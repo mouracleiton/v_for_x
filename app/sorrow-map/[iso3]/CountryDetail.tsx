@@ -893,6 +893,78 @@ export default function CountryDetail({ params }: PageProps) {
           <MilitaryHealthDeepDive country={c} />
           <GenderDeepDive country={c} />
 
+          {/* ═══ ENRICHED DIMENSIONS (OpenRepublic integration) ═══ */}
+          {/* These only show when data is present for this country */}
+
+          {c.energy && (c.energy.renewable_electric_pct !== null || c.energy.renewable_matrix_pct !== null) && (
+            <CollapsibleSection title="ENERGY MATRIX" accent="green">
+              <GenericSection
+                title="Energy"
+                entries={[
+                  { label: "Renewable Matrix", value: formatVal(c.energy.renewable_matrix_pct, "%") },
+                  { label: "Renewable Electric", value: formatVal(c.energy.renewable_electric_pct, "%") },
+                  { label: "Hydroelectric", value: formatVal(c.energy.hydroelectric_pct, "%") },
+                  { label: "Wind", value: formatVal(c.energy.wind_pct, "%") },
+                  { label: "Solar", value: formatVal(c.energy.solar_pct, "%") },
+                  { label: "Fossil Electric", value: formatVal(c.energy.fossil_electric_pct, "%") },
+                  { label: "Nuclear", value: formatVal(c.energy.nuclear_pct, "%") },
+                  { label: "No Access (M)", value: formatVal(c.energy.no_access_electricity_m) },
+                ]}
+                bars={c.energy.renewable_electric_pct !== null ? [
+                  { value: c.energy.renewable_electric_pct, max: 100, label: "Renewable Electricity", unit: "%", inverse: true },
+                ] : undefined}
+              />
+            </CollapsibleSection>
+          )}
+
+          {c.justice && c.justice.prison_population !== null && (
+            <CollapsibleSection title="JUSTICE & INCARCERATION" accent="amber">
+              <GenericSection
+                title="Justice"
+                entries={[
+                  { label: "Prison Population", value: formatNumber(c.justice.prison_population) },
+                  { label: "Prison Rate /100k", value: formatVal(c.justice.prison_rate_per_100k) },
+                  { label: "Pre-Trial %", value: formatVal(c.justice.pre_trial_pct, "%") },
+                  { label: "Overcrowding %", value: formatVal(c.justice.prison_overcrowding_pct, "%") },
+                  { label: "Cases Backlog", value: formatNumber(c.justice.judicial_efficiency_cases_backlog) },
+                ]}
+                bars={c.justice.prison_rate_per_100k !== null ? [
+                  { value: c.justice.prison_rate_per_100k, max: 700, label: "Incarceration Rate", unit: "/100k" },
+                ] : undefined}
+              />
+            </CollapsibleSection>
+          )}
+
+          {c.taxation && c.taxation.tax_burden_pct_gdp !== null && (
+            <CollapsibleSection title="TAXATION" accent="amber">
+              <GenericSection
+                title="Taxation"
+                entries={[
+                  { label: "Tax Burden % GDP", value: formatVal(c.taxation.tax_burden_pct_gdp, "%") },
+                  { label: "Consumption Tax %", value: formatVal(c.taxation.consumption_tax_pct, "%") },
+                  { label: "Income Tax %", value: formatVal(c.taxation.income_tax_pct, "%") },
+                  { label: "Property Tax %", value: formatVal(c.taxation.property_tax_pct, "%") },
+                ]}
+                bars={c.taxation.tax_burden_pct_gdp !== null ? [
+                  { value: c.taxation.tax_burden_pct_gdp, max: 50, label: "Tax Burden", unit: "% GDP" },
+                ] : undefined}
+              />
+            </CollapsibleSection>
+          )}
+
+          {c.food_security && c.food_security.severe_food_insecurity_m !== null && (
+            <CollapsibleSection title="FOOD SECURITY (DEEP)" accent="blood">
+              <GenericSection
+                title="Food Security"
+                entries={[
+                  { label: "Severe FI (M)", value: formatVal(c.food_security.severe_food_insecurity_m, "M") },
+                  { label: "Total FI (M)", value: formatVal(c.food_security.total_food_insecurity_m, "M") },
+                  { label: "Min Wage Affordability", value: formatVal(c.food_security.food_cost_affordability_ratio, "×") },
+                ]}
+              />
+            </CollapsibleSection>
+          )}
+
           {/* Cross-Links */}
           <CrossLinks country={c} />
         </div>

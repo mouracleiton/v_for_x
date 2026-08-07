@@ -137,6 +137,46 @@ export interface CountryData {
   employment: {
     unemployment_pct: number | null;
     youth_unemployment_pct: number | null;
+    informality_pct?: number | null;
+    median_income_usd?: number | null;
+    child_labor_m?: number | null;
+  };
+  // ── Enriched dimensions (OpenRepublic integration) ──
+  justice?: {
+    prison_population: number | null;
+    prison_rate_per_100k: number | null;
+    pre_trial_pct: number | null;
+    prison_overcrowding_pct: number | null;
+    judicial_efficiency_cases_backlog: number | null;
+    rule_of_law_index: number | null;
+    _meta?: { sources: string[]; year: number | null };
+  };
+  energy?: {
+    renewable_matrix_pct: number | null;
+    renewable_electric_pct: number | null;
+    hydroelectric_pct: number | null;
+    wind_pct: number | null;
+    solar_pct: number | null;
+    fossil_electric_pct: number | null;
+    nuclear_pct: number | null;
+    no_access_electricity_m: number | null;
+    _meta?: { sources: string[]; year: number | null };
+  };
+  taxation?: {
+    tax_burden_pct_gdp: number | null;
+    consumption_tax_pct: number | null;
+    income_tax_pct: number | null;
+    property_tax_pct: number | null;
+    tax_revenue_total_usd: number | null;
+    _meta?: { sources: string[]; year: number | null };
+  };
+  food_security?: {
+    severe_food_insecurity_m: number | null;
+    total_food_insecurity_m: number | null;
+    min_wage_usd: number | null;
+    min_wage_needed_usd: number | null;
+    food_cost_affordability_ratio: number | null;
+    _meta?: { sources: string[]; year: number | null };
   };
 }
 
