@@ -259,7 +259,7 @@ export default function MapaDaDorPage() {
   );
 
   return (
-    <div className="p-4 md:p-6 max-w-[1600px] mx-auto">
+    <div className="p-3 sm:p-4 md:p-6 max-w-[1600px] mx-auto">
       {/* Header */}
       <div className="mb-6 border-b border-border-dim pb-4">
         <div className="flex items-baseline gap-4 flex-wrap">
@@ -288,7 +288,7 @@ export default function MapaDaDorPage() {
         </div>
 
         {/* Center — map */}
-        <div className="border border-border-dim h-[60vh] lg:h-[70vh] bg-abyss">
+        <div className="border border-border-dim h-[50vh] sm:h-[60vh] lg:h-[70vh] bg-abyss">
           <ChoroplethMap
             geoData={geoData as never}
             dimension={activeDimKey}

@@ -543,7 +543,7 @@ export default function CountryDetail({ params }: PageProps) {
 
   if (!country) {
     return (
-      <div className="p-6 max-w-3xl mx-auto">
+      <div className="p-3 sm:p-6 max-w-3xl mx-auto">
         <GlitchText
           text="COUNTRY NOT FOUND"
           as="h1"
@@ -567,7 +567,7 @@ export default function CountryDetail({ params }: PageProps) {
   const wfpColor = c.hunger.wfp_class ? wfpClassColor(c.hunger.wfp_class) : "#333";
 
   return (
-    <div className="p-4 md:p-6 max-w-5xl mx-auto">
+    <div className="p-3 sm:p-4 md:p-6 max-w-5xl mx-auto">
       {/* Header */}
       <div className="mb-6 border-b border-border-dim pb-4">
         <Link
@@ -580,7 +580,7 @@ export default function CountryDetail({ params }: PageProps) {
           <GlitchText
             text={c.name_en.toUpperCase()}
             as="h1"
-            className="text-2xl md:text-3xl font-bold text-blood-bright glow-blood tracking-widest"
+            className="text-xl sm:text-2xl md:text-3xl font-bold text-blood-bright glow-blood tracking-widest"
           />
           <span className="text-lg text-content-dim">({c.iso3})</span>
           {c.is_hotspot && (

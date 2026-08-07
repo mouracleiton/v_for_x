@@ -35,7 +35,7 @@ export default function MascaraPage() {
 
   if (isDuress || showDecoy) {
     return (
-      <div className="p-10 max-w-3xl mx-auto">
+      <div className="p-3 sm:p-3 sm:p-6 md:p-10 max-w-3xl mx-auto">
         <h1 className="text-4xl text-content-primary font-bold mb-4">Weather Report</h1>
         <p className="text-content-secondary text-lg mb-6">
           Today's forecast: Partly cloudy with a chance of rain. High of 22°C, low of 14°C.
@@ -49,7 +49,7 @@ export default function MascaraPage() {
   }
 
   return (
-    <div className="p-6 md:p-10 max-w-4xl mx-auto">
+    <div className="p-3 sm:p-6 md:p-10 max-w-4xl mx-auto">
       <div className="mb-8 pt-4">
         <div className="text-xs text-content-dim mb-1">[08] THE MASK</div>
         <h1 className="text-2xl md:text-3xl text-blood-bright font-bold glow-blood">

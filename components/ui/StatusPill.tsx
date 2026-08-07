@@ -20,7 +20,7 @@ export default function StatusPill({
 
   return (
     <span
-      className="inline-block px-2 py-0.5 text-xs uppercase tracking-wider border"
+      className="inline-pill inline-block px-2 py-0.5 text-xs uppercase tracking-wider border"
       style={{ backgroundColor: c.bg, borderColor: c.border, color: c.text }}
     >
       {children}

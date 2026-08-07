@@ -81,7 +81,7 @@ export default function ProtocolXContent() {
   const categories = ["ALL", ...new Set(blueprints.map((b) => b.category))];
 
   return (
-    <div className="p-6 md:p-10 max-w-5xl mx-auto">
+    <div className="p-3 sm:p-6 md:p-10 max-w-5xl mx-auto">
       {/* Header */}
       <div className="mb-8 pt-4">
         <div className="text-xs text-content-dim mb-1">[03] PROTOCOL X</div>

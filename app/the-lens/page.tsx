@@ -357,7 +357,7 @@ export default function TheLensPage() {
      ═══════════════════════════════════════════════════════════════ */
 
   return (
-    <div className="p-4 md:p-6 max-w-[1600px] mx-auto">
+    <div className="p-3 sm:p-4 md:p-6 max-w-[1600px] mx-auto">
       {/* ── HEADER ── */}
       <div className="mb-6 border-b border-border-dim pb-4">
         <div className="flex items-baseline gap-4 flex-wrap">
@@ -455,7 +455,7 @@ export default function TheLensPage() {
         </div>
 
         {/* Scatter chart */}
-        <div className="border border-border-dim bg-abyss p-2" style={{ height: 480 }}>
+        <div className="border border-border-dim bg-abyss p-2 h-[320px] sm:h-[400px] md:h-[480px]">
           <ResponsiveContainer width="100%" height="100%">
             <ScatterChart margin={{ top: 20, right: 30, bottom: 50, left: 20 }}>
               <CartesianGrid stroke="#1a1a1a" strokeDasharray="2 4" />

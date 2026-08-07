@@ -137,7 +137,7 @@ export default function TrilhaPage() {
   }, 0);
 
   return (
-    <div className="p-6 md:p-10 max-w-5xl mx-auto">
+    <div className="p-3 sm:p-6 md:p-10 max-w-5xl mx-auto">
       <div className="mb-8 pt-4">
         <div className="text-xs text-content-dim mb-1">[06] THE TRAIL</div>
         <h1 className="text-2xl md:text-3xl text-blood-bright font-bold glow-blood">

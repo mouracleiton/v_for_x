@@ -108,7 +108,7 @@ export default function EquationPage() {
   const targetLine = data.global_indicators.sdg2.threshold_m;
 
   return (
-    <div className="p-6 md:p-10 max-w-5xl mx-auto">
+    <div className="p-3 sm:p-6 md:p-10 max-w-5xl mx-auto">
       {/* Header */}
       <div className="mb-8 pt-4">
         <div className="text-xs text-content-dim mb-1">[02] THE EQUATION</div>
@@ -256,7 +256,7 @@ export default function EquationPage() {
         <p className="text-xs text-content-secondary mb-4">
           Every line is a future. BAU is the road we're on. Ambitious is the road we could take. The gap between them is 607 million lives.
         </p>
-        <div className="border border-border-dim bg-void p-2" style={{ height: 360 }}>
+        <div className="border border-border-dim bg-void p-2 h-[280px] sm:h-[360px]">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={comparisonData} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" />
@@ -305,7 +305,7 @@ export default function EquationPage() {
         <p className="text-xs text-content-secondary mb-4">
           Where does hunger concentrate? Africa carries the heaviest burden across all scenarios.
         </p>
-        <div className="border border-border-dim bg-void p-2" style={{ height: 280 }}>
+        <div className="border border-border-dim bg-void p-2 h-[220px] sm:h-[280px]">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={regionData} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" />

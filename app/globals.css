@@ -35,6 +35,9 @@
 html {
   background: #000;
   scroll-behavior: smooth;
+  /* Prevent text size adjust on orientation change */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -44,6 +47,56 @@ body {
   font-size: 14px;
   line-height: 1.6;
   overflow-x: hidden;
+  /* Prevent rubber-band scroll on iOS */
+  overscroll-behavior-y: none;
+  /* Disable tap highlight */
+  -webkit-tap-highlight-color: transparent;
+  /* Optimize touch scrolling */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── Mobile Touch Optimization ─────────────────────────────── */
+
+button,
+a,
+input,
+select,
+textarea,
+[role="button"] {
+  /* Minimum 44px tap target per Apple HIG / Material guidelines */
+  min-height: 36px;
+  touch-action: manipulation;
+}
+
+/* Re-allow smaller heights for inline tags/pills */
+button.inline-pill,
+a.inline-pill,
+.inline-pill {
+  min-height: 0;
+}
+
+/* Safe-area-aware padding utility */
+.safe-pt {
+  padding-top: env(safe-area-inset-top);
+}
+.safe-pb {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.safe-pl {
+  padding-left: env(safe-area-inset-left);
+}
+.safe-pr {
+  padding-right: env(safe-area-inset-right);
+}
+
+/* dvh fallback — uses 100vh if dvh unsupported */
+.min-h-dvh {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+.h-dvh {
+  height: 100vh;
+  height: 100dvh;
 }
 
 /* ── Scanline Overlay ─────────────────────────────────────── */
@@ -320,7 +373,7 @@ a:hover {
 
 @media (max-width: 768px) {
   .scanlines::before {
-    opacity: 0.3;
+    opacity: 0.2;
   }
 
   .grain::before {
@@ -329,6 +382,42 @@ a:hover {
 
   body {
     font-size: 13px;
+  }
+
+  /* Reduce padding on mobile for content containers */
+  .terminal-card {
+    padding: 0.75rem !important;
+  }
+
+  /* Make tables scroll smoothly on touch */
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    font-size: 12px;
+  }
+
+  /* Even tighter on small phones */
+  .terminal-card {
+    padding: 0.625rem !important;
+  }
+
+  /* Hide decorative ASCII art that overflows on narrow screens */
+  pre[data-ascii-hero] {
+    font-size: 6px !important;
+    line-height: 1.1;
+  }
+}
+
+/* ── Desktop: restore terminal-card padding ────────────────── */
+
+@media (min-width: 769px) {
+  .terminal-card {
+    padding: 1rem;
   }
 }
 

@@ -61,10 +61,10 @@ export default function HomePage() {
   const targetHunger = data.global_indicators.sdg2.threshold_m;
 
   return (
-    <div className="p-6 md:p-10 max-w-5xl mx-auto">
+    <div className="p-3 sm:p-6 md:p-10 max-w-5xl mx-auto">
       {/* Hero */}
       <div className="text-center mb-12 pt-8">
-        <pre className="text-blood text-[10px] md:text-xs leading-tight inline-block glow-blood" aria-hidden="true">{`
+        <pre data-ascii-hero className="text-blood text-[6px] sm:text-[10px] md:text-xs leading-tight inline-block glow-blood" aria-hidden="true">{`
         .:::::::::::::::.
       :::'   ._-___-_'  \`:   PEOPLE SHOULD NOT BE
      ::    .'         '.  ::   AFRAID OF THEIR GOVERNMENTS.

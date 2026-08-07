@@ -32,7 +32,7 @@ export default function BlueprintContent({
 
   if (!bp) {
     return (
-      <div className="p-10 max-w-3xl mx-auto text-center">
+      <div className="p-3 sm:p-3 sm:p-6 md:p-10 max-w-3xl mx-auto text-center">
         <h1 className="text-2xl text-blood mb-4">BLUEPRINT NOT FOUND</h1>
         <Link href="/protocol-x/" className="text-blood-bright hover:underline">
           ← Back to Protocol X
@@ -42,7 +42,7 @@ export default function BlueprintContent({
   }
 
   return (
-    <div className="p-6 md:p-10 max-w-3xl mx-auto">
+    <div className="p-3 sm:p-6 md:p-10 max-w-3xl mx-auto">
       <div className="mb-6">
         <Link
           href="/protocol-x/"

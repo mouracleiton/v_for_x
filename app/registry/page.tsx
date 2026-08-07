@@ -67,7 +67,7 @@ export default function RegistroPage() {
   }, [statusFilter, severityFilter]);
 
   return (
-    <div className="p-6 md:p-10 max-w-5xl mx-auto">
+    <div className="p-3 sm:p-6 md:p-10 max-w-5xl mx-auto">
       {/* Header */}
       <div className="mb-8 pt-4">
         <div className="text-xs text-content-dim mb-1">[04] THE REGISTRY</div>

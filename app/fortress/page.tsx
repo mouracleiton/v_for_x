@@ -3,7 +3,7 @@ import StatusPill from "@/components/ui/StatusPill";
 
 export default function FortalezaPage() {
   return (
-    <div className="p-6 md:p-10 max-w-4xl mx-auto">
+    <div className="p-3 sm:p-6 md:p-10 max-w-4xl mx-auto">
       <div className="mb-8 pt-4">
         <div className="text-xs text-content-dim mb-1">[07] THE FORTRESS</div>
         <h1 className="text-2xl md:text-3xl text-blood-bright font-bold glow-blood">

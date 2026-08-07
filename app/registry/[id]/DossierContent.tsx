@@ -50,7 +50,7 @@ export default function DossierContent({
 
   if (!d) {
     return (
-      <div className="p-10 max-w-3xl mx-auto text-center">
+      <div className="p-3 sm:p-3 sm:p-6 md:p-10 max-w-3xl mx-auto text-center">
         <h1 className="text-2xl text-blood mb-4">DOSSIER NOT FOUND</h1>
         <Link href="/registry/" className="text-blood-bright hover:underline">
           ← Back to Registry
@@ -62,7 +62,7 @@ export default function DossierContent({
   const validationPct = (d.peer_validations / (d.required_validations * 3)) * 100;
 
   return (
-    <div className="p-6 md:p-10 max-w-3xl mx-auto">
+    <div className="p-3 sm:p-6 md:p-10 max-w-3xl mx-auto">
       <div className="mb-6">
         <Link href="/registry/" className="text-xs text-content-dim hover:text-blood">
           ← BACK TO REGISTRY
