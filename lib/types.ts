@@ -59,6 +59,9 @@ export interface CountryData {
     expenditure_per_capita_usd: number | null;
     tuberculosis_per100k: number | null;
     hiv_prevalence_pct: number | null;
+    doctors_per_1000?: number | null;
+    nurses_per_1000?: number | null;
+    hospital_beds_per_1000?: number | null;
   };
   human_development: {
     hdi: number | null;
@@ -89,6 +92,8 @@ export interface CountryData {
     secondary_enrollment_pct: number | null;
     year: number;
     primary_completion_pct: number | null;
+    pisa_score?: number | null;
+    functional_illiteracy_pct?: number | null;
   };
   connectivity: {
     internet_users_pct: number | null;
@@ -111,6 +116,8 @@ export interface CountryData {
     air_pollution_pm25_ugm3: number | null;
     year: number;
     forest_area_km2: number | null;
+    deforestation_km2?: number | null;
+    pesticide_use_tons?: number | null;
   };
   gender: {
     female_labor_force_pct: number | null;
@@ -129,6 +136,11 @@ export interface CountryData {
     homicide_rate_per100k: number | null;
     homicide_male_per100k: number | null;
     homicide_female_per100k: number | null;
+    femicides_per_year?: number | null;
+    killings_by_police?: number | null;
+    prison_population?: number | null;
+    pre_trial_pct?: number | null;
+    prison_rate_per_100k?: number | null;
   };
   poverty: {
     headcount_365_pct: number | null;
