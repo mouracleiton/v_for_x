@@ -219,6 +219,9 @@ export default function HomePage() {
           { href: "/the-trail/", code: "06", label: "THE TRAIL", desc: "Resource routing" },
           { href: "/fortress/", code: "07", label: "FORTRESS", desc: "Infrastructure" },
           { href: "/the-mask/", code: "08", label: "MASK", desc: "Identity & OpSec" },
+          { href: "/the-lens/", code: "09", label: "THE LENS", desc: "Compare & correlate" },
+          { href: "/the-archive/", code: "10", label: "ARCHIVE", desc: "Sources & methods" },
+          { href: "/the-signal/", code: "11", label: "SIGNAL", desc: "Watchlist alerts" },
         ].map((b) => (
           <Link
             key={b.href}

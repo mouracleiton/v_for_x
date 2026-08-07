@@ -84,4 +84,7 @@ export const branchLinks = [
   { href: "/the-trail/", label: "THE TRAIL", code: "06" },
   { href: "/fortress/", label: "FORTRESS", code: "07" },
   { href: "/the-mask/", label: "MASK", code: "08" },
+  { href: "/the-lens/", label: "THE LENS", code: "09" },
+  { href: "/the-archive/", label: "ARCHIVE", code: "10" },
+  { href: "/the-signal/", label: "SIGNAL", code: "11" },
 ] as const;

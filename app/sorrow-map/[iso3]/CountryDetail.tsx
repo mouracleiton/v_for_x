@@ -23,6 +23,13 @@ import {
   countryToTrilha,
 } from "@/lib/crosslinks";
 import type { WorldBackbone, CountryData } from "@/lib/types";
+import {
+  MigrationDeepDive,
+  GovernanceDeepDive,
+  ClimateHungerDeepDive,
+  MilitaryHealthDeepDive,
+  GenderDeepDive,
+} from "./DeepDives";
 
 const data = backbone as WorldBackbone;
 
@@ -524,6 +531,11 @@ export default function CountryDetail({ params }: PageProps) {
     [code]
   );
 
+  const hotspotIso3s = useMemo(
+    () => new Set(data.hotspots.all.map((h) => h.iso3)),
+    []
+  );
+
   // Set store context
   useState(() => {
     if (country) setCurrentCountry(country.iso3);
@@ -871,6 +883,15 @@ export default function CountryDetail({ params }: PageProps) {
               ]}
             />
           </CollapsibleSection>
+
+          {/* ═══ DIMENSION DEEP-DIVE MODULES ═══ */}
+          {/* Derived analytics that cross-reference multiple dimensions */}
+
+          <MigrationDeepDive country={c} hotspotIso3s={hotspotIso3s} />
+          <GovernanceDeepDive country={c} />
+          <ClimateHungerDeepDive country={c} />
+          <MilitaryHealthDeepDive country={c} />
+          <GenderDeepDive country={c} />
 
           {/* Cross-Links */}
           <CrossLinks country={c} />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import blueprintsData from "@/data/blueprints.json";
@@ -9,6 +9,14 @@ import TerminalCard from "@/components/ui/TerminalCard";
 import StatusPill from "@/components/ui/StatusPill";
 import { sound } from "@/lib/sound";
 import type { WorldBackbone } from "@/lib/types";
+import {
+  checklistGetAll,
+  checklistSave,
+  checklistDelete,
+  signData,
+  downloadJSON,
+  type ChecklistKit,
+} from "@/lib/idb";
 
 const data = backbone as WorldBackbone;
 
@@ -216,6 +224,17 @@ export default function ProtocolXContent() {
 
 function SurvivalChecklist() {
   const [scenarios, setScenarios] = useState<string[]>([]);
+  const [savedKits, setSavedKits] = useState<ChecklistKit[]>([]);
+  const [kitName, setKitName] = useState("");
+  const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set());
+  const [loadingKits, setLoadingKits] = useState(true);
+
+  useEffect(() => {
+    checklistGetAll().then((kits) => {
+      setSavedKits(kits);
+      setLoadingKits(false);
+    }).catch(() => setLoadingKits(false));
+  }, []);
 
   const scenarioMap: Record<string, { label: string; items: string[] }> = {
     conflict: {
@@ -244,8 +263,69 @@ function SurvivalChecklist() {
     return Array.from(items);
   }, [scenarios]);
 
+  const progress = allItems.length > 0
+    ? Math.round((Array.from(checkedItems).filter((i) => allItems.includes(i)).length / allItems.length) * 100)
+    : 0;
+
+  const toggleItem = (item: string) => {
+    setCheckedItems((prev) => {
+      const next = new Set(prev);
+      if (next.has(item)) next.delete(item);
+      else next.add(item);
+      return next;
+    });
+    sound.select();
+  };
+
+  const saveKit = async () => {
+    if (allItems.length === 0) return;
+    const kit: ChecklistKit = {
+      name: kitName.trim() || `Kit ${new Date().toLocaleDateString()}`,
+      scenarios,
+      items: allItems.map((text) => ({ text, checked: checkedItems.has(text) })),
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    };
+    const id = await checklistSave(kit);
+    const updated = await checklistGetAll();
+    setSavedKits(updated);
+    sound.success();
+    setKitName("");
+  };
+
+  const loadKit = (kit: ChecklistKit) => {
+    setScenarios(kit.scenarios);
+    setCheckedItems(new Set(kit.items.filter((i) => i.checked).map((i) => i.text)));
+    sound.nav();
+  };
+
+  const deleteKit = async (id: number) => {
+    await checklistDelete(id);
+    const updated = await checklistGetAll();
+    setSavedKits(updated);
+    sound.error();
+  };
+
+  const exportKit = async () => {
+    if (allItems.length === 0) return;
+    const exportData = {
+      type: "vfx-survival-kit",
+      version: 1,
+      name: kitName.trim() || "Survival Kit",
+      exportedAt: new Date().toISOString(),
+      scenarios,
+      items: allItems.map((text) => ({ text, checked: checkedItems.has(text) })),
+      progress,
+    };
+    const sig = await signData(exportData);
+    const finalData = { ...exportData, signature: sig?.signature ?? null, signedBy: sig?.handle ?? null };
+    downloadJSON(finalData, `vfx-survival-kit-${Date.now()}.json`);
+    sound.success();
+  };
+
   return (
     <div>
+      {/* Scenario selectors */}
       <div className="flex flex-wrap gap-2 mb-4">
         {Object.entries(scenarioMap).map(([key, val]) => (
           <button
@@ -268,28 +348,108 @@ function SurvivalChecklist() {
           </button>
         ))}
       </div>
+
       {allItems.length > 0 ? (
-        <div className="space-y-1">
+        <>
+          {/* Progress bar */}
+          <div className="mb-4">
+            <div className="flex justify-between text-[10px] text-content-dim mb-1">
+              <span>READINESS: {progress}%</span>
+              <span>{Array.from(checkedItems).filter((i) => allItems.includes(i)).length} / {allItems.length} ITEMS ACQUIRED</span>
+            </div>
+            <div className="w-full h-2 bg-void border border-border-dim">
+              <div
+                className="h-full transition-all"
+                style={{
+                  width: `${progress}%`,
+                  backgroundColor: progress === 100 ? "var(--color-terminal-green)" : progress >= 50 ? "var(--color-warning-amber)" : "var(--color-blood)",
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Checklist items */}
           <div className="text-xs text-terminal-green mb-2">
             ▸ CHECKLIST ({allItems.length} ITEMS):
           </div>
-          {allItems.map((item, i) => (
-            <div key={i} className="flex items-center gap-2 text-xs text-content-primary p-1">
-              <span className="text-content-dim">[ ]</span>
-              <span>{item}</span>
-            </div>
-          ))}
-          <button
-            onClick={() => {
-              window.print();
-            }}
-            className="mt-3 px-3 py-1 text-xs border border-border-dim text-content-secondary hover:border-blood no-print"
-          >
-            [ PRINT CHECKLIST ]
-          </button>
-        </div>
+          <div className="space-y-1 mb-4">
+            {allItems.map((item, i) => (
+              <button
+                key={i}
+                onClick={() => toggleItem(item)}
+                className="flex items-center gap-2 text-xs text-content-primary p-1 w-full text-left hover:bg-panel/50"
+              >
+                <span className={checkedItems.has(item) ? "text-terminal-green" : "text-content-dim"}>
+                  [{checkedItems.has(item) ? "✓" : " "}]
+                </span>
+                <span className={checkedItems.has(item) ? "line-through text-content-dim" : ""}>
+                  {item}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {/* Save + export controls */}
+          <div className="flex flex-wrap gap-2 mb-4">
+            <input
+              type="text"
+              value={kitName}
+              onChange={(e) => setKitName(e.target.value)}
+              placeholder="Kit name (optional)"
+              className="flex-1 min-w-[120px] bg-void border border-border-dim px-3 py-1.5 text-xs text-content-primary focus:border-blood focus:outline-none"
+            />
+            <button
+              onClick={saveKit}
+              className="px-3 py-1.5 text-xs border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void"
+            >
+              [ SAVE KIT ]
+            </button>
+            <button
+              onClick={exportKit}
+              className="px-3 py-1.5 text-xs border border-blood text-blood-bright hover:bg-blood hover:text-void"
+            >
+              [ EXPORT SIGNED JSON ]
+            </button>
+            <button
+              onClick={() => window.print()}
+              className="px-3 py-1.5 text-xs border border-border-dim text-content-secondary hover:border-blood no-print"
+            >
+              [ PRINT ]
+            </button>
+          </div>
+        </>
       ) : (
-        <p className="text-xs text-content-dim">Select scenarios above to generate your checklist.</p>
+        <p className="text-xs text-content-dim mb-4">Select scenarios above to generate your checklist.</p>
+      )}
+
+      {/* Saved kits */}
+      {!loadingKits && savedKits.length > 0 && (
+        <div className="border-t border-border-dim pt-3">
+          <div className="text-[10px] text-content-dim uppercase tracking-widest mb-2">
+            SAVED KITS ({savedKits.length})
+          </div>
+          <div className="space-y-1">
+            {savedKits.map((kit) => {
+              const checked = kit.items.filter((i) => i.checked).length;
+              return (
+                <div key={kit.id} className="flex items-center justify-between p-2 border border-border-dim bg-void/50">
+                  <button onClick={() => loadKit(kit)} className="flex-1 text-left">
+                    <span className="text-xs text-content-primary font-bold">{kit.name}</span>
+                    <span className="text-[10px] text-content-dim ml-2">
+                      {kit.scenarios.length} scenarios · {checked}/{kit.items.length} items
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => kit.id && deleteKit(kit.id)}
+                    className="text-content-dim hover:text-blood text-xs ml-2"
+                  >
+                    [×]
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       )}
     </div>
   );
