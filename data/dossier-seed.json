@@ -1,0 +1,112 @@
+[
+  {
+    "id": "REG-001",
+    "subject": "[REDACTED] — Former Minister of Defense, [COUNTRY]",
+    "country_iso3": "SDN",
+    "category": "war_crime",
+    "severity": "critical",
+    "status": "PEER_VALIDATED",
+    "accusation": "Ordered systematic blockade of humanitarian aid to contested regions during active famine conditions. Evidence of weaponizing hunger as a tool of war against civilian population.",
+    "evidence": [
+      { "type": "primary", "description": "UN Panel of Experts report documenting aid convoy blockades (2024)", "quality_score": 3 },
+      { "type": "primary", "description": "Satellite imagery showing destroyed food storage facilities", "quality_score": 3 },
+      { "type": "secondary", "description": "Amnesty International investigation — witness testimonies from 47 aid workers", "quality_score": 1 }
+    ],
+    "evidence_quality_score": 7,
+    "peer_validations": 8,
+    "required_validations": 5,
+    "right_of_response": "No response offered",
+    "created_at": "2025-03-15",
+    "updated_at": "2025-06-20",
+    "version": 4,
+    "country_data_ref": "Conflict intensity: 5/5 · Displacement: 8.1M · Famine risk: 5/5"
+  },
+  {
+    "id": "REG-002",
+    "subject": "[REDACTED] — CEO, [MULTINATIONAL AGRI CORP]",
+    "country_iso3": "BRA",
+    "category": "economic_exploitation",
+    "severity": "high",
+    "status": "UNDER_REVIEW",
+    "accusation": "Systematic land grabbing from indigenous communities. Use of paramilitary groups to forcibly displace traditional populations for monoculture expansion.",
+    "evidence": [
+      { "type": "primary", "description": "Land registry fraud documentation by federal prosecutors", "quality_score": 3 },
+      { "type": "secondary", "description": "Investigative journalism series by major outlet", "quality_score": 1 },
+      { "type": "testimony", "description": "Testimony of 12 displaced families", "quality_score": 0.5 }
+    ],
+    "evidence_quality_score": 4.5,
+    "peer_validations": 3,
+    "required_validations": 5,
+    "right_of_response": "Company denies all allegations. Claims all land acquisitions were legal.",
+    "created_at": "2025-04-02",
+    "updated_at": "2025-07-10",
+    "version": 2,
+    "country_data_ref": "CPI Score: 36/100 · Political Corruption Index: 0.55"
+  },
+  {
+    "id": "REG-003",
+    "subject": "[REDACTED] — Governor, [PROVINCE]",
+    "country_iso3": "HTI",
+    "category": "corruption",
+    "severity": "high",
+    "status": "CONFIRMED",
+    "accusation": "Systematic embezzlement of international earthquake relief funds. Diverted construction materials to personal business empire. At least $12M in aid unaccounted for.",
+    "evidence": [
+      { "type": "primary", "description": "Audit report by international oversight body", "quality_score": 3 },
+      { "type": "primary", "description": "Bank records obtained by judicial authorities", "quality_score": 3 },
+      { "type": "primary", "description": "Criminal conviction (2024)", "quality_score": 3 },
+      { "type": "secondary", "description": "Investigative documentary with leaked documents", "quality_score": 1 }
+    ],
+    "evidence_quality_score": 10,
+    "peer_validations": 15,
+    "required_validations": 5,
+    "right_of_response": "Convicted. Appealing sentence.",
+    "created_at": "2025-01-20",
+    "updated_at": "2025-07-01",
+    "version": 7,
+    "country_data_ref": "CPI Score: 11/100 · HDI Category: Low · Hotspot: YES"
+  },
+  {
+    "id": "REG-004",
+    "subject": "[REDACTED] — Military Commander, [REGION]",
+    "country_iso3": "MMR",
+    "category": "human_rights_violation",
+    "severity": "critical",
+    "status": "PEER_VALIDATED",
+    "accusation": "Command responsibility for systematic attacks on civilian villages including deliberate burning of food stores, livestock, and agricultural infrastructure as tactic of ethnic cleansing.",
+    "evidence": [
+      { "type": "primary", "description": "UN Human Rights Council fact-finding mission report", "quality_score": 3 },
+      { "type": "primary", "description": "ICJ provisional measures order referencing attacks", "quality_score": 3 },
+      { "type": "testimony", "description": "Testimony of 200+ refugees in Bangladesh camps", "quality_score": 0.5 }
+    ],
+    "evidence_quality_score": 6.5,
+    "peer_validations": 11,
+    "required_validations": 5,
+    "right_of_response": "No response offered",
+    "created_at": "2025-02-10",
+    "updated_at": "2025-06-28",
+    "version": 3,
+    "country_data_ref": "Conflict intensity: 4/5 · Displacement: 1.2M · Democracy Index: 0.080"
+  },
+  {
+    "id": "REG-005",
+    "subject": "[REDACTED] — Corporate Board, [EXTRACTIVE CORP]",
+    "country_iso3": "COD",
+    "category": "environmental_destruction",
+    "severity": "moderate",
+    "status": "ACCUSATION",
+    "accusation": "Illegal mining operations causing mass deforestation and mercury contamination of water sources serving 50,000+ people. Collusion with armed groups to secure mining concessions.",
+    "evidence": [
+      { "type": "secondary", "description": "Environmental NGO investigation with water sample analysis", "quality_score": 1 },
+      { "type": "testimony", "description": "Community leader testimony (4 sources)", "quality_score": 0.5 }
+    ],
+    "evidence_quality_score": 3,
+    "peer_validations": 2,
+    "required_validations": 5,
+    "right_of_response": "Pending — 72h cooldown active",
+    "created_at": "2025-07-12",
+    "updated_at": "2025-07-12",
+    "version": 1,
+    "country_data_ref": "Forest area: 55.6% · Hotspot: YES · CPI: 20/100"
+  }
+]

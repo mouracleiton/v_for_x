@@ -1,0 +1,352 @@
+@import "tailwindcss";
+
+/* ═══════════════════════════════════════════════════════════
+   V FOR X — CYBERPUNK TERMINAL DESIGN SYSTEM
+   ═══════════════════════════════════════════════════════════ */
+
+@theme {
+  --color-void: #000000;
+  --color-abyss: #0a0a0a;
+  --color-panel: #111111;
+  --color-panel-hi: #161616;
+  --color-border-dim: #1a1a1a;
+  --color-border-bright: #2a2a2a;
+
+  --color-blood: #cc0000;
+  --color-blood-bright: #e10600;
+  --color-blood-dim: #660000;
+  --color-terminal-green: #00ff41;
+  --color-warning-amber: #ffaa00;
+
+  --color-content-primary: #e0e0e0;
+  --color-content-secondary: #888888;
+  --color-content-dim: #444444;
+
+  --font-mono: "JetBrains Mono", "Fira Code", "SF Mono", "Cascadia Code",
+    "Menlo", "Consolas", monospace;
+}
+
+/* ── Base ─────────────────────────────────────────────────── */
+
+* {
+  border-radius: 0 !important;
+}
+
+html {
+  background: #000;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #000000;
+  color: #e0e0e0;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ── Scanline Overlay ─────────────────────────────────────── */
+
+.scanlines::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0) 0px,
+    rgba(0, 0, 0, 0) 2px,
+    rgba(0, 0, 0, 0.15) 3px,
+    rgba(0, 0, 0, 0.15) 3px
+  );
+  pointer-events: none;
+  z-index: 9998;
+}
+
+/* ── CRT Vignette ─────────────────────────────────────────── */
+
+.crt-vignette::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 50%,
+    rgba(0, 0, 0, 0.35) 100%
+  );
+  pointer-events: none;
+  z-index: 9997;
+}
+
+/* ── Film Grain ───────────────────────────────────────────── */
+
+.grain::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  opacity: 0.02;
+  pointer-events: none;
+  z-index: 9996;
+  animation: grain-shift 0.5s steps(4) infinite;
+}
+
+@keyframes grain-shift {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-2px, 1px); }
+  50% { transform: translate(1px, -2px); }
+  75% { transform: translate(-1px, 2px); }
+  100% { transform: translate(2px, -1px); }
+}
+
+/* ── Flicker ──────────────────────────────────────────────── */
+
+.flicker {
+  animation: flicker 8s infinite;
+}
+
+@keyframes flicker {
+  0%, 96%, 100% { opacity: 1; }
+  97% { opacity: 0.85; }
+  98% { opacity: 1; }
+  98.5% { opacity: 0.9; }
+  99% { opacity: 1; }
+}
+
+/* ── Glitch Text ──────────────────────────────────────────── */
+
+.glitch {
+  position: relative;
+  display: inline-block;
+}
+
+.glitch::before,
+.glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+}
+
+.glitch:hover::before {
+  opacity: 0.8;
+  color: #00ff41;
+  animation: glitch-x 0.3s linear;
+  clip-path: polygon(0 20%, 100% 20%, 100% 50%, 0 50%);
+}
+
+.glitch:hover::after {
+  opacity: 0.8;
+  color: #cc0000;
+  animation: glitch-y 0.3s linear;
+  clip-path: polygon(0 60%, 100% 60%, 100% 100%, 0 100%);
+}
+
+@keyframes glitch-x {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 1px); }
+  40% { transform: translate(2px, -1px); }
+  60% { transform: translate(-1px, -1px); }
+  80% { transform: translate(1px, 1px); }
+  100% { transform: translate(0); }
+}
+
+@keyframes glitch-y {
+  0% { transform: translate(0); }
+  20% { transform: translate(2px, -1px); }
+  40% { transform: translate(-2px, 1px); }
+  60% { transform: translate(1px, 1px); }
+  80% { transform: translate(-1px, -1px); }
+  100% { transform: translate(0); }
+}
+
+/* ── Blinking Cursor ──────────────────────────────────────── */
+
+.cursor-blink::after {
+  content: "█";
+  animation: blink 1s step-start infinite;
+  color: var(--color-blood-bright);
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+/* ── Typewriter ───────────────────────────────────────────── */
+
+.typewriter {
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 2px solid var(--color-blood-bright);
+  animation: typing 2s steps(40, end), blink-caret 0.75s step-start infinite;
+}
+
+@keyframes typing {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+@keyframes blink-caret {
+  50% { border-color: transparent; }
+}
+
+/* ── Pulse Glow ───────────────────────────────────────────── */
+
+.pulse-blood {
+  animation: pulse-blood 2s ease-in-out infinite;
+}
+
+@keyframes pulse-blood {
+  0%, 100% { box-shadow: 0 0 5px rgba(204, 0, 0, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(204, 0, 0, 0.6); }
+}
+
+/* ── Text Glow ────────────────────────────────────────────── */
+
+.glow-blood {
+  text-shadow: 0 0 10px rgba(204, 0, 0, 0.5);
+}
+
+.glow-green {
+  text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+}
+
+/* ── Terminal Card ────────────────────────────────────────── */
+
+.terminal-card {
+  background: var(--color-abyss);
+  border: 1px solid var(--color-border-dim);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.terminal-card:hover {
+  border-color: var(--color-blood-dim);
+  box-shadow: 0 0 15px rgba(204, 0, 0, 0.1);
+}
+
+/* ── Scrollbar ────────────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2a2a2a;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #660000;
+}
+
+/* ── Links ────────────────────────────────────────────────── */
+
+a {
+  color: #e0e0e0;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+a:hover {
+  color: #e10600;
+}
+
+/* ── Leaflet Dark Override ────────────────────────────────── */
+
+.leaflet-container {
+  background: #050505 !important;
+  font-family: var(--font-mono) !important;
+}
+
+.leaflet-popup-content-wrapper {
+  background: #0a0a0a !important;
+  color: #e0e0e0 !important;
+  border: 1px solid #cc0000 !important;
+}
+
+.leaflet-popup-tip {
+  background: #cc0000 !important;
+}
+
+.leaflet-control-zoom a {
+  background: #0a0a0a !important;
+  color: #cc0000 !important;
+  border: 1px solid #1a1a1a !important;
+}
+
+.leaflet-control-attribution {
+  display: none !important;
+}
+
+/* ── Reduced Motion ───────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .grain::before,
+  .scanlines::before {
+    display: none;
+  }
+
+  .typewriter {
+    width: 100% !important;
+    animation: none !important;
+  }
+}
+
+/* ── Mobile adjustments ───────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .scanlines::before {
+    opacity: 0.3;
+  }
+
+  .grain::before {
+    display: none;
+  }
+
+  body {
+    font-size: 13px;
+  }
+}
+
+/* ── Print mode (Protocol X) ──────────────────────────────── */
+
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  .scanlines::before,
+  .crt-vignette::after,
+  .grain::before {
+    display: none !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}
