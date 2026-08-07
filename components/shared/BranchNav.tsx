@@ -62,8 +62,8 @@ export default function BranchNav() {
           onClick={() => sound.nav()}
         >
           <pre className="text-blood text-[8px] leading-tight">{guyFawkesAscii}</pre>
-          <div className="text-blood-bright text-xs font-bold tracking-widest mt-1">
-            V FOR X
+          <div className="text-blood-bright text-xs font-bold tracking-widest mt-1 flex items-center gap-1">
+            🦀 V FOR X
           </div>
         </Link>
 
@@ -104,7 +104,7 @@ export default function BranchNav() {
             className="text-blood-bright text-sm font-bold tracking-widest"
             onClick={() => sound.nav()}
           >
-            <span className="text-blood">V</span> FOR X
+            <span className="text-blood">🦀</span> FOR X
           </Link>
           <div className="flex items-center gap-2">
             <SoundToggle />

@@ -64,6 +64,7 @@ export default function HomePage() {
     <div className="p-3 sm:p-6 md:p-10 max-w-5xl mx-auto">
       {/* Hero */}
       <div className="text-center mb-12 pt-8">
+        <div className="text-5xl md:text-7xl mb-2 animate-pulse">🦀</div>
         <pre data-ascii-hero className="text-blood text-[6px] sm:text-[10px] md:text-xs leading-tight inline-block glow-blood" aria-hidden="true">{`
         .:::::::::::::::.
       :::'   ._-___-_'  \`:   PEOPLE SHOULD NOT BE
@@ -237,6 +238,7 @@ export default function HomePage() {
 
       {/* Footer */}
       <footer className="border-t border-border-dim pt-4 pb-8">
+        <div className="text-center text-3xl mb-3">🦀</div>
         <div className="flex flex-col md:flex-row justify-between gap-2 text-xs text-content-dim">
           <span>Data sync: {data.metadata.created} · {data.metadata.total_countries} countries</span>
           <span>Sources: {data.metadata.sources.length} official · CC0</span>
