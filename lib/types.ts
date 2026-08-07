@@ -192,6 +192,56 @@ export interface CountryData {
   };
 }
 
+// ── SDG parallel equations (SDG 3, 4, 6, 7, 10, 13) ──
+
+export interface SdgEquationIntervention {
+  name: string;
+  cost_billion_yr?: number;
+  revenue_billion_yr?: number;
+  reach_m: number;
+  roi_note: string;
+}
+
+export interface SdgEquation {
+  sdg: number;
+  title: string;
+  subtitle: string;
+  icon: string;
+  moral_framing: string;
+  current_gap: Record<string, number | string>;
+  cost: {
+    annual_billion: number;
+    annual_trillion?: number;
+    source: string;
+    description: string;
+  };
+  affordability: {
+    pct_world_gdp: number;
+    pct_military: number;
+    days_of_military: number;
+    framing: string;
+  };
+  interventions: SdgEquationIntervention[];
+  status: string;
+  sdg_target: string;
+}
+
+export interface SdgEquations {
+  meta: {
+    framework: string;
+    methodology: string;
+    world_military_trillion_yr: number;
+    world_gdp_trillion: number;
+    military_per_day_billion: number;
+    sources_overview: string[];
+    quick_wins_total_billion?: number;
+    quick_wins_label?: string;
+    quick_wins_pct_military?: number;
+    quick_wins_days_military?: number;
+  };
+  equations: Record<string, SdgEquation>;
+}
+
 export interface Scenario {
   name: string;
   years: number[];
@@ -312,4 +362,5 @@ export interface WorldBackbone {
   tactics_conflict_zones: Tactic[];
   structural_blockers: StructuralBlocker[];
   implementation_phases: ImplementationPhase[];
+  sdg_equations?: SdgEquations;
 }

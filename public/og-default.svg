@@ -1,0 +1,108 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="bgGlow" cx="50%" cy="40%" r="70%">
+      <stop offset="0%" stop-color="#1a0000"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </radialGradient>
+    <linearGradient id="bloodLine" x1="0" y1="0" x2="1200" y2="0">
+      <stop offset="0%" stop-color="#660000"/>
+      <stop offset="50%" stop-color="#cc0000"/>
+      <stop offset="100%" stop-color="#660000"/>
+    </linearGradient>
+    <filter id="textGlow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bgGlow)"/>
+
+  <!-- Top blood line -->
+  <rect x="0" y="0" width="1200" height="4" fill="url(#bloodLine)"/>
+
+  <!-- Grid pattern (faint) -->
+  <g opacity="0.03" stroke="#cc0000" stroke-width="0.5">
+    <line x1="0" y1="90" x2="1200" y2="90"/>
+    <line x1="0" y1="180" x2="1200" y2="180"/>
+    <line x1="0" y1="270" x2="1200" y2="270"/>
+    <line x1="0" y1="360" x2="1200" y2="360"/>
+    <line x1="0" y1="450" x2="1200" y2="450"/>
+    <line x1="0" y1="540" x2="1200" y2="540"/>
+    <line x1="200" y1="0" x2="200" y2="630"/>
+    <line x1="400" y1="0" x2="400" y2="630"/>
+    <line x1="600" y1="0" x2="600" y2="630"/>
+    <line x1="800" y1="0" x2="800" y2="630"/>
+    <line x1="1000" y1="0" x2="1000" y2="630"/>
+  </g>
+
+  <!-- Guy Fawkes mask (stylized, minimal) -->
+  <g transform="translate(540, 60)" opacity="0.06" fill="#cc0000">
+    <text x="60" y="80" font-size="120" text-anchor="middle">🦀</text>
+  </g>
+
+  <!-- Logo / Brand -->
+  <text x="600" y="80" font-family="'Courier New', monospace" font-size="14" fill="#660000" text-anchor="middle" letter-spacing="8">
+    THE PLATFORM THAT REFUSES TO DIE
+  </text>
+
+  <!-- Main title -->
+  <text x="600" y="170" font-family="'Courier New', monospace" font-size="72" font-weight="bold" fill="#cc0000" text-anchor="middle" filter="url(#textGlow)" letter-spacing="12">
+    V FOR X
+  </text>
+
+  <!-- Headline stat -->
+  <text x="600" y="240" font-family="'Courier New', monospace" font-size="22" fill="#888888" text-anchor="middle">
+    200 countries × 19 dimensions · CC0
+  </text>
+
+  <!-- Central equation -->
+  <rect x="150" y="280" width="900" height="100" fill="#0a0a0a" stroke="#330000" stroke-width="1"/>
+
+  <text x="600" y="325" font-family="'Courier New', monospace" font-size="36" font-weight="bold" fill="#cc0000" text-anchor="middle" filter="url(#textGlow)">
+    $93B/yr = 14 days of military spending
+  </text>
+  <text x="600" y="358" font-family="'Courier New', monospace" font-size="16" fill="#666666" text-anchor="middle">
+    That's what it costs to end global hunger.
+  </text>
+
+  <!-- Three-column stats -->
+  <g font-family="'Courier New', monospace">
+    <!-- Stat 1 -->
+    <text x="250" y="430" font-size="42" font-weight="bold" fill="#cc0000" text-anchor="middle" filter="url(#textGlow)">667M</text>
+    <text x="250" y="455" font-size="14" fill="#666666" text-anchor="middle">undernourished</text>
+    <text x="250" y="475" font-size="11" fill="#444444" text-anchor="middle">1 in 11 humans</text>
+
+    <!-- Stat 2 -->
+    <text x="600" y="430" font-size="42" font-weight="bold" fill="#cc0000" text-anchor="middle" filter="url(#textGlow)">120M+</text>
+    <text x="600" y="455" font-size="14" fill="#666666" text-anchor="middle">displaced</text>
+    <text x="600" y="475" font-size="11" fill="#444444" text-anchor="middle">forcibly, right now</text>
+
+    <!-- Stat 3 -->
+    <text x="950" y="430" font-size="42" font-weight="bold" fill="#cc0000" text-anchor="middle" filter="url(#textGlow)">$2.4T</text>
+    <text x="950" y="455" font-size="14" fill="#666666" text-anchor="middle">military/yr</text>
+    <text x="950" y="475" font-size="11" fill="#444444" text-anchor="middle">0.9% ends hunger</text>
+  </g>
+
+  <!-- Bottom section labels -->
+  <g font-family="'Courier New', monospace" font-size="12" fill="#444444" text-anchor="middle">
+    <text x="150" y="540">Sorrow Map</text>
+    <text x="310" y="540">The Equation</text>
+    <text x="470" y="540">Protocol X</text>
+    <text x="630" y="540">The Choice</text>
+    <text x="790" y="540">The Exodus</text>
+    <text x="950" y="540">The Allocator</text>
+    <text x="1080" y="540">+ 19 more</text>
+  </g>
+
+  <!-- Bottom blood line -->
+  <rect x="0" y="626" width="1200" height="4" fill="url(#bloodLine)"/>
+
+  <!-- URL -->
+  <text x="600" y="600" font-family="'Courier New', monospace" font-size="14" fill="#333333" text-anchor="middle" letter-spacing="2">
+    mouracleiton.github.io/v_for_x
+  </text>
+</svg>

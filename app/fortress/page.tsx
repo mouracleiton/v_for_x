@@ -1,5 +1,15 @@
+import type { Metadata } from "next";
+import { getMeta } from "@/lib/seo";
 import TerminalCard from "@/components/ui/TerminalCard";
 import StatusPill from "@/components/ui/StatusPill";
+
+const meta = getMeta("/fortress/");
+
+export const metadata: Metadata = {
+  title: meta.title,
+  description: meta.description,
+  openGraph: { title: meta.title, description: meta.description },
+};
 
 export default function FortalezaPage() {
   return (

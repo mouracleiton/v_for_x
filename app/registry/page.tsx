@@ -14,7 +14,7 @@ interface Dossier {
   severity: string;
   status: string;
   accusation: string;
-  evidence: { type: string; description: string; quality_score: number }[];
+  evidence: { type: string; description: string; quality_score: number; source_url?: string }[];
   evidence_quality_score: number;
   peer_validations: number;
   required_validations: number;
@@ -23,9 +23,31 @@ interface Dossier {
   updated_at: string;
   version: number;
   country_data_ref: string;
+  source_provenance?: {
+    authority: string;
+    authority_type: string;
+    source_dataset?: string;
+    source_url?: string;
+    case_number?: string;
+    opensanctions_id?: string;
+    auto_populated?: boolean;
+    fetched_at?: string;
+  };
 }
 
 const dossiers = dossiersData as Dossier[];
+
+const authorityBadge = (type?: string): { label: string; color: "blood" | "amber" | "green" | "dim" } => {
+  switch (type) {
+    case "icc_arrest_warrant": return { label: "ICC WARRANT", color: "blood" };
+    case "icj_proceedings": return { label: "ICJ CASE", color: "amber" };
+    case "un_investigation":
+    case "un_sanctions": return { label: "UN FINDING", color: "blood" };
+    case "sanctions": return { label: "SANCTIONED", color: "amber" };
+    case "community_submitted": return { label: "COMMUNITY", color: "dim" };
+    default: return { label: "COMMUNITY", color: "dim" };
+  }
+};
 
 const statusColor = (status: string): "blood" | "amber" | "green" | "dim" => {
   switch (status) {
@@ -75,9 +97,57 @@ export default function RegistroPage() {
           THE REGISTRY
         </h1>
         <p className="text-content-secondary text-sm mt-2">
-          // Accountability infrastructure. Dossiers with peer-validated evidence. No witch hunts.
+          // Accountability infrastructure. {dossiers.length} dossiers — {dossiers.filter(d => d.source_provenance?.authority_type?.includes("icc") || d.source_provenance?.authority_type?.includes("icj") || d.source_provenance?.authority_type?.includes("un")).length} from international courts, {dossiers.filter(d => !d.source_provenance).length} community-validated. Every entry traces to a legal finding — no witch hunts.
         </p>
       </div>
+
+      {/* Provenance breakdown */}
+      <TerminalCard title="EVIDENCE PIPELINE — WHERE THE DATA COMES FROM" accent="green" className="mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+          <div className="flex items-start gap-2">
+            <span className="text-blood-bright">■</span>
+            <div>
+              <div className="font-bold text-blood-bright">ICC Arrest Warrants</div>
+              <div className="text-content-dim">Adjudicated by International Criminal Court. Active warrants for war crimes, crimes against humanity. 124 states obligated to enforce.</div>
+              <div className="text-content-dim mt-1">→ {dossiers.filter(d => d.source_provenance?.authority_type === "icc_arrest_warrant").length} dossiers</div>
+            </div>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="text-warning-amber">■</span>
+            <div>
+              <div className="font-bold text-warning-amber">ICJ Proceedings</div>
+              <div className="text-content-dim">Cases before the International Court of Justice — provisional measures and ongoing genocide proceedings.</div>
+              <div className="text-content-dim mt-1">→ {dossiers.filter(d => d.source_provenance?.authority_type === "icj_proceedings").length} dossiers</div>
+            </div>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="text-blood">■</span>
+            <div>
+              <div className="font-bold text-blood">UN Security Council Findings</div>
+              <div className="text-content-dim">Panel of Experts reports, Chapter VII resolutions, sanctions committee designations.</div>
+              <div className="text-content-dim mt-1">→ {dossiers.filter(d => d.source_provenance?.authority_type === "un_investigation" || d.source_provenance?.authority_type === "un_sanctions").length} dossiers</div>
+            </div>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="text-content-dim">■</span>
+            <div>
+              <div className="font-bold text-content-secondary">Community Dossiers (safeguarded)</div>
+              <div className="text-content-dim">Submitted by contributors with evidence scoring. Redacted until peer-validated. Right-of-response mandatory.</div>
+              <div className="text-content-dim mt-1">→ {dossiers.filter(d => !d.source_provenance).length} dossiers</div>
+            </div>
+          </div>
+        </div>
+        <div className="border-t border-border-dim mt-4 pt-3">
+          <div className="text-[10px] text-content-dim uppercase tracking-widest mb-2">
+            // AUTO-POPULATION PIPELINE
+          </div>
+          <p className="text-xs text-content-secondary">
+            Run <code className="text-blood-bright bg-void px-1 py-0.5 border border-border-dim">python3 scripts/fetch_sanctions_dossiers.py</code> to pull
+            fresh dossiers from OpenSanctions (OFAC, EU, UN SC, UK HMT). Each entry carries
+            source provenance — every accusation traces to a legal finding by a recognized body.
+          </p>
+        </div>
+      </TerminalCard>
 
       {/* Anti-witch-hunt safeguards */}
       <TerminalCard title="SAFEGUARDS — HOW THIS WORKS" accent="green" className="mb-6">
@@ -159,7 +229,7 @@ export default function RegistroPage() {
           >
             <div className="flex items-start justify-between gap-3 mb-2">
               <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
                   <span className="text-xs text-content-dim">{d.id}</span>
                   <StatusPill color={statusColor(d.status)}>
                     {d.status.replace(/_/g, " ")}
@@ -167,6 +237,10 @@ export default function RegistroPage() {
                   <StatusPill color={severityColor(d.severity)}>
                     {d.severity.toUpperCase()}
                   </StatusPill>
+                  {d.source_provenance && (() => {
+                    const badge = authorityBadge(d.source_provenance.authority_type);
+                    return <StatusPill color={badge.color}>{badge.label}</StatusPill>;
+                  })()}
                 </div>
                 <h3 className="text-sm font-bold text-content-primary">{d.subject}</h3>
                 <p className="text-xs text-content-secondary mt-1 line-clamp-2">{d.accusation}</p>
@@ -176,6 +250,9 @@ export default function RegistroPage() {
               <span>▸ {categoryLabels[d.category] || d.category}</span>
               <span>▸ Evidence: {d.evidence_quality_score}pts</span>
               <span>▸ Validations: {d.peer_validations}/{d.required_validations}</span>
+              {d.source_provenance?.case_number && (
+                <span>▸ {d.source_provenance.case_number}</span>
+              )}
               <span>▸ v{d.version}</span>
             </div>
           </Link>

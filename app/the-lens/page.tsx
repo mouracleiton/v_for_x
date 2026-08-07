@@ -17,7 +17,14 @@ import {
   Tooltip,
   ResponsiveContainer,
   ReferenceLine,
+  RadarChart,
+  Radar,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Legend,
 } from "recharts";
+import { calculateVulnerability, scoreColor, DOMAIN_WEIGHTS } from "@/lib/vulnerability";
 
 const data = backbone as WorldBackbone;
 
@@ -312,6 +319,21 @@ export default function TheLensPage() {
         .filter((c): c is CountryData => c !== undefined),
     [selectedIso3]
   );
+
+  /* ── Radar chart data for comparison overlay ── */
+  const radarColors = ["#e10600", "#00ff41", "#00ddff", "#ffaa00", "#aa44ff"];
+
+  const radarData = useMemo(() => {
+    return DOMAIN_WEIGHTS.map((dw) => {
+      const row: Record<string, number | string> = { domain: dw.label };
+      for (const c of selectedCountries) {
+        const result = calculateVulnerability(c);
+        const dom = result.domains.find((d) => d.domain === dw.domain);
+        row[c.iso3] = dom && dom.hasData && !Number.isNaN(dom.score) ? Math.round(dom.score) : 0;
+      }
+      return row;
+    });
+  }, [selectedCountries]);
 
   const filteredList = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
@@ -771,6 +793,153 @@ export default function TheLensPage() {
             <span>NO DATA AVAILABLE</span>
           </div>
         </div>
+
+        {/* ═══ VULNERABILITY RADAR OVERLAY ═══ */}
+        {selectedCountries.length >= 2 && (
+          <div className="mt-6 pt-6 border-t border-border-dim">
+            <div className="text-[10px] text-content-dim uppercase tracking-widest mb-3">
+              // VULNERABILITY RADAR — {selectedCountries.length} COUNTRIES OVERLAID
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {/* Radar chart */}
+              <div style={{ width: "100%", height: 380 }}>
+                <ResponsiveContainer>
+                  <RadarChart data={radarData} outerRadius="72%">
+                    <PolarGrid stroke="#333" />
+                    <PolarAngleAxis dataKey="domain" tick={{ fill: "#999", fontSize: 9 }} />
+                    <PolarRadiusAxis domain={[0, 100]} tick={{ fill: "#555", fontSize: 8 }} angle={90} />
+                    {selectedCountries.map((c, i) => {
+                      const color = radarColors[i % radarColors.length];
+                      return (
+                        <Radar
+                          key={c.iso3}
+                          name={c.iso3}
+                          dataKey={c.iso3}
+                          stroke={color}
+                          fill={color}
+                          fillOpacity={0.06}
+                          strokeWidth={2}
+                        />
+                      );
+                    })}
+                    <Legend wrapperStyle={{ fontSize: "10px", paddingTop: "8px" }} />
+                    <Tooltip
+                      contentStyle={{
+                        background: "#0a0a0a",
+                        border: "1px solid #444",
+                        fontSize: "11px",
+                      }}
+                    />
+                  </RadarChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Composite scores + gap analysis */}
+              <div className="space-y-3">
+                {/* Composite scores ranked */}
+                <div>
+                  <div className="text-[10px] text-content-dim uppercase tracking-widest mb-2">
+                    COMPOSITE VULNERABILITY SCORE
+                  </div>
+                  <div className="space-y-1.5">
+                    {[...selectedCountries]
+                      .sort((a, b) => {
+                        const sa = calculateVulnerability(a).composite;
+                        const sb = calculateVulnerability(b).composite;
+                        return sb - sa;
+                      })
+                      .map((c) => {
+                        const result = calculateVulnerability(c);
+                        const color = radarColors[selectedCountries.indexOf(c) % radarColors.length];
+                        return (
+                          <div key={c.iso3} className="flex items-center gap-2 text-xs">
+                            <span className="w-10 font-bold" style={{ color }}>{c.iso3}</span>
+                            <div className="flex-1 bg-void border border-border-dim h-5 relative">
+                              <div
+                                className="h-full transition-all"
+                                style={{
+                                  width: `${result.composite}%`,
+                                  backgroundColor: scoreColor(result.composite),
+                                }}
+                              />
+                              <span className="absolute inset-0 flex items-center px-2 text-[10px] text-content-primary font-bold">
+                                {result.composite.toFixed(1)} — {result.missingDomains.length} domains missing
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
+
+                {/* Gap analysis: worst domain for each country */}
+                <div>
+                  <div className="text-[10px] text-content-dim uppercase tracking-widest mb-2">
+                    BIGGEST VULNERABILITY GAP
+                  </div>
+                  <div className="space-y-1">
+                    {selectedCountries.map((c) => {
+                      const result = calculateVulnerability(c);
+                      const scored = result.domains.filter((d) => d.hasData && !Number.isNaN(d.score));
+                      if (scored.length === 0) return null;
+                      const worst = [...scored].sort((a, b) => b.score - a.score)[0];
+                      return (
+                        <div key={c.iso3} className="flex items-center justify-between text-xs border-b border-border-dim py-1">
+                          <span className="font-bold" style={{ color: radarColors[selectedCountries.indexOf(c) % radarColors.length] }}>
+                            {c.iso3}
+                          </span>
+                          <span className="text-content-secondary flex-1 px-2 text-right truncate">
+                            {worst.label}: {worst.raw}
+                          </span>
+                          <span className="font-bold" style={{ color: scoreColor(worst.score) }}>
+                            {worst.score.toFixed(0)}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Worst country overall analysis */}
+                {(() => {
+                  const ranked = [...selectedCountries]
+                    .map((c) => ({ country: c, result: calculateVulnerability(c) }))
+                    .sort((a, b) => b.result.composite - a.result.composite);
+                  const worst = ranked[0];
+                  const best = ranked[ranked.length - 1];
+                  if (!worst || !best || worst.country.iso3 === best.country.iso3) return null;
+                  const gap = worst.result.composite - best.result.composite;
+                  const worstDomains = worst.result.domains
+                    .filter((d) => d.hasData && !Number.isNaN(d.score))
+                    .sort((a, b) => b.score - a.score)
+                    .slice(0, 3);
+                  return (
+                    <div className="p-3 border border-blood-dim bg-abyss">
+                      <div className="text-[10px] text-blood-bright uppercase tracking-widest mb-2">
+                        ⚠ {worst.country.name_en} ({worst.country.iso3}) IS {gap.toFixed(1)} POINTS MORE VULNERABLE
+                      </div>
+                      <div className="text-xs text-content-secondary space-y-1">
+                        <p>
+                          {worst.country.name_en}&apos;s critical dimensions:
+                        </p>
+                        {worstDomains.map((d) => (
+                          <div key={d.domain} className="flex items-center gap-2">
+                            <span className="inline-block w-2 h-2" style={{ backgroundColor: d.color }} />
+                            <span className="text-content-primary font-bold">{d.label}</span>
+                            <span className="text-content-dim">— {d.raw}</span>
+                            <span className="ml-auto font-bold" style={{ color: scoreColor(d.score) }}>
+                              {d.score.toFixed(0)}/100
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Dossier links */}
         {selectedCountries.length >= 2 && (

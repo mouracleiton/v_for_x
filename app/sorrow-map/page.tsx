@@ -70,6 +70,27 @@ const DIMENSIONS: DimensionDef[] = [
   { key: "education_pisa_score", label: "PISA SCORE", category: "EDUCATION", unit: "", inverse: true },
   { key: "connectivity_internet_users_pct", label: "INTERNET ACCESS", category: "CONNECTIVITY", unit: "%", inverse: true },
   { key: "water_sanitation_basic_access_pct", label: "WATER ACCESS", category: "WATER", unit: "%", inverse: true },
+  // ── Extended dimensions (round 4) ──
+  { key: "human_development_hdi", label: "HUMAN DEVELOPMENT INDEX", category: "DEVELOPMENT", unit: "", inverse: true },
+  { key: "economy_gdp_per_capita_usd", label: "GDP PER CAPITA", category: "ECONOMY", unit: "$", inverse: true },
+  { key: "economy_gdp_usd", label: "GDP (TOTAL)", category: "ECONOMY", unit: "$", inverse: true },
+  { key: "military_pct_gdp", label: "MILITARY % GDP", category: "MILITARY", unit: "%" },
+  { key: "military_expenditure_usd", label: "MILITARY EXPENDITURE", category: "MILITARY", unit: "$" },
+  { key: "health_expenditure_pct_gdp", label: "HEALTH % GDP", category: "HEALTH", unit: "%", inverse: true },
+  { key: "climate_co2_per_capita_t", label: "CO₂ PER CAPITA", category: "CLIMATE", unit: "t" },
+  { key: "climate_ghg_total_mt", label: "GHG TOTAL", category: "CLIMATE", unit: "Mt" },
+  { key: "education_literacy_rate_pct", label: "LITERACY RATE", category: "EDUCATION", unit: "%", inverse: true },
+  { key: "education_primary_enrollment_pct", label: "PRIMARY ENROLLMENT", category: "EDUCATION", unit: "%", inverse: true },
+  { key: "gender_women_parliament_pct", label: "WOMEN IN PARLIAMENT", category: "GENDER", unit: "%", inverse: true },
+  { key: "migration_forcibly_displaced", label: "FORCIBLY DISPLACED", category: "MIGRATION", unit: "" },
+  { key: "migration_refugees_origin", label: "REFUGEES (ORIGIN)", category: "MIGRATION", unit: "" },
+  { key: "migration_refugees_hosted", label: "REFUGEES (HOSTED)", category: "MIGRATION", unit: "" },
+  { key: "employment_unemployment_pct", label: "UNEMPLOYMENT", category: "EMPLOYMENT", unit: "%" },
+  { key: "employment_youth_unemployment_pct", label: "YOUTH UNEMPLOYMENT", category: "EMPLOYMENT", unit: "%" },
+  { key: "environment_forest_area_pct", label: "FOREST AREA", category: "ENVIRONMENT", unit: "%", inverse: true },
+  { key: "environment_renewable_energy_pct", label: "RENEWABLE ENERGY", category: "ENVIRONMENT", unit: "%", inverse: true },
+  { key: "connectivity_broadband_per100", label: "BROADBAND SUBSCRIPTIONS", category: "CONNECTIVITY", unit: "/100", inverse: true },
+  { key: "demographics_population", label: "POPULATION", category: "DEMOGRAPHICS", unit: "" },
 ];
 
 /**

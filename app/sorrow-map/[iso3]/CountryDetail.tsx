@@ -16,6 +16,8 @@ import {
   wfpClassColor,
   wfpClassLabel,
 } from "@/lib/format";
+import { sound } from "@/lib/sound";
+import FreshnessBadge, { computeDataFreshness } from "@/components/shared/FreshnessBadge";
 import {
   countryToEquation,
   countryToProtocol,
@@ -29,6 +31,7 @@ import {
   ClimateHungerDeepDive,
   MilitaryHealthDeepDive,
   GenderDeepDive,
+  SdgScorecardDeepDive,
 } from "./DeepDives";
 
 const data = backbone as WorldBackbone;
@@ -592,6 +595,28 @@ export default function CountryDetail({ params }: PageProps) {
         <div className="text-sm text-content-secondary mt-1">
           {c.name_pt} · {c.region} / {c.subregion}
         </div>
+        {/* Action bar */}
+        <div className="flex flex-wrap items-center gap-2 mt-3 no-print">
+          <button
+            onClick={() => { window.print(); sound.select(); }}
+            className="text-[10px] px-2 py-1 border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void transition-colors uppercase tracking-widest"
+          >
+            🖨 PRINT / PDF BRIEF
+          </button>
+          <Link
+            href={`/the-act/?country=${c.iso3}`}
+            className="text-[10px] px-2 py-1 border border-blood text-blood-bright hover:bg-blood hover:text-void transition-colors uppercase tracking-widest"
+          >
+            → CAMPAIGN KIT
+          </Link>
+          {/* Data freshness */}
+          {(() => {
+            const f = computeDataFreshness(c);
+            return f.newestYear !== null && (
+              <FreshnessBadge year={f.newestYear} label={`Data through`} />
+            );
+          })()}
+        </div>
         {c.hunger.wfp_class && (
           <div className="mt-2">
             <span
@@ -886,6 +911,8 @@ export default function CountryDetail({ params }: PageProps) {
 
           {/* ═══ DIMENSION DEEP-DIVE MODULES ═══ */}
           {/* Derived analytics that cross-reference multiple dimensions */}
+
+          <SdgScorecardDeepDive country={c} />
 
           <MigrationDeepDive country={c} hotspotIso3s={hotspotIso3s} />
           <GovernanceDeepDive country={c} />

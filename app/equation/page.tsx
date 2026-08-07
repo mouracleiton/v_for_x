@@ -12,7 +12,7 @@ import StatusPill from "@/components/ui/StatusPill";
 import ShareableStat from "@/components/shared/ShareableStat";
 import Link from "next/link";
 import { tierColor } from "@/lib/format";
-import type { WorldBackbone, Scenario } from "@/lib/types";
+import type { WorldBackbone, Scenario, SdgEquation } from "@/lib/types";
 
 const data = backbone as WorldBackbone;
 
@@ -60,6 +60,7 @@ const chartTooltipStyle = {
 export default function EquationPage() {
   const [selectedScenario, setSelectedScenario] = useState("ambicioso");
   const [selectedFinancing, setSelectedFinancing] = useState<number[]>([]);
+  const [selectedSdg, setSelectedSdg] = useState<string>("sdg6_water");
 
   const scenario = data.scenarios[selectedScenario] as Scenario;
 
@@ -116,7 +117,7 @@ export default function EquationPage() {
           THE EQUATION
         </h1>
         <p className="text-content-secondary text-sm mt-2">
-          // Don't just see the problem. Model the fix. Real numbers, real projections, real solutions.
+          // Don't just see the problem. Model the fix. Real numbers, real projections, real solutions. Hunger + 6 parallel SDG equations.
         </p>
       </div>
 
@@ -667,6 +668,15 @@ export default function EquationPage() {
         </div>
       </TerminalCard>
 
+      {/* CROSS-DOMAIN EQUATIONS — SDG 3/4/6/7/10/13 */}
+      {data.sdg_equations && (
+        <SdgEquationsSection
+          equations={data.sdg_equations}
+          selectedSdg={selectedSdg}
+          onSelectSdg={setSelectedSdg}
+        />
+      )}
+
       {/* Cross-links */}
       <TerminalCard title="CROSS-LINKS">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -685,5 +695,221 @@ export default function EquationPage() {
         </div>
       </TerminalCard>
     </div>
+  );
+}
+
+/* ── SDG PARALLEL EQUATIONS ──
+ * Same moral-clarity framing as the hunger equation: compute the gap from
+ * real data, show the cost, compare to military spending.
+ */
+const sdgTabMeta: Record<string, { label: string; color: string; sdg: string }> = {
+  sdg6_water:   { label: "WATER",   color: "#00ddff", sdg: "SDG 6" },
+  sdg3_health:  { label: "HEALTH",  color: "#e10600", sdg: "SDG 3" },
+  sdg7_energy:  { label: "ENERGY",  color: "#ffaa00", sdg: "SDG 7" },
+  sdg4_education: { label: "EDUCATION", color: "#00ff41", sdg: "SDG 4" },
+  sdg13_climate: { label: "CLIMATE", color: "#cc6600", sdg: "SDG 13" },
+  sdg10_inequality: { label: "INEQUALITY", color: "#aa44ff", sdg: "SDG 10" },
+};
+
+function SdgEquationsSection({
+  equations,
+  selectedSdg,
+  onSelectSdg,
+}: {
+  equations: NonNullable<WorldBackbone["sdg_equations"]>;
+  selectedSdg: string;
+  onSelectSdg: (key: string) => void;
+}) {
+  const eq = equations.equations[selectedSdg] as SdgEquation;
+  const meta = sdgTabMeta[selectedSdg] || sdgTabMeta.sdg6_water;
+  const keys = Object.keys(equations.equations);
+  const eqMeta = equations.meta;
+
+  // Build a scale comparison bar (cost vs military vs GDP)
+  const costB = eq.cost.annual_billion;
+  const milB = eqMeta.world_military_trillion_yr * 1000;
+
+  return (
+    <>
+      {/* Section header */}
+      <TerminalCard
+        title="CROSS-DOMAIN EQUATIONS — 6 GAPS, 1 PATTERN"
+        accent="amber"
+        glow
+        className="mb-6"
+      >
+        <p className="text-xs text-content-secondary mb-4">
+          Hunger is the proof of concept. The same equation structure — gap, cost, affordability —
+          applies to every solvable crisis. Every gap below is cheaper than military spending.
+          Every one has published, evidence-backed interventions.
+        </p>
+
+        {/* Quick-wins aggregate */}
+        {eqMeta.quick_wins_total_billion && (
+          <div className="border border-terminal-green bg-terminal-green/5 p-4 mb-4">
+            <div className="text-[10px] text-content-dim uppercase tracking-widest mb-1">
+              THE COMBINED EQUATION
+            </div>
+            <div className="text-lg text-terminal-green font-bold glow-green">
+              ${eqMeta.quick_wins_total_billion}B/year
+            </div>
+            <div className="text-xs text-content-secondary mt-1">
+              {eqMeta.quick_wins_label}
+            </div>
+            <div className="text-xs text-content-dim mt-1">
+              = {eqMeta.quick_wins_pct_military}% of world military spending · {eqMeta.quick_wins_days_military} days
+            </div>
+          </div>
+        )}
+
+        {/* SDG tabs */}
+        <div className="flex flex-wrap gap-2">
+          {keys.map((key) => {
+            const tm = sdgTabMeta[key];
+            const isActive = selectedSdg === key;
+            return (
+              <button
+                key={key}
+                onClick={() => onSelectSdg(key)}
+                className={`px-3 py-2 text-xs border transition-colors ${
+                  isActive
+                    ? "bg-void"
+                    : "border-border-dim text-content-secondary hover:border-blood-dim"
+                }`}
+                style={isActive ? { borderColor: tm.color, color: tm.color } : {}}
+              >
+                <span className="text-content-dim mr-1">{tm.sdg}</span>
+                <span className="font-bold">{tm.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </TerminalCard>
+
+      {/* Active SDG equation */}
+      <TerminalCard
+        title={`${meta.sdg} — ${eq.title.toUpperCase()}`}
+        accent="amber"
+        className="mb-6"
+      >
+        {/* Moral framing */}
+        <div className="border-l-2 pl-3 mb-4" style={{ borderColor: meta.color }}>
+          <p className="text-sm text-content-primary italic">{eq.moral_framing}</p>
+          <p className="text-xs text-content-dim mt-1">{eq.subtitle}</p>
+        </div>
+
+        {/* The gap */}
+        <div className="terminal-card p-3 mb-4">
+          <div className="text-[10px] text-content-dim uppercase tracking-widest mb-2">
+            THE GAP — computed from {data.metadata.total_countries}-country data
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {Object.entries(eq.current_gap).filter(([, v]) => typeof v === "number" || typeof v === "string").slice(0, 6).map(([k, v]) => (
+              <div key={k}>
+                <div className="text-[10px] text-content-dim uppercase">{k.replace(/_/g, " ")}</div>
+                <div className="text-sm font-bold text-content-primary">
+                  {typeof v === "number" ? v.toLocaleString() : v}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* The cost */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+          <div className="border border-blood bg-blood/5 p-3 text-center">
+            <div className="text-[9px] text-content-dim uppercase">ANNUAL COST</div>
+            <div className="text-xl font-bold text-blood-bright">
+              {eq.cost.annual_trillion ? `$${eq.cost.annual_trillion}T` : `$${costB}B`}
+            </div>
+            <div className="text-[9px] text-content-dim mt-1">/year</div>
+          </div>
+          <div className="border p-3 text-center" style={{ borderColor: meta.color + "66", background: meta.color + "0d" }}>
+            <div className="text-[9px] text-content-dim uppercase">% OF MILITARY</div>
+            <div className="text-xl font-bold" style={{ color: meta.color }}>
+              {eq.affordability.pct_military}%
+            </div>
+            <div className="text-[9px] text-content-dim mt-1">{eq.affordability.days_of_military} days</div>
+          </div>
+          <div className="border border-border-dim p-3 text-center">
+            <div className="text-[9px] text-content-dim uppercase">% OF WORLD GDP</div>
+            <div className="text-xl font-bold text-content-primary">
+              {eq.affordability.pct_world_gdp}%
+            </div>
+            <div className="text-[9px] text-content-dim mt-1">of ~${eqMeta.world_gdp_trillion}T</div>
+          </div>
+          <div className="border border-terminal-green bg-terminal-green/5 p-3 text-center">
+            <div className="text-[9px] text-content-dim uppercase">STATUS</div>
+            <div className="text-sm font-bold text-terminal-green uppercase mt-1">
+              {eq.status.replace(/_/g, " ")}
+            </div>
+            <div className="text-[9px] text-content-dim mt-1">{eq.sdg_target}</div>
+          </div>
+        </div>
+
+        {/* Scale comparison bar */}
+        <div className="mb-4">
+          <div className="flex justify-between text-[10px] text-content-dim mb-1">
+            <span>SCALE COMPARISON (annual, USD)</span>
+          </div>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] text-content-secondary w-32 shrink-0">
+                {eq.title} ({eq.cost.annual_trillion ? `$${eq.cost.annual_trillion}T` : `$${costB}B`})
+              </span>
+              <div className="flex-1 h-4 bg-void border border-border-dim">
+                <div className="h-full" style={{ width: `${Math.min(100, costB / milB * 100)}%`, backgroundColor: meta.color }} />
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] text-content-secondary w-32 shrink-0">
+                World military (${eqMeta.world_military_trillion_yr}T)
+              </span>
+              <div className="flex-1 h-4 bg-void border border-border-dim">
+                <div className="h-full bg-blood" style={{ width: "100%" }} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Affordability framing */}
+        <div className="terminal-card p-3 mb-4">
+          <p className="text-xs text-content-primary font-bold">
+            {eq.affordability.framing}
+          </p>
+        </div>
+
+        {/* Interventions */}
+        <div className="text-[10px] text-content-dim uppercase tracking-widest mb-2">
+          EVIDENCE-BACKED INTERVENTIONS
+        </div>
+        <div className="space-y-2">
+          {eq.interventions.map((iv, i) => (
+            <div key={i} className="terminal-card p-3">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1">
+                  <div className="text-xs font-bold text-content-primary">{iv.name}</div>
+                  <div className="text-xs text-content-secondary mt-0.5">{iv.roi_note}</div>
+                </div>
+                <div className="text-right shrink-0">
+                  {iv.cost_billion_yr !== undefined && (
+                    <div className="text-xs font-bold text-blood-bright">${iv.cost_billion_yr}B/yr</div>
+                  )}
+                  {iv.revenue_billion_yr !== undefined && (
+                    <div className="text-xs font-bold text-terminal-green">+${iv.revenue_billion_yr}B/yr</div>
+                  )}
+                  <div className="text-[9px] text-content-dim">{iv.reach_m >= 1000 ? `${(iv.reach_m / 1000).toFixed(1)}B` : `${iv.reach_m}M`} reached</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Source */}
+        <div className="text-[10px] text-content-dim italic mt-3">
+          [Source: {eq.cost.source}]
+        </div>
+      </TerminalCard>
+    </>
   );
 }

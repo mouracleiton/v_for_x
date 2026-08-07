@@ -6,6 +6,7 @@ import TerminalCard from "@/components/ui/TerminalCard";
 import StatusPill from "@/components/ui/StatusPill";
 import ShareableStat from "@/components/shared/ShareableStat";
 import type { WorldBackbone } from "@/lib/types";
+import DiffEngine from "@/components/shared/DiffEngine";
 
 const data = backbone as WorldBackbone;
 
@@ -738,6 +739,52 @@ export default function TheArchivePage() {
           </span>
         </div>
       </div>
+
+      {/* ══ PUBLIC DATA API ══ */}
+      <section className="mt-8">
+        <h2 className="text-sm uppercase tracking-widest text-blood-bright mb-4">
+          §05 // PUBLIC DATA API
+        </h2>
+        <TerminalCard title="JSON API — READ-ONLY, CC0" accent="green">
+          <p className="text-xs text-content-secondary mb-4">
+            The entire dataset is served as static JSON. No keys, no rate limits, no authentication.
+            Build apps, dashboards, research tools on top of this data.
+          </p>
+          <div className="space-y-2">
+            {[
+              { path: "/api/v1/index.json", desc: "API metadata + endpoint directory" },
+              { path: "/api/v1/countries.json", desc: "All 200 countries — summary (name, region, key stats)" },
+              { path: "/api/v1/countries/{ISO3}.json", desc: "Full country record (all 19 dimensions)" },
+              { path: "/api/v1/equations.json", desc: "6 cross-domain SDG equations" },
+              { path: "/api/v1/hotspots.json", desc: "22 WFP-classified hunger hotspots" },
+            ].map((ep) => (
+              <div key={ep.path} className="flex items-center gap-3 p-2 border border-border-dim bg-void">
+                <StatusPill color="green">GET</StatusPill>
+                <code className="text-xs text-blood-bright font-mono flex-1">{ep.path}</code>
+                <span className="text-[10px] text-content-dim hidden sm:inline">{ep.desc}</span>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 p-3 border border-terminal-green bg-terminal-green/5">
+            <div className="text-[10px] text-content-dim uppercase tracking-widest mb-1">EXAMPLE</div>
+            <pre className="text-[10px] text-terminal-green font-mono overflow-x-auto">{`curl https://mouracleiton.github.io/v_for_x/api/v1/countries/SSD.json | jq .`}</pre>
+            <div className="text-[10px] text-content-dim mt-1">
+              Returns the full South Sudan record — all health, education, water, climate, governance data.
+            </div>
+          </div>
+          <div className="text-[10px] text-content-dim italic mt-3">
+            ▸ Base URL: https://mouracleiton.github.io/v_for_x · License: CC0 · {data.metadata.total_countries} countries
+          </div>
+        </TerminalCard>
+      </section>
+
+      {/* ══ DATA DIFF ENGINE ══ */}
+      <section className="mt-8">
+        <h2 className="text-sm uppercase tracking-widest text-blood-bright mb-4">
+          §06 // DATA DIFF ENGINE
+        </h2>
+        <DiffEngine />
+      </section>
     </div>
   );
 }

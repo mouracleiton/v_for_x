@@ -8,9 +8,21 @@
     "status": "PEER_VALIDATED",
     "accusation": "Ordered systematic blockade of humanitarian aid to contested regions during active famine conditions. Evidence of weaponizing hunger as a tool of war against civilian population.",
     "evidence": [
-      { "type": "primary", "description": "UN Panel of Experts report documenting aid convoy blockades (2024)", "quality_score": 3 },
-      { "type": "primary", "description": "Satellite imagery showing destroyed food storage facilities", "quality_score": 3 },
-      { "type": "secondary", "description": "Amnesty International investigation — witness testimonies from 47 aid workers", "quality_score": 1 }
+      {
+        "type": "primary",
+        "description": "UN Panel of Experts report documenting aid convoy blockades (2024)",
+        "quality_score": 3
+      },
+      {
+        "type": "primary",
+        "description": "Satellite imagery showing destroyed food storage facilities",
+        "quality_score": 3
+      },
+      {
+        "type": "secondary",
+        "description": "Amnesty International investigation — witness testimonies from 47 aid workers",
+        "quality_score": 1
+      }
     ],
     "evidence_quality_score": 7,
     "peer_validations": 8,
@@ -30,9 +42,21 @@
     "status": "UNDER_REVIEW",
     "accusation": "Systematic land grabbing from indigenous communities. Use of paramilitary groups to forcibly displace traditional populations for monoculture expansion.",
     "evidence": [
-      { "type": "primary", "description": "Land registry fraud documentation by federal prosecutors", "quality_score": 3 },
-      { "type": "secondary", "description": "Investigative journalism series by major outlet", "quality_score": 1 },
-      { "type": "testimony", "description": "Testimony of 12 displaced families", "quality_score": 0.5 }
+      {
+        "type": "primary",
+        "description": "Land registry fraud documentation by federal prosecutors",
+        "quality_score": 3
+      },
+      {
+        "type": "secondary",
+        "description": "Investigative journalism series by major outlet",
+        "quality_score": 1
+      },
+      {
+        "type": "testimony",
+        "description": "Testimony of 12 displaced families",
+        "quality_score": 0.5
+      }
     ],
     "evidence_quality_score": 4.5,
     "peer_validations": 3,
@@ -52,10 +76,26 @@
     "status": "CONFIRMED",
     "accusation": "Systematic embezzlement of international earthquake relief funds. Diverted construction materials to personal business empire. At least $12M in aid unaccounted for.",
     "evidence": [
-      { "type": "primary", "description": "Audit report by international oversight body", "quality_score": 3 },
-      { "type": "primary", "description": "Bank records obtained by judicial authorities", "quality_score": 3 },
-      { "type": "primary", "description": "Criminal conviction (2024)", "quality_score": 3 },
-      { "type": "secondary", "description": "Investigative documentary with leaked documents", "quality_score": 1 }
+      {
+        "type": "primary",
+        "description": "Audit report by international oversight body",
+        "quality_score": 3
+      },
+      {
+        "type": "primary",
+        "description": "Bank records obtained by judicial authorities",
+        "quality_score": 3
+      },
+      {
+        "type": "primary",
+        "description": "Criminal conviction (2024)",
+        "quality_score": 3
+      },
+      {
+        "type": "secondary",
+        "description": "Investigative documentary with leaked documents",
+        "quality_score": 1
+      }
     ],
     "evidence_quality_score": 10,
     "peer_validations": 15,
@@ -75,9 +115,21 @@
     "status": "PEER_VALIDATED",
     "accusation": "Command responsibility for systematic attacks on civilian villages including deliberate burning of food stores, livestock, and agricultural infrastructure as tactic of ethnic cleansing.",
     "evidence": [
-      { "type": "primary", "description": "UN Human Rights Council fact-finding mission report", "quality_score": 3 },
-      { "type": "primary", "description": "ICJ provisional measures order referencing attacks", "quality_score": 3 },
-      { "type": "testimony", "description": "Testimony of 200+ refugees in Bangladesh camps", "quality_score": 0.5 }
+      {
+        "type": "primary",
+        "description": "UN Human Rights Council fact-finding mission report",
+        "quality_score": 3
+      },
+      {
+        "type": "primary",
+        "description": "ICJ provisional measures order referencing attacks",
+        "quality_score": 3
+      },
+      {
+        "type": "testimony",
+        "description": "Testimony of 200+ refugees in Bangladesh camps",
+        "quality_score": 0.5
+      }
     ],
     "evidence_quality_score": 6.5,
     "peer_validations": 11,
@@ -97,8 +149,16 @@
     "status": "ACCUSATION",
     "accusation": "Illegal mining operations causing mass deforestation and mercury contamination of water sources serving 50,000+ people. Collusion with armed groups to secure mining concessions.",
     "evidence": [
-      { "type": "secondary", "description": "Environmental NGO investigation with water sample analysis", "quality_score": 1 },
-      { "type": "testimony", "description": "Community leader testimony (4 sources)", "quality_score": 0.5 }
+      {
+        "type": "secondary",
+        "description": "Environmental NGO investigation with water sample analysis",
+        "quality_score": 1
+      },
+      {
+        "type": "testimony",
+        "description": "Community leader testimony (4 sources)",
+        "quality_score": 0.5
+      }
     ],
     "evidence_quality_score": 3,
     "peer_validations": 2,
@@ -108,5 +168,367 @@
     "updated_at": "2025-07-12",
     "version": 1,
     "country_data_ref": "Forest area: 55.6% · Hotspot: YES · CPI: 20/100"
+  },
+  {
+    "id": "ICC-01",
+    "subject": "Vladimir Putin — President of the Russian Federation [RUS]",
+    "country_iso3": "RUS",
+    "category": "war_crime",
+    "severity": "critical",
+    "status": "CONFIRMED",
+    "accusation": "ICC arrest warrant (ICC-02/23-01, issued 17 March 2023) for unlawful deportation of children from occupied areas of Ukraine to the Russian Federation. The war crimes include the unlawful deportation of population and the unlawful transfer of population from occupied territories.",
+    "evidence": [
+      {
+        "type": "primary",
+        "description": "ICC Pre-Trial Chamber II arrest warrant (17 March 2023), case ICC-02/23-01",
+        "quality_score": 3,
+        "source_url": "https://www.icc-cpi.int/news/situation-ukraine-icc-judges-issue-arrest-warrants-against-vladimir-vladimirovich-putin-and"
+      },
+      {
+        "type": "primary",
+        "description": "UN Commission of Inquiry on Ukraine report documenting systematic child deportations (March 2023)",
+        "quality_score": 3
+      },
+      {
+        "type": "secondary",
+        "description": "Yale Humanitarian Research Lab geospatial analysis confirming at least 6,000 children relocated to camps (February 2023)",
+        "quality_score": 1
+      }
+    ],
+    "evidence_quality_score": 7,
+    "peer_validations": 8,
+    "required_validations": 5,
+    "right_of_response": "The Russian Federation rejects ICC jurisdiction and denies the charges. Russia is not a party to the Rome Statute.",
+    "created_at": "2023-03-17",
+    "updated_at": "2025-01-15",
+    "version": 3,
+    "country_data_ref": "Undernourishment: 2.5%",
+    "source_provenance": {
+      "authority": "International Criminal Court (ICC)",
+      "authority_type": "icc_arrest_warrant",
+      "source_dataset": "icc_cpi",
+      "source_url": "https://www.icc-cpi.int/",
+      "case_number": "ICC-02/23-01",
+      "auto_populated": false,
+      "fetched_at": "2025-08-07"
+    }
+  },
+  {
+    "id": "ICC-02",
+    "subject": "Maria Lvova-Belova — Russian Presidential Commissioner for Children's Rights [RUS]",
+    "country_iso3": "RUS",
+    "category": "war_crime",
+    "severity": "critical",
+    "status": "CONFIRMED",
+    "accusation": "ICC arrest warrant (ICC-02/23-02, issued 17 March 2023) for the war crime of unlawful deportation of children and unlawful transfer of population from occupied areas of Ukraine to the Russian Federation.",
+    "evidence": [
+      {
+        "type": "primary",
+        "description": "ICC Pre-Trial Chamber II arrest warrant (17 March 2023), case ICC-02/23-02",
+        "quality_score": 3,
+        "source_url": "https://www.icc-cpi.int/news/situation-ukraine-icc-judges-issue-arrest-warrants-against-vladimir-vladimirovich-putin-and"
+      },
+      {
+        "type": "secondary",
+        "description": "Lvova-Belova's own public statements confirming the relocation program, including televised interviews (2022-2023)",
+        "quality_score": 1
+      }
+    ],
+    "evidence_quality_score": 4,
+    "peer_validations": 7,
+    "required_validations": 5,
+    "right_of_response": "Lvova-Belova has publicly stated the program is a 'rescue' and 'adoption' operation, not deportation.",
+    "created_at": "2023-03-17",
+    "updated_at": "2025-01-15",
+    "version": 2,
+    "country_data_ref": "Undernourishment: 2.5%",
+    "source_provenance": {
+      "authority": "International Criminal Court (ICC)",
+      "authority_type": "icc_arrest_warrant",
+      "source_dataset": "icc_cpi",
+      "source_url": "https://www.icc-cpi.int/",
+      "case_number": "ICC-02/23-02",
+      "auto_populated": false,
+      "fetched_at": "2025-08-07"
+    }
+  },
+  {
+    "id": "ICC-03",
+    "subject": "Benjamin Netanyahu — Prime Minister of Israel [ISR]",
+    "country_iso3": "ISR",
+    "category": "war_crime",
+    "severity": "critical",
+    "status": "CONFIRMED",
+    "accusation": "ICC arrest warrant (ICC-01/18, issued 21 November 2024) for crimes against humanity and war crimes, including the war crime of starvation as a method of warfare, the crime against humanity of murder, persecution, and other inhumane acts, committed in the Gaza Strip from at least 8 October 2023.",
+    "evidence": [
+      {
+        "type": "primary",
+        "description": "ICC Pre-Trial Chamber I arrest warrant (21 November 2024), case ICC-01/18",
+        "quality_score": 3,
+        "source_url": "https://www.icc-cpi.int/news/icc-pre-trial-chamber-i-rejects-state-israels-challenges-jurisdiction-and-issues-warrants"
+      },
+      {
+        "type": "primary",
+        "description": "UN Office for the Coordination of Humanitarian Affairs (OCHA) humanitarian access data documenting systematic aid denial (2024)",
+        "quality_score": 3
+      },
+      {
+        "type": "secondary",
+        "description": "Human Rights Watch report 'Threshold of Pain' documenting starvation as weapon (December 2024)",
+        "quality_score": 1
+      },
+      {
+        "type": "secondary",
+        "description": "Amnesty International report documenting war crimes in Gaza (December 2024)",
+        "quality_score": 1
+      }
+    ],
+    "evidence_quality_score": 8,
+    "peer_validations": 10,
+    "required_validations": 5,
+    "right_of_response": "Israel rejects ICC jurisdiction and denies all charges. Israel is not a party to the Rome Statute.",
+    "created_at": "2024-11-21",
+    "updated_at": "2025-07-30",
+    "version": 4,
+    "country_data_ref": "Undernourishment: 2.5%",
+    "source_provenance": {
+      "authority": "International Criminal Court (ICC)",
+      "authority_type": "icc_arrest_warrant",
+      "source_dataset": "icc_cpi",
+      "source_url": "https://www.icc-cpi.int/",
+      "case_number": "ICC-01/18",
+      "auto_populated": false,
+      "fetched_at": "2025-08-07"
+    }
+  },
+  {
+    "id": "ICC-04",
+    "subject": "Yoav Gallant — Former Minister of Defense of Israel [ISR]",
+    "country_iso3": "ISR",
+    "category": "war_crime",
+    "severity": "critical",
+    "status": "CONFIRMED",
+    "accusation": "ICC arrest warrant (ICC-01/18, issued 21 November 2024) for crimes against humanity and war crimes, including the war crime of starvation as a method of warfare, murder, persecution, and other inhumable acts committed in the Gaza Strip from at least 8 October 2023.",
+    "evidence": [
+      {
+        "type": "primary",
+        "description": "ICC Pre-Trial Chamber I arrest warrant (21 November 2024), case ICC-01/18",
+        "quality_score": 3,
+        "source_url": "https://www.icc-cpi.int/news/icc-pre-trial-chamber-i-rejects-state-israels-challenges-jurisdiction-and-issues-warrants"
+      },
+      {
+        "type": "secondary",
+        "description": "Public statements by Gallant ordering 'complete siege' on Gaza (October 2023) — 'no electricity, no food, no fuel'",
+        "quality_score": 1
+      },
+      {
+        "type": "secondary",
+        "description": "UN Special Rapporteur report on the right to food documenting engineered famine conditions (2024)",
+        "quality_score": 1
+      }
+    ],
+    "evidence_quality_score": 5,
+    "peer_validations": 8,
+    "required_validations": 5,
+    "right_of_response": "Gallant's legal team filed a jurisdictional challenge with the ICC (denied November 2024). Denies all charges.",
+    "created_at": "2024-11-21",
+    "updated_at": "2025-07-30",
+    "version": 3,
+    "country_data_ref": "Undernourishment: 2.5%",
+    "source_provenance": {
+      "authority": "International Criminal Court (ICC)",
+      "authority_type": "icc_arrest_warrant",
+      "source_dataset": "icc_cpi",
+      "source_url": "https://www.icc-cpi.int/",
+      "case_number": "ICC-01/18",
+      "auto_populated": false,
+      "fetched_at": "2025-08-07"
+    }
+  },
+  {
+    "id": "ICC-05",
+    "subject": "Omar al-Bashir — Former President of Sudan [SDN]",
+    "country_iso3": "SDN",
+    "category": "war_crime",
+    "severity": "critical",
+    "status": "CONFIRMED",
+    "accusation": "ICC arrest warrant (ICC-02/05-01/09, first issued 4 March 2009, amended 12 July 2010) for five counts of crimes against humanity (murder, extermination, forcible transfer, torture, rape) and two counts of war crimes (pillaging, intentionally directing attacks) committed in Darfur. A separate warrant added three counts of genocide in 2010.",
+    "evidence": [
+      {
+        "type": "primary",
+        "description": "ICC arrest warrant (4 March 2009), case ICC-02/05-01/09 — first sitting head of state indicted by the ICC",
+        "quality_score": 3,
+        "source_url": "https://www.icc-cpi.int/darfur"
+      },
+      {
+        "type": "primary",
+        "description": "UN Security Council Resolution 1593 (2005) referring Darfur to the ICC — legally binding under Chapter VII",
+        "quality_score": 3
+      },
+      {
+        "type": "primary",
+        "description": "UN Commission of Inquiry on Darfur report documenting 300,000+ deaths and systematic mass atrocities (January 2005)",
+        "quality_score": 3
+      }
+    ],
+    "evidence_quality_score": 9,
+    "peer_validations": 12,
+    "required_validations": 5,
+    "right_of_response": "Al-Bashir and the Sudanese government (at the time) rejected ICC jurisdiction. He was ousted in April 2019 and is detained in Sudan. The ICC transfer request remains pending.",
+    "created_at": "2009-03-04",
+    "updated_at": "2025-06-20",
+    "version": 6,
+    "country_data_ref": "Conflict intensity: 5/5 · Displacement: 10.0M · Famine risk: 5/5",
+    "source_provenance": {
+      "authority": "International Criminal Court (ICC)",
+      "authority_type": "icc_arrest_warrant",
+      "source_dataset": "icc_cpi",
+      "source_url": "https://www.icc-cpi.int/darfur",
+      "case_number": "ICC-02/05-01/09",
+      "auto_populated": false,
+      "fetched_at": "2025-08-07"
+    }
+  },
+  {
+    "id": "ICC-06",
+    "subject": "Hibatullah Akhundzada — Supreme Leader of the Taliban [AFG]",
+    "country_iso3": "AFG",
+    "category": "human_rights_violation",
+    "severity": "critical",
+    "status": "CONFIRMED",
+    "accusation": "ICC arrest warrant (ICC-02/57, issued 8 July 2025) for crimes against humanity, specifically gender-based persecution of women and girls in Afghanistan since August 2021. The warrant covers the systematic deprivation of liberty, education, employment, and freedom of movement based on gender.",
+    "evidence": [
+      {
+        "type": "primary",
+        "description": "ICC Pre-Trial Chamber II arrest warrant (8 July 2025), case ICC-02/57",
+        "quality_score": 3,
+        "source_url": "https://www.icc-cpi.int/news/icc-judges-issue-arrest-warrants-afghanistan"
+      },
+      {
+        "type": "primary",
+        "description": "UN Special Rapporteur on Afghanistan report documenting gender apartheid (2023-2025)",
+        "quality_score": 3
+      },
+      {
+        "type": "secondary",
+        "description": "Amnesty International and IRC joint report 'The Taliban's War on Women' (2023)",
+        "quality_score": 1
+      }
+    ],
+    "evidence_quality_score": 7,
+    "peer_validations": 9,
+    "required_validations": 5,
+    "right_of_response": "The Taliban has not formally responded. A Taliban spokesperson rejected the ICC's jurisdiction.",
+    "created_at": "2025-07-08",
+    "updated_at": "2025-08-07",
+    "version": 1,
+    "country_data_ref": "Conflict intensity: 3/5 · Displacement: 6.0M · Famine risk: 3/5 · Undernourishment: 28.9%",
+    "source_provenance": {
+      "authority": "International Criminal Court (ICC)",
+      "authority_type": "icc_arrest_warrant",
+      "source_dataset": "icc_cpi",
+      "source_url": "https://www.icc-cpi.int/",
+      "case_number": "ICC-02/57",
+      "auto_populated": false,
+      "fetched_at": "2025-08-07"
+    }
+  },
+  {
+    "id": "ICJ-01",
+    "subject": "State of Israel — Respondent, South Africa v. Israel [ISR]",
+    "country_iso3": "ISR",
+    "category": "human_rights_violation",
+    "severity": "critical",
+    "status": "UNDER_REVIEW",
+    "accusation": "ICJ proceedings (Application of the Convention on the Prevention and Punishment of the Crime of Genocide in the Gaza Strip, South Africa v. Israel). South Africa alleges Israel has committed and is committing genocide against Palestinians in Gaza, violating the Genocide Convention. The ICJ has issued three sets of provisional measures ordering Israel to prevent genocidal acts (26 January 2024, 28 March 2024, 24 May 2024).",
+    "evidence": [
+      {
+        "type": "primary",
+        "description": "ICJ Order on Provisional Measures (26 January 2024) — found plausible risk of genocide and ordered Israel to take all measures to prevent genocidal acts",
+        "quality_score": 3,
+        "source_url": "https://www.icj-cij.org/node/203453"
+      },
+      {
+        "type": "primary",
+        "description": "ICJ Additional Provisional Measures (28 March 2024 and 24 May 2024) — found imminent risk of irreparable prejudice and ordered halt to military operations in Rafah",
+        "quality_score": 3
+      },
+      {
+        "type": "secondary",
+        "description": "UN Special Committee report finding Israel's warfare methods consistent with genocide characteristics (November 2024)",
+        "quality_score": 1
+      },
+      {
+        "type": "secondary",
+        "description": "OCHA casualty and humanitarian data: 40,000+ killed, 96% population displaced, engineered famine (2024)",
+        "quality_score": 1
+      }
+    ],
+    "evidence_quality_score": 8,
+    "peer_validations": 6,
+    "required_validations": 5,
+    "right_of_response": "Israel rejects the genocide allegation as 'baseless' and has filed counter-arguments. Israel argues military operations target Hamas, not Palestinian civilians.",
+    "created_at": "2023-12-29",
+    "updated_at": "2025-07-30",
+    "version": 5,
+    "country_data_ref": "Undernourishment: 2.5%",
+    "source_provenance": {
+      "authority": "International Court of Justice (ICJ)",
+      "authority_type": "icj_proceedings",
+      "source_dataset": "icj_cij",
+      "source_url": "https://www.icj-cij.org/",
+      "case_number": "ICJ 192-2023",
+      "auto_populated": false,
+      "fetched_at": "2025-08-07"
+    }
+  },
+  {
+    "id": "UN-01",
+    "subject": "Rapid Support Forces (RSF) Leadership — Sudan [SDN]",
+    "country_iso3": "SDN",
+    "category": "war_crime",
+    "severity": "critical",
+    "status": "PEER_VALIDATED",
+    "accusation": "UN Panel of Experts for Sudan and multiple independent investigations document systematic war crimes by the RSF during the Sudan civil war (2023-present): mass ethnic violence in Darfur (documented ethnic cleansing of the Masalit people), systematic sexual violence as a weapon of war, recruitment of child soldiers, looting of humanitarian aid, and deliberate obstruction of food supplies to civilian populations during famine conditions.",
+    "evidence": [
+      {
+        "type": "primary",
+        "description": "UN Panel of Experts on Sudan final report (S/2024/757, October 2024) documenting RSF war crimes and ethnic cleansing",
+        "quality_score": 3,
+        "source_url": "https://www.un.org/securitycouncil/content/sudan-sanctions-regime"
+      },
+      {
+        "type": "primary",
+        "description": "Human Rights Watch report 'The Massalit Will Not Come Home' — ethnic cleansing and crimes against humanity in El Geneina (May 2024)",
+        "quality_score": 3
+      },
+      {
+        "type": "primary",
+        "description": "UN Security Council Resolution 2736 (2024) demanding RSF cease the siege of El Fasher",
+        "quality_score": 3
+      },
+      {
+        "type": "secondary",
+        "description": "Amnesty International investigation documenting RSF sexual violence as a weapon of war (February 2025)",
+        "quality_score": 1
+      }
+    ],
+    "evidence_quality_score": 10,
+    "peer_validations": 11,
+    "required_validations": 5,
+    "right_of_response": "The RSF has denied allegations and accused the SAF of equivalent violations.",
+    "created_at": "2024-05-09",
+    "updated_at": "2025-06-20",
+    "version": 4,
+    "country_data_ref": "Conflict intensity: 5/5 · Displacement: 10.0M · Famine risk: 5/5",
+    "source_provenance": {
+      "authority": "UN Security Council Panel of Experts on Sudan",
+      "authority_type": "un_investigation",
+      "source_dataset": "un_poe_sudan",
+      "source_url": "https://www.un.org/securitycouncil/content/sudan-sanctions-regime",
+      "case_number": "S/2024/757",
+      "auto_populated": false,
+      "fetched_at": "2025-08-07"
+    }
   }
 ]

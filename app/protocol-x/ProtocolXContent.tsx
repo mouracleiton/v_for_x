@@ -8,7 +8,8 @@ import backbone from "@/data/world_backbone.json";
 import TerminalCard from "@/components/ui/TerminalCard";
 import StatusPill from "@/components/ui/StatusPill";
 import { sound } from "@/lib/sound";
-import type { WorldBackbone } from "@/lib/types";
+import type { WorldBackbone, CountryData } from "@/lib/types";
+import { countryToBlueprints } from "@/lib/crosslinks";
 import {
   checklistGetAll,
   checklistSave,
@@ -48,6 +49,22 @@ export default function ProtocolXContent() {
     if (!countryCode) return null;
     return data.countries.find((c) => c.iso3 === countryCode.toUpperCase()) || null;
   }, [countryCode]);
+
+  // Blueprint matching: use the data-driven engine to rank blueprints for this country
+  const blueprintMatches = useMemo(() => {
+    if (!countryContext) return [];
+    return countryToBlueprints(countryContext);
+  }, [countryContext]);
+
+  // Resolve matched blueprint ids to full blueprint objects
+  const matchedBlueprints = useMemo(() => {
+    return blueprintMatches
+      .map((m) => {
+        const bp = blueprints.find((b) => b.id === m.blueprintId);
+        return bp ? { ...m, blueprint: bp } : null;
+      })
+      .filter((x): x is NonNullable<typeof x> => x !== null);
+  }, [blueprintMatches]);
 
   const contextTag = useMemo(() => {
     if (!countryContext) return null;
@@ -93,8 +110,15 @@ export default function ProtocolXContent() {
         </p>
       </div>
 
-      {/* Context indicator */}
-      {countryContext && (
+      {/* Blueprint Recommender — country selector + auto-suggest */}
+      <BlueprintRecommender
+        countryContext={countryContext}
+        countryCode={countryCode}
+        matchedBlueprints={matchedBlueprints}
+      />
+
+      {/* Context indicator (legacy tag-based hints, shown alongside matches) */}
+      {countryContext && contextTag && contextTag.length > 0 && (
         <TerminalCard
           title={`CONTEXT FILTER ACTIVE — ${countryContext.name_en}`}
           accent="amber"
@@ -219,6 +243,165 @@ export default function ProtocolXContent() {
         </TerminalCard>
       </div>
     </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BLUEPRINT RECOMMENDER
+   Data-driven auto-suggest: pick a country → see which blueprints
+   its crisis profile demands, ranked by priority with reasoning.
+   ═══════════════════════════════════════════════════════════════ */
+
+type MatchedBlueprint = {
+  blueprintId: string;
+  reason: string;
+  priority: "critical" | "recommended" | "resilience";
+  blueprint: Blueprint;
+};
+
+const PRIORITY_META: Record<
+  "critical" | "recommended" | "resilience",
+  { label: string; color: "blood" | "amber" | "green"; className: string }
+> = {
+  critical: { label: "CRITICAL", color: "blood", className: "border-blood bg-blood/5" },
+  recommended: { label: "RECOMMENDED", color: "amber", className: "border-warning-amber bg-warning-amber/5" },
+  resilience: { label: "RESILIENCE", color: "green", className: "border-terminal-green bg-terminal-green/5" },
+};
+
+function BlueprintRecommender({
+  countryContext,
+  countryCode,
+  matchedBlueprints,
+}: {
+  countryContext: CountryData | null;
+  countryCode: string | null;
+  matchedBlueprints: MatchedBlueprint[];
+}) {
+  const [countrySearch, setCountrySearch] = useState("");
+
+  const searchResults = useMemo(() => {
+    const q = countrySearch.trim().toLowerCase();
+    if (!q) return [];
+    return data.countries
+      .filter(
+        (c) =>
+          c.name_en.toLowerCase().includes(q) ||
+          c.iso3.toLowerCase().includes(q)
+      )
+      .slice(0, 6);
+  }, [countrySearch]);
+
+  const criticalCount = matchedBlueprints.filter((m) => m.priority === "critical").length;
+  const recommendedCount = matchedBlueprints.filter((m) => m.priority === "recommended").length;
+
+  return (
+    <TerminalCard title="BLUEPRINT RECOMMENDER" accent="blood" glow={!!countryContext} className="mb-6">
+      <p className="text-xs text-content-secondary mb-4">
+        // the survival blueprints this country&apos;s crisis profile demands.
+        {!countryContext && " select a country below — the engine matches its data (conflict, famine, water, health, governance) to the right protocols."}
+      </p>
+
+      {/* Country selector */}
+      <div className="relative mb-4">
+        <label className="text-[10px] text-content-dim uppercase tracking-wider block mb-1">
+          Country Context {countryCode && <span className="text-terminal-green">— ACTIVE: {countryContext?.name_en}</span>}
+        </label>
+        <input
+          type="text"
+          value={countryContext ? `${countryContext.name_en} (${countryContext.iso3})` : countrySearch}
+          onChange={(e) => {
+            setCountrySearch(e.target.value);
+          }}
+          onFocus={() => {
+            if (countryContext) setCountrySearch("");
+          }}
+          placeholder="Search country (e.g. Sudan, SSD…)"
+          className="w-full bg-void border border-border-dim px-3 py-2 text-xs text-content-primary focus:border-blood focus:outline-none"
+        />
+        {searchResults.length > 0 && (
+          <div className="absolute z-20 left-0 right-0 mt-1 border border-border-dim bg-abyss max-h-60 overflow-y-auto">
+            {searchResults.map((c) => (
+              <Link
+                key={c.iso3}
+                href={`/protocol-x/?country=${c.iso3}`}
+                onClick={() => { setCountrySearch(""); sound.select(); }}
+                className="w-full text-left px-3 py-2 text-xs border-b border-border-dim last:border-b-0 hover:bg-panel block"
+              >
+                <span className="text-content-dim font-mono mr-2">{c.iso3}</span>
+                {c.name_en}
+                {c.is_hotspot && <span className="text-blood-bright ml-2 text-[10px]">HOTSPOT</span>}
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Matched blueprints */}
+      {countryContext && matchedBlueprints.length > 0 ? (
+        <div>
+          {/* Summary line */}
+          <div className="flex flex-wrap gap-3 mb-3 text-[10px]">
+            <span className="text-blood-bright">{criticalCount} critical</span>
+            <span className="text-warning-amber">{recommendedCount} recommended</span>
+            <span className="text-terminal-green">{matchedBlueprints.length - criticalCount - recommendedCount} resilience</span>
+            <span className="text-content-dim ml-auto">
+              → {matchedBlueprints.length} of {blueprints.length} blueprints matched
+            </span>
+          </div>
+
+          <div className="space-y-2">
+            {matchedBlueprints.map((m) => {
+              const meta = PRIORITY_META[m.priority];
+              return (
+                <Link
+                  key={m.blueprintId}
+                  href={`/protocol-x/${m.blueprintId}/`}
+                  onClick={() => sound.nav()}
+                  className={`block border p-3 hover:border-blood-bright transition-colors ${meta.className}`}
+                >
+                  <div className="flex items-start justify-between gap-2 mb-1">
+                    <div className="flex items-center gap-2">
+                      <StatusPill color={meta.color}>{meta.label}</StatusPill>
+                      <span className="text-xs font-bold text-content-primary">{m.blueprint.title}</span>
+                    </div>
+                    <StatusPill color={m.blueprint.tech_level === "HIGH" ? "amber" : "green"}>
+                      {m.blueprint.tech_level}-TECH
+                    </StatusPill>
+                  </div>
+                  <div className="text-[11px] text-content-secondary leading-relaxed">
+                    ▸ {m.reason}
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 text-[10px] text-content-dim mt-1">
+                    <span>{m.blueprint.category}</span>
+                    <span>·</span>
+                    <span>{"★".repeat(m.blueprint.difficulty)}{"☆".repeat(5 - m.blueprint.difficulty)}</span>
+                    <span>·</span>
+                    <span>{m.blueprint.time_estimate}</span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      ) : countryContext ? (
+        <div className="text-xs text-content-dim italic">
+          ▸ No specific crisis triggers detected for {countryContext.name_en}. Browse the full catalog below or try another country.
+        </div>
+      ) : (
+        <div className="flex flex-wrap gap-2">
+          {data.hotspots.all.slice(0, 12).map((h) => (
+            <Link
+              key={h.iso3}
+              href={`/protocol-x/?country=${h.iso3}`}
+              onClick={() => sound.select()}
+              className="px-2 py-1 text-[11px] border border-blood text-blood-bright hover:bg-blood hover:text-void transition-colors"
+            >
+              {h.name_en || h.name_pt}
+            </Link>
+          ))}
+        </div>
+      )}
+    </TerminalCard>
   );
 }
 

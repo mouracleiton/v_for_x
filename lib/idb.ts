@@ -7,7 +7,7 @@
 import { openDB, type IDBPDatabase } from "idb";
 
 const DB_NAME = "vfx-store";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 export interface LedgerEntry {
   id?: number;
@@ -38,6 +38,21 @@ export interface WatchlistEntry {
   note?: string;
 }
 
+/* ═══ METRIC ALERT RULES ═══
+ * User-defined threshold rules that scan all 200 countries.
+ * e.g. { metric: "health.doctors_per_1000", operator: "<", threshold: 1.0 }
+ * Matching countries are surfaced as multi-dimensional alerts.
+ */
+
+export interface AlertRule {
+  id?: number;
+  metric: string;      // dotted path into CountryData, e.g. "health.doctors_per_1000"
+  metricLabel: string; // human-readable label
+  operator: "<" | "<=" | ">" | ">=";
+  threshold: number;
+  createdAt: number;
+}
+
 let dbPromise: Promise<IDBPDatabase> | null = null;
 
 function getDB(): Promise<IDBPDatabase> {
@@ -56,6 +71,9 @@ function getDB(): Promise<IDBPDatabase> {
         }
         if (!db.objectStoreNames.contains("watchlist")) {
           db.createObjectStore("watchlist", { keyPath: "iso3" });
+        }
+        if (!db.objectStoreNames.contains("alert_rules")) {
+          db.createObjectStore("alert_rules", { keyPath: "id", autoIncrement: true });
         }
       },
     });
@@ -163,6 +181,148 @@ export async function watchlistHas(iso3: string): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+/* ═══ ALERT RULES ═══ */
+
+export async function alertRulesGetAll(): Promise<AlertRule[]> {
+  try {
+    const db = await getDB();
+    const all = await db.getAll("alert_rules");
+    return all.sort((a, b) => a.createdAt - b.createdAt);
+  } catch {
+    return [];
+  }
+}
+
+export async function alertRuleAdd(rule: AlertRule): Promise<number> {
+  const db = await getDB();
+  const id = await db.add("alert_rules", rule);
+  return id as number;
+}
+
+export async function alertRuleDelete(id: number): Promise<void> {
+  try {
+    const db = await getDB();
+    await db.delete("alert_rules", id);
+  } catch {
+    /* ignore */
+  }
+}
+
+export async function alertRuleClearAll(): Promise<void> {
+  try {
+    const db = await getDB();
+    await db.clear("alert_rules");
+  } catch {
+    /* ignore */
+  }
+}
+
+/* ═══ ALERT RULE SHARING (export / import / URL) ═══
+ * Share-format spec: a portable JSON payload that captures a set of alert
+ * rules WITHOUT database ids, so it can be exchanged between browsers,
+ * embedded in URLs, or version-controlled.  Compatible with the
+ * AlertRule interface — import strips ids and re-inserts fresh rows.
+ */
+
+export interface AlertRuleShare {
+  format: "vfx-alert-rules";
+  version: 1;
+  exportedAt: string;
+  /** human-readable name for this rule set */
+  name?: string;
+  rules: {
+    metric: string;
+    metricLabel: string;
+    operator: "<" | "<=" | ">" | ">=";
+    threshold: number;
+  }[];
+}
+
+/**
+ * Build a share-format object from a list of persisted alert rules,
+ * stripping ids so the payload is portable.
+ */
+export function buildAlertShare(
+  rules: AlertRule[],
+  name?: string
+): AlertRuleShare {
+  return {
+    format: "vfx-alert-rules",
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    name,
+    rules: rules.map((r) => ({
+      metric: r.metric,
+      metricLabel: r.metricLabel,
+      operator: r.operator,
+      threshold: r.threshold,
+    })),
+  };
+}
+
+/**
+ * Import a share-format payload into IndexedDB.  Returns the number of
+ * rules actually imported (skips duplicates and invalid entries).
+ * If `replace` is true, clears all existing rules first.
+ */
+export async function importAlertShare(
+  share: AlertRuleShare,
+  replace = false
+): Promise<number> {
+  const db = await getDB();
+  if (replace) {
+    await db.clear("alert_rules");
+  }
+
+  // Load existing to dedupe by metric+operator+threshold
+  const existing = await db.getAll("alert_rules");
+  const existingKeys = new Set(
+    existing.map((r) => `${r.metric}|${r.operator}|${r.threshold}`)
+  );
+
+  let imported = 0;
+  const now = Date.now();
+  for (const rule of share.rules) {
+    if (
+      !rule.metric ||
+      !rule.operator ||
+      typeof rule.threshold !== "number" ||
+      !Number.isFinite(rule.threshold)
+    ) {
+      continue; // skip invalid
+    }
+    const key = `${rule.metric}|${rule.operator}|${rule.threshold}`;
+    if (!replace && existingKeys.has(key)) continue;
+    existingKeys.add(key);
+    await db.add("alert_rules", {
+      metric: rule.metric,
+      metricLabel: rule.metricLabel || rule.metric,
+      operator: rule.operator,
+      threshold: rule.threshold,
+      createdAt: now + imported,
+    });
+    imported++;
+  }
+  return imported;
+}
+
+/**
+ * Validate an unknown object as an AlertRuleShare.  Returns the parsed
+ * share or null if the shape is wrong.
+ */
+export function parseAlertShare(raw: unknown): AlertRuleShare | null {
+  if (
+    typeof raw !== "object" ||
+    raw === null ||
+    (raw as Record<string, unknown>).format !== "vfx-alert-rules"
+  ) {
+    return null;
+  }
+  const obj = raw as AlertRuleShare;
+  if (!Array.isArray(obj.rules)) return null;
+  return obj;
 }
 
 /* ═══ CRYPTO SIGNING ═══ */

@@ -4,7 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && python3 scripts/generate_api.py",
+    "update-data": "python3 scripts/update_data.py",
+    "update-data:dry": "python3 scripts/update_data.py --dry-run",
+    "snapshot": "python3 scripts/snapshot.py save",
     "start": "next start"
   },
   "dependencies": {

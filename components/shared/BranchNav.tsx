@@ -89,7 +89,19 @@ export default function BranchNav() {
         </div>
 
         <div className="p-3 border-t border-border-dim">
-          <SoundToggle />
+          <div className="flex items-center justify-between gap-2">
+            <SoundToggle />
+            <button
+              onClick={() => {
+                // Dispatch the Cmd+K shortcut programmatically
+                const evt = new KeyboardEvent("keydown", { key: "k", metaKey: true, ctrlKey: navigator.platform.includes("Mac") });
+                window.dispatchEvent(evt);
+              }}
+              className="text-[9px] px-2 py-1 border border-border-dim text-content-dim hover:border-blood hover:text-blood-bright transition-colors"
+            >
+              ⌘K SEARCH
+            </button>
+          </div>
         </div>
       </nav>
 

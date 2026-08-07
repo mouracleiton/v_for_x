@@ -11,9 +11,26 @@ import {
   watchlistGetAll,
   watchlistAdd,
   watchlistRemove,
+  alertRulesGetAll,
+  alertRuleAdd,
+  alertRuleDelete,
+  alertRuleClearAll,
+  buildAlertShare,
+  importAlertShare,
+  parseAlertShare,
+  downloadJSON,
   type WatchlistEntry,
+  type AlertRule,
 } from "@/lib/idb";
 import { sound } from "@/lib/sound";
+import {
+  METRIC_CATALOG,
+  evaluateRule,
+  resolveMetric,
+  getMetricDef,
+  formatMetricValue,
+  type MetricDef,
+} from "@/lib/metrics";
 
 const data = backbone as WorldBackbone;
 
@@ -71,13 +88,47 @@ export default function TheSignalPage() {
   const [search, setSearch] = useState("");
   const [showResults, setShowResults] = useState(false);
 
-  /* ── Load watchlist from IndexedDB on mount ── */
+  /* ── Alert rule state ── */
+  const [alertRules, setAlertRules] = useState<AlertRule[]>([]);
+  const [ruleMetric, setRuleMetric] = useState<string>("health.doctors_per_1000");
+  const [ruleOperator, setRuleOperator] = useState<"<" | "<=" | ">" | ">=">("<");
+  const [ruleThreshold, setRuleThreshold] = useState<string>("1.0");
+  const [importMessage, setImportMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  /* ── Load watchlist + alert rules from IndexedDB on mount ── */
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const entries = await watchlistGetAll();
-        if (!cancelled) setWatchlist(entries);
+        // Check for ?rules= share param in the URL (base64-encoded AlertRuleShare)
+        if (typeof window !== "undefined") {
+          const url = new URL(window.location.href);
+          const encoded = url.searchParams.get("rules");
+          if (encoded) {
+            try {
+              const json = atob(encoded);
+              const share = parseAlertShare(JSON.parse(json));
+              if (share && share.rules.length > 0) {
+                await importAlertShare(share, false);
+                // Clean the URL so a refresh doesn't re-import
+                url.searchParams.delete("rules");
+                window.history.replaceState({}, "", url.toString());
+              }
+            } catch {
+              /* malformed payload — silently ignore */
+            }
+          }
+        }
+
+        const [entries, rules] = await Promise.all([
+          watchlistGetAll(),
+          alertRulesGetAll(),
+        ]);
+        if (!cancelled) {
+          setWatchlist(entries);
+          setAlertRules(rules);
+        }
       } catch {
         /* IndexedDB unavailable — leave empty */
       } finally {
@@ -152,6 +203,139 @@ export default function TheSignalPage() {
       sound.error();
     }
   }
+
+  /* ── Alert rule handlers ── */
+  async function handleAddRule() {
+    const threshold = parseFloat(ruleThreshold);
+    if (Number.isNaN(threshold)) {
+      sound.error();
+      return;
+    }
+    const def = getMetricDef(ruleMetric);
+    try {
+      await alertRuleAdd({
+        metric: ruleMetric,
+        metricLabel: def.label,
+        operator: ruleOperator,
+        threshold,
+        createdAt: Date.now(),
+      });
+      const rules = await alertRulesGetAll();
+      setAlertRules(rules);
+      sound.success();
+    } catch {
+      sound.error();
+    }
+  }
+
+  async function handleDeleteRule(id: number) {
+    try {
+      await alertRuleDelete(id);
+      const rules = await alertRulesGetAll();
+      setAlertRules(rules);
+      sound.select();
+    } catch {
+      sound.error();
+    }
+  }
+
+  /* ── Share / export / import handlers ── */
+  function handleExportRules() {
+    if (alertRules.length === 0) {
+      sound.error();
+      return;
+    }
+    const share = buildAlertShare(alertRules, `VFX Alerts (${new Date().toLocaleDateString()})`);
+    downloadJSON(share, `vfx-alert-rules-${Date.now()}.json`);
+    sound.success();
+  }
+
+  function handleShareRulesUrl() {
+    if (alertRules.length === 0 || typeof window === "undefined") {
+      sound.error();
+      return;
+    }
+    const share = buildAlertShare(alertRules);
+    const encoded = btoa(JSON.stringify(share));
+    const url = `${window.location.origin}${window.location.pathname}?rules=${encoded}`;
+    navigator.clipboard
+      ?.writeText(url)
+      .then(() => sound.success())
+      .catch(() => {
+        // Fallback: select the URL in a prompt
+        window.prompt("Copy this URL to share your alert rules:", url);
+        sound.select();
+      });
+  }
+
+  async function handleImportRules(file: File) {
+    try {
+      const text = await file.text();
+      const raw = JSON.parse(text);
+      const share = parseAlertShare(raw);
+      if (!share) {
+        setError("Invalid file: not a vfx-alert-rules share payload");
+        sound.error();
+        return;
+      }
+      const count = await importAlertShare(share, false);
+      const rules = await alertRulesGetAll();
+      setAlertRules(rules);
+      sound.success();
+      setImportMessage(`Imported ${count} rule${count === 1 ? "" : "s"} (${share.rules.length - count} duplicate${share.rules.length - count === 1 ? "" : "s"} skipped)`);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to import file");
+      sound.error();
+    }
+  }
+
+  async function handleClearAllRules() {
+    if (alertRules.length === 0) return;
+    if (!window.confirm(`Delete all ${alertRules.length} alert rules? This cannot be undone.`)) return;
+    await alertRuleClearAll();
+    setAlertRules([]);
+    sound.select();
+  }
+
+  /* ── When the metric changes, update default threshold ── */
+  function handleMetricChange(path: string) {
+    setRuleMetric(path);
+    const def = getMetricDef(path);
+    if (def.defaultThreshold !== undefined) {
+      // For higherIsBetter metrics, default operator is "<" (below threshold = bad)
+      // For lower-is-worse metrics, default operator is ">" (above threshold = bad)
+      setRuleOperator(def.higherIsBetter ? "<" : ">");
+      setRuleThreshold(String(def.defaultThreshold));
+    }
+  }
+
+  /* ── Compute matching countries for each alert rule ── */
+  const ruleMatches = useMemo(() => {
+    return alertRules.map((rule) => {
+      const def = getMetricDef(rule.metric);
+      const matching = data.countries
+        .filter((c) => evaluateRule(c, rule.metric, rule.operator, rule.threshold))
+        .map((c) => {
+          const val = resolveMetric(c, rule.metric);
+          return { country: c, value: val };
+        })
+        .sort((a, b) => {
+          // Sort worst-first: for higherIsBetter, lowest values are worst; for lower-is-worse, highest
+          if (def.higherIsBetter) return (a.value ?? Infinity) - (b.value ?? Infinity);
+          return (b.value ?? -Infinity) - (a.value ?? -Infinity);
+        });
+      return { rule, def, matching };
+    });
+  }, [alertRules]);
+
+  /* ── Countries that trigger ANY active rule (for auto-pin suggestions) ── */
+  const allRuleMatches = useMemo(() => {
+    const set = new Set<string>();
+    for (const { matching } of ruleMatches) {
+      for (const { country } of matching) set.add(country.iso3);
+    }
+    return set;
+  }, [ruleMatches]);
 
   /* ── Aggregate stats for the summary dashboard ── */
   const stats = useMemo(() => {
@@ -373,6 +557,287 @@ export default function TheSignalPage() {
                   );
                 })}
               </div>
+            </div>
+          </TerminalCard>
+
+          {/* ═══ SECTION 2b — METRIC ALERT RULES ═══ */}
+          <TerminalCard
+            title="MULTI-DIMENSIONAL ALERT RULES"
+            accent="amber"
+            glow={alertRules.length > 0}
+            className="mb-6"
+          >
+            <p className="text-xs text-content-secondary mb-4">
+              // don't just pin countries — pin <strong className="text-warning-amber">conditions</strong>.
+              scan all 200 countries against any metric threshold. water, health, energy, education, climate, inequality — all 19 dimensions.
+            </p>
+
+            {/* Rule builder */}
+            <div className="border border-border-dim bg-void p-3 mb-4">
+              <div className="text-[10px] text-content-dim uppercase tracking-widest mb-3">
+                BUILD A RULE
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 items-end">
+                {/* Metric selector */}
+                <div className="sm:col-span-5">
+                  <label className="text-[10px] text-content-dim uppercase block mb-1">Metric</label>
+                  <select
+                    value={ruleMetric}
+                    onChange={(e) => handleMetricChange(e.target.value)}
+                    className="w-full bg-void border border-border-dim px-2 py-1.5 text-xs text-content-primary focus:border-warning-amber focus:outline-none"
+                  >
+                    {Object.entries(
+                      METRIC_CATALOG.reduce<Record<string, MetricDef[]>>((acc, m) => {
+                        (acc[m.domain] ??= []).push(m);
+                        return acc;
+                      }, {})
+                    ).map(([domain, metrics]) => (
+                      <optgroup key={domain} label={domain.toUpperCase()}>
+                        {metrics.map((m) => (
+                          <option key={m.path} value={m.path}>
+                            {m.label}{m.unit ? ` (${m.unit})` : ""} — {m.path}
+                          </option>
+                        ))}
+                      </optgroup>
+                    ))}
+                  </select>
+                </div>
+                {/* Operator */}
+                <div className="sm:col-span-2">
+                  <label className="text-[10px] text-content-dim uppercase block mb-1">Op</label>
+                  <select
+                    value={ruleOperator}
+                    onChange={(e) => setRuleOperator(e.target.value as typeof ruleOperator)}
+                    className="w-full bg-void border border-border-dim px-2 py-1.5 text-xs text-content-primary focus:border-warning-amber focus:outline-none"
+                  >
+                    <option value="<">&lt; less than</option>
+                    <option value="<=">&le; at most</option>
+                    <option value=">">&gt; greater than</option>
+                    <option value=">=">&ge; at least</option>
+                  </select>
+                </div>
+                {/* Threshold */}
+                <div className="sm:col-span-3">
+                  <label className="text-[10px] text-content-dim uppercase block mb-1">Threshold</label>
+                  <input
+                    type="number"
+                    step="any"
+                    value={ruleThreshold}
+                    onChange={(e) => setRuleThreshold(e.target.value)}
+                    className="w-full bg-void border border-border-dim px-2 py-1.5 text-xs text-content-primary focus:border-warning-amber focus:outline-none"
+                  />
+                </div>
+                {/* Add button */}
+                <div className="sm:col-span-2">
+                  <button
+                    onClick={handleAddRule}
+                    className="w-full px-3 py-1.5 text-xs border border-warning-amber text-warning-amber hover:bg-warning-amber hover:text-void transition-colors font-bold uppercase tracking-widest"
+                  >
+                    + ARM
+                  </button>
+                </div>
+              </div>
+              {/* Live preview count */}
+              {(() => {
+                const t = parseFloat(ruleThreshold);
+                if (Number.isNaN(t)) return null;
+                const preview = data.countries.filter((c) =>
+                  evaluateRule(c, ruleMetric, ruleOperator, t)
+                ).length;
+                const def = getMetricDef(ruleMetric);
+                return (
+                  <div className="text-[10px] text-content-dim mt-2">
+                    ▸ Preview: <span className="text-warning-amber font-bold">{preview}</span> / {data.countries.length} countries match{" "}
+                    <span className="text-content-secondary">{def.label} {ruleOperator} {t}{def.unit ?? ""}</span>
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Quick presets */}
+            <div className="mb-4">
+              <div className="text-[10px] text-content-dim uppercase tracking-widest mb-2">
+                QUICK PRESETS
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { metric: "health.doctors_per_1000", op: "<" as const, threshold: 1.0, label: "Doctors < 1.0/1000" },
+                  { metric: "water_sanitation.safe_sanitation_pct", op: "<" as const, threshold: 50, label: "Safe sanitation < 50%" },
+                  { metric: "education.literacy_rate_pct", op: "<" as const, threshold: 70, label: "Literacy < 70%" },
+                  { metric: "health.child_mortality_under5_per1k", op: ">" as const, threshold: 40, label: "Child mortality > 40/1k" },
+                  { metric: "inequality.gini", op: ">" as const, threshold: 45, label: "Gini > 45" },
+                  { metric: "climate.co2_per_capita_t", op: ">" as const, threshold: 10, label: "CO2 > 10t/capita" },
+                  { metric: "poverty.headcount_365_pct", op: ">" as const, threshold: 30, label: "Extreme poverty > 30%" },
+                  { metric: "environment.air_pollution_pm25_ugm3", op: ">" as const, threshold: 35, label: "PM2.5 > 35 µg/m³" },
+                ].map((preset) => (
+                  <button
+                    key={preset.label}
+                    onClick={() => {
+                      setRuleMetric(preset.metric);
+                      setRuleOperator(preset.op);
+                      setRuleThreshold(String(preset.threshold));
+                    }}
+                    className="px-2 py-1 text-[10px] border border-border-dim text-content-secondary hover:border-warning-amber hover:text-warning-amber transition-colors"
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Active rules + matches */}
+            {alertRules.length > 0 ? (
+              <div className="space-y-3">
+                <div className="text-[10px] text-content-dim uppercase tracking-widest">
+                  ARMED RULES ({alertRules.length}) — {allRuleMatches.size} countries in violation
+                </div>
+                {ruleMatches.map(({ rule, def, matching }) => (
+                  <div key={rule.id} className="border border-border-dim bg-void/50 p-3">
+                    {/* Rule header */}
+                    <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <StatusPill color="amber">
+                          {def.domain.toUpperCase()}
+                        </StatusPill>
+                        <span className="text-xs font-bold text-content-primary">
+                          {def.label}
+                        </span>
+                        <span className="text-xs text-warning-amber font-mono">
+                          {rule.operator} {rule.threshold}{def.unit ?? ""}
+                        </span>
+                        <span className="text-[10px] text-content-dim">
+                          → {matching.length} {matching.length === 1 ? "country" : "countries"}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => rule.id && handleDeleteRule(rule.id)}
+                        className="text-xs px-2 py-1 border border-border-dim text-content-secondary hover:border-blood hover:text-blood-bright"
+                      >
+                        ✕ DISARM
+                      </button>
+                    </div>
+                    {/* Matching countries */}
+                    {matching.length > 0 ? (
+                      <div className="space-y-1">
+                        {matching.slice(0, 10).map(({ country, value }) => {
+                          const isWatched = watchedIsoSet.has(country.iso3);
+                          return (
+                            <div
+                              key={country.iso3}
+                              className="flex items-center justify-between gap-2 py-1 px-2 border-b border-border-dim/30 text-xs"
+                            >
+                              <Link
+                                href={`/sorrow-map/${country.iso3.toLowerCase()}/`}
+                                onClick={() => sound.select()}
+                                className="text-content-primary hover:text-blood-bright flex items-center gap-2"
+                              >
+                                <span className="text-content-dim font-mono">{country.iso3}</span>
+                                {country.name_en}
+                              </Link>
+                              <div className="flex items-center gap-2">
+                                <span className="text-blood-bright font-bold font-mono">
+                                  {formatMetricValue(value, def.unit)}
+                                </span>
+                                {isWatched ? (
+                                  <span className="text-terminal-green text-[10px]">✓ PINNED</span>
+                                ) : (
+                                  <button
+                                    onClick={() => handleAdd(country)}
+                                    className="text-[10px] px-1.5 py-0.5 border border-blood-dim text-blood-bright hover:bg-blood hover:text-void transition-colors"
+                                  >
+                                    + PIN
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                        {matching.length > 10 && (
+                          <div className="text-[10px] text-content-dim pt-1">
+                            + {matching.length - 10} more…
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="text-[10px] text-content-dim">
+                        No countries currently match this rule.
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-[10px] text-content-dim italic">
+                ▸ No rules armed yet. Use the builder above or try a quick preset — e.g. "Doctors &lt; 1.0/1000" flags 57+ countries with critical physician shortages.
+              </div>
+            )}
+
+            {/* Share / Export / Import toolbar */}
+            <div className="border-t border-border-dim mt-4 pt-3">
+              <div className="text-[10px] text-content-dim uppercase tracking-widest mb-2">
+                SHARE & SYNC RULES
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={handleShareRulesUrl}
+                  disabled={alertRules.length === 0}
+                  className="text-[10px] px-2 py-1 border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  ⧉ COPY SHARE URL
+                </button>
+                <button
+                  onClick={handleExportRules}
+                  disabled={alertRules.length === 0}
+                  className="text-[10px] px-2 py-1 border border-blood text-blood-bright hover:bg-blood hover:text-void disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  ↓ EXPORT JSON
+                </button>
+                <button
+                  onClick={() => {
+                    const input = document.getElementById("alert-import-input") as HTMLInputElement | null;
+                    input?.click();
+                  }}
+                  className="text-[10px] px-2 py-1 border border-border-dim text-content-secondary hover:border-warning-amber hover:text-warning-amber transition-colors"
+                >
+                  ↑ IMPORT JSON
+                </button>
+                <input
+                  id="alert-import-input"
+                  type="file"
+                  accept=".json"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      handleImportRules(file);
+                      e.target.value = "";
+                    }
+                  }}
+                />
+                {alertRules.length > 0 && (
+                  <button
+                    onClick={handleClearAllRules}
+                    className="text-[10px] px-2 py-1 border border-border-dim text-content-dim hover:border-blood hover:text-blood-bright transition-colors ml-auto"
+                  >
+                    ✕ CLEAR ALL
+                  </button>
+                )}
+              </div>
+              {importMessage && (
+                <div className="text-[10px] text-terminal-green mt-2 animate-pulse">
+                  ✓ {importMessage}
+                </div>
+              )}
+              {error && (
+                <div className="text-[10px] text-blood-bright mt-2">
+                  ⚠ {error}
+                </div>
+              )}
+              {alertRules.length > 0 && (
+                <div className="text-[9px] text-content-dim mt-2">
+                  ▸ Share URL encodes all {alertRules.length} rule{alertRules.length === 1 ? "" : "s"} — paste it anywhere. Recipients land here with rules auto-imported.
+                </div>
+              )}
             </div>
           </TerminalCard>
 
