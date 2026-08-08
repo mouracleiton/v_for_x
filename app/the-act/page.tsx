@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import backbone from "@/data/world_backbone.json";
 import type { WorldBackbone, CountryData } from "@/lib/types";
@@ -8,6 +8,7 @@ import TerminalCard from "@/components/ui/TerminalCard";
 import StatusPill from "@/components/ui/StatusPill";
 import { sound } from "@/lib/sound";
 import { generateCountryCampaign, generateEquationCampaign, analyzeNeeds, type CampaignKit } from "@/lib/campaign";
+import { detectLang, CAMPAIGN_LANGS, type CampaignLang } from "@/lib/campaign-i18n";
 import { downloadJSON } from "@/lib/idb";
 import { calculateVulnerability, scoreColor } from "@/lib/vulnerability";
 
@@ -56,6 +57,8 @@ export default function TheActPage() {
   const [selectedIso, setSelectedIso] = useState<string>("");
   const [selectedEq, setSelectedEq] = useState<string>("sdg6_water");
   const [activeTab, setActiveTab] = useState<"thread" | "whatsapp" | "instagram" | "email" | "brief">("thread");
+  const [campaignLang, setCampaignLang] = useState<CampaignLang>("en");
+  const [langManuallySet, setLangManuallySet] = useState(false);
 
   const country = useMemo<CountryData | undefined>(
     () => data.countries.find((c) => c.iso3 === selectedIso),
@@ -76,14 +79,22 @@ export default function TheActPage() {
 
   const kit: CampaignKit | null = useMemo(() => {
     if (mode === "country" && country) {
-      return generateCountryCampaign(country, data);
+      return generateCountryCampaign(country, data, campaignLang);
     }
     if (mode === "equation" && data.sdg_equations) {
       const eq = data.sdg_equations.equations[selectedEq];
       if (eq) return generateEquationCampaign(selectedEq, eq, data.sdg_equations.meta);
     }
     return null;
-  }, [mode, country, selectedEq]);
+  }, [mode, country, selectedEq, campaignLang]);
+
+  // Auto-detect language when country changes (unless user manually set it)
+  useEffect(() => {
+    if (country && !langManuallySet) {
+      const detected = detectLang(country.iso3);
+      setCampaignLang(detected);
+    }
+  }, [country, langManuallySet]);
 
   const needs = useMemo(() => country ? analyzeNeeds(country) : [], [country]);
   const vuln = useMemo(() => country ? calculateVulnerability(country) : null, [country]);
@@ -213,6 +224,31 @@ export default function TheActPage() {
           </div>
         )}
       </TerminalCard>
+
+      {/* Campaign language selector */}
+      {mode === "country" && country && (
+        <div className="flex items-center gap-2 mb-4">
+          <span className="text-[10px] text-content-dim uppercase tracking-widest">OUTPUT LANG:</span>
+          {CAMPAIGN_LANGS.map((l) => (
+            <button
+              key={l.id}
+              onClick={() => { setCampaignLang(l.id); setLangManuallySet(true); sound.select(); }}
+              className={`text-[10px] px-2 py-1 border transition-colors ${
+                campaignLang === l.id
+                  ? "border-blood text-blood-bright bg-blood/5"
+                  : "border-border-dim text-content-secondary hover:border-blood"
+              }`}
+            >
+              {l.flag} {l.label}
+            </button>
+          ))}
+          {campaignLang !== "en" && (
+            <span className="text-[9px] text-terminal-green ml-auto">
+              ✓ {CAMPAIGN_LANGS.find((l) => l.id === campaignLang)?.label} detected
+            </span>
+          )}
+        </div>
+      )}
 
       {/* Needs analysis (country mode only) */}
       {mode === "country" && country && needs.length > 0 && (

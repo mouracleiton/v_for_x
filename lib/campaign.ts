@@ -13,6 +13,7 @@
  */
 
 import type { CountryData, SdgEquation, WorldBackbone } from "./types";
+import { detectLang, PHRASES, type CampaignLang } from "./campaign-i18n";
 
 export interface CampaignTweet {
   text: string;
@@ -291,8 +292,11 @@ export function analyzeNeeds(country: CountryData): NeedAnalysis[] {
 
 export function generateCountryCampaign(
   country: CountryData,
-  data: WorldBackbone
+  data: WorldBackbone,
+  langOverride?: CampaignLang
 ): CampaignKit {
+  const lang = langOverride ?? detectLang(country.iso3);
+  const P = PHRASES[lang] ?? PHRASES.en;
   const name = country.name_en;
   const pop = country.demographics.population / 1_000_000;
   const needs = analyzeNeeds(country);
@@ -314,15 +318,15 @@ export function generateCountryCampaign(
   let hookText: string;
   if (topNeeds.length > 0) {
     const worst = topNeeds[0];
-    hookText = `${worst.emoji} ${name.toUpperCase()} — THE REALITY\n\n${worst.headline}.\n\n${worst.context}\n\nThis is not fate. This is policy.\n\nA thread on what ${name} actually needs ↓`;
+    hookText = P.threadHook(name, worst.headline, worst.context);
   } else {
-    hookText = `${name} doesn't appear in the crisis data.\n\nBut that doesn't mean there's nothing to fix. Every country has gaps. Here's what the data says ↓`;
+    hookText = P.threadHook(name, lang === "pt" ? "Não aparece nos dados de crise" : lang === "es" ? "No aparece en los datos de crisis" : lang === "fr" ? "N'apparaît pas dans les données de crise" : lang === "ar" ? "لا يظهر في بيانات الأزمة" : "Doesn't appear in crisis data", lang === "pt" ? "Mas não significa que não há nada a consertar." : lang === "es" ? "Pero no significa que no haya nada que arreglar." : lang === "fr" ? "Mais ça ne veut rien dire." : lang === "ar" ? "لكن هذا لا يعني أنه لا يوجد شيء لإصلاحه." : "But that doesn't mean there's nothing to fix.");
   }
   tweets.push({ text: hookText, charCount: hookText.length, type: "hook", icon: "🧵" });
 
   // ── TWEETS 2-N: EVIDENCE (one per need) ──
   for (const need of topNeeds.slice(0, 4)) {
-    const text = `${need.emoji} ${need.category}\n\n${name}: ${need.headline}.\n\n${need.context}\n\nThe world has the resources to fix this. We choose not to.`;
+    const text = P.threadNeed(need.category, name, need.headline, need.context);
     tweets.push({ text, charCount: text.length, type: "evidence", icon: need.emoji });
   }
 
@@ -333,30 +337,30 @@ export function generateCountryCampaign(
     const undernourishedM = country.hunger.undernourishment_pct
       ? pop * country.hunger.undernourishment_pct / 100
       : 0;
-    const costPerMillion = 93 / 667; // $B per million hungry
+    const costPerMillion = 93 / 667;
     const costFix = undernourishedM * costPerMillion;
     const days = dailyMil > 0 ? costFix / dailyMil : 0;
-
-    const text = `💰 THE COST OF INACTION\n\n${name} spends ${(mil / 1e9).toFixed(1)}% of GDP on military — more than on health.\n\nIt would take ${days < 1 ? `${(days * 24).toFixed(0)} hours` : `${days.toFixed(1)} days`} of ${name}'s OWN military budget to feed every hungry person in the country.\n\nThat's not a dream. That's arithmetic.`;
+    const daysStr = days < 1 ? `${(days * 24).toFixed(0)}h` : `${days.toFixed(1)} dias`;
+    const text = P.threadMilitary(name, milPct ?? 0, daysStr);
     tweets.push({ text, charCount: text.length, type: "evidence", icon: "💰" });
   }
 
   // ── THE SOLUTION ──
-  const solutionText = `🔧 THE SOLUTION EXISTS\n\nEnding global hunger costs $${hungerCost}B/year.\n\nThe world spends $${globalMilitaryT}T/year on weapons.\n\nThat's 14 days.\n\nSafe water + healthcare + electricity + education for every human: $422B/year = 64 days.\n\nWe can afford this 6 times over.`;
+  const solutionText = P.threadSolution(String(hungerCost), String(globalMilitaryT), "422");
   tweets.push({ text: solutionText, charCount: solutionText.length, type: "solution", icon: "🔧" });
 
   // ── THE DEMAND ──
-  const demandText = `📢 WHAT TO DO\n\n1. Share this thread. The silence is the problem.\n2. Contact your representatives. Demand humanitarian funding.\n3. Support organizations doing the work.\n4. Push for military spending reallocation.\n\n${country.is_hotspot ? `${name} is a WFP hunger hotspot. ` : ""}Every share reaches someone who didn't know.\n\nFull data + sources: mouracleiton.github.io/v_for_x`;
+  const demandText = P.threadDemand(name, country.is_hotspot);
   tweets.push({ text: demandText, charCount: demandText.length, type: "demand", icon: "📢" });
 
   // ── WHATSAPP ──
   const whatsapp = topNeeds.length > 0
-    ? `${topNeeds[0].emoji} *${name.toUpperCase()} — DID YOU KNOW?*\n\n${topNeeds[0].headline}.\n${topNeeds[0].context}\n\nThe world spends $${globalMilitaryT}T/year on weapons. Ending hunger costs $${hungerCost}B = 14 days of that.\n\nWe choose war over people every single day. Share if you think that needs to change.\n\nmouracleiton.github.io/v_for_x`
+    ? `*${P.whatsappIntro(name)}*\n\n${topNeeds[0].headline}.\n${topNeeds[0].context}\n\n${lang === "pt" ? "O mundo gasta" : lang === "es" ? "El mundo gasta" : lang === "fr" ? "Le monde dépense" : lang === "ar" ? "العالم ينفق" : "The world spends"} $${globalMilitaryT}T/${lang === "pt" ? "ano" : lang === "es" ? "año" : lang === "fr" ? "an" : lang === "ar" ? "سنة" : "yr"} ${lang === "pt" ? "em armas" : lang === "es" ? "en armas" : lang === "fr" ? "en armes" : lang === "ar" ? "على الأسلحة" : "on weapons"}. ${lang === "pt" ? "Acabar com a fome" : lang === "es" ? "Terminar el hambre" : lang === "fr" ? "Mettre fin à la faim" : lang === "ar" ? "إنهاء الجوع" : "Ending hunger"} = $${hungerCost}B = 14 ${lang === "pt" ? "dias" : lang === "es" ? "días" : lang === "fr" ? "jours" : lang === "ar" ? "يوم" : "days"}.\n\n${P.whatsappCTA}\n\nmouracleiton.github.io/v_for_x`
     : `${name} data briefing: mouracleiton.github.io/v_for_x`;
 
   // ── INSTAGRAM ──
   const igNeeds = topNeeds.slice(0, 3).map((n) => `${n.emoji} ${n.headline}`).join("\n");
-  const instagram = `${name} 📍\n\n${igNeeds}\n\nThe data doesn't lie. The resources exist. What's missing is political will.\n\n$93B/year ends global hunger = 14 days of military spending.\n\nShare → pressure → change.\n\n#${name.replace(/\s+/g, "")} #ZeroHunger #SDG2 #EndPoverty #DataForGood #VForX`;
+  const instagram = `${name} 📍\n\n${igNeeds}\n\n${P.globalContext}\n\n$${hungerCost}B/${lang === "pt" ? "ano" : lang === "es" ? "año" : lang === "fr" ? "an" : lang === "ar" ? "سنة" : "yr"} = 14 ${lang === "pt" ? "dias de gasto militar" : lang === "es" ? "días de gasto militar" : lang === "fr" ? "jours de dépense militaire" : lang === "ar" ? "يوم من الإنفاق العسكري" : "days of military spending"}.\n\n${P.instagramTags(name)}`;
 
   // ── EMAIL ──
   const emailBody = `Dear [Representative Name],
