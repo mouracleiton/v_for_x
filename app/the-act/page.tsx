@@ -7,8 +7,9 @@ import type { WorldBackbone, CountryData } from "@/lib/types";
 import TerminalCard from "@/components/ui/TerminalCard";
 import StatusPill from "@/components/ui/StatusPill";
 import { sound } from "@/lib/sound";
-import { generateCountryCampaign, generateEquationCampaign, type CampaignKit } from "@/lib/campaign";
+import { generateCountryCampaign, generateEquationCampaign, analyzeNeeds, type CampaignKit } from "@/lib/campaign";
 import { downloadJSON } from "@/lib/idb";
+import { calculateVulnerability, scoreColor } from "@/lib/vulnerability";
 
 const data = backbone as WorldBackbone;
 
@@ -54,7 +55,7 @@ export default function TheActPage() {
   const [countrySearch, setCountrySearch] = useState("");
   const [selectedIso, setSelectedIso] = useState<string>("");
   const [selectedEq, setSelectedEq] = useState<string>("sdg6_water");
-  const [activeTab, setActiveTab] = useState<"tweets" | "email" | "brief">("tweets");
+  const [activeTab, setActiveTab] = useState<"thread" | "whatsapp" | "instagram" | "email" | "brief">("thread");
 
   const country = useMemo<CountryData | undefined>(
     () => data.countries.find((c) => c.iso3 === selectedIso),
@@ -84,6 +85,9 @@ export default function TheActPage() {
     return null;
   }, [mode, country, selectedEq]);
 
+  const needs = useMemo(() => country ? analyzeNeeds(country) : [], [country]);
+  const vuln = useMemo(() => country ? calculateVulnerability(country) : null, [country]);
+
   return (
     <div className="p-3 sm:p-6 md:p-10 max-w-4xl mx-auto">
       {/* Header */}
@@ -93,9 +97,9 @@ export default function TheActPage() {
           THE ACT
         </h1>
         <p className="text-content-secondary text-sm mt-2">
-          // understanding the problem is step one. this is step two. generate
-          shareable campaign kits — tweet threads, email templates, printable
-          briefs — pre-filled with real data. copy. send. act.
+          // Pick a country. Get a ready-to-post analysis of what it actually needs.
+          Tweet threads, WhatsApp messages, Instagram captions — all pre-written with real data.
+          Copy. Paste. Change the narrative.
         </p>
       </div>
 
@@ -159,7 +163,12 @@ export default function TheActPage() {
             </div>
             {country && (
               <div className="mt-3 p-2 border border-terminal-green bg-terminal-green/5 text-xs text-content-primary">
-                ✓ Selected: <strong>{country.name_en}</strong> ({country.iso3})
+                ✓ Selected: <strong>{country.name_en}</strong> ({country.iso3}) — {(country.demographics.population / 1e6).toFixed(0)}M people
+                {vuln && (
+                  <span className="ml-2 text-[10px]" style={{ color: scoreColor(vuln.composite) }}>
+                    Vulnerability: {vuln.composite.toFixed(0)}/100
+                  </span>
+                )}
               </div>
             )}
             {/* Quick picks */}
@@ -205,15 +214,48 @@ export default function TheActPage() {
         )}
       </TerminalCard>
 
+      {/* Needs analysis (country mode only) */}
+      {mode === "country" && country && needs.length > 0 && (
+        <TerminalCard title={`${country.name_en.toUpperCase()} — WHAT THE DATA SAYS IT NEEDS`} accent="blood" glow className="mb-6">
+          <p className="text-xs text-content-dim mb-3">
+            // {needs.length} critical needs identified. These are sorted by severity —
+            how far the country is from acceptable thresholds.
+          </p>
+          <div className="space-y-2">
+            {needs.slice(0, 8).map((n, i) => (
+              <div key={n.id} className="flex items-start gap-3 p-2 border border-border-dim bg-void">
+                <span className="text-lg shrink-0">{n.emoji}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-[9px] text-content-dim uppercase">{n.category}</span>
+                    {i === 0 && <span className="text-[9px] text-blood-bright font-bold">URGENT</span>}
+                  </div>
+                  <div className="text-xs text-content-primary font-bold">{n.headline}</div>
+                  <div className="text-[10px] text-content-secondary mt-0.5">{n.context}</div>
+                </div>
+                <div className="text-right shrink-0">
+                  <div className="text-[9px] text-content-dim">SEVERITY</div>
+                  <div className="text-sm font-bold" style={{ color: scoreColor(Math.min(n.severity * 2, 100)) }}>
+                    {n.severity.toFixed(0)}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </TerminalCard>
+      )}
+
       {/* Campaign output */}
       {kit ? (
         <>
-          {/* Tab selector */}
-          <div className="flex gap-2 mb-4">
+          {/* Format tabs */}
+          <div className="flex flex-wrap gap-2 mb-4">
             {([
-              { key: "tweets", label: `TWEET THREAD (${kit.tweets.length})` },
-              { key: "email", label: "EMAIL TEMPLATE" },
-              { key: "brief", label: "ONE-PAGE BRIEF" },
+              { key: "thread", label: `🐦 THREAD (${kit.tweets.length})` },
+              { key: "whatsapp", label: "💬 WHATSAPP" },
+              { key: "instagram", label: "📸 INSTAGRAM" },
+              { key: "email", label: "✉ EMAIL" },
+              { key: "brief", label: "📄 BRIEF" },
             ] as const).map((t) => (
               <button
                 key={t.key}
@@ -234,39 +276,97 @@ export default function TheActPage() {
               }}
               className="ml-auto px-3 py-1.5 text-xs border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void transition-colors"
             >
-              ↓ DOWNLOAD JSON
+              ↓ JSON
             </button>
           </div>
 
-          {/* Tweets */}
-          {activeTab === "tweets" && (
-            <div className="space-y-4">
+          {/* Tweet thread */}
+          {activeTab === "thread" && (
+            <div className="space-y-3">
               {kit.tweets.map((tweet, i) => (
-                <TerminalCard key={i} title={`TWEET ${i + 1}/${kit.tweets.length}`} accent="amber">
-                  <div className="flex items-start justify-between gap-3">
-                    <pre className="text-xs text-content-primary whitespace-pre-wrap font-mono flex-1 leading-relaxed">
-                      {tweet.text}
-                    </pre>
-                  </div>
-                  <div className="flex items-center justify-between mt-3 pt-2 border-t border-border-dim">
-                    <span className={`text-[10px] ${tweet.charCount > 280 ? "text-blood-bright" : "text-terminal-green"}`}>
-                      {tweet.charCount} chars {tweet.charCount > 280 ? "(split needed)" : "✓ under 280"}
+                <div key={i} className={`terminal-card p-3 ${tweet.type === "hook" ? "border-blood-dim" : ""}`}>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">{tweet.icon}</span>
+                      <span className="text-[10px] text-content-dim uppercase tracking-widest">
+                        {i + 1}/{kit.tweets.length}
+                        <span className="ml-2 text-[9px]" style={{
+                          color: tweet.type === "hook" ? "#e10600" : tweet.type === "solution" ? "#00ff41" : tweet.type === "demand" ? "#ffaa00" : "#888"
+                        }}>
+                          {tweet.type.toUpperCase()}
+                        </span>
+                      </span>
+                    </div>
+                    <span className={`text-[9px] ${tweet.charCount > 280 ? "text-blood-bright" : "text-terminal-green"}`}>
+                      {tweet.charCount} {tweet.charCount > 280 ? "(split)" : "✓"}
                     </span>
-                    <CopyButton text={tweet.text} label="[ COPY TWEET ]" />
                   </div>
-                </TerminalCard>
+                  <pre className="text-xs text-content-primary whitespace-pre-wrap font-mono flex-1 leading-relaxed">
+                    {tweet.text}
+                  </pre>
+                  <div className="flex items-center justify-end mt-2 pt-2 border-t border-border-dim">
+                    <CopyButton text={tweet.text} label="[ COPY ]" />
+                    <a
+                      href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(tweet.text)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[10px] px-2 py-0.5 border border-border-dim text-content-secondary hover:border-blood hover:text-blood-bright ml-1"
+                    >
+                      [ TWEET ]
+                    </a>
+                  </div>
+                </div>
               ))}
               {kit.tweets.length > 1 && (
-                <TerminalCard title="FULL THREAD (COPY ALL)">
-                  <CopyButton text={kit.tweets.map((t, i) => `${i + 1}/${kit.tweets.length}\n${t.text}`).join("\n\n---\n\n")} label="[ COPY ENTIRE THREAD ]" />
+                <TerminalCard title="COPY ENTIRE THREAD">
+                  <CopyButton text={kit.tweets.map((t, i) => `${i + 1}/${kit.tweets.length}\n${t.text}`).join("\n\n---\n\n")} label="[ COPY ALL ]" />
                 </TerminalCard>
               )}
             </div>
           )}
 
+          {/* WhatsApp */}
+          {activeTab === "whatsapp" && (
+            <TerminalCard title="💬 WHATSAPP / TELEGRAM MESSAGE" accent="green">
+              <pre className="text-xs text-content-primary whitespace-pre-wrap font-mono leading-relaxed p-3 border border-border-dim bg-void max-h-[400px] overflow-y-auto">
+                {kit.whatsapp}
+              </pre>
+              <div className="flex items-center justify-between mt-3 pt-2 border-t border-border-dim">
+                <span className="text-[10px] text-content-dim">{kit.whatsapp.length} chars</span>
+                <div className="flex gap-1">
+                  <CopyButton text={kit.whatsapp} label="[ COPY ]" />
+                  <a
+                    href={`https://wa.me/?text=${encodeURIComponent(kit.whatsapp)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[10px] px-2 py-0.5 border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void"
+                  >
+                    [ OPEN WHATSAPP ]
+                  </a>
+                </div>
+              </div>
+            </TerminalCard>
+          )}
+
+          {/* Instagram */}
+          {activeTab === "instagram" && (
+            <TerminalCard title="📸 INSTAGRAM / FACEBOOK CAPTION" accent="amber">
+              <pre className="text-xs text-content-primary whitespace-pre-wrap font-mono leading-relaxed p-3 border border-border-dim bg-void max-h-[400px] overflow-y-auto">
+                {kit.instagram}
+              </pre>
+              <div className="flex items-center justify-between mt-3 pt-2 border-t border-border-dim">
+                <span className="text-[10px] text-content-dim">{kit.instagram.length} chars · {kit.instagram.includes("#") ? "hashtags included" : "no hashtags"}</span>
+                <CopyButton text={kit.instagram} label="[ COPY CAPTION ]" />
+              </div>
+              <div className="text-[10px] text-content-dim mt-2 italic">
+                ▸ Tip: Use the Country Briefing page (/the-briefing/) to generate a printable image for your post.
+              </div>
+            </TerminalCard>
+          )}
+
           {/* Email */}
           {activeTab === "email" && (
-            <TerminalCard title="EMAIL TO REPRESENTATIVE" accent="green" glow>
+            <TerminalCard title="✉ EMAIL TO REPRESENTATIVE" accent="green" glow>
               <div className="mb-3">
                 <div className="flex items-center justify-between gap-2 mb-1">
                   <span className="text-[10px] text-content-dim uppercase">Subject</span>
@@ -278,14 +378,13 @@ export default function TheActPage() {
               </div>
               <div className="flex items-center justify-between gap-2 mb-1">
                 <span className="text-[10px] text-content-dim uppercase">Body</span>
-                <CopyButton text={kit.email.body} label="[ COPY FULL EMAIL ]" />
+                <CopyButton text={kit.email.body} label="[ COPY EMAIL ]" />
               </div>
               <pre className="p-3 border border-border-dim bg-void text-xs text-content-primary whitespace-pre-wrap font-mono leading-relaxed max-h-[500px] overflow-y-auto">
                 {kit.email.body}
               </pre>
               <div className="text-[10px] text-content-dim mt-2 italic">
-                ▸ Replace [bracketed] fields with your information. Email your representative,
-                senator, MP, or relevant government official.
+                ▸ Replace [bracketed] fields with your information.
               </div>
             </TerminalCard>
           )}
@@ -298,7 +397,6 @@ export default function TheActPage() {
                   <div className="text-[10px] text-content-dim uppercase tracking-widest mb-1">SUMMARY</div>
                   <p className="text-sm text-content-secondary">{kit.brief.summary}</p>
                 </div>
-
                 <div>
                   <div className="text-[10px] text-content-dim uppercase tracking-widest mb-2">KEY DATA</div>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
@@ -310,58 +408,30 @@ export default function TheActPage() {
                     ))}
                   </div>
                 </div>
-
                 <div className="border-l-2 border-blood pl-3">
                   <div className="text-[10px] text-content-dim uppercase tracking-widest mb-1">CALL TO ACTION</div>
                   <p className="text-sm text-content-primary">{kit.brief.callToAction}</p>
                 </div>
-
                 <div>
                   <div className="text-[10px] text-content-dim uppercase tracking-widest mb-1">SOURCES</div>
                   <ul className="text-[10px] text-content-dim space-y-0.5">
-                    {kit.brief.sources.map((s, i) => (
+                    {kit.brief.sources.slice(0, 8).map((s, i) => (
                       <li key={i}>• {s}</li>
                     ))}
                   </ul>
                 </div>
-
                 <div className="flex gap-2">
                   <button
-                    onClick={() => {
-                      window.print();
-                      sound.select();
-                    }}
+                    onClick={() => { window.print(); sound.select(); }}
                     className="flex-1 py-2 text-xs border border-blood text-blood-bright hover:bg-blood hover:text-void transition-colors uppercase tracking-widest"
                   >
-                    🖨 PRINT / SAVE AS PDF
+                    🖨 PRINT / PDF
                   </button>
                   <CopyButton text={`${kit.brief.title}\n\n${kit.brief.summary}\n\n${kit.brief.keyStats.map(s => `${s.label}: ${s.value}`).join("\n")}\n\n${kit.brief.callToAction}`} label="[ COPY BRIEF ]" />
-                </div>
-
-                <div className="text-[10px] text-content-dim text-center italic">
-                  Data: {data.metadata.created} · {data.metadata.total_countries} countries · CC0
                 </div>
               </div>
             </TerminalCard>
           )}
-
-          {/* Cross-links */}
-          <TerminalCard title="NEXT STEPS" className="mt-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <Link href="/equation/" className="terminal-card p-3 hover:border-blood block">
-                <div className="text-xs text-blood-bright font-bold">→ THE EQUATION</div>
-                <div className="text-xs text-content-secondary mt-1">Model the full solution</div>
-              </Link>
-              <Link href="/protocol-x/" className="terminal-card p-3 hover:border-blood block">
-                <div className="text-xs text-blood-bright font-bold">→ PROTOCOL X</div>
-                <div className="text-xs text-content-secondary mt-1">Field deployment guides</div>
-              </Link>
-              <Link href="/registry/" className="terminal-card p-3 hover:border-blood block">
-                <div className="text-xs text-blood-bright font-bold">→ REGISTRY</div>
-                <div className="text-xs text-content-secondary mt-1">Accountability dossiers</div>
-              </Link>
-            </div>
-          </TerminalCard>
         </>
       ) : (
         <TerminalCard title="AWAITING INPUT" accent="amber">
