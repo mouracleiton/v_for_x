@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useStore } from "@/stores/useStore";
+import { tc } from "@/lib/i18n-content";
 import Link from "next/link";
 import backbone from "@/data/world_backbone.json";
 import type { WorldBackbone, CountryData } from "@/lib/types";
@@ -67,6 +69,7 @@ function dimensionCompleteness(c: CountryData): Record<string, number> {
 type SortKey = "completeness" | "incomplete" | "name";
 
 export default function TheMatrixPage() {
+  const { lang } = useStore();
   const [sortKey, setSortKey] = useState<SortKey>("incomplete");
   const [regionFilter, setRegionFilter] = useState<string>("all");
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
@@ -168,7 +171,7 @@ export default function TheMatrixPage() {
       </div>
 
       {/* Global stats */}
-      <TerminalCard title="DATA INVENTORY" accent="blood" className="mb-6">
+      <TerminalCard title={tc(lang, "matrix.inventory")} accent="blood" className="mb-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
           <div>
             <div className="text-[10px] text-content-dim uppercase tracking-widest">AVG COMPLETENESS</div>
@@ -201,7 +204,7 @@ export default function TheMatrixPage() {
       </TerminalCard>
 
       {/* Per-dimension completeness */}
-      <TerminalCard title="BLIND SPOTS BY DIMENSION" accent="amber" className="mb-6">
+      <TerminalCard title={tc(lang, "matrix.blind_spots")} accent="amber" className="mb-6">
         <p className="text-xs text-content-dim mb-3">
           // Which dimensions have the most missing data across all 200 countries?
         </p>

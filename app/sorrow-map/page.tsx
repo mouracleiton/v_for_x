@@ -8,6 +8,8 @@ import TerminalCard from "@/components/ui/TerminalCard";
 import GlitchText from "@/components/ui/GlitchText";
 import StatusPill from "@/components/ui/StatusPill";
 import { useStore } from "@/stores/useStore";
+import { t, type Lang } from "@/lib/i18n";
+import { tc } from "@/lib/i18n-content";
 import { severityColor, formatNumber, wfpClassLabel } from "@/lib/format";
 import type { WorldBackbone } from "@/lib/types";
 
@@ -44,54 +46,54 @@ export interface DimensionDef {
 }
 
 const DIMENSIONS: DimensionDef[] = [
-  { key: "hunger_undernourishment_pct", label: "UNDERNOURISHMENT", category: "HUNGER", unit: "%" },
-  { key: "hunger_prevalence_pct", label: "ACUTE FOOD INSECURITY", category: "HUNGER", unit: "%" },
-  { key: "hunger_child_stunting_pct", label: "CHILD STUNTING", category: "HUNGER", unit: "%" },
-  { key: "hunger_child_wasting_pct", label: "CHILD WASTING", category: "HUNGER", unit: "%" },
-  { key: "hunger_famine_risk_1to5", label: "FAMINE RISK", category: "HUNGER", unit: "/5" },
-  { key: "food_security_severe_food_insecurity_m", label: "SEVERE FOOD INSECURITY", category: "HUNGER", unit: "M" },
-  { key: "conflict_intensity_1to5", label: "CONFLICT INTENSITY", category: "CONFLICT", unit: "/5" },
-  { key: "conflict_displacement_m", label: "DISPLACEMENT", category: "CONFLICT", unit: "M" },
-  { key: "poverty_headcount_365_pct", label: "EXTREME POVERTY ($3.65)", category: "POVERTY", unit: "%" },
-  { key: "poverty_headcount_685_pct", label: "POVERTY ($6.85)", category: "POVERTY", unit: "%" },
-  { key: "health_life_expectancy", label: "LIFE EXPECTANCY", category: "HEALTH", unit: "yrs", inverse: true },
-  { key: "health_child_mortality_under5_per1k", label: "CHILD MORTALITY (U5)", category: "HEALTH", unit: "/1k" },
-  { key: "health_maternal_mortality_per100k", label: "MATERNAL MORTALITY", category: "HEALTH", unit: "/100k" },
-  { key: "health_doctors_per_1000", label: "DOCTORS /1000", category: "HEALTH", unit: "", inverse: true },
-  { key: "health_hospital_beds_per_1000", label: "HOSPITAL BEDS /1000", category: "HEALTH", unit: "", inverse: true },
-  { key: "governance_corruption_perceptions_index", label: "CORRUPTION (CPI)", category: "GOVERNANCE", unit: "", inverse: true },
-  { key: "governance_political_corruption_index", label: "POLITICAL CORRUPTION", category: "GOVERNANCE", unit: "" },
-  { key: "inequality_gini", label: "INEQUALITY (GINI)", category: "INEQUALITY", unit: "" },
-  { key: "security_homicide_rate_per100k", label: "HOMICIDE RATE", category: "SECURITY", unit: "/100k" },
-  { key: "justice_prison_rate_per_100k", label: "INCARCERATION RATE", category: "JUSTICE", unit: "/100k" },
-  { key: "environment_air_pollution_pm25_ugm3", label: "AIR POLLUTION (PM2.5)", category: "ENVIRONMENT", unit: "µg/m³" },
-  { key: "energy_renewable_electric_pct", label: "RENEWABLE ELECTRICITY", category: "ENERGY", unit: "%", inverse: true },
-  { key: "energy_no_access_electricity_m", label: "NO ELECTRICITY ACCESS", category: "ENERGY", unit: "M" },
-  { key: "taxation_tax_burden_pct_gdp", label: "TAX BURDEN % GDP", category: "ECONOMY", unit: "%" },
-  { key: "education_pisa_score", label: "PISA SCORE", category: "EDUCATION", unit: "", inverse: true },
-  { key: "connectivity_internet_users_pct", label: "INTERNET ACCESS", category: "CONNECTIVITY", unit: "%", inverse: true },
-  { key: "water_sanitation_basic_access_pct", label: "WATER ACCESS", category: "WATER", unit: "%", inverse: true },
+  { key: "hunger_undernourishment_pct", label: "label.undernourishment", category: "cat.hunger", unit: "%" },
+  { key: "hunger_prevalence_pct", label: "label.acute_food_insecurity", category: "cat.hunger", unit: "%" },
+  { key: "hunger_child_stunting_pct", label: "label.child_stunting", category: "cat.hunger", unit: "%" },
+  { key: "hunger_child_wasting_pct", label: "label.child_wasting", category: "cat.hunger", unit: "%" },
+  { key: "hunger_famine_risk_1to5", label: "label.famine_risk", category: "cat.hunger", unit: "/5" },
+  { key: "food_security_severe_food_insecurity_m", label: "label.severe_food_insecurity", category: "cat.hunger", unit: "M" },
+  { key: "conflict_intensity_1to5", label: "label.conflict_intensity", category: "cat.conflict", unit: "/5" },
+  { key: "conflict_displacement_m", label: "label.displacement", category: "cat.conflict", unit: "M" },
+  { key: "poverty_headcount_365_pct", label: "label.extreme_poverty", category: "cat.poverty", unit: "%" },
+  { key: "poverty_headcount_685_pct", label: "label.poverty", category: "cat.poverty", unit: "%" },
+  { key: "health_life_expectancy", label: "label.life_expectancy", category: "cat.health", unit: "yrs", inverse: true },
+  { key: "health_child_mortality_under5_per1k", label: "label.child_mortality", category: "cat.health", unit: "/1k" },
+  { key: "health_maternal_mortality_per100k", label: "label.maternal_mortality", category: "cat.health", unit: "/100k" },
+  { key: "health_doctors_per_1000", label: "label.doctors", category: "cat.health", unit: "", inverse: true },
+  { key: "health_hospital_beds_per_1000", label: "label.hospital_beds", category: "cat.health", unit: "", inverse: true },
+  { key: "governance_corruption_perceptions_index", label: "label.corruption_cpi", category: "cat.governance", unit: "", inverse: true },
+  { key: "governance_political_corruption_index", label: "label.political_corruption", category: "cat.governance", unit: "" },
+  { key: "inequality_gini", label: "label.inequality_gini", category: "cat.inequality", unit: "" },
+  { key: "security_homicide_rate_per100k", label: "label.homicide_rate", category: "cat.security", unit: "/100k" },
+  { key: "justice_prison_rate_per_100k", label: "label.incarceration_rate", category: "cat.justice", unit: "/100k" },
+  { key: "environment_air_pollution_pm25_ugm3", label: "label.air_pollution", category: "cat.environment", unit: "µg/m³" },
+  { key: "energy_renewable_electric_pct", label: "label.renewable_electricity", category: "cat.energy", unit: "%", inverse: true },
+  { key: "energy_no_access_electricity_m", label: "label.no_electricity", category: "cat.energy", unit: "M" },
+  { key: "taxation_tax_burden_pct_gdp", label: "label.tax_burden", category: "cat.economy", unit: "%" },
+  { key: "education_pisa_score", label: "label.pisa_score", category: "cat.education", unit: "", inverse: true },
+  { key: "connectivity_internet_users_pct", label: "label.internet_access", category: "cat.connectivity", unit: "%", inverse: true },
+  { key: "water_sanitation_basic_access_pct", label: "label.water_access", category: "cat.water", unit: "%", inverse: true },
   // ── Extended dimensions (round 4) ──
-  { key: "human_development_hdi", label: "HUMAN DEVELOPMENT INDEX", category: "DEVELOPMENT", unit: "", inverse: true },
-  { key: "economy_gdp_per_capita_usd", label: "GDP PER CAPITA", category: "ECONOMY", unit: "$", inverse: true },
-  { key: "economy_gdp_usd", label: "GDP (TOTAL)", category: "ECONOMY", unit: "$", inverse: true },
-  { key: "military_pct_gdp", label: "MILITARY % GDP", category: "MILITARY", unit: "%" },
-  { key: "military_expenditure_usd", label: "MILITARY EXPENDITURE", category: "MILITARY", unit: "$" },
-  { key: "health_expenditure_pct_gdp", label: "HEALTH % GDP", category: "HEALTH", unit: "%", inverse: true },
-  { key: "climate_co2_per_capita_t", label: "CO₂ PER CAPITA", category: "CLIMATE", unit: "t" },
-  { key: "climate_ghg_total_mt", label: "GHG TOTAL", category: "CLIMATE", unit: "Mt" },
-  { key: "education_literacy_rate_pct", label: "LITERACY RATE", category: "EDUCATION", unit: "%", inverse: true },
-  { key: "education_primary_enrollment_pct", label: "PRIMARY ENROLLMENT", category: "EDUCATION", unit: "%", inverse: true },
-  { key: "gender_women_parliament_pct", label: "WOMEN IN PARLIAMENT", category: "GENDER", unit: "%", inverse: true },
-  { key: "migration_forcibly_displaced", label: "FORCIBLY DISPLACED", category: "MIGRATION", unit: "" },
-  { key: "migration_refugees_origin", label: "REFUGEES (ORIGIN)", category: "MIGRATION", unit: "" },
-  { key: "migration_refugees_hosted", label: "REFUGEES (HOSTED)", category: "MIGRATION", unit: "" },
-  { key: "employment_unemployment_pct", label: "UNEMPLOYMENT", category: "EMPLOYMENT", unit: "%" },
-  { key: "employment_youth_unemployment_pct", label: "YOUTH UNEMPLOYMENT", category: "EMPLOYMENT", unit: "%" },
-  { key: "environment_forest_area_pct", label: "FOREST AREA", category: "ENVIRONMENT", unit: "%", inverse: true },
-  { key: "environment_renewable_energy_pct", label: "RENEWABLE ENERGY", category: "ENVIRONMENT", unit: "%", inverse: true },
-  { key: "connectivity_broadband_per100", label: "BROADBAND SUBSCRIPTIONS", category: "CONNECTIVITY", unit: "/100", inverse: true },
-  { key: "demographics_population", label: "POPULATION", category: "DEMOGRAPHICS", unit: "" },
+  { key: "human_development_hdi", label: "label.hdi", category: "cat.development", unit: "", inverse: true },
+  { key: "economy_gdp_per_capita_usd", label: "label.gdp_per_capita", category: "cat.economy", unit: "$", inverse: true },
+  { key: "economy_gdp_usd", label: "label.gdp_total", category: "cat.economy", unit: "$", inverse: true },
+  { key: "military_pct_gdp", label: "label.military_pct_gdp", category: "cat.military", unit: "%" },
+  { key: "military_expenditure_usd", label: "label.military_expenditure", category: "cat.military", unit: "$" },
+  { key: "health_expenditure_pct_gdp", label: "label.health_pct_gdp", category: "cat.health", unit: "%", inverse: true },
+  { key: "climate_co2_per_capita_t", label: "label.co2_per_capita", category: "cat.climate", unit: "t" },
+  { key: "climate_ghg_total_mt", label: "label.ghg_total", category: "cat.climate", unit: "Mt" },
+  { key: "education_literacy_rate_pct", label: "label.literacy_rate", category: "cat.education", unit: "%", inverse: true },
+  { key: "education_primary_enrollment_pct", label: "label.primary_enrollment", category: "cat.education", unit: "%", inverse: true },
+  { key: "gender_women_parliament_pct", label: "label.women_parliament", category: "cat.gender", unit: "%", inverse: true },
+  { key: "migration_forcibly_displaced", label: "label.forcibly_displaced", category: "cat.migration", unit: "" },
+  { key: "migration_refugees_origin", label: "label.refugees_origin", category: "cat.migration", unit: "" },
+  { key: "migration_refugees_hosted", label: "label.refugees_hosted", category: "cat.migration", unit: "" },
+  { key: "employment_unemployment_pct", label: "label.unemployment", category: "cat.employment", unit: "%" },
+  { key: "employment_youth_unemployment_pct", label: "label.youth_unemployment", category: "cat.employment", unit: "%" },
+  { key: "environment_forest_area_pct", label: "label.forest_area", category: "cat.environment", unit: "%", inverse: true },
+  { key: "environment_renewable_energy_pct", label: "label.renewable_energy", category: "cat.environment", unit: "%", inverse: true },
+  { key: "connectivity_broadband_per100", label: "label.broadband", category: "cat.connectivity", unit: "/100", inverse: true },
+  { key: "demographics_population", label: "label.population", category: "cat.demographics", unit: "" },
 ];
 
 /**
@@ -177,6 +179,7 @@ function DimensionSidebar({
   activeKey: string;
   onSelect: (key: string) => void;
 }) {
+  const { lang } = useStore();
   const categories = useMemo(() => {
     const map: Record<string, DimensionDef[]> = {};
     for (const d of DIMENSIONS) {
@@ -191,7 +194,7 @@ function DimensionSidebar({
       {Object.entries(categories).map(([cat, dims]) => (
         <div key={cat}>
           <div className="text-[10px] text-content-dim uppercase tracking-widest mb-1 px-1">
-            // {cat}
+            // {tc(lang, cat)}
           </div>
           <div className="space-y-0.5">
             {dims.map((d) => (
@@ -207,7 +210,7 @@ function DimensionSidebar({
                 <span className={activeKey === d.key ? "text-blood-bright" : "text-content-dim"}>
                   {activeKey === d.key ? "▶" : "·"}{" "}
                 </span>
-                {d.label}
+                {tc(lang, d.label)}
               </button>
             ))}
           </div>
@@ -222,13 +225,14 @@ function DimensionSidebar({
    ═══════════════════════════════════════════════════════════════ */
 
 function HotspotList({ onSelect }: { onSelect: (iso3: string) => void }) {
+  const { lang } = useStore();
   const hotspots = useMemo(
     () => [...data.hotspots.all].sort((a, b) => b.score - a.score),
     []
   );
 
   return (
-    <TerminalCard title="ACTIVE CRISIS ZONES" accent="blood" glow>
+    <TerminalCard title={tc(lang, "sorrow.active_crisis_zones")} accent="blood" glow>
       <div className="space-y-1 max-h-[400px] overflow-y-auto">
         {hotspots.map((h) => (
           <button
@@ -267,7 +271,7 @@ function HotspotList({ onSelect }: { onSelect: (iso3: string) => void }) {
 
 export default function MapaDaDorPage() {
   const router = useRouter();
-  const { setCurrentCountry } = useStore();
+  const { setCurrentCountry, lang } = useStore();
   const [activeDimKey, setActiveDimKey] = useState(DIMENSIONS[0].key);
   const [geoData, setGeoData] = useState<GeoFeatureCollection | null>(null);
   const basePath = process.env.NODE_ENV === "production" ? "/v_for_x" : "";
@@ -304,14 +308,14 @@ export default function MapaDaDorPage() {
       {/* Header */}
       <div className="mb-6 border-b border-border-dim pb-4">
         <div className="flex items-baseline gap-4 flex-wrap">
-          <GlitchText text="SORROW MAP" as="h1" className="text-2xl md:text-3xl font-bold text-blood-bright glow-blood tracking-widest" />
+          <GlitchText text={t(lang, "nav.sorrow-map")} as="h1" className="text-2xl md:text-3xl font-bold text-blood-bright glow-blood tracking-widest" />
           <StatusPill color="blood">LIVE</StatusPill>
-          <span className="text-xs text-content-dim">// BRANCH 01 — GLOBAL SUFFERING MAP</span>
+          <span className="text-xs text-content-dim">{tc(lang, "subtitle.sorrow_map")}</span>
         </div>
         <div className="text-sm text-content-secondary mt-2">
-          <span className="text-content-dim">{">"}</span> MAPPING:{" "}
-          <span className="text-blood-bright">{activeDim.label}</span>
-          <span className="text-content-dim"> ({activeDim.category})</span>
+          <span className="text-content-dim">{">"}</span> {tc(lang, "sorrow.mapping")}:{" "}
+          <span className="text-blood-bright">{tc(lang, activeDim.label)}</span>
+          <span className="text-content-dim"> ({tc(lang, activeDim.category)})</span>
         </div>
       </div>
 
@@ -320,7 +324,7 @@ export default function MapaDaDorPage() {
         {/* Left sidebar — dimension switcher */}
         <div className="space-y-3">
           <div className="text-xs text-content-dim uppercase tracking-widest mb-2">
-            // SELECT METRIC
+            // {tc(lang, "sorrow.select_metric")}
           </div>
           <DimensionSidebar activeKey={activeDimKey} onSelect={setActiveDimKey} />
           <div className="mt-4">
@@ -349,7 +353,7 @@ export default function MapaDaDorPage() {
         <div className="space-y-4">
           <HotspotList onSelect={handleCountryClick} />
           <div className="border border-border-dim p-3 bg-abyss text-[10px] text-content-dim space-y-1">
-            <div className="text-blood-bright uppercase tracking-widest mb-1">// LEGEND</div>
+            <div className="text-blood-bright uppercase tracking-widest mb-1">// {tc(lang, "sorrow.legend")}</div>
             <div className="flex items-center gap-2">
               <span className="inline-block w-3 h-3 border-2 border-blood-bright" style={{ backgroundColor: "#550000" }} />
               HOTSPOT COUNTRY (pulsing border)

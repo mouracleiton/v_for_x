@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useStore } from "@/stores/useStore";
+import { tc } from "@/lib/i18n-content";
 import Link from "next/link";
 import backbone from "@/data/world_backbone.json";
 import type { WorldBackbone, CountryData } from "@/lib/types";
@@ -83,6 +85,7 @@ function computeThreat(countries: CountryData[]): ThreatLevel {
 /* ═══ COMPONENT ═══ */
 
 export default function TheSignalPage() {
+  const { lang } = useStore();
   const [watchlist, setWatchlist] = useState<WatchlistEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -385,12 +388,12 @@ export default function TheSignalPage() {
           THE SIGNAL
         </h1>
         <p className="text-content-secondary text-sm mt-2">
-          // Pin countries. Track conditions. Never lose sight of a crisis.
+          {tc(lang, "subtitle.the_signal")}
         </p>
       </div>
 
       {loading ? (
-        <TerminalCard title="ESTABLISHING UPLINK…" glow>
+        <TerminalCard title={tc(lang, "signal.establishing")} glow>
           <div className="text-xs text-content-dim animate-pulse">
             {" "}
             ▒▒▒ Loading watchlist from local store… ▒▒▒{" "}

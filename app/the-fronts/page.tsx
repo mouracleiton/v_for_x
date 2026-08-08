@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useStore } from "@/stores/useStore";
+import { tc } from "@/lib/i18n-content";
 import Link from "next/link";
 import backbone from "@/data/world_backbone.json";
 import type { WorldBackbone, CountryData } from "@/lib/types";
@@ -84,6 +86,7 @@ function buildRegionData(countries: CountryData[]): RegionData[] {
 }
 
 export default function TheFrontsPage() {
+  const { lang } = useStore();
   const regions = useMemo(() => buildRegionData(data.countries), []);
   const [selectedRegion, setSelectedRegion] = useState<string | null>(regions[0]?.name ?? null);
 
@@ -323,7 +326,7 @@ export default function TheFrontsPage() {
       </TerminalCard>
 
       {/* Cross-region comparison */}
-      <TerminalCard title="REGIONAL COMPARISON // ALL 5 FRONTS" accent="amber" className="mb-6">
+      <TerminalCard title={tc(lang, "fronts.regional_comparison")} accent="amber" className="mb-6">
         <p className="text-xs text-content-dim mb-3">
           // Vulnerability scores overlaid. Africa is in a category of its own.
         </p>

@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
+import { useStore } from "@/stores/useStore";
+import { tc } from "@/lib/i18n-content";
 import Link from "next/link";
 import backbone from "@/data/world_backbone.json";
 import type { WorldBackbone, CountryData } from "@/lib/types";
@@ -96,6 +98,7 @@ function useLiveCounter(start: number, perYear: number, active: boolean) {
 }
 
 export default function TheDashboardPage() {
+  const { lang } = useStore();
   const [animateCounters, setAnimateCounters] = useState(false);
   const contrasts = useMemo(() => findContrasts(data.countries), []);
 
@@ -143,12 +146,12 @@ export default function TheDashboardPage() {
           THE DASHBOARD
         </h1>
         <p className="text-content-secondary text-sm mt-2">
-          // One screen. The entire world&apos;s crisis. Updated in real time because it is happening in real time.
+          {tc(lang, "subtitle.the_dashboard")}
         </p>
       </div>
 
       {/* Live counters */}
-      <TerminalCard title="LIVE COUNTERS // THE WORLD RIGHT NOW" accent="blood" glow className="mb-6">
+      <TerminalCard title={tc(lang, "dashboard.live_counters")} accent="blood" glow className="mb-6">
         <div className="flex items-center gap-3 mb-4">
           <button
             onClick={() => { setAnimateCounters(!animateCounters); }}
@@ -188,7 +191,7 @@ export default function TheDashboardPage() {
       </TerminalCard>
 
       {/* Global indicators grid */}
-      <TerminalCard title="GLOBAL INDICATORS // THE STATE OF THE WORLD" accent="amber" className="mb-6">
+      <TerminalCard title={tc(lang, "dashboard.global_indicators")} accent="amber" className="mb-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Indicator label="WORLD POPULATION" value={formatNumber(globalStats.totalPop / 1e6)} unit="M" color="#999" />
           <Indicator label="UNDERNOURISHED" value={`${globalStats.totalUndernourished}`} unit="M" color="#cc0000" sub="1 in 11 humans" />
@@ -238,7 +241,7 @@ export default function TheDashboardPage() {
 
       {/* Worst and best */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <TerminalCard title="MOST VULNERABLE COUNTRY" accent="blood">
+        <TerminalCard title={tc(lang, "dashboard.most_vulnerable")} accent="blood">
           <Link
             href={`/sorrow-map/${globalStats.worst.c.iso3.toLowerCase()}/`}
             className="block p-4 border border-blood-dim bg-abyss hover:bg-blood/5 transition-colors"
@@ -265,7 +268,7 @@ export default function TheDashboardPage() {
           </Link>
         </TerminalCard>
 
-        <TerminalCard title="LEAST VULNERABLE COUNTRY" accent="green">
+        <TerminalCard title={tc(lang, "dashboard.least_vulnerable")} accent="green">
           <Link
             href={`/sorrow-map/${globalStats.best.c.iso3.toLowerCase()}/`}
             className="block p-4 border border-terminal-green/30 bg-abyss hover:bg-terminal-green/5 transition-colors"

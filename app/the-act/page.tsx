@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import { useStore } from "@/stores/useStore";
+import { tc } from "@/lib/i18n-content";
 import Link from "next/link";
 import backbone from "@/data/world_backbone.json";
 import type { WorldBackbone, CountryData } from "@/lib/types";
@@ -57,6 +59,7 @@ function CopyButton({ text, label }: { text: string; label: string }) {
 }
 
 export default function TheActPage() {
+  const { lang } = useStore();
   const [mode, setMode] = useState<Mode>("country");
   const [countrySearch, setCountrySearch] = useState("");
   const [selectedIso, setSelectedIso] = useState<string>("");
@@ -197,7 +200,7 @@ export default function TheActPage() {
           THE ACT
         </h1>
         <p className="text-content-secondary text-sm mt-2">
-          // Pick a country. Get a ready-to-post analysis of what it actually needs.
+          {tc(lang, "subtitle.the_act")}
           Tweet threads, WhatsApp messages, Instagram captions — all pre-written with real data.
           Copy. Paste. Change the narrative.
         </p>
@@ -228,7 +231,7 @@ export default function TheActPage() {
       </div>
 
       {/* Source selector */}
-      <TerminalCard title="SELECT SOURCE" accent="green" className="mb-6">
+      <TerminalCard title={tc(lang, "act.select_source")} accent="green" className="mb-6">
         {mode === "country" ? (
           <div>
             <div className="relative">
@@ -353,7 +356,7 @@ export default function TheActPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-baseline gap-2">
                     <span className="text-[9px] text-content-dim uppercase">{n.category}</span>
-                    {i === 0 && <span className="text-[9px] text-blood-bright font-bold">URGENT</span>}
+                    {i === 0 && <span className="text-[9px] text-blood-bright font-bold">{tc(lang, "status.urgent")}</span>}
                   </div>
                   <div className="text-xs text-content-primary font-bold">{n.headline}</div>
                   <div className="text-[10px] text-content-secondary mt-0.5">{n.context}</div>
@@ -638,7 +641,7 @@ export default function TheActPage() {
                 </div>
               ))}
               {kit.tweets.length > 1 && (
-                <TerminalCard title="COPY ENTIRE THREAD">
+                <TerminalCard title={tc(lang, "act.copy_thread")}>
                   <CopyButton text={kit.tweets.map((t, i) => `${i + 1}/${kit.tweets.length}\n${t.text}`).join("\n\n---\n\n")} label="[ COPY ALL ]" />
                 </TerminalCard>
               )}

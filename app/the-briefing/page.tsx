@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
+import { useStore } from "@/stores/useStore";
+import { tc } from "@/lib/i18n-content";
 import Link from "next/link";
 import backbone from "@/data/world_backbone.json";
 import type { WorldBackbone, CountryData } from "@/lib/types";
@@ -24,6 +26,7 @@ const BEST = {
 };
 
 export default function TheBriefingPage() {
+  const { lang } = useStore();
   const [selectedIso3, setSelectedIso3] = useState<string>("BRA");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -74,13 +77,13 @@ export default function TheBriefingPage() {
           THE BRIEFING
         </h1>
         <p className="text-content-secondary text-sm mt-2">
-          // Pick a country. Get a devastating one-page report with its specific numbers.
+          {tc(lang, "subtitle.the_briefing")}
           Print it. Share it. Make the argument undeniable.
         </p>
       </div>
 
       {/* Country selector */}
-      <TerminalCard title="SELECT YOUR COUNTRY" className="mb-6 no-print">
+      <TerminalCard title={tc(lang, "briefing.select_country")} className="mb-6 no-print">
         <div className="flex flex-wrap gap-2 mb-3">
           {["SDN", "BRA", "USA", "IND", "COD", "YEM", "AFG", "UKR"].map((iso3) => {
             const c = data.countries.find((x) => x.iso3 === iso3);
@@ -157,7 +160,7 @@ export default function TheBriefingPage() {
         {/* The headline stat */}
         {underPct !== null && underPct > 0 && (
           <div className="mb-6 p-4 border border-blood bg-abyss">
-            <div className="text-[10px] text-content-dim uppercase tracking-widest mb-1">THE HEADLINE</div>
+            <div className="text-[10px] text-content-dim uppercase tracking-widest mb-1">{tc(lang, "label.headline")}</div>
             <div className="text-xl text-content-primary">
               <span className="text-3xl text-blood-bright font-bold glow-blood">{underM.toFixed(1)}M</span> people
               {" "}(<span className="text-blood-bright font-bold">{underPct.toFixed(1)}%</span>) in {country.name_en}
@@ -186,7 +189,7 @@ export default function TheBriefingPage() {
             bad={country.health.life_expectancy !== null && country.health.life_expectancy < 65}
           />
           <StatBox
-            label="CHILD MORTALITY"
+            label={tc(lang, "label.child_mortality")}
             value={country.health.child_mortality_under5_per1k?.toFixed(1) ?? "—"}
             unit="/1k"
             vs={`Best: ${BEST.childMortality}`}

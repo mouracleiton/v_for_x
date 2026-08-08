@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useStore } from "@/stores/useStore";
+import { tc } from "@/lib/i18n-content";
 import Link from "next/link";
 import backbone from "@/data/world_backbone.json";
 import timelinesData from "@/data/crisis_timelines.json";
@@ -176,6 +178,7 @@ const STORIES: Story[] = [
 ];
 
 export default function StoriesPage() {
+  const { lang } = useStore();
   const [activeStory, setActiveStory] = useState<string | null>(null);
   const [stepIdx, setStepIdx] = useState(0);
   const [activeTimeline, setActiveTimeline] = useState<string>("SDN");
@@ -196,14 +199,14 @@ export default function StoriesPage() {
           STORIES
         </h1>
         <p className="text-content-secondary text-sm mt-2">
-          // don't just see the data — follow it. guided narrative tours connect
+          {tc(lang, "subtitle.the_stories")}
           the problem → the people → the solution → the action. crisis timelines
           show how we got here.
         </p>
       </div>
 
       {/* ═══ STORY MODES ═══ */}
-      <TerminalCard title="STORY MODES — GUIDED TOURS" accent="amber" glow className="mb-6">
+      <TerminalCard title={tc(lang, "stories.modes")} accent="amber" glow className="mb-6">
         {!story ? (
           <>
             <p className="text-xs text-content-secondary mb-4">

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useStore } from "@/stores/useStore";
+import { tc } from "@/lib/i18n-content";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   ReferenceLine, Legend, Area, AreaChart,
@@ -58,6 +60,7 @@ const chartTooltipStyle = {
 };
 
 export default function EquationPage() {
+  const { lang } = useStore();
   const [selectedScenario, setSelectedScenario] = useState("ambicioso");
   const [selectedFinancing, setSelectedFinancing] = useState<number[]>([]);
   const [selectedSdg, setSelectedSdg] = useState<string>("sdg6_water");
@@ -117,12 +120,12 @@ export default function EquationPage() {
           THE EQUATION
         </h1>
         <p className="text-content-secondary text-sm mt-2">
-          // Don't just see the problem. Model the fix. Real numbers, real projections, real solutions. Hunger + 6 parallel SDG equations.
+          {tc(lang, "subtitle.equation")}
         </p>
       </div>
 
       {/* A. Scenario Simulator */}
-      <TerminalCard title="SCENARIO SIMULATOR" glow className="mb-6">
+      <TerminalCard title={tc(lang, "equation.scenario_simulator")} glow className="mb-6">
         <p className="text-xs text-content-secondary mb-4">
           Adjust the slider to see how different annual investments change the hunger trajectory (2025-2034)
         </p>
@@ -324,7 +327,7 @@ export default function EquationPage() {
       </TerminalCard>
 
       {/* FINANCING SOURCES — viral stat visualization */}
-      <TerminalCard title="WHERE DOES THE MONEY COME FROM?" accent="green" glow className="mb-6">
+      <TerminalCard title={tc(lang, "equation.money_source")} accent="green" glow className="mb-6">
         <p className="text-xs text-content-secondary mb-4">
           The most viral statistic on this platform: ending hunger costs less than 1% of what the world spends on weapons.
         </p>

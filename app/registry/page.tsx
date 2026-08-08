@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useStore } from "@/stores/useStore";
+import { tc } from "@/lib/i18n-content";
 import Link from "next/link";
 import dossiersData from "@/data/dossier-seed.json";
 import TerminalCard from "@/components/ui/TerminalCard";
@@ -77,6 +79,7 @@ const categoryLabels: Record<string, string> = {
 };
 
 export default function RegistroPage() {
+  const { lang } = useStore();
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [severityFilter, setSeverityFilter] = useState("ALL");
 
@@ -102,7 +105,7 @@ export default function RegistroPage() {
       </div>
 
       {/* Provenance breakdown */}
-      <TerminalCard title="EVIDENCE PIPELINE — WHERE THE DATA COMES FROM" accent="green" className="mb-6">
+      <TerminalCard title={tc(lang, "registry.evidence_pipeline")} accent="green" className="mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
           <div className="flex items-start gap-2">
             <span className="text-blood-bright">■</span>
@@ -150,7 +153,7 @@ export default function RegistroPage() {
       </TerminalCard>
 
       {/* Anti-witch-hunt safeguards */}
-      <TerminalCard title="SAFEGUARDS — HOW THIS WORKS" accent="green" className="mb-6">
+      <TerminalCard title={tc(lang, "registry.safeguards")} accent="green" className="mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
           <div className="flex items-start gap-2">
             <span className="text-terminal-green">✓</span>

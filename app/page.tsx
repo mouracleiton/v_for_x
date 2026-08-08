@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { tc } from "@/lib/i18n-content";
 import { useStore } from "@/stores/useStore";
 import { useMemo, useState, useEffect } from "react";
 import backbone from "@/data/world_backbone.json";
@@ -219,7 +220,7 @@ function SdgRotatingCounter() {
 }
 
 export default function HomePage() {
-  const { setCurrentCountry } = useStore();
+  const { setCurrentCountry, lang } = useStore();
 
   const topCrises = useMemo(
     () => [...data.hotspots.all].sort((a, b) => b.score - a.score).slice(0, 3),
@@ -267,7 +268,7 @@ export default function HomePage() {
         className="mb-6"
       >
         <div className="flex items-center gap-4 mb-3">
-          <StatusPill color="blood">OFF TRACK</StatusPill>
+          <StatusPill color="blood">{tc(lang, "label.off_track")}</StatusPill>
           <span className="text-content-secondary text-xs">
             Target: {data.global_indicators.sdg2.target}
           </span>
@@ -280,14 +281,14 @@ export default function HomePage() {
         />
         <div className="grid grid-cols-2 gap-4 mt-4">
           <div>
-            <div className="text-xs text-content-dim mb-1">BAU trajectory (2030)</div>
+            <div className="text-xs text-content-dim mb-1">{tc(lang, "label.bau_trajectory")}</div>
             <div className="text-lg text-blood">
               {formatNumber(data.global_indicators.sdg2.projected_2030_bau_m)}M
             </div>
-            <div className="text-xs text-content-dim">Status quo = failure</div>
+            <div className="text-xs text-content-dim">{tc(lang, "label.status_quo_failure")}</div>
           </div>
           <div>
-            <div className="text-xs text-content-dim mb-1">Ambitious scenario (2034)</div>
+            <div className="text-xs text-content-dim mb-1">{tc(lang, "label.ambitious_scenario")}</div>
             <div className="text-lg text-terminal-green glow-green">
               {formatNumber(data.global_indicators.sdg2.projected_2034_ambitious_m)}M
             </div>

@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useState, useRef, useEffect, useCallback } from "react";
+import { useStore } from "@/stores/useStore";
+import { tc } from "@/lib/i18n-content";
 import Link from "next/link";
 import backbone from "@/data/world_backbone.json";
 import type { WorldBackbone, CountryData } from "@/lib/types";
@@ -246,6 +248,7 @@ function renderNormalPoint(props: { cx?: number; cy?: number }) {
    ═══════════════════════════════════════════════════════════════ */
 
 export default function TheLensPage() {
+  const { lang } = useStore();
   /* ── Correlation state ── */
   const [xMetricId, setXMetricId] = useState("gdp_per_capita");
   const [yMetricId, setYMetricId] = useState("child_mortality");
@@ -403,10 +406,10 @@ export default function TheLensPage() {
           <h1 className="text-2xl md:text-3xl font-bold text-blood-bright glow-blood tracking-widest">
             THE LENS
           </h1>
-          <StatusPill color="amber">ANALYTICS</StatusPill>
+          <StatusPill color="amber">{tc(lang, "label.analytics")}</StatusPill>
         </div>
         <p className="text-sm text-content-secondary mt-2">
-          <span className="text-content-dim">//</span> Correlation is causation&apos;s shadow.
+          {tc(lang, "subtitle.the_lens")}
           Compare countries. Find patterns. Make arguments.
         </p>
       </div>

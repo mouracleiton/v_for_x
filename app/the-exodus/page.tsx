@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useStore } from "@/stores/useStore";
+import { tc } from "@/lib/i18n-content";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import TerminalCard from "@/components/ui/TerminalCard";
@@ -33,6 +35,7 @@ type ViewMode = "all" | "regional" | "continental";
 type LayerMode = "refugees" | "displaced" | "idps";
 
 export default function TheExodusPage() {
+  const { lang } = useStore();
   const [viewMode, setViewMode] = useState<ViewMode>("all");
   const [layerMode, setLayerMode] = useState<LayerMode>("refugees");
   const [selectedOrigin, setSelectedOrigin] = useState<string | null>(null);
@@ -76,24 +79,24 @@ export default function TheExodusPage() {
       </div>
 
       {/* Global stats bar */}
-      <TerminalCard title="GLOBAL DISPLACEMENT CRISIS" accent="blood" glow className="mb-6">
+      <TerminalCard title={tc(lang, "exodus.global_crisis")} accent="blood" glow className="mb-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div>
-            <div className="text-[10px] text-content-dim uppercase tracking-widest">REFUGEES</div>
+            <div className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "label.refugees")}</div>
             <div className="text-2xl text-blood-bright font-bold glow-blood">
               {formatNumber(stats.totalRefugees)}
             </div>
             <div className="text-[10px] text-content-dim">crossed a border</div>
           </div>
           <div>
-            <div className="text-[10px] text-content-dim uppercase tracking-widest">FORCIBLY DISPLACED</div>
+            <div className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "label.forcibly_displaced")}</div>
             <div className="text-2xl text-blood font-bold">
               {formatNumber(stats.totalDisplaced)}
             </div>
             <div className="text-[10px] text-content-dim">total</div>
           </div>
           <div>
-            <div className="text-[10px] text-content-dim uppercase tracking-widest">IDPs (DISASTER)</div>
+            <div className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "label.idps")}</div>
             <div className="text-2xl text-content-primary font-bold">
               {formatNumber(stats.totalIDPs)}
             </div>
@@ -110,15 +113,15 @@ export default function TheExodusPage() {
       </TerminalCard>
 
       {/* Map controls */}
-      <TerminalCard title="FLOW MAP" accent="amber" className="mb-6">
+      <TerminalCard title={tc(lang, "exodus.flow_map")} accent="amber" className="mb-6">
         <div className="flex flex-wrap items-center gap-3 mb-4">
           {/* Layer mode */}
           <div className="flex items-center gap-2">
             <span className="text-[10px] text-content-dim uppercase tracking-widest">LAYER:</span>
             {([
-              { id: "refugees", label: "REFUGEES" },
-              { id: "displaced", label: "DISPLACED" },
-              { id: "idps", label: "IDPs" },
+              { id: "refugees", label: tc(lang, "label.refugees") },
+              { id: "displaced", label: tc(lang, "label.displaced") },
+              { id: "idps", label: tc(lang, "label.idps") },
             ] as const).map((m) => (
               <button
                 key={m.id}
@@ -249,7 +252,7 @@ export default function TheExodusPage() {
           ))}
         </TerminalCard>
 
-        <TerminalCard title="TOP HOSTS // BURDEN SHARE" accent="green">
+        <TerminalCard title={tc(lang, "exodus.top_hosts")} accent="green">
           {stats.topHosts.slice(0, 10).map((n, i) => (
             <Link
               key={n.iso3}
@@ -273,7 +276,7 @@ export default function TheExodusPage() {
       </div>
 
       {/* Displacement ratio — most affected relative to population */}
-      <TerminalCard title="DISPLACEMENT AS % OF POPULATION // THE INVISIBLE CRISES" className="mb-6">
+      <TerminalCard title={tc(lang, "exodus.displacement_pct")} className="mb-6">
         <p className="text-xs text-content-dim mb-3">
           // These countries have the highest displaced-to-population ratio. The world doesn&apos;t talk about them.
         </p>

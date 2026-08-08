@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useStore } from "@/stores/useStore";
+import { tc } from "@/lib/i18n-content";
 import Link from "next/link";
 import backbone from "@/data/world_backbone.json";
 import type { WorldBackbone } from "@/lib/types";
@@ -15,6 +17,7 @@ const data = backbone as WorldBackbone;
 type Tab = "financing" | "blockers" | "phases";
 
 export default function TheLedgerPage() {
+  const { lang } = useStore();
   const [tab, setTab] = useState<Tab>("financing");
 
   // Financing alternatives — compute what each could fund
@@ -65,7 +68,7 @@ export default function TheLedgerPage() {
           THE LEDGER
         </h1>
         <p className="text-content-secondary text-sm mt-2">
-          // The money exists. The blockers are known. The roadmap is written.
+          {tc(lang, "subtitle.the_ledger")}
           What&apos;s missing is political will. Here&apos;s the full accounting.
         </p>
       </div>
@@ -94,7 +97,7 @@ export default function TheLedgerPage() {
       {/* ═══ FINANCING TAB ═══ */}
       {tab === "financing" && (
         <>
-          <TerminalCard title="5 WAYS TO FUND THE END OF HUNGER" accent="amber" className="mb-6">
+          <TerminalCard title={tc(lang, "ledger.five_ways")} accent="amber" className="mb-6">
             <p className="text-xs text-content-dim mb-4">
               // Each alternative raises more than the $93B/yr needed. The question was never
               &quot;can we afford it?&quot; — it was always &quot;will we choose to?&quot;
@@ -184,7 +187,7 @@ export default function TheLedgerPage() {
 
       {/* ═══ BLOCKERS TAB ═══ */}
       {tab === "blockers" && (
-        <TerminalCard title="STRUCTURAL BLOCKERS // WHY HUNGER PERSISTS" accent="blood" className="mb-6">
+        <TerminalCard title={tc(lang, "ledger.blockers")} accent="blood" className="mb-6">
           <p className="text-xs text-content-dim mb-4">
             // Money alone doesn&apos;t solve these. Each blocker requires a different kind of action —
             political, logistical, or military (humanitarian corridors).

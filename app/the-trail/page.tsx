@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useStore } from "@/stores/useStore";
+import { tc } from "@/lib/i18n-content";
 import Link from "next/link";
 import backbone from "@/data/world_backbone.json";
 import TerminalCard from "@/components/ui/TerminalCard";
@@ -29,6 +31,7 @@ import {
 const data = backbone as WorldBackbone;
 
 export default function TrilhaPage() {
+  const { lang } = useStore();
   const [ledger, setLedger] = useState<LedgerEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [identity, setIdentity] = useState<string | null>(null);
@@ -194,7 +197,7 @@ export default function TrilhaPage() {
           THE TRAIL
         </h1>
         <p className="text-content-secondary text-sm mt-2">
-          // Local-first ledger. Transparent routing. Signed entries. Export and verify.
+          {tc(lang, "subtitle.the_trail")}
         </p>
       </div>
 
@@ -270,7 +273,7 @@ export default function TrilhaPage() {
       </TerminalCard>
 
       {/* Transparent ledger */}
-      <TerminalCard title="TRANSPARENT LEDGER — LOCAL STORE" glow className="mb-6">
+      <TerminalCard title={tc(lang, "trail.transparent_ledger")} glow className="mb-6">
         <div className="flex items-center justify-between mb-3">
           <span className="text-xs text-content-secondary">
             {loading ? "Loading..." : `${ledger.length} entries stored locally`}
@@ -426,7 +429,7 @@ export default function TrilhaPage() {
 
       {/* Needs matching */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <TerminalCard title="I NEED" accent="blood">
+        <TerminalCard title={tc(lang, "trail.i_need")} accent="blood">
           <div className="space-y-3">
             <input
               type="text"
@@ -462,7 +465,7 @@ export default function TrilhaPage() {
           </div>
         </TerminalCard>
 
-        <TerminalCard title="I HAVE" accent="green">
+        <TerminalCard title={tc(lang, "trail.i_have")} accent="green">
           <div className="space-y-3">
             <input
               type="text"
@@ -532,7 +535,7 @@ export default function TrilhaPage() {
       </TerminalCard>
 
       {/* Financing integration */}
-      <TerminalCard title="FUND THE SOLUTION" className="mb-6">
+      <TerminalCard title={tc(lang, "trail.fund_solution")} className="mb-6">
         <Link href="/equation/" className="text-sm text-blood-bright hover:underline">
           → See The Equation: How $93B/year can end global hunger
         </Link>

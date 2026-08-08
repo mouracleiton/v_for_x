@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
+import { useStore } from "@/stores/useStore";
+import { tc } from "@/lib/i18n-content";
 import TerminalCard from "@/components/ui/TerminalCard";
 import StatusPill from "@/components/ui/StatusPill";
 import { sound } from "@/lib/sound";
@@ -111,6 +113,7 @@ curl -s https://mouracleiton.github.io/v_for_x/api/v1/equations.json | jq '.equa
 };
 
 export default function TheApiPage() {
+  const { lang } = useStore();
   const [selectedEndpoint, setSelectedEndpoint] = useState<string>("countries");
   const [codeLang, setCodeLang] = useState<keyof typeof CODE_SAMPLES>("javascript");
   const [queryIso3, setQueryIso3] = useState("BRA");
@@ -161,7 +164,7 @@ export default function TheApiPage() {
       </div>
 
       {/* API overview */}
-      <TerminalCard title="PUBLIC DATA API // v1.0" accent="green" glow className="mb-6">
+      <TerminalCard title={tc(lang, "api.public")} accent="green" glow className="mb-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
           <div>
             <div className="text-[10px] text-content-dim uppercase tracking-widest">ENDPOINTS</div>
@@ -189,7 +192,7 @@ export default function TheApiPage() {
       </TerminalCard>
 
       {/* Endpoint explorer */}
-      <TerminalCard title="ENDPOINTS // INTERACTIVE EXPLORER" accent="amber" className="mb-6">
+      <TerminalCard title={tc(lang, "api.endpoints")} accent="amber" className="mb-6">
         <div className="flex flex-wrap gap-2 mb-4">
           {ENDPOINTS.map((e) => (
             <button

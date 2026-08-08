@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import { useStore } from "@/stores/useStore";
+import { tc } from "@/lib/i18n-content";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import blueprintsData from "@/data/blueprints.json";
@@ -38,6 +40,7 @@ interface Blueprint {
 const blueprints = blueprintsData as Blueprint[];
 
 export default function ProtocolXContent() {
+  const { lang } = useStore();
   const searchParams = useSearchParams();
   const countryCode = searchParams.get("country");
   const [search, setSearch] = useState("");
@@ -106,7 +109,7 @@ export default function ProtocolXContent() {
           PROTOCOL X
         </h1>
         <p className="text-content-secondary text-sm mt-2">
-          // Survival and resistance blueprints. Both high-tech and low-tech. Tech is optional.
+          {tc(lang, "subtitle.protocol_x")}
         </p>
       </div>
 
@@ -220,7 +223,7 @@ export default function ProtocolXContent() {
       </div>
 
       {/* Survival Checklist Generator */}
-      <TerminalCard title="SURVIVAL CHECKLIST GENERATOR" glow>
+      <TerminalCard title={tc(lang, "protocol.checklist_generator")} glow>
         <p className="text-xs text-content-secondary mb-4">
           Select scenarios to generate a custom preparedness checklist from blueprint components.
         </p>
@@ -277,6 +280,7 @@ function BlueprintRecommender({
   countryCode: string | null;
   matchedBlueprints: MatchedBlueprint[];
 }) {
+  const { lang } = useStore();
   const [countrySearch, setCountrySearch] = useState("");
 
   const searchResults = useMemo(() => {
@@ -295,7 +299,7 @@ function BlueprintRecommender({
   const recommendedCount = matchedBlueprints.filter((m) => m.priority === "recommended").length;
 
   return (
-    <TerminalCard title="BLUEPRINT RECOMMENDER" accent="blood" glow={!!countryContext} className="mb-6">
+    <TerminalCard title={tc(lang, "protocol.blueprint_recommender")} accent="blood" glow={!!countryContext} className="mb-6">
       <p className="text-xs text-content-secondary mb-4">
         // the survival blueprints this country&apos;s crisis profile demands.
         {!countryContext && " select a country below — the engine matches its data (conflict, famine, water, health, governance) to the right protocols."}

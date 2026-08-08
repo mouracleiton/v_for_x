@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
+import { useStore } from "@/stores/useStore";
+import { tc } from "@/lib/i18n-content";
 import Link from "next/link";
 import TerminalCard from "@/components/ui/TerminalCard";
 import StatusPill from "@/components/ui/StatusPill";
@@ -25,6 +27,7 @@ import {
 } from "recharts";
 
 export default function AllocatorPage() {
+  const { lang } = useStore();
   const [allocations, setAllocations] = useState<Record<string, number>>({
     sdg2_hunger: 93,
     sdg6_water: 0,
@@ -73,12 +76,12 @@ export default function AllocatorPage() {
           THE ALLOCATOR
         </h1>
         <p className="text-content-secondary text-sm mt-2">
-          // You have the entire world military budget. Every slider you drag is a life you save or a missile you build. Choose.
+          {tc(lang, "subtitle.the_allocator")}
         </p>
       </div>
 
       {/* Summary bar */}
-      <TerminalCard title="YOUR BUDGET" accent="blood" glow className="mb-6">
+      <TerminalCard title={tc(lang, "allocator.budget")} accent="blood" glow className="mb-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
           <div>
             <div className="text-[10px] text-content-dim uppercase tracking-widest">ALLOCATED</div>
@@ -152,7 +155,7 @@ export default function AllocatorPage() {
       </TerminalCard>
 
       {/* Presets */}
-      <TerminalCard title="QUICK SCENARIOS" className="mb-6">
+      <TerminalCard title={tc(lang, "allocator.scenarios")} className="mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           {PRESETS.map((preset) => {
             const total = Object.values(preset.allocations).reduce((a, b) => a + b, 0);
@@ -289,7 +292,7 @@ export default function AllocatorPage() {
       </TerminalCard>
 
       {/* Comparison: what could this buy in military terms */}
-      <TerminalCard title="THE MATH OF MORALITY" className="mb-6">
+      <TerminalCard title={tc(lang, "allocator.morality")} className="mb-6">
         <div className="space-y-3 text-xs">
           <div className="p-3 border border-border-dim bg-void">
             <div className="text-blood-bright font-bold mb-2">

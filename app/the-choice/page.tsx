@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useStore } from "@/stores/useStore";
+import { tc } from "@/lib/i18n-content";
 import Link from "next/link";
 import backbone from "@/data/world_backbone.json";
 import type { WorldBackbone } from "@/lib/types";
@@ -34,6 +36,7 @@ type SortKey = "ratio" | "daysLocal" | "military" | "undernourished";
 type ViewMode = "offenders" | "all";
 
 export default function TheChoicePage() {
+  const { lang } = useStore();
   const entries = useMemo(() => buildChoiceData(data.countries), []);
   const [sortKey, setSortKey] = useState<SortKey>("ratio");
   const [viewMode, setViewMode] = useState<ViewMode>("offenders");
@@ -98,14 +101,14 @@ export default function TheChoicePage() {
           THE CHOICE
         </h1>
         <p className="text-content-secondary text-sm mt-2">
-          // Every government makes the same choice: how much to spend killing vs healing.
+          {tc(lang, "subtitle.the_choice")}
           {globalStats.offenderCount} countries spend more on military than health.
           The world spends ${formatNumber(globalStats.totalMil)}B/yr on weapons and ${formatNumber(globalStats.totalHealth)}B on health.
         </p>
       </div>
 
       {/* Global stats */}
-      <TerminalCard title="THE GLOBAL CHOICE" accent="blood" glow className="mb-6">
+      <TerminalCard title={tc(lang, "choice.global_choice")} accent="blood" glow className="mb-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
           <div>
             <div className="text-[10px] text-content-dim uppercase tracking-widest">WORLD MILITARY</div>
@@ -144,7 +147,7 @@ export default function TheChoicePage() {
       </TerminalCard>
 
       {/* Scatter: Military vs Health spending */}
-      <TerminalCard title="MILITARY vs HEALTH SPENDING // THE LINE" accent="amber" className="mb-6">
+      <TerminalCard title={tc(lang, "choice.military_vs_health")} accent="amber" className="mb-6">
         <p className="text-xs text-content-dim mb-3">
           // Every dot is a country. Above the line = military wins. Below = health wins.
           The line is parity (1:1). Red dots spend more on war than healing.
@@ -321,7 +324,7 @@ export default function TheChoicePage() {
       </TerminalCard>
 
       {/* The devastating summary */}
-      <TerminalCard title="THE DEVASTATING MATH" accent="blood" className="mb-6">
+      <TerminalCard title={tc(lang, "choice.devastating_math")} accent="blood" className="mb-6">
         <div className="space-y-4 text-sm">
           {/* Most absurd ratios */}
           {offenders.slice(0, 3).map((e) => (

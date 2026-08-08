@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { tc } from "@/lib/i18n-content";
 import TerminalCard from "@/components/ui/TerminalCard";
 import StatusPill from "@/components/ui/StatusPill";
 import { useStore } from "@/stores/useStore";
@@ -34,7 +35,7 @@ interface DeadDrop {
 }
 
 export default function TeiaPage() {
-  const { identity, setIdentity, session, startSession } = useStore();
+  const { identity, setIdentity, session, startSession, lang } = useStore();
   const [channel, setChannel] = useState("#general");
   const [input, setInput] = useState("");
   const [localMessages, setLocalMessages] = useState<P2PMessage[]>([]);
@@ -430,12 +431,12 @@ export default function TeiaPage() {
           THE WEB
         </h1>
         <p className="text-content-secondary text-sm mt-2">
-          // Anonymous communication. No registration. No email. No phone. Direct peer-to-peer.
+          {tc(lang, "subtitle.the_web")}
         </p>
       </div>
 
       {/* Identity panel */}
-      <TerminalCard title="ANONYMOUS IDENTITY" className="mb-6">
+      <TerminalCard title={tc(lang, "web.anonymous_identity")} className="mb-6">
         {identity ? (
           <div className="flex flex-wrap items-center gap-4">
             <div>
@@ -672,7 +673,7 @@ export default function TeiaPage() {
           </TerminalCard>
 
           {/* Dead drops */}
-          <TerminalCard title="DEAD DROPS — GPS-COORDINATE MESSAGE DROPS" accent="amber" className="mb-6">
+          <TerminalCard title={tc(lang, "web.dead_drops")} accent="amber" className="mb-6">
             <p className="text-xs text-content-secondary mb-4">
               Plant messages at geographic coordinates. Stored locally, persisted across sessions.
             </p>

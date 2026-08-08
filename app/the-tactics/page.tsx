@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useStore } from "@/stores/useStore";
+import { tc } from "@/lib/i18n-content";
 import Link from "next/link";
 import backbone from "@/data/world_backbone.json";
 import type { WorldBackbone, Tactic } from "@/lib/types";
@@ -126,6 +128,7 @@ type FilterCategory = "all" | "humanitarian" | "political" | "military";
 type SortKey = "success" | "casualties" | "speed" | "tier";
 
 export default function TheTacticsPage() {
+  const { lang } = useStore();
   const tactics = useMemo(() => normalizeTactics(), []);
   const [filter, setFilter] = useState<FilterCategory>("all");
   const [sortKey, setSortKey] = useState<SortKey>("success");
@@ -170,13 +173,13 @@ export default function TheTacticsPage() {
           THE TACTICS
         </h1>
         <p className="text-content-secondary text-sm mt-2">
-          // 17 ways to respond to crisis, ranked by what actually works. Nonviolent resistance
+          {tc(lang, "subtitle.the_tactics")}
           succeeds 53% of the time. Armed insurgency: 26%. The data is clear.
         </p>
       </div>
 
       {/* The proof — Chenoweth stat */}
-      <TerminalCard title="THE EVIDENCE // CHENOWETH FINDING" accent="green" glow className="mb-6">
+      <TerminalCard title={tc(lang, "tactics.evidence")} accent="green" glow className="mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <div className="text-xs text-content-dim mb-1">NONVIOLENT RESISTANCE</div>
@@ -399,7 +402,7 @@ export default function TheTacticsPage() {
       </div>
 
       {/* Key insight */}
-      <TerminalCard title="THE UNCOMFORTABLE TRUTH" accent="blood" className="mb-6">
+      <TerminalCard title={tc(lang, "tactics.uncomfortable")} accent="blood" className="mb-6">
         <div className="space-y-3 text-xs text-content-secondary">
           <p>
             The most effective tactics in conflict zones are <span className="text-terminal-green font-bold">not</span> the ones

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { tc } from "@/lib/i18n-content";
 import TerminalCard from "@/components/ui/TerminalCard";
 import StatusPill from "@/components/ui/StatusPill";
 import { useStore } from "@/stores/useStore";
@@ -19,7 +20,7 @@ const data = backbone as WorldBackbone;
 const HOTSPOT_ISO3S = data.hotspots.all.map((h) => h.iso3);
 
 export default function MascaraPage() {
-  const { identity, triggerDuress, isDuress, session, startSession } = useStore();
+  const { identity, triggerDuress, isDuress, session, startSession, lang } = useStore();
   const [duressCode, setDuressCode] = useState("");
   const [duressSet, setDuressSet] = useState(false);
   const [showDecoy, setShowDecoy] = useState(false);
@@ -73,12 +74,12 @@ export default function MascaraPage() {
           THE MASK
         </h1>
         <p className="text-content-secondary text-sm mt-2">
-          // Identity protection. Operational security. You are invisible until you choose not to be.
+          {tc(lang, "subtitle.the_mask")}
         </p>
       </div>
 
       {/* Threat model */}
-      <TerminalCard title="THREAT MODEL — WHAT WE PROTECT AGAINST" accent="amber" className="mb-6">
+      <TerminalCard title={tc(lang, "mask.threat_model")} accent="amber" className="mb-6">
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
@@ -235,7 +236,7 @@ export default function MascaraPage() {
       </TerminalCard>
 
       {/* Duress codes */}
-      <TerminalCard title="DURESS CODES — PLAUSIBLE DENIABILITY" className="mb-6">
+      <TerminalCard title={tc(lang, "mask.duress")} className="mb-6">
         {!duressSet ? (
           <div className="space-y-3">
             <p className="text-xs text-content-secondary">
@@ -290,7 +291,7 @@ export default function MascaraPage() {
       </TerminalCard>
 
       {/* Session management */}
-      <TerminalCard title="SESSION MANAGEMENT" className="mb-6">
+      <TerminalCard title={tc(lang, "mask.session_mgmt")} className="mb-6">
         <div className="flex items-center justify-between mb-3">
           <div>
             {session ? (
@@ -322,7 +323,7 @@ export default function MascaraPage() {
       </TerminalCard>
 
       {/* OpSec Guide */}
-      <TerminalCard title="OPSEC GUIDE — COMPREHENSIVE">
+      <TerminalCard title={tc(lang, "mask.opsec")}>
         <div className="space-y-1">
           {[
             { id: "opsec", title: "Operational Security Fundamentals" },

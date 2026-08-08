@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useStore } from "@/stores/useStore";
+import { tc } from "@/lib/i18n-content";
 import Link from "next/link";
 import backbone from "@/data/world_backbone.json";
 import type { WorldBackbone, Scenario } from "@/lib/types";
@@ -42,6 +44,7 @@ const INTERVENTION_COLORS = [
 type Tab = "hunger" | "deaths" | "regions" | "interventions";
 
 export default function TheTimelinePage() {
+  const { lang } = useStore();
   const [selectedScenarios, setSelectedScenarios] = useState<Set<string>>(
     new Set(["bau", "ambicioso"])
   );
@@ -158,7 +161,7 @@ export default function TheTimelinePage() {
       </div>
 
       {/* Scenario selector */}
-      <TerminalCard title="SELECT SCENARIOS TO COMPARE" className="mb-6">
+      <TerminalCard title={tc(lang, "timeline.select_scenarios")} className="mb-6">
         <div className="flex flex-wrap gap-2">
           {SCENARIO_META.map((m) => {
             const active = selectedScenarios.has(m.key);

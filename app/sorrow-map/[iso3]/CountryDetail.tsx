@@ -9,6 +9,8 @@ import GlitchText from "@/components/ui/GlitchText";
 import DataBar from "@/components/ui/DataBar";
 import StatusPill from "@/components/ui/StatusPill";
 import { useStore } from "@/stores/useStore";
+import { t } from "@/lib/i18n";
+import { tc } from "@/lib/i18n-content";
 import {
   formatNumber,
   formatPct,
@@ -245,6 +247,7 @@ interface MiserySubmission {
 }
 
 function ProofOfMiseryForm({ iso3 }: { iso3: string }) {
+  const { lang } = useStore();
   const [text, setText] = useState("");
   const [fileHash, setFileHash] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
@@ -330,7 +333,7 @@ function ProofOfMiseryForm({ iso3 }: { iso3: string }) {
     <TerminalCard title="PROOF OF MISERY // SUBMISSION" accent="blood" glow>
       <div className="mb-3 p-2 border border-blood-dim bg-blood/5">
         <div className="flex items-center gap-2 mb-1">
-          <StatusPill color="blood">UNVERIFIED</StatusPill>
+          <StatusPill color="blood">{tc(lang, "status.unverified")}</StatusPill>
           <span className="text-[10px] text-content-dim">
             Evidence stored locally. Requires on-chain attestation to become permanent.
           </span>
@@ -434,6 +437,7 @@ function ProofOfMiseryForm({ iso3 }: { iso3: string }) {
    ═══════════════════════════════════════════════════════════════ */
 
 function HungerSection({ c }: { c: CountryData }) {
+  const { lang } = useStore();
   const h = c.hunger;
   return (
     <>
@@ -456,7 +460,7 @@ function HungerSection({ c }: { c: CountryData }) {
       <DataRow label="Children SAM" value={formatVal(h.children_sam_m, "M", formatNumber)} />
       <DataRow
         label="IPC Phase 5 (Famine)"
-        value={h.ipc_phase5 ? "CONFIRMED" : "No"}
+        value={h.ipc_phase5 ? tc(lang, "status.confirmed") : tc(lang, "label.no")}
       />
       <DataRow label="Famine Risk" value={formatVal(h.famine_risk_1to5, "/5")} />
       <DataRow label="WFP Classification" value={h.wfp_class ? wfpClassLabel(h.wfp_class) : "—"} />
@@ -527,7 +531,7 @@ export default function CountryDetail({ params }: PageProps) {
   const { iso3: rawIso3 } = use(params);
   const code = rawIso3.toUpperCase();
   const router = useRouter();
-  const { setCurrentCountry } = useStore();
+  const { setCurrentCountry, lang } = useStore();
 
   const country = useMemo(
     () => data.countries.find((c) => c.iso3 === code) ?? null,
@@ -548,7 +552,7 @@ export default function CountryDetail({ params }: PageProps) {
     return (
       <div className="p-3 sm:p-6 max-w-3xl mx-auto">
         <GlitchText
-          text="COUNTRY NOT FOUND"
+          text={tc(lang, "status.country_not_found")}
           as="h1"
           className="text-2xl font-bold text-blood-bright glow-blood tracking-widest"
         />
@@ -577,7 +581,7 @@ export default function CountryDetail({ params }: PageProps) {
           href="/sorrow-map/"
           className="text-[10px] text-content-dim hover:text-blood-bright uppercase tracking-widest"
         >
-          {">"} MAPA DA DOR
+          {">"} {t(lang, "nav.sorrow-map")}
         </Link>
         <div className="flex items-baseline gap-3 mt-2 flex-wrap">
           <GlitchText
@@ -647,7 +651,7 @@ export default function CountryDetail({ params }: PageProps) {
             <DataRow label="Subregion" value={c.subregion} />
             <DataRow label="UN Member" value={c.is_un_member ? "Yes" : "No"} />
             <DataRow label="Population" value={`${formatNumber(c.demographics.population)} (${c.demographics.population_year})`} />
-            <DataRow label="Is Hotspot" value={c.is_hotspot ? "YES" : "No"} />
+            <DataRow label={tc(lang, "label.is_hotspot")} value={c.is_hotspot ? tc(lang, "label.yes") : tc(lang, "label.no")} />
             <DataRow label="Hotspot Score" value={formatVal(c.hotspot_score)} />
           </CollapsibleSection>
 

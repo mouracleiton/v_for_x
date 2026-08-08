@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useStore } from "@/stores/useStore";
+import { tc } from "@/lib/i18n-content";
 import Link from "next/link";
 import backbone from "@/data/world_backbone.json";
 import type { WorldBackbone, CountryData } from "@/lib/types";
@@ -123,6 +125,7 @@ function fmt(n: number | null): string {
 const RADAR_COLORS = ["#cc0000", "#00ddff", "#00ff41", "#ffaa00"];
 
 export default function TheIndexPage() {
+  const { lang } = useStore();
   const [tab, setTab] = useState<Tab>("ranking");
 
   return (
@@ -134,7 +137,7 @@ export default function TheIndexPage() {
           THE INDEX
         </h1>
         <p className="text-content-secondary text-sm mt-2">
-          // rank. compare. aggregate. the analytics engine — composite vulnerability scores,
+          {tc(lang, "subtitle.the_index")}
           side-by-side country comparison, and regional rollups across all 19 dimensions.
         </p>
       </div>
@@ -172,6 +175,7 @@ export default function TheIndexPage() {
    ═══════════════════════════════════════════════════════════════ */
 
 function VulnerabilityRanking() {
+  const { lang } = useStore();
   const [weights, setWeights] = useState<Record<string, number>>(
     Object.fromEntries(DOMAIN_WEIGHTS.map((d) => [d.domain, d.defaultWeight]))
   );
@@ -196,7 +200,7 @@ function VulnerabilityRanking() {
   return (
     <div className="space-y-6">
       {/* Weight controls */}
-      <TerminalCard title="DOMAIN WEIGHTS — DEFINE YOUR INDEX" accent="amber" glow>
+      <TerminalCard title={tc(lang, "index.domain_weights")} accent="amber" glow>
         <p className="text-xs text-content-secondary mb-4">
           // adjust the weights to redefine what "vulnerable" means. the ranking updates live.
           higher weight = that domain matters more. zero = ignore it entirely.
@@ -311,6 +315,7 @@ function VulnerabilityRanking() {
    ═══════════════════════════════════════════════════════════════ */
 
 function ComparisonMode() {
+  const { lang } = useStore();
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<string[]>(["SSD", "NOR", "IND"]);
 
@@ -496,7 +501,7 @@ function ComparisonMode() {
       )}
 
       {countries.length >= 2 && (
-        <TerminalCard title="SIDE-BY-SIDE COMPARISON" accent="blood" glow>
+        <TerminalCard title={tc(lang, "index.side_by_side")} accent="blood" glow>
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead>

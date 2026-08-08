@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useStore } from "@/stores/useStore";
+import { tc } from "@/lib/i18n-content";
 import backbone from "@/data/world_backbone.json";
 import TerminalCard from "@/components/ui/TerminalCard";
 import StatusPill from "@/components/ui/StatusPill";
@@ -372,6 +374,7 @@ const CITATIONS: string[] = [
 ];
 
 export default function TheArchivePage() {
+  const { lang } = useStore();
   const [openDim, setOpenDim] = useState<string | null>("hunger");
 
   const toggleDim = (key: string) => {
@@ -387,7 +390,7 @@ export default function TheArchivePage() {
           THE ARCHIVE
         </h1>
         <p className="text-content-secondary text-sm mt-2">
-          // Sources. Methods. Field definitions. Every number traceable to its origin.
+          {tc(lang, "subtitle.the_archive")}
         </p>
       </div>
 
@@ -489,7 +492,7 @@ export default function TheArchivePage() {
 
         <div className="grid gap-3 md:grid-cols-2">
           {/* Schema */}
-          <TerminalCard title="SCHEMA ARCHITECTURE" accent="green">
+          <TerminalCard title={tc(lang, "archive.schema")} accent="green">
             <p className="text-xs text-content-secondary leading-relaxed mb-3">
               The data spine is a flat relational structure:{" "}
               <span className="text-terminal-green font-mono">

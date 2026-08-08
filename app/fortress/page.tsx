@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { tc } from "@/lib/i18n-content";
 import { getMeta } from "@/lib/seo";
 import TerminalCard from "@/components/ui/TerminalCard";
 import StatusPill from "@/components/ui/StatusPill";
@@ -12,6 +13,8 @@ export const metadata: Metadata = {
 };
 
 export default function FortalezaPage() {
+  // Fortress is a server component — use "en" for static export
+  const lang = "en" as const;
   return (
     <div className="p-3 sm:p-6 md:p-10 max-w-4xl mx-auto">
       <div className="mb-8 pt-4">
@@ -20,12 +23,12 @@ export default function FortalezaPage() {
           THE FORTRESS
         </h1>
         <p className="text-content-secondary text-sm mt-2">
-          // If this platform goes dark, 10 others light up. Cut one head, two grow back.
+          {tc(lang, "subtitle.fortress")}
         </p>
       </div>
 
       {/* Hydra Nodes */}
-      <TerminalCard title="HYDRA NODES — DISTRIBUTED ARCHITECTURE" glow className="mb-6">
+      <TerminalCard title={tc(lang, "fortress.hydra")} glow className="mb-6">
         <pre className="text-blood text-[8px] md:text-[10px] leading-tight mb-4" aria-hidden="true">{`
      NODE-A          NODE-B          NODE-C
     ┌───────┐      ┌───────┐      ┌───────┐
@@ -53,7 +56,7 @@ export default function FortalezaPage() {
       </TerminalCard>
 
       {/* Self-hosting */}
-      <TerminalCard title="SELF-HOSTING — RUN A NODE" className="mb-6">
+      <TerminalCard title={tc(lang, "fortress.self_hosting")} className="mb-6">
         <div className="space-y-4">
           <div>
             <div className="text-xs font-bold text-blood-bright mb-2">DOCKER</div>
