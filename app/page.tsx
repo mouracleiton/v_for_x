@@ -33,7 +33,7 @@ const rotatingNumberKeys = [
 
 const sdgCounterItems: {
   sdg: string;
-  title: string;
+  titleKey: string;
   bigValue: string;
   labelKey: string;
   comparisonKey: string;
@@ -42,7 +42,7 @@ const sdgCounterItems: {
 }[] = [
   {
     sdg: "SDG 7",
-    title: "ENERGY",
+    titleKey: "cat.energy",
     bigValue: "$35B",
     labelKey: "sdg.energy_label",
     comparisonKey: "sdg.energy_comparison",
@@ -51,7 +51,7 @@ const sdgCounterItems: {
   },
   {
     sdg: "SDG 6",
-    title: "WATER",
+    titleKey: "cat.water",
     bigValue: "$114B",
     labelKey: "sdg.water_label",
     comparisonKey: "sdg.water_comparison",
@@ -60,7 +60,7 @@ const sdgCounterItems: {
   },
   {
     sdg: "SDG 3",
-    title: "HEALTH",
+    titleKey: "cat.health",
     bigValue: "$176B",
     labelKey: "sdg.health_label",
     comparisonKey: "sdg.health_comparison",
@@ -69,7 +69,7 @@ const sdgCounterItems: {
   },
   {
     sdg: "SDG 4",
-    title: "EDUCATION",
+    titleKey: "cat.education",
     bigValue: "$97B",
     labelKey: "sdg.education_label",
     comparisonKey: "sdg.education_comparison",
@@ -78,7 +78,7 @@ const sdgCounterItems: {
   },
   {
     sdg: "SDG 10",
-    title: "INEQUALITY",
+    titleKey: "cat.inequality",
     bigValue: "$313B",
     labelKey: "sdg.inequality_label",
     comparisonKey: "sdg.inequality_comparison",
@@ -87,7 +87,7 @@ const sdgCounterItems: {
   },
   {
     sdg: "SDG 13",
-    title: "CLIMATE",
+    titleKey: "cat.climate",
     bigValue: "764×",
     labelKey: "sdg.climate_label",
     comparisonKey: "sdg.climate_comparison",
@@ -133,7 +133,7 @@ function SdgRotatingCounter({ lang }: { lang: Lang }) {
             {item.sdg}
           </span>
           <span className="text-xs font-bold uppercase tracking-widest" style={{ color: item.color }}>
-            {item.title}
+            {tc(lang, item.titleKey)}
           </span>
         </div>
         <div className="flex items-baseline gap-3 mb-2">
@@ -164,7 +164,7 @@ function SdgRotatingCounter({ lang }: { lang: Lang }) {
                 width: i === idx ? 24 : 8,
                 backgroundColor: i === idx ? item.color : "var(--color-border-dim)",
               }}
-              aria-label={`Go to ${s.title}`}
+              aria-label={`Go to ${tc(lang, s.titleKey)}`}
             />
           ))}
         </div>
