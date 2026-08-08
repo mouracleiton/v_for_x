@@ -104,9 +104,9 @@ export default function ProtocolXContent() {
     <div className="p-3 sm:p-6 md:p-10 max-w-5xl mx-auto">
       {/* Header */}
       <div className="mb-8 pt-4">
-        <div className="text-xs text-content-dim mb-1">[03] PROTOCOL X</div>
+        <div className="text-xs text-content-dim mb-1">{tc(lang, "protocol.tag")}</div>
         <h1 className="text-2xl md:text-3xl text-blood-bright font-bold glow-blood">
-          PROTOCOL X
+          {tc(lang, "protocol.title")}
         </h1>
         <p className="text-content-secondary text-sm mt-2">
           {tc(lang, "subtitle.protocol_x")}
@@ -123,19 +123,19 @@ export default function ProtocolXContent() {
       {/* Context indicator (legacy tag-based hints, shown alongside matches) */}
       {countryContext && contextTag && contextTag.length > 0 && (
         <TerminalCard
-          title={`CONTEXT FILTER ACTIVE — ${countryContext.name_en}`}
+          title={`${tc(lang, "protocol.context_filter")} — ${countryContext.name_en}`}
           accent="amber"
           className="mb-6"
         >
           <div className="text-xs space-y-1">
             {countryContext.conflict.intensity_1to5 >= 3 && (
-              <div className="text-blood">▸ High conflict intensity — security and comms blueprints prioritized</div>
+              <div className="text-blood">{tc(lang, "protocol.ctx_conflict")}</div>
             )}
             {countryContext.hunger.famine_risk_1to5 && countryContext.hunger.famine_risk_1to5 >= 3 && (
-              <div className="text-blood">▸ Famine risk detected — food and water blueprints prioritized</div>
+              <div className="text-blood">{tc(lang, "protocol.ctx_famine")}</div>
             )}
             {countryContext.connectivity.internet_users_pct !== null && countryContext.connectivity.internet_users_pct < 30 && (
-              <div className="text-warning-amber">▸ Low connectivity — low-tech solutions recommended</div>
+              <div className="text-warning-amber">{tc(lang, "protocol.ctx_low_connect")}</div>
             )}
           </div>
         </TerminalCard>
@@ -145,7 +145,7 @@ export default function ProtocolXContent() {
       <div className="flex flex-col md:flex-row gap-3 mb-6">
         <input
           type="text"
-          placeholder="search blueprints..."
+          placeholder={tc(lang, "protocol.search_ph")}
           value={search}
           onChange={(e) => {
             setSearch(e.target.value);
@@ -167,7 +167,7 @@ export default function ProtocolXContent() {
                   : "border-border-dim text-content-secondary hover:border-blood-dim"
               }`}
             >
-              {t === "ALL" ? "ALL" : t === "HIGH" ? "HIGH-TECH" : "LOW-TECH"}
+              {t === "ALL" ? tc(lang, "protocol.all") : t === "HIGH" ? tc(lang, "protocol.high_tech") : tc(lang, "protocol.low_tech")}
             </button>
           ))}
         </div>
@@ -210,12 +210,12 @@ export default function ProtocolXContent() {
               <StatusPill
                 color={b.tech_level === "HIGH" ? "amber" : "green"}
               >
-                {b.tech_level}-TECH
+                {b.tech_level === "HIGH" ? tc(lang, "protocol.high_tech_short") : tc(lang, "protocol.low_tech_short")}
               </StatusPill>
             </div>
             <div className="flex flex-wrap items-center gap-3 text-xs text-content-dim mt-2">
               <span>▸ {b.category}</span>
-              <span>▸ Difficulty: {"★".repeat(b.difficulty)}{"☆".repeat(5 - b.difficulty)}</span>
+              <span>▸ {tc(lang, "protocol.difficulty")}: {"★".repeat(b.difficulty)}{"☆".repeat(5 - b.difficulty)}</span>
               <span>▸ {b.time_estimate}</span>
             </div>
           </Link>
@@ -225,7 +225,7 @@ export default function ProtocolXContent() {
       {/* Survival Checklist Generator */}
       <TerminalCard title={tc(lang, "protocol.checklist_generator")} glow>
         <p className="text-xs text-content-secondary mb-4">
-          Select scenarios to generate a custom preparedness checklist from blueprint components.
+          {tc(lang, "protocol.checklist_desc")}
         </p>
         <SurvivalChecklist />
       </TerminalCard>
@@ -235,12 +235,12 @@ export default function ProtocolXContent() {
         <TerminalCard title={tc(lang, "card.cross_links")}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <Link href="/the-trail/" className="terminal-card p-3 hover:border-blood block">
-              <div className="text-xs text-blood-bright font-bold">→ NEED SUPPLIES?</div>
-              <div className="text-xs text-content-secondary mt-1">Resource matching in your area</div>
+              <div className="text-xs text-blood-bright font-bold">{tc(lang, "protocol.link_supplies")}</div>
+              <div className="text-xs text-content-secondary mt-1">{tc(lang, "protocol.link_supplies_desc")}</div>
             </Link>
             <Link href="/the-mask/" className="terminal-card p-3 hover:border-blood block">
-              <div className="text-xs text-blood-bright font-bold">→ SECURE YOUR COMMS</div>
-              <div className="text-xs text-content-secondary mt-1">Identity protection and OpSec</div>
+              <div className="text-xs text-blood-bright font-bold">{tc(lang, "protocol.link_comms")}</div>
+              <div className="text-xs text-content-secondary mt-1">{tc(lang, "protocol.link_comms_desc")}</div>
             </Link>
           </div>
         </TerminalCard>
@@ -301,14 +301,13 @@ function BlueprintRecommender({
   return (
     <TerminalCard title={tc(lang, "protocol.blueprint_recommender")} accent="blood" glow={!!countryContext} className="mb-6">
       <p className="text-xs text-content-secondary mb-4">
-        // the survival blueprints this country&apos;s crisis profile demands.
-        {!countryContext && " select a country below — the engine matches its data (conflict, famine, water, health, governance) to the right protocols."}
+        // {tc(lang, "protocol.recommender_desc")}
       </p>
 
       {/* Country selector */}
       <div className="relative mb-4">
         <label className="text-[10px] text-content-dim uppercase tracking-wider block mb-1">
-          Country Context {countryCode && <span className="text-terminal-green">— ACTIVE: {countryContext?.name_en}</span>}
+          {tc(lang, "protocol.country_context")} {countryCode && <span className="text-terminal-green">— {tc(lang, "protocol.active")}: {countryContext?.name_en}</span>}
         </label>
         <input
           type="text"
@@ -319,7 +318,7 @@ function BlueprintRecommender({
           onFocus={() => {
             if (countryContext) setCountrySearch("");
           }}
-          placeholder="Search country (e.g. Sudan, SSD…)"
+          placeholder={tc(lang, "act.search_country_ph")}
           className="w-full bg-void border border-border-dim px-3 py-2 text-xs text-content-primary focus:border-blood focus:outline-none"
         />
         {searchResults.length > 0 && (
@@ -333,7 +332,7 @@ function BlueprintRecommender({
               >
                 <span className="text-content-dim font-mono mr-2">{c.iso3}</span>
                 {c.name_en}
-                {c.is_hotspot && <span className="text-blood-bright ml-2 text-[10px]">HOTSPOT</span>}
+                {c.is_hotspot && <span className="text-blood-bright ml-2 text-[10px]">{tc(lang, "act.hotspot")}</span>}
               </Link>
             ))}
           </div>
@@ -345,11 +344,11 @@ function BlueprintRecommender({
         <div>
           {/* Summary line */}
           <div className="flex flex-wrap gap-3 mb-3 text-[10px]">
-            <span className="text-blood-bright">{criticalCount} critical</span>
-            <span className="text-warning-amber">{recommendedCount} recommended</span>
-            <span className="text-terminal-green">{matchedBlueprints.length - criticalCount - recommendedCount} resilience</span>
+            <span className="text-blood-bright">{criticalCount} {tc(lang, "protocol.critical")}</span>
+            <span className="text-warning-amber">{recommendedCount} {tc(lang, "protocol.recommended")}</span>
+            <span className="text-terminal-green">{matchedBlueprints.length - criticalCount - recommendedCount} {tc(lang, "protocol.resilience")}</span>
             <span className="text-content-dim ml-auto">
-              → {matchedBlueprints.length} of {blueprints.length} blueprints matched
+              → {matchedBlueprints.length} / {blueprints.length} {tc(lang, "protocol.blueprints_matched")}
             </span>
           </div>
 
@@ -369,7 +368,7 @@ function BlueprintRecommender({
                       <span className="text-xs font-bold text-content-primary">{m.blueprint.title}</span>
                     </div>
                     <StatusPill color={m.blueprint.tech_level === "HIGH" ? "amber" : "green"}>
-                      {m.blueprint.tech_level}-TECH
+                      {m.blueprint.tech_level === "HIGH" ? tc(lang, "protocol.high_tech_short") : tc(lang, "protocol.low_tech_short")}
                     </StatusPill>
                   </div>
                   <div className="text-[11px] text-content-secondary leading-relaxed">
@@ -389,7 +388,7 @@ function BlueprintRecommender({
         </div>
       ) : countryContext ? (
         <div className="text-xs text-content-dim italic">
-          ▸ No specific crisis triggers detected for {countryContext.name_en}. Browse the full catalog below or try another country.
+          ▸ {tc(lang, "protocol.no_triggers")} {countryContext.name_en}. {tc(lang, "protocol.browse_catalog")}
         </div>
       ) : (
         <div className="flex flex-wrap gap-2">
@@ -410,6 +409,7 @@ function BlueprintRecommender({
 }
 
 function SurvivalChecklist() {
+  const { lang } = useStore();
   const [scenarios, setScenarios] = useState<string[]>([]);
   const [savedKits, setSavedKits] = useState<ChecklistKit[]>([]);
   const [kitName, setKitName] = useState("");
@@ -425,19 +425,19 @@ function SurvivalChecklist() {
 
   const scenarioMap: Record<string, { label: string; items: string[] }> = {
     conflict: {
-      label: "Active Conflict",
+      label: tc(lang, "protocol.scn_conflict"),
       items: ["Mesh network devices (encrypted comms)", "Dead drop protocol established", "Field first aid knowledge", "Nonviolent resistance strategy training", "Digital OpSec practices", "Mutual aid network activated", "Evacuation route planned"],
     },
     disaster: {
-      label: "Natural Disaster",
+      label: tc(lang, "protocol.scn_disaster"),
       items: ["Water purification supplies (solar + boiling)", "Emergency caloric garden started", "Micro solar setup (50W)", "3-day food reserve", "Battery-powered radio", "First aid supplies", "Physical maps of area"],
     },
     economic: {
-      label: "Economic Collapse",
+      label: tc(lang, "protocol.scn_economic"),
       items: ["Mutual aid network established", "Emergency garden (food sovereignty)", "Barter inventory (skills + goods)", "Off-grid power capability", "Water purification capacity", "Community defense plan"],
     },
     epidemic: {
-      label: "Epidemic/Outbreak",
+      label: tc(lang, "protocol.scn_epidemic"),
       items: ["Water purification (boiling + solar)", "First aid knowledge (no-contact care)", "Isolation protocols", "Basic medical supplies (gloves, masks)", "Communications plan (remote coordination)", "Nutrition maintenance (garden)"],
     },
   };
@@ -541,8 +541,8 @@ function SurvivalChecklist() {
           {/* Progress bar */}
           <div className="mb-4">
             <div className="flex justify-between text-[10px] text-content-dim mb-1">
-              <span>READINESS: {progress}%</span>
-              <span>{Array.from(checkedItems).filter((i) => allItems.includes(i)).length} / {allItems.length} ITEMS ACQUIRED</span>
+              <span>{tc(lang, "protocol.readiness")}: {progress}%</span>
+              <span>{Array.from(checkedItems).filter((i) => allItems.includes(i)).length} / {allItems.length} {tc(lang, "protocol.items_acquired")}</span>
             </div>
             <div className="w-full h-2 bg-void border border-border-dim">
               <div
@@ -557,7 +557,7 @@ function SurvivalChecklist() {
 
           {/* Checklist items */}
           <div className="text-xs text-terminal-green mb-2">
-            ▸ CHECKLIST ({allItems.length} ITEMS):
+            ▸ {tc(lang, "protocol.checklist_header")} ({allItems.length}):
           </div>
           <div className="space-y-1 mb-4">
             {allItems.map((item, i) => (
@@ -582,38 +582,38 @@ function SurvivalChecklist() {
               type="text"
               value={kitName}
               onChange={(e) => setKitName(e.target.value)}
-              placeholder="Kit name (optional)"
+              placeholder={tc(lang, "protocol.kit_name_ph")}
               className="flex-1 min-w-[120px] bg-void border border-border-dim px-3 py-1.5 text-xs text-content-primary focus:border-blood focus:outline-none"
             />
             <button
               onClick={saveKit}
               className="px-3 py-1.5 text-xs border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void"
             >
-              [ SAVE KIT ]
+              {tc(lang, "protocol.save_kit")}
             </button>
             <button
               onClick={exportKit}
               className="px-3 py-1.5 text-xs border border-blood text-blood-bright hover:bg-blood hover:text-void"
             >
-              [ EXPORT SIGNED JSON ]
+              {tc(lang, "protocol.export_json")}
             </button>
             <button
               onClick={() => window.print()}
               className="px-3 py-1.5 text-xs border border-border-dim text-content-secondary hover:border-blood no-print"
             >
-              [ PRINT ]
+              {tc(lang, "protocol.print")}
             </button>
           </div>
         </>
       ) : (
-        <p className="text-xs text-content-dim mb-4">Select scenarios above to generate your checklist.</p>
+        <p className="text-xs text-content-dim mb-4">{tc(lang, "protocol.select_scenarios")}</p>
       )}
 
       {/* Saved kits */}
       {!loadingKits && savedKits.length > 0 && (
         <div className="border-t border-border-dim pt-3">
           <div className="text-[10px] text-content-dim uppercase tracking-widest mb-2">
-            SAVED KITS ({savedKits.length})
+            {tc(lang, "protocol.saved_kits")} ({savedKits.length})
           </div>
           <div className="space-y-1">
             {savedKits.map((kit) => {
@@ -623,14 +623,14 @@ function SurvivalChecklist() {
                   <button onClick={() => loadKit(kit)} className="flex-1 text-left">
                     <span className="text-xs text-content-primary font-bold">{kit.name}</span>
                     <span className="text-[10px] text-content-dim ml-2">
-                      {kit.scenarios.length} scenarios · {checked}/{kit.items.length} items
+                      {kit.scenarios.length} {tc(lang, "protocol.scenarios")} · {checked}/{kit.items.length} {tc(lang, "protocol.items")}
                     </span>
                   </button>
                   <button
                     onClick={() => kit.id && deleteKit(kit.id)}
                     className="text-content-dim hover:text-blood text-xs ml-2"
                   >
-                    [×]
+                    {tc(lang, "protocol.delete")}
                   </button>
                 </div>
               );

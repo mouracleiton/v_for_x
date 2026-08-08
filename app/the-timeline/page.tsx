@@ -150,13 +150,12 @@ export default function TheTimelinePage() {
     <div className="p-3 sm:p-6 md:p-10 max-w-6xl mx-auto">
       {/* Header */}
       <div className="mb-8 pt-4">
-        <div className="text-xs text-content-dim mb-1">[22] THE TIMELINE</div>
+        <div className="text-xs text-content-dim mb-1">{tc(lang, "timeline.tag")}</div>
         <h1 className="text-2xl md:text-3xl text-blood-bright font-bold glow-blood tracking-widest">
-          THE TIMELINE
+          {tc(lang, "timeline.title")}
         </h1>
         <p className="text-content-secondary text-sm mt-2">
-          // 10 years. 5 scenarios. {formatNumber(8745173)} lives hang in the balance.
-          This is what happens if we act — and what happens if we don&apos;t.
+          // {tc(lang, "timeline.subtitle_extra")} {formatNumber(8745173)} {tc(lang, "timeline.lives_in_balance")}
         </p>
       </div>
 
@@ -187,10 +186,10 @@ export default function TheTimelinePage() {
       {/* Tab selector */}
       <div className="flex gap-2 mb-4">
         {([
-          { id: "hunger", label: "HUNGER TRAJECTORY" },
-          { id: "deaths", label: "DEATHS AVOIDED" },
-          { id: "regions", label: "REGIONAL IMPACT" },
-          { id: "interventions", label: "INTERVENTION ROI" },
+          { id: "hunger", label: tc(lang, "timeline.tab_hunger") },
+          { id: "deaths", label: tc(lang, "timeline.tab_deaths") },
+          { id: "regions", label: tc(lang, "timeline.tab_regions") },
+          { id: "interventions", label: tc(lang, "timeline.tab_interventions") },
         ] as const).map((t) => (
           <button
             key={t.id}
@@ -235,8 +234,7 @@ export default function TheTimelinePage() {
             </ResponsiveContainer>
           </div>
           <div className="text-[10px] text-content-dim mt-2">
-            // BAU = business as usual (do nothing). Ambicioso ($93B/yr) reaches the SDG2 target by 2032.
-            Every scenario between is a political choice.
+            {tc(lang, "timeline.hunger_desc")}
           </div>
         </TerminalCard>
       )}
@@ -274,10 +272,10 @@ export default function TheTimelinePage() {
             </ResponsiveContainer>
           </div>
           <div className="p-3 mt-3 border border-terminal-green/30 bg-terminal-green/5 text-xs text-terminal-green">
-            The Ambitious scenario saves {formatNumber(8745173)} lives over 10 years for $93B/yr.
-            That&apos;s {" "}
+            {tc(lang, "timeline.ambitious_saves")} {formatNumber(8745173)} {tc(lang, "timeline.lives_10yr")}
+            {tc(lang, "timeline.thats")}{" "}
             <span className="font-bold">${(93e9 / 8745173).toFixed(0)}</span>
-            {" "}/life/year — cheaper than a single missile.
+            {" "}/{tc(lang, "timeline.life_year")} — {tc(lang, "timeline.cheaper_missile")}
           </div>
         </TerminalCard>
       )}
@@ -286,7 +284,7 @@ export default function TheTimelinePage() {
       {tab === "regions" && (
         <TerminalCard title={tc(lang, "card.regional_impact")} accent="amber" className="mb-6">
           <div className="flex items-center gap-2 mb-4">
-            <span className="text-[10px] text-content-dim uppercase tracking-widest">SCENARIO:</span>
+            <span className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "timeline.scenario_word")}:</span>
             {SCENARIO_META.filter((m) => m.key !== "bau").map((m) => (
               <button
                 key={m.key}
@@ -320,11 +318,11 @@ export default function TheTimelinePage() {
                 <div key={r.region} className="p-3 border border-border-dim bg-void">
                   <div className="font-bold text-content-primary text-sm">{r.region}</div>
                   <div className="text-xs text-content-secondary mt-1">
-                    <span className="text-blood-bright font-bold">{r.start}M</span> hungry today → {" "}
-                    <span className="text-terminal-green font-bold">{r.end}M</span> by 2034
+                    <span className="text-blood-bright font-bold">{r.start}M</span> {tc(lang, "timeline.hungry_today")} → {" "}
+                    <span className="text-terminal-green font-bold">{r.end}M</span> {tc(lang, "timeline.by_2034")}
                   </div>
                   <div className="text-xs text-terminal-green font-bold mt-1">
-                    {reduction.toFixed(0)}% reduction · {formatNumber(r.start - r.end)}M fed
+                    {reduction.toFixed(0)}% {tc(lang, "timeline.reduction")} · {formatNumber(r.start - r.end)}M {tc(lang, "timeline.fed")}
                   </div>
                 </div>
               );
@@ -337,8 +335,7 @@ export default function TheTimelinePage() {
       {tab === "interventions" && (
         <TerminalCard title={tc(lang, "card.intervention_roi")} accent="green" className="mb-6">
           <p className="text-xs text-content-dim mb-3">
-            // The Ambitious scenario ($93B/yr) allocates across 6 evidence-based interventions.
-            ROI = return on investment multiplier per dollar.
+            {tc(lang, "timeline.roi_desc")}
           </p>
           <div style={{ width: "100%", height: 320 }}>
             <ResponsiveContainer>
@@ -371,11 +368,11 @@ export default function TheTimelinePage() {
             <table className="w-full text-xs">
               <thead>
                 <tr className="border-b border-border-dim text-content-dim text-[10px] uppercase tracking-widest">
-                  <th className="text-left p-2">Intervention</th>
-                  <th className="text-right p-2">Budget</th>
-                  <th className="text-right p-2">People Reached</th>
-                  <th className="text-right p-2">Cost/Person</th>
-                  <th className="text-center p-2">ROI</th>
+                  <th className="text-left p-2">{tc(lang, "timeline.th_intervention")}</th>
+                  <th className="text-right p-2">{tc(lang, "timeline.th_budget")}</th>
+                  <th className="text-right p-2">{tc(lang, "timeline.th_people_reached")}</th>
+                  <th className="text-right p-2">{tc(lang, "timeline.th_cost_person")}</th>
+                  <th className="text-center p-2">{tc(lang, "timeline.th_roi")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -388,7 +385,7 @@ export default function TheTimelinePage() {
                     <td className="p-2 text-right text-blood-bright font-bold">${formatNumber(iv.budget)}B</td>
                     <td className="p-2 text-right text-terminal-green">{formatNumber(iv.people)}M</td>
                     <td className="p-2 text-right text-content-secondary">
-                      ${iv.budget > 0 ? (iv.budget / iv.people).toFixed(0) : "?"}/person
+                      ${iv.budget > 0 ? (iv.budget / iv.people).toFixed(0) : "?"}/{tc(lang, "timeline.person")}
                     </td>
                     <td className="p-2 text-center">
                       <span
@@ -398,7 +395,7 @@ export default function TheTimelinePage() {
                           color: iv.roi >= 10 ? "#00ff41" : iv.roi >= 5 ? "#ffaa00" : "#cc0000",
                         }}
                       >
-                        {iv.roi}× ROI
+                        {iv.roi}× {tc(lang, "timeline.roi_word")}
                       </span>
                     </td>
                   </tr>
@@ -407,9 +404,7 @@ export default function TheTimelinePage() {
             </table>
           </div>
           <div className="p-3 mt-3 border border-terminal-green/30 bg-terminal-green/5 text-xs">
-            <span className="text-terminal-green font-bold">Agricultural R&amp;D has 20× ROI</span> — every $1
-            invested returns $20. It reaches the fewest people directly but creates climate-resilient crops
-            that feed billions. School Feeding has 10× ROI and breaks the intergenerational cycle of poverty.
+            <span className="text-terminal-green font-bold">{tc(lang, "timeline.agri_roi")}</span> {tc(lang, "timeline.agri_roi_desc")}
           </div>
         </TerminalCard>
       )}
@@ -441,17 +436,17 @@ export default function TheTimelinePage() {
               <div className="flex items-center gap-2 mb-2">
                 <span className="inline-block w-3 h-3" style={{ backgroundColor: s.color }} />
                 <span className="text-xs font-bold" style={{ color: s.color }}>{s.label}</span>
-                {s.sdg2 && <StatusPill color="green">SDG2 MET</StatusPill>}
+                {s.sdg2 && <StatusPill color="green">{tc(lang, "timeline.sdg2_met")}</StatusPill>}
               </div>
               <div className="text-2xl font-bold" style={{ color: s.hunger < 20 ? "#00ff41" : s.hunger < 200 ? "#ffaa00" : "#cc0000" }}>
                 {formatNumber(s.hunger)}M
               </div>
-              <div className="text-[10px] text-content-dim">undernourished in {scrubYear}</div>
+              <div className="text-[10px] text-content-dim">{tc(lang, "timeline.undernourished_in")} {scrubYear}</div>
               <div className="mt-2 text-xs text-terminal-green">
-                {formatNumber(s.deaths)} lives saved (cumulative)
+                {formatNumber(s.deaths)} {tc(lang, "timeline.lives_saved_cumul")}
               </div>
               <div className="text-[10px] text-content-dim">
-                ${formatNumber(s.cumulativeCost)}B invested total
+                ${formatNumber(s.cumulativeCost)}B {tc(lang, "timeline.invested_total")}
               </div>
             </div>
           ))}
@@ -461,13 +456,13 @@ export default function TheTimelinePage() {
       {/* Cross-links */}
       <div className="flex flex-wrap gap-2">
         <Link href="/the-allocator/" className="text-xs px-3 py-1.5 border border-border-dim text-content-secondary hover:border-blood hover:text-blood-bright">
-          ▶ ALLOCATE THE BUDGET
+          {tc(lang, "timeline.link_allocator")}
         </Link>
         <Link href="/the-choice/" className="text-xs px-3 py-1.5 border border-border-dim text-content-secondary hover:border-blood hover:text-blood-bright">
-          ▶ THE CHOICE
+          {tc(lang, "timeline.link_choice")}
         </Link>
         <Link href="/equation/" className="text-xs px-3 py-1.5 border border-border-dim text-content-secondary hover:border-blood hover:text-blood-bright">
-          ▶ FULL EQUATION
+          {tc(lang, "timeline.link_equation")}
         </Link>
       </div>
     </div>

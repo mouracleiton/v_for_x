@@ -33,6 +33,7 @@ const sdgTabMeta: Record<string, { label: string; color: string }> = {
 type Mode = "country" | "equation";
 
 function CopyButton({ text, label }: { text: string; label: string }) {
+  const { lang } = useStore();
   const [copied, setCopied] = useState(false);
   const copy = async () => {
     try {
@@ -53,7 +54,7 @@ function CopyButton({ text, label }: { text: string; label: string }) {
           : "border-border-dim text-content-secondary hover:border-blood hover:text-blood-bright"
       }`}
     >
-      {copied ? "[ COPIED ]" : label}
+      {copied ? tc(lang, "act.copied") : label}
     </button>
   );
 }
@@ -195,14 +196,12 @@ export default function TheActPage() {
     <div className="p-3 sm:p-6 md:p-10 max-w-4xl mx-auto">
       {/* Header */}
       <div className="mb-8 pt-4">
-        <div className="text-xs text-content-dim mb-1">[12] THE ACT</div>
+        <div className="text-xs text-content-dim mb-1">{tc(lang, "act.tag")}</div>
         <h1 className="text-2xl md:text-3xl text-blood-bright font-bold glow-blood">
-          THE ACT
+          {tc(lang, "act.title")}
         </h1>
         <p className="text-content-secondary text-sm mt-2">
-          {tc(lang, "subtitle.the_act")}
-          Tweet threads, WhatsApp messages, Instagram captions — all pre-written with real data.
-          Copy. Paste. Change the narrative.
+          {tc(lang, "subtitle.the_act")}{" "}{tc(lang, "act.subtitle_extra")}
         </p>
       </div>
 
@@ -216,7 +215,7 @@ export default function TheActPage() {
               : "border-border-dim text-content-secondary hover:border-blood-dim"
           }`}
         >
-          BY COUNTRY
+          {tc(lang, "act.by_country")}
         </button>
         <button
           onClick={() => { setMode("equation"); sound.select(); }}
@@ -226,7 +225,7 @@ export default function TheActPage() {
               : "border-border-dim text-content-secondary hover:border-blood-dim"
           }`}
         >
-          BY SDG EQUATION
+          {tc(lang, "act.by_sdg")}
         </button>
       </div>
 
@@ -239,7 +238,7 @@ export default function TheActPage() {
                 type="text"
                 value={countrySearch}
                 onChange={(e) => setCountrySearch(e.target.value)}
-                placeholder="Search country (e.g. Sudan, SSD, Yemen…)"
+                placeholder={tc(lang, "act.search_country_ph")}
                 className="w-full bg-void border border-border-dim px-3 py-2 text-xs text-content-primary focus:border-terminal-green focus:outline-none"
               />
               {searchResults.length > 0 && (
@@ -258,7 +257,7 @@ export default function TheActPage() {
                         <span className="text-content-dim font-mono mr-2">{c.iso3}</span>
                         {c.name_en}
                       </span>
-                      {c.is_hotspot && <StatusPill color="blood">HOTSPOT</StatusPill>}
+                      {c.is_hotspot && <StatusPill color="blood">{tc(lang, "act.hotspot")}</StatusPill>}
                     </button>
                   ))}
                 </div>
@@ -266,17 +265,17 @@ export default function TheActPage() {
             </div>
             {country && (
               <div className="mt-3 p-2 border border-terminal-green bg-terminal-green/5 text-xs text-content-primary">
-                ✓ Selected: <strong>{country.name_en}</strong> ({country.iso3}) — {(country.demographics.population / 1e6).toFixed(0)}M people
+                {tc(lang, "act.selected")} <strong>{country.name_en}</strong> ({country.iso3}) — {(country.demographics.population / 1e6).toFixed(0)}M {tc(lang, "act.people_word")}
                 {vuln && (
                   <span className="ml-2 text-[10px]" style={{ color: scoreColor(vuln.composite) }}>
-                    Vulnerability: {vuln.composite.toFixed(0)}/100
+                    {tc(lang, "act.vulnerability_word")} {vuln.composite.toFixed(0)}/100
                   </span>
                 )}
               </div>
             )}
             {/* Quick picks */}
             <div className="mt-3">
-              <div className="text-[10px] text-content-dim uppercase mb-1">Quick pick — worst crises</div>
+              <div className="text-[10px] text-content-dim uppercase mb-1">{tc(lang, "act.quick_pick")}</div>
               <div className="flex flex-wrap gap-2">
                 {data.hotspots.all.slice(0, 8).map((h) => (
                   <button
@@ -320,7 +319,7 @@ export default function TheActPage() {
       {/* Campaign language selector */}
       {mode === "country" && country && (
         <div className="flex items-center gap-2 mb-4">
-          <span className="text-[10px] text-content-dim uppercase tracking-widest">OUTPUT LANG:</span>
+          <span className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "act.output_lang")}</span>
           {CAMPAIGN_LANGS.map((l) => (
             <button
               key={l.id}
@@ -336,7 +335,7 @@ export default function TheActPage() {
           ))}
           {campaignLang !== "en" && (
             <span className="text-[9px] text-terminal-green ml-auto">
-              ✓ {CAMPAIGN_LANGS.find((l) => l.id === campaignLang)?.label} detected
+              ✓ {CAMPAIGN_LANGS.find((l) => l.id === campaignLang)?.label} {tc(lang, "act.detected")}
             </span>
           )}
         </div>
@@ -344,10 +343,9 @@ export default function TheActPage() {
 
       {/* Needs analysis (country mode only) */}
       {mode === "country" && country && needs.length > 0 && (
-        <TerminalCard title={`${country.name_en.toUpperCase()} — WHAT THE DATA SAYS IT NEEDS`} accent="blood" glow className="mb-6">
+        <TerminalCard title={`${country.name_en.toUpperCase()} — ${tc(lang, "act.needs_title")}`} accent="blood" glow className="mb-6">
           <p className="text-xs text-content-dim mb-3">
-            // {needs.length} critical needs identified. These are sorted by severity —
-            how far the country is from acceptable thresholds.
+            // {needs.length} {tc(lang, "act.needs_desc")}
           </p>
           <div className="space-y-2">
             {needs.slice(0, 8).map((n, i) => (
@@ -362,7 +360,7 @@ export default function TheActPage() {
                   <div className="text-[10px] text-content-secondary mt-0.5">{n.context}</div>
                 </div>
                 <div className="text-right shrink-0">
-                  <div className="text-[9px] text-content-dim">SEVERITY</div>
+                  <div className="text-[9px] text-content-dim">{tc(lang, "act.severity")}</div>
                   <div className="text-sm font-bold" style={{ color: scoreColor(Math.min(n.severity * 2, 100)) }}>
                     {n.severity.toFixed(0)}
                   </div>
@@ -376,29 +374,27 @@ export default function TheActPage() {
       {/* ═══ AI MESSAGE GENERATOR ═══ */}
       {mode === "country" && country && (
         <TerminalCard
-          title="AI MESSAGE GENERATOR // UNIQUE, VARIED, ANTI-BAN"
+          title={tc(lang, "act.ai_title")}
           accent="amber"
           className="mb-6"
         >
           <p className="text-xs text-content-dim mb-3">
-            // Generates unique social media messages from {country.name_en}'s real data.
-            Each generation uses random tone + angle + temperature — no two messages are alike.
-            Your API key stays on your device.
+            // {tc(lang, "act.ai_desc")}
           </p>
 
           {/* Config status / toggle */}
           <div className="flex items-center gap-2 mb-3">
             {aiConfig ? (
               <>
-                <StatusPill color="green">CONNECTED</StatusPill>
+                <StatusPill color="green">{tc(lang, "act.connected")}</StatusPill>
                 <span className="text-[10px] text-content-dim">{aiConfig.model} @ {aiConfig.baseUrl.replace(/https?:\/\//, "").split("/")[0]}</span>
                 <button onClick={() => setShowAiConfig(!showAiConfig)} className="text-[10px] px-2 py-0.5 border border-border-dim text-content-secondary hover:border-blood ml-auto">
-                  [ CONFIG ]
+                  {tc(lang, "act.config_btn")}
                 </button>
               </>
             ) : (
               <button onClick={() => setShowAiConfig(true)} className="text-[10px] px-3 py-1 border border-blood text-blood-bright hover:bg-blood hover:text-void">
-                [ CONFIGURE API ]
+                {tc(lang, "act.configure_api")}
               </button>
             )}
           </div>
@@ -407,7 +403,7 @@ export default function TheActPage() {
           {showAiConfig && (
             <div className="p-3 border border-border-dim bg-void mb-3 space-y-2">
               <div>
-                <label className="text-[10px] text-content-dim uppercase">API BASE URL</label>
+                <label className="text-[10px] text-content-dim uppercase">{tc(lang, "act.api_base_url")}</label>
                 <input
                   type="text"
                   value={aiBaseUrl}
@@ -418,7 +414,7 @@ export default function TheActPage() {
                 <div className="text-[9px] text-content-dim mt-0.5">OpenAI: https://api.openai.com/v1 · Groq: https://api.groq.com/openai/v1 · OpenRouter: https://openrouter.ai/api/v1</div>
               </div>
               <div>
-                <label className="text-[10px] text-content-dim uppercase">API KEY</label>
+                <label className="text-[10px] text-content-dim uppercase">{tc(lang, "act.api_key")}</label>
                 <input
                   type="password"
                   value={aiApiKey}
@@ -429,7 +425,7 @@ export default function TheActPage() {
                 <div className="text-[9px] text-content-dim mt-0.5">Stored only in your browser's localStorage. Never sent anywhere except the API URL above.</div>
               </div>
               <div>
-                <label className="text-[10px] text-content-dim uppercase">MODEL</label>
+                <label className="text-[10px] text-content-dim uppercase">{tc(lang, "act.model")}</label>
                 <input
                   type="text"
                   value={aiModel}
@@ -445,15 +441,15 @@ export default function TheActPage() {
                   disabled={!aiBaseUrl.trim() || !aiApiKey.trim() || !aiModel.trim()}
                   className="px-3 py-1 text-xs border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void disabled:opacity-30 disabled:cursor-not-allowed"
                 >
-                  [ SAVE ]
+                  {tc(lang, "act.save")}
                 </button>
                 {aiConfig && (
                   <button onClick={handleClearAIConfig} className="px-3 py-1 text-xs border border-blood text-blood hover:bg-blood hover:text-void">
-                    [ DISCONNECT ]
+                    {tc(lang, "act.disconnect")}
                   </button>
                 )}
                 <button onClick={() => setShowAiConfig(false)} className="px-3 py-1 text-xs border border-border-dim text-content-secondary hover:border-blood ml-auto">
-                  [ CANCEL ]
+                  {tc(lang, "act.cancel")}
                 </button>
               </div>
             </div>
@@ -464,7 +460,7 @@ export default function TheActPage() {
             <div className="space-y-2">
               {/* Platform selector */}
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[10px] text-content-dim uppercase">PLATFORM:</span>
+                <span className="text-[10px] text-content-dim uppercase">{tc(lang, "act.platform")}</span>
                 {Object.entries(PLATFORM_STYLES).map(([id, style]) => (
                   <button
                     key={id}
@@ -485,7 +481,7 @@ export default function TheActPage() {
                 type="text"
                 value={aiCustom}
                 onChange={(e) => setAiCustom(e.target.value)}
-                placeholder="Optional: custom instructions (e.g. 'mention the upcoming election', 'reference specific NGO')"
+                placeholder={tc(lang, "act.custom_ph")}
                 className="w-full bg-void border border-border-dim px-2 py-1 text-xs text-content-primary focus:border-terminal-green focus:outline-none"
               />
 
@@ -496,14 +492,14 @@ export default function TheActPage() {
                   disabled={aiGenerating}
                   className="flex-1 px-3 py-2 text-xs border border-blood text-blood-bright hover:bg-blood hover:text-void transition-colors disabled:opacity-50 disabled:cursor-wait font-bold"
                 >
-                  {aiGenerating ? "[ GENERATING... ]" : `[ GENERATE ${PLATFORM_STYLES[aiPlatform]?.name.toUpperCase()} ]`}
+                  {aiGenerating ? tc(lang, "act.generating") : `${tc(lang, "act.generate_for")} ${PLATFORM_STYLES[aiPlatform]?.name.toUpperCase()} ]`}
                 </button>
                 <button
                   onClick={handleAIGenerateBatch}
                   disabled={aiGenerating}
                   className="px-3 py-2 text-xs border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void transition-colors disabled:opacity-50 disabled:cursor-wait"
                 >
-                  [ ALL PLATFORMS ]
+                  {tc(lang, "act.all_platforms")}
                 </button>
               </div>
 
@@ -518,7 +514,7 @@ export default function TheActPage() {
               {aiResults.length > 0 && (
                 <div className="space-y-2 mt-3">
                   <div className="text-[10px] text-content-dim uppercase tracking-widest">
-                    GENERATED MESSAGES ({aiResults.length})
+                    {tc(lang, "act.generated_messages")} ({aiResults.length})
                   </div>
                   {aiResults.map((r, i) => (
                     <div key={r.timestamp + "-" + i} className="p-2 border border-border-dim bg-void">
@@ -530,8 +526,8 @@ export default function TheActPage() {
                         {r.text}
                       </pre>
                       <div className="flex items-center justify-end gap-1 mt-2 pt-1 border-t border-border-dim">
-                        <span className="text-[9px] text-content-dim mr-auto">{r.text.length} chars</span>
-                        <CopyButton text={r.text} label="[ COPY ]" />
+                        <span className="text-[9px] text-content-dim mr-auto">{r.text.length} {tc(lang, "act.chars")}</span>
+                        <CopyButton text={r.text} label={tc(lang, "act.copy_btn")} />
                         {r.platform === "Twitter/X" && (
                           <a
                             href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(r.text)}`}
@@ -539,7 +535,7 @@ export default function TheActPage() {
                             rel="noopener noreferrer"
                             className="text-[9px] px-2 py-0.5 border border-border-dim text-content-secondary hover:border-blood hover:text-blood-bright"
                           >
-                            [ TWEET ]
+                            {tc(lang, "act.tweet_btn")}
                           </a>
                         )}
                         {r.platform === "WhatsApp" && (
@@ -549,7 +545,7 @@ export default function TheActPage() {
                             rel="noopener noreferrer"
                             className="text-[9px] px-2 py-0.5 border border-border-dim text-content-secondary hover:border-terminal-green hover:text-terminal-green"
                           >
-                            [ WHATSAPP ]
+                            {tc(lang, "act.whatsapp_btn")}
                           </a>
                         )}
                       </div>
@@ -559,7 +555,7 @@ export default function TheActPage() {
                     onClick={() => { setAiResults([]); sound.error(); }}
                     className="text-[9px] px-2 py-0.5 border border-border-dim text-content-dim hover:border-blood"
                   >
-                    [ CLEAR ALL ]
+                    {tc(lang, "act.clear_all")}
                   </button>
                 </div>
               )}
@@ -621,7 +617,7 @@ export default function TheActPage() {
                       </span>
                     </div>
                     <span className={`text-[9px] ${tweet.charCount > 280 ? "text-blood-bright" : "text-terminal-green"}`}>
-                      {tweet.charCount} {tweet.charCount > 280 ? "(split)" : "✓"}
+                      {tweet.charCount} {tweet.charCount > 280 ? tc(lang, "act.split") : "✓"}
                     </span>
                   </div>
                   <pre className="text-xs text-content-primary whitespace-pre-wrap font-mono flex-1 leading-relaxed">
@@ -635,14 +631,14 @@ export default function TheActPage() {
                       rel="noopener noreferrer"
                       className="text-[10px] px-2 py-0.5 border border-border-dim text-content-secondary hover:border-blood hover:text-blood-bright ml-1"
                     >
-                      [ TWEET ]
+                      {tc(lang, "act.tweet_btn")}
                     </a>
                   </div>
                 </div>
               ))}
               {kit.tweets.length > 1 && (
                 <TerminalCard title={tc(lang, "act.copy_thread")}>
-                  <CopyButton text={kit.tweets.map((t, i) => `${i + 1}/${kit.tweets.length}\n${t.text}`).join("\n\n---\n\n")} label="[ COPY ALL ]" />
+                  <CopyButton text={kit.tweets.map((t, i) => `${i + 1}/${kit.tweets.length}\n${t.text}`).join("\n\n---\n\n")} label={tc(lang, "act.copy_all")} />
                 </TerminalCard>
               )}
             </div>
@@ -664,7 +660,7 @@ export default function TheActPage() {
                     rel="noopener noreferrer"
                     className="text-[10px] px-2 py-0.5 border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void"
                   >
-                    [ OPEN WHATSAPP ]
+                    {tc(lang, "act.open_whatsapp")}
                   </a>
                 </div>
               </div>
@@ -678,11 +674,11 @@ export default function TheActPage() {
                 {kit.instagram}
               </pre>
               <div className="flex items-center justify-between mt-3 pt-2 border-t border-border-dim">
-                <span className="text-[10px] text-content-dim">{kit.instagram.length} chars · {kit.instagram.includes("#") ? "hashtags included" : "no hashtags"}</span>
-                <CopyButton text={kit.instagram} label="[ COPY CAPTION ]" />
+                <span className="text-[10px] text-content-dim">{kit.instagram.length} chars · {kit.instagram.includes("#") ? tc(lang, "act.hashtags_included") : tc(lang, "act.no_hashtags")}</span>
+                <CopyButton text={kit.instagram} label={tc(lang, "act.copy_caption")} />
               </div>
               <div className="text-[10px] text-content-dim mt-2 italic">
-                ▸ Tip: Use the Country Briefing page (/the-briefing/) to generate a printable image for your post.
+                {tc(lang, "act.ig_tip")}
               </div>
             </TerminalCard>
           )}
@@ -692,7 +688,7 @@ export default function TheActPage() {
             <TerminalCard title={tc(lang, "card.email_rep")} accent="green" glow>
               <div className="mb-3">
                 <div className="flex items-center justify-between gap-2 mb-1">
-                  <span className="text-[10px] text-content-dim uppercase">Subject</span>
+                  <span className="text-[10px] text-content-dim uppercase">{tc(lang, "act.subject")}</span>
                   <CopyButton text={kit.email.subject} label="[ COPY ]" />
                 </div>
                 <div className="p-2 border border-border-dim bg-void text-xs text-content-primary font-mono">
@@ -700,14 +696,14 @@ export default function TheActPage() {
                 </div>
               </div>
               <div className="flex items-center justify-between gap-2 mb-1">
-                <span className="text-[10px] text-content-dim uppercase">Body</span>
-                <CopyButton text={kit.email.body} label="[ COPY EMAIL ]" />
+                <span className="text-[10px] text-content-dim uppercase">{tc(lang, "act.body")}</span>
+                <CopyButton text={kit.email.body} label={tc(lang, "act.copy_email")} />
               </div>
               <pre className="p-3 border border-border-dim bg-void text-xs text-content-primary whitespace-pre-wrap font-mono leading-relaxed max-h-[500px] overflow-y-auto">
                 {kit.email.body}
               </pre>
               <div className="text-[10px] text-content-dim mt-2 italic">
-                ▸ Replace [bracketed] fields with your information.
+                {tc(lang, "act.replace_brackets")}
               </div>
             </TerminalCard>
           )}
@@ -717,11 +713,11 @@ export default function TheActPage() {
             <TerminalCard title={kit.brief.title} accent="blood" glow>
               <div className="space-y-4">
                 <div>
-                  <div className="text-[10px] text-content-dim uppercase tracking-widest mb-1">SUMMARY</div>
+                  <div className="text-[10px] text-content-dim uppercase tracking-widest mb-1">{tc(lang, "act.summary")}</div>
                   <p className="text-sm text-content-secondary">{kit.brief.summary}</p>
                 </div>
                 <div>
-                  <div className="text-[10px] text-content-dim uppercase tracking-widest mb-2">KEY DATA</div>
+                  <div className="text-[10px] text-content-dim uppercase tracking-widest mb-2">{tc(lang, "act.key_data")}</div>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                     {kit.brief.keyStats.map((s, i) => (
                       <div key={i} className="border border-border-dim bg-void p-2">
@@ -732,11 +728,11 @@ export default function TheActPage() {
                   </div>
                 </div>
                 <div className="border-l-2 border-blood pl-3">
-                  <div className="text-[10px] text-content-dim uppercase tracking-widest mb-1">CALL TO ACTION</div>
+                  <div className="text-[10px] text-content-dim uppercase tracking-widest mb-1">{tc(lang, "act.call_to_action")}</div>
                   <p className="text-sm text-content-primary">{kit.brief.callToAction}</p>
                 </div>
                 <div>
-                  <div className="text-[10px] text-content-dim uppercase tracking-widest mb-1">SOURCES</div>
+                  <div className="text-[10px] text-content-dim uppercase tracking-widest mb-1">{tc(lang, "act.sources")}</div>
                   <ul className="text-[10px] text-content-dim space-y-0.5">
                     {kit.brief.sources.slice(0, 8).map((s, i) => (
                       <li key={i}>• {s}</li>
@@ -748,9 +744,9 @@ export default function TheActPage() {
                     onClick={() => { window.print(); sound.select(); }}
                     className="flex-1 py-2 text-xs border border-blood text-blood-bright hover:bg-blood hover:text-void transition-colors uppercase tracking-widest"
                   >
-                    🖨 PRINT / PDF
+                    {tc(lang, "act.print_pdf")}
                   </button>
-                  <CopyButton text={`${kit.brief.title}\n\n${kit.brief.summary}\n\n${kit.brief.keyStats.map(s => `${s.label}: ${s.value}`).join("\n")}\n\n${kit.brief.callToAction}`} label="[ COPY BRIEF ]" />
+                  <CopyButton text={`${kit.brief.title}\n\n${kit.brief.summary}\n\n${kit.brief.keyStats.map(s => `${s.label}: ${s.value}`).join("\n")}\n\n${kit.brief.callToAction}`} label={tc(lang, "act.copy_brief")} />
                 </div>
               </div>
             </TerminalCard>
@@ -759,7 +755,7 @@ export default function TheActPage() {
       ) : (
         <TerminalCard title={tc(lang, "card.awaiting_input")} accent="amber">
           <div className="text-sm text-content-dim text-center py-6">
-            ▒ Select a country or SDG equation above to generate your campaign kit. ▒
+            {tc(lang, "act.select_prompt")}
           </div>
         </TerminalCard>
       )}

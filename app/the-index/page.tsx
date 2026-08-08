@@ -132,22 +132,21 @@ export default function TheIndexPage() {
     <div className="p-3 sm:p-6 md:p-10 max-w-5xl mx-auto">
       {/* Header */}
       <div className="mb-8 pt-4">
-        <div className="text-xs text-content-dim mb-1">[13] THE INDEX</div>
+        <div className="text-xs text-content-dim mb-1">{tc(lang, "index.tag")}</div>
         <h1 className="text-2xl md:text-3xl text-blood-bright font-bold glow-blood">
-          THE INDEX
+          {tc(lang, "index.title")}
         </h1>
         <p className="text-content-secondary text-sm mt-2">
-          {tc(lang, "subtitle.the_index")}
-          side-by-side country comparison, and regional rollups across all 19 dimensions.
+          {tc(lang, "subtitle.the_index")}{" "}{tc(lang, "index.subtitle_extra")}
         </p>
       </div>
 
       {/* Tab selector */}
       <div className="flex flex-wrap gap-2 mb-6">
         {([
-          { key: "ranking", label: "VULNERABILITY RANKING" },
-          { key: "comparison", label: "COUNTRY COMPARISON" },
-          { key: "regions", label: "REGIONAL ROLLUPS" },
+          { key: "ranking", label: tc(lang, "index.tab_ranking") },
+          { key: "comparison", label: tc(lang, "index.tab_comparison") },
+          { key: "regions", label: tc(lang, "index.tab_regions") },
         ] as const).map((t) => (
           <button
             key={t.key}
@@ -202,8 +201,7 @@ function VulnerabilityRanking() {
       {/* Weight controls */}
       <TerminalCard title={tc(lang, "index.domain_weights")} accent="amber" glow>
         <p className="text-xs text-content-secondary mb-4">
-          // adjust the weights to redefine what "vulnerable" means. the ranking updates live.
-          higher weight = that domain matters more. zero = ignore it entirely.
+          {tc(lang, "index.weights_desc")}
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {DOMAIN_WEIGHTS.map((dw) => (
@@ -235,7 +233,7 @@ function VulnerabilityRanking() {
             onClick={resetWeights}
             className="text-xs px-3 py-1.5 border border-border-dim text-content-secondary hover:border-blood hover:text-blood-bright"
           >
-            ↺ RESET DEFAULTS
+            {tc(lang, "index.reset_defaults")}
           </button>
           <button
             onClick={() => {
@@ -246,13 +244,13 @@ function VulnerabilityRanking() {
             }}
             className="text-xs px-3 py-1.5 border border-border-dim text-content-secondary hover:border-blood hover:text-blood-bright"
           >
-            ⚖ EQUAL WEIGHTS
+            {tc(lang, "index.equal_weights")}
           </button>
         </div>
       </TerminalCard>
 
       {/* Ranking */}
-      <TerminalCard title={`VULNERABILITY RANKING — ${showAll ? `ALL ${ranked.length}` : "TOP 25"}`} accent="blood" glow>
+      <TerminalCard title={`${tc(lang, "index.ranking_title")} — ${showAll ? `${tc(lang, "index.all")} ${ranked.length}` : tc(lang, "index.top25")}`} accent="blood" glow>
         <div className="space-y-1">
           {visible.map((item, i) => {
             const score = item.result.composite;
@@ -294,7 +292,7 @@ function VulnerabilityRanking() {
             onClick={() => { setShowAll(true); sound.select(); }}
             className="block w-full text-center py-2 mt-3 text-xs border border-border-dim text-content-secondary hover:border-blood hover:text-blood-bright transition-colors"
           >
-            ▼ SHOW ALL {ranked.length} COUNTRIES
+            ▼ {tc(lang, "index.show_all")} {ranked.length} {tc(lang, "index.countries_word")}
           </button>
         )}
         {showAll && (
@@ -302,7 +300,7 @@ function VulnerabilityRanking() {
             onClick={() => { setShowAll(false); sound.select(); }}
             className="block w-full text-center py-2 mt-3 text-xs border border-border-dim text-content-secondary hover:border-blood hover:text-blood-bright transition-colors"
           >
-            ▲ COLLAPSE TO TOP 25
+            ▲ {tc(lang, "index.collapse")}
           </button>
         )}
       </TerminalCard>
@@ -383,14 +381,14 @@ function ComparisonMode() {
     <div className="space-y-6">
       <TerminalCard title={tc(lang, "card.select_countries")} accent="green">
         <p className="text-xs text-content-secondary mb-3">
-          // pin up to 4 countries for side-by-side comparison across {COMPARE_METRICS.length} metrics.
+          // {tc(lang, "index.pin_desc")} {COMPARE_METRICS.length} {tc(lang, "index.metrics_word")}.
         </p>
         <div className="relative mb-3">
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Add country (e.g. Sudan, SSD…)"
+            placeholder={tc(lang, "index.add_country_ph")}
             className="w-full bg-void border border-border-dim px-3 py-2 text-xs text-content-primary focus:border-terminal-green focus:outline-none"
           />
           {searchResults.length > 0 && (
@@ -417,7 +415,7 @@ function ComparisonMode() {
             </span>
           ))}
           {countries.length === 0 && (
-            <span className="text-xs text-content-dim">No countries selected.</span>
+            <span className="text-xs text-content-dim">{tc(lang, "index.no_countries")}</span>
           )}
         </div>
       </TerminalCard>
@@ -425,8 +423,7 @@ function ComparisonMode() {
       {countries.length >= 2 && (
         <TerminalCard title={tc(lang, "card.crisis_radar")} accent="blood" glow>
           <p className="text-xs text-content-secondary mb-3">
-            // one polygon per country — the shape of the crisis. each axis is a domain
-            normalized to 0-100 where 100 = maximum vulnerability. bigger area = worse off.
+            {tc(lang, "index.radar_desc")}
           </p>
           <div className="h-[300px] sm:h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -480,7 +477,7 @@ function ComparisonMode() {
             </ResponsiveContainer>
           </div>
           <div className="text-[10px] text-content-dim mt-2">
-            ▸ Composite scores for each country:{" "}
+            ▸ {tc(lang, "index.composite_scores")}{" "}
             {countries.map((c, i) => {
               const vuln = calculateVulnerability(c);
               return (
@@ -506,7 +503,7 @@ function ComparisonMode() {
             <table className="w-full text-xs">
               <thead>
                 <tr className="border-b border-border-dim">
-                  <th className="text-left py-2 px-2 text-content-dim uppercase sticky left-0 bg-abyss">Metric</th>
+                  <th className="text-left py-2 px-2 text-content-dim uppercase sticky left-0 bg-abyss">{tc(lang, "index.metric_header")}</th>
                   {countries.map((c) => (
                     <th key={c.iso3} className="text-right py-2 px-2 text-content-primary font-bold whitespace-nowrap">
                       {c.name_en}
@@ -549,8 +546,8 @@ function ComparisonMode() {
             </table>
           </div>
           <div className="flex gap-4 mt-3 text-[10px]">
-            <span className="text-terminal-green">✓ best value</span>
-            <span className="text-blood-bright">✗ worst value</span>
+            <span className="text-terminal-green">✓ {tc(lang, "index.best_value")}</span>
+            <span className="text-blood-bright">✗ {tc(lang, "index.worst_value")}</span>
           </div>
         </TerminalCard>
       )}
@@ -570,8 +567,7 @@ function RegionalRollups() {
     <div className="space-y-4">
       <TerminalCard title={tc(lang, "card.regional_aggregation")} accent="amber" glow>
         <p className="text-xs text-content-secondary mb-4">
-          // every metric below is weighted by population across all countries in the region.
-          ranked worst-first by undernourishment.
+          {tc(lang, "index.regional_desc")}
         </p>
         <div className="space-y-2">
           {regions.map((r) => (
@@ -580,22 +576,22 @@ function RegionalRollups() {
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-bold text-content-primary">{r.region}</span>
                   <span className="text-[10px] text-content-dim">
-                    {r.countries} countries · {(r.population / 1e6).toFixed(0)}M people
+                    {r.countries} {tc(lang, "index.countries_word")} · {(r.population / 1e6).toFixed(0)}M {tc(lang, "act.people_word")}
                   </span>
                 </div>
                 <div className="flex gap-1">
                   {r.hotspotCount > 0 && (
-                    <StatusPill color="blood">{r.hotspotCount} hotspot{r.hotspotCount > 1 ? "s" : ""}</StatusPill>
+                    <StatusPill color="blood">{r.hotspotCount} {tc(lang, "index.hotspot_word")}</StatusPill>
                   )}
                   {r.conflictCountries > 0 && (
-                    <StatusPill color="amber">{r.conflictCountries} in conflict</StatusPill>
+                    <StatusPill color="amber">{r.conflictCountries} {tc(lang, "index.in_conflict")}</StatusPill>
                   )}
                 </div>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
                 {r.avgUndernourishment !== null && (
                   <div>
-                    <span className="text-content-dim text-[10px] uppercase block">Undernourish</span>
+                    <span className="text-content-dim text-[10px] uppercase block">{tc(lang, "index.undernourish")}</span>
                     <span className={r.avgUndernourishment > 15 ? "text-blood-bright font-bold" : "text-content-primary"}>
                       {r.avgUndernourishment.toFixed(1)}%
                     </span>
@@ -603,7 +599,7 @@ function RegionalRollups() {
                 )}
                 {r.avgLifeExpectancy !== null && (
                   <div>
-                    <span className="text-content-dim text-[10px] uppercase block">Life Exp</span>
+                    <span className="text-content-dim text-[10px] uppercase block">{tc(lang, "index.life_exp")}</span>
                     <span className={r.avgLifeExpectancy < 65 ? "text-blood-bright" : "text-content-primary"}>
                       {r.avgLifeExpectancy.toFixed(1)}y
                     </span>
@@ -611,7 +607,7 @@ function RegionalRollups() {
                 )}
                 {r.avgDoctors !== null && (
                   <div>
-                    <span className="text-content-dim text-[10px] uppercase block">Doctors/1k</span>
+                    <span className="text-content-dim text-[10px] uppercase block">{tc(lang, "index.doctors_1k")}</span>
                     <span className={r.avgDoctors < 2 ? "text-blood-bright font-bold" : "text-content-primary"}>
                       {r.avgDoctors.toFixed(2)}
                     </span>
@@ -619,7 +615,7 @@ function RegionalRollups() {
                 )}
                 {r.avgLiteracy !== null && (
                   <div>
-                    <span className="text-content-dim text-[10px] uppercase block">Literacy</span>
+                    <span className="text-content-dim text-[10px] uppercase block">{tc(lang, "index.literacy")}</span>
                     <span className={r.avgLiteracy < 70 ? "text-blood-bright" : "text-content-primary"}>
                       {r.avgLiteracy.toFixed(0)}%
                     </span>
@@ -627,7 +623,7 @@ function RegionalRollups() {
                 )}
                 {r.avgGini !== null && (
                   <div>
-                    <span className="text-content-dim text-[10px] uppercase block">Gini</span>
+                    <span className="text-content-dim text-[10px] uppercase block">{tc(lang, "index.gini")}</span>
                     <span className={r.avgGini > 40 ? "text-warning-amber" : "text-content-primary"}>
                       {r.avgGini.toFixed(1)}
                     </span>
@@ -635,7 +631,7 @@ function RegionalRollups() {
                 )}
                 {r.avgCpi !== null && (
                   <div>
-                    <span className="text-content-dim text-[10px] uppercase block">CPI</span>
+                    <span className="text-content-dim text-[10px] uppercase block">{tc(lang, "index.cpi")}</span>
                     <span className={r.avgCpi < 40 ? "text-warning-amber" : "text-content-primary"}>
                       {r.avgCpi.toFixed(0)}
                     </span>
@@ -643,7 +639,7 @@ function RegionalRollups() {
                 )}
                 {r.avgCo2 !== null && (
                   <div>
-                    <span className="text-content-dim text-[10px] uppercase block">CO2/cap</span>
+                    <span className="text-content-dim text-[10px] uppercase block">{tc(lang, "index.co2_cap")}</span>
                     <span className={r.avgCo2 > 5 ? "text-warning-amber" : "text-content-primary"}>
                       {r.avgCo2.toFixed(2)}t
                     </span>
@@ -651,7 +647,7 @@ function RegionalRollups() {
                 )}
                 {r.avgChildMortality !== null && (
                   <div>
-                    <span className="text-content-dim text-[10px] uppercase block">Child Mort</span>
+                    <span className="text-content-dim text-[10px] uppercase block">{tc(lang, "index.child_mort")}</span>
                     <span className={r.avgChildMortality > 30 ? "text-blood-bright font-bold" : "text-content-primary"}>
                       {r.avgChildMortality.toFixed(1)}/1k
                     </span>

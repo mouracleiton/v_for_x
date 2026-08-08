@@ -383,9 +383,9 @@ export default function TheSignalPage() {
     <div className="p-3 sm:p-6 md:p-10 max-w-5xl mx-auto">
       {/* ── HEADER ── */}
       <div className="mb-8 pt-4">
-        <div className="text-xs text-content-dim mb-1">[11] THE SIGNAL</div>
+        <div className="text-xs text-content-dim mb-1">{tc(lang, "signal.tag")}</div>
         <h1 className="text-2xl md:text-3xl text-blood-bright font-bold glow-blood">
-          THE SIGNAL
+          {tc(lang, "signal.title")}
         </h1>
         <p className="text-content-secondary text-sm mt-2">
           {tc(lang, "subtitle.the_signal")}
@@ -396,7 +396,7 @@ export default function TheSignalPage() {
         <TerminalCard title={tc(lang, "signal.establishing")} glow>
           <div className="text-xs text-content-dim animate-pulse">
             {" "}
-            ▒▒▒ Loading watchlist from local store… ▒▒▒{" "}
+            {tc(lang, "signal.loading_store")}{" "}
           </div>
         </TerminalCard>
       ) : (
@@ -404,7 +404,7 @@ export default function TheSignalPage() {
           {/* ═══ SECTION 1 — WATCHLIST SUMMARY DASHBOARD ═══ */}
           {stats ? (
             <TerminalCard
-              title="WATCHLIST SUMMARY"
+              title={tc(lang, "signal.watchlist_summary")}
               glow
               accent={threat === "LOW" ? "green" : threat === "MODERATE" ? "amber" : "blood"}
               className="mb-6"
@@ -412,7 +412,7 @@ export default function TheSignalPage() {
               {/* Threat level banner */}
               <div className="flex items-center gap-3 mb-4 p-3 border border-border-dim bg-void">
                 <span className="text-xs text-content-dim uppercase tracking-widest">
-                  Threat Level
+                  {tc(lang, "signal.threat_level")}
                 </span>
                 <StatusPill color={threatInfo.color}>{threat}</StatusPill>
                 <span className="text-xs text-content-secondary ml-auto">
@@ -421,24 +421,24 @@ export default function TheSignalPage() {
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                <StatTile label="Watched" value={String(stats.total)} />
+                <StatTile label={tc(lang, "signal.watched")} value={String(stats.total)} />
                 <StatTile
-                  label="Hotspots"
+                  label={tc(lang, "signal.hotspots")}
                   value={String(stats.hotspots)}
                   tone={stats.hotspots > 0 ? "blood" : "dim"}
                 />
                 <StatTile
-                  label="Avg Under-nourish"
+                  label={tc(lang, "signal.avg_undernourish")}
                   value={stats.avgUnder != null ? `${stats.avgUnder.toFixed(1)}%` : "N/A"}
                   tone={stats.avgUnder != null && stats.avgUnder > 20 ? "blood" : "dim"}
                 />
                 <StatTile
-                  label="Max Conflict"
+                  label={tc(lang, "signal.max_conflict")}
                   value={`${stats.maxConflict}/5`}
                   tone={stats.maxConflict >= 3 ? "blood" : "dim"}
                 />
                 <StatTile
-                  label="Famine Risk ≥3"
+                  label={tc(lang, "signal.famine_risk_3")}
                   value={String(stats.famineRiskGte3)}
                   tone={stats.famineRiskGte3 > 0 ? "blood" : "dim"}
                 />
@@ -446,39 +446,36 @@ export default function TheSignalPage() {
 
               {stats.phase5 > 0 && (
                 <div className="mt-3 text-xs text-blood-bright">
-                  ⚠ {stats.phase5} watched {stats.phase5 === 1 ? "country" : "countries"}{" "}
-                  at IPC Phase 5 (catastrophe/famine).
+                  ⚠ {stats.phase5} {tc(lang, "signal.watched")} {stats.phase5 === 1 ? tc(lang, "signal.country") : tc(lang, "signal.countries")}{" "}{tc(lang, "signal.at_ipc5")}
                 </div>
               )}
             </TerminalCard>
           ) : (
             <TerminalCard
-              title="WATCHLIST EMPTY"
+              title={tc(lang, "signal.watchlist_empty")}
               accent="amber"
               glow
               className="mb-6"
             >
               <div className="text-sm text-content-secondary mb-2">
-                No countries pinned. Your watchlist is the early-warning layer —
-                pin crisis zones to track conditions at a glance.
+                {tc(lang, "signal.empty_desc1")}
               </div>
               <div className="text-xs text-content-dim">
-                ↓ Use the console below to add countries. Quick-add buttons for
-                all 22 WFP hotspots are standing by.
+                {tc(lang, "signal.empty_desc2")}
               </div>
             </TerminalCard>
           )}
 
           {/* ═══ SECTION 2 — ADD COUNTRY ═══ */}
           <TerminalCard
-            title="ADD COUNTRY"
+            title={tc(lang, "signal.add_country")}
             accent="green"
             className="mb-6"
           >
             {/* Searchable dropdown */}
             <div className="mb-4">
               <label className="text-xs text-content-dim uppercase tracking-wider block mb-2">
-                Search (name or ISO3)
+                {tc(lang, "signal.search_label")}
               </label>
               <div className="relative">
                 <input
@@ -490,7 +487,7 @@ export default function TheSignalPage() {
                   }}
                   onFocus={() => setShowResults(true)}
                   onBlur={() => setTimeout(() => setShowResults(false), 150)}
-                  placeholder="e.g. Sudan, SDN, Gaza…"
+                  placeholder={tc(lang, "signal.search_ph")}
                   className="w-full bg-void border border-border-dim px-3 py-2 text-xs text-content-primary focus:border-terminal-green focus:outline-none"
                 />
                 {showResults && searchResults.length > 0 && (
@@ -517,7 +514,7 @@ export default function TheSignalPage() {
                             {c.name_en}
                           </span>
                           {already ? (
-                            <span className="text-terminal-green">✓ PINNED</span>
+                            <span className="text-terminal-green">✓ {tc(lang, "signal.pinned")}</span>
                           ) : c.is_hotspot ? (
                             <StatusPill color="blood">HOTSPOT</StatusPill>
                           ) : null}
@@ -537,7 +534,7 @@ export default function TheSignalPage() {
             {/* Quick-add hotspots */}
             <div>
               <label className="text-xs text-content-dim uppercase tracking-wider block mb-2">
-                Quick-Add — 22 WFP Hotspots
+                {tc(lang, "signal.quick_add")}
               </label>
               <div className="flex flex-wrap gap-2">
                 {data.hotspots.all.map((h) => {
@@ -565,25 +562,25 @@ export default function TheSignalPage() {
 
           {/* ═══ SECTION 2b — METRIC ALERT RULES ═══ */}
           <TerminalCard
-            title="MULTI-DIMENSIONAL ALERT RULES"
+            title={tc(lang, "signal.alert_rules")}
             accent="amber"
             glow={alertRules.length > 0}
             className="mb-6"
           >
             <p className="text-xs text-content-secondary mb-4">
-              // don't just pin countries — pin <strong className="text-warning-amber">conditions</strong>.
-              scan all 200 countries against any metric threshold. water, health, energy, education, climate, inequality — all 19 dimensions.
+              // {tc(lang, "signal.alert_desc1")} <strong className="text-warning-amber">conditions</strong>.
+              {tc(lang, "signal.alert_desc2")}
             </p>
 
             {/* Rule builder */}
             <div className="border border-border-dim bg-void p-3 mb-4">
               <div className="text-[10px] text-content-dim uppercase tracking-widest mb-3">
-                BUILD A RULE
+                {tc(lang, "signal.build_rule")}
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 items-end">
                 {/* Metric selector */}
                 <div className="sm:col-span-5">
-                  <label className="text-[10px] text-content-dim uppercase block mb-1">Metric</label>
+                  <label className="text-[10px] text-content-dim uppercase block mb-1">{tc(lang, "signal.metric")}</label>
                   <select
                     value={ruleMetric}
                     onChange={(e) => handleMetricChange(e.target.value)}
@@ -607,21 +604,21 @@ export default function TheSignalPage() {
                 </div>
                 {/* Operator */}
                 <div className="sm:col-span-2">
-                  <label className="text-[10px] text-content-dim uppercase block mb-1">Op</label>
+                  <label className="text-[10px] text-content-dim uppercase block mb-1">{tc(lang, "signal.op")}</label>
                   <select
                     value={ruleOperator}
                     onChange={(e) => setRuleOperator(e.target.value as typeof ruleOperator)}
                     className="w-full bg-void border border-border-dim px-2 py-1.5 text-xs text-content-primary focus:border-warning-amber focus:outline-none"
                   >
-                    <option value="<">&lt; less than</option>
-                    <option value="<=">&le; at most</option>
-                    <option value=">">&gt; greater than</option>
-                    <option value=">=">&ge; at least</option>
+                    <option value="<">&lt; {tc(lang, "signal.less_than")}</option>
+                    <option value="<=">&le; {tc(lang, "signal.at_most")}</option>
+                    <option value=">">&gt; {tc(lang, "signal.greater_than")}</option>
+                    <option value=">=">&ge; {tc(lang, "signal.at_least")}</option>
                   </select>
                 </div>
                 {/* Threshold */}
                 <div className="sm:col-span-3">
-                  <label className="text-[10px] text-content-dim uppercase block mb-1">Threshold</label>
+                  <label className="text-[10px] text-content-dim uppercase block mb-1">{tc(lang, "signal.threshold")}</label>
                   <input
                     type="number"
                     step="any"
@@ -636,7 +633,7 @@ export default function TheSignalPage() {
                     onClick={handleAddRule}
                     className="w-full px-3 py-1.5 text-xs border border-warning-amber text-warning-amber hover:bg-warning-amber hover:text-void transition-colors font-bold uppercase tracking-widest"
                   >
-                    + ARM
+                    {tc(lang, "signal.arm")}
                   </button>
                 </div>
               </div>
@@ -650,7 +647,7 @@ export default function TheSignalPage() {
                 const def = getMetricDef(ruleMetric);
                 return (
                   <div className="text-[10px] text-content-dim mt-2">
-                    ▸ Preview: <span className="text-warning-amber font-bold">{preview}</span> / {data.countries.length} countries match{" "}
+                    ▸ {tc(lang, "signal.preview")}: <span className="text-warning-amber font-bold">{preview}</span> / {data.countries.length} {tc(lang, "signal.countries_match")}{" "}
                     <span className="text-content-secondary">{def.label} {ruleOperator} {t}{def.unit ?? ""}</span>
                   </div>
                 );
@@ -660,7 +657,7 @@ export default function TheSignalPage() {
             {/* Quick presets */}
             <div className="mb-4">
               <div className="text-[10px] text-content-dim uppercase tracking-widest mb-2">
-                QUICK PRESETS
+                {tc(lang, "signal.quick_presets")}
               </div>
               <div className="flex flex-wrap gap-2">
                 {[
@@ -692,7 +689,7 @@ export default function TheSignalPage() {
             {alertRules.length > 0 ? (
               <div className="space-y-3">
                 <div className="text-[10px] text-content-dim uppercase tracking-widest">
-                  ARMED RULES ({alertRules.length}) — {allRuleMatches.size} countries in violation
+                  {tc(lang, "signal.armed_rules")} ({alertRules.length}) — {allRuleMatches.size} {tc(lang, "signal.countries_violation")}
                 </div>
                 {ruleMatches.map(({ rule, def, matching }) => (
                   <div key={rule.id} className="border border-border-dim bg-void/50 p-3">
@@ -709,14 +706,14 @@ export default function TheSignalPage() {
                           {rule.operator} {rule.threshold}{def.unit ?? ""}
                         </span>
                         <span className="text-[10px] text-content-dim">
-                          → {matching.length} {matching.length === 1 ? "country" : "countries"}
+                          → {matching.length} {matching.length === 1 ? tc(lang, "signal.country") : tc(lang, "signal.countries")}
                         </span>
                       </div>
                       <button
                         onClick={() => rule.id && handleDeleteRule(rule.id)}
                         className="text-xs px-2 py-1 border border-border-dim text-content-secondary hover:border-blood hover:text-blood-bright"
                       >
-                        ✕ DISARM
+                        ✕ {tc(lang, "signal.disarm")}
                       </button>
                     </div>
                     {/* Matching countries */}
@@ -742,13 +739,13 @@ export default function TheSignalPage() {
                                   {formatMetricValue(value, def.unit)}
                                 </span>
                                 {isWatched ? (
-                                  <span className="text-terminal-green text-[10px]">✓ PINNED</span>
+                                  <span className="text-terminal-green text-[10px]">✓ {tc(lang, "signal.pinned")}</span>
                                 ) : (
                                   <button
                                     onClick={() => handleAdd(country)}
                                     className="text-[10px] px-1.5 py-0.5 border border-blood-dim text-blood-bright hover:bg-blood hover:text-void transition-colors"
                                   >
-                                    + PIN
+                                    + {tc(lang, "signal.pin")}
                                   </button>
                                 )}
                               </div>
@@ -763,7 +760,7 @@ export default function TheSignalPage() {
                       </div>
                     ) : (
                       <div className="text-[10px] text-content-dim">
-                        No countries currently match this rule.
+                        {tc(lang, "signal.no_match")}
                       </div>
                     )}
                   </div>
@@ -778,7 +775,7 @@ export default function TheSignalPage() {
             {/* Share / Export / Import toolbar */}
             <div className="border-t border-border-dim mt-4 pt-3">
               <div className="text-[10px] text-content-dim uppercase tracking-widest mb-2">
-                SHARE & SYNC RULES
+                {tc(lang, "signal.share_sync")}
               </div>
               <div className="flex flex-wrap gap-2">
                 <button
@@ -786,14 +783,14 @@ export default function TheSignalPage() {
                   disabled={alertRules.length === 0}
                   className="text-[10px] px-2 py-1 border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                 >
-                  ⧉ COPY SHARE URL
+                  ⧉ {tc(lang, "signal.copy_share_url")}
                 </button>
                 <button
                   onClick={handleExportRules}
                   disabled={alertRules.length === 0}
                   className="text-[10px] px-2 py-1 border border-blood text-blood-bright hover:bg-blood hover:text-void disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                 >
-                  ↓ EXPORT JSON
+                  ↓ {tc(lang, "signal.export_json")}
                 </button>
                 <button
                   onClick={() => {
@@ -802,7 +799,7 @@ export default function TheSignalPage() {
                   }}
                   className="text-[10px] px-2 py-1 border border-border-dim text-content-secondary hover:border-warning-amber hover:text-warning-amber transition-colors"
                 >
-                  ↑ IMPORT JSON
+                  ↑ {tc(lang, "signal.import_json")}
                 </button>
                 <input
                   id="alert-import-input"
@@ -822,7 +819,7 @@ export default function TheSignalPage() {
                     onClick={handleClearAllRules}
                     className="text-[10px] px-2 py-1 border border-border-dim text-content-dim hover:border-blood hover:text-blood-bright transition-colors ml-auto"
                   >
-                    ✕ CLEAR ALL
+                    ✕ {tc(lang, "signal.clear_all")}
                   </button>
                 )}
               </div>
@@ -846,7 +843,7 @@ export default function TheSignalPage() {
 
           {/* ═══ SECTION 3 — WATCHED COUNTRIES ═══ */}
           <TerminalCard
-            title={`WATCHED COUNTRIES (${watchedCountries.length})`}
+            title={`${tc(lang, "signal.watched_countries")} (${watchedCountries.length})`}
             accent="blood"
             className="mb-6"
           >
@@ -891,7 +888,7 @@ export default function TheSignalPage() {
                           </span>
                           {c.is_hotspot && (
                             <StatusPill color="blood">
-                              HOTSPOT · {(c.hotspot_score ?? 0).toFixed(1)}
+                              {tc(lang, "act.hotspot")} · {(c.hotspot_score ?? 0).toFixed(1)}
                             </StatusPill>
                           )}
                           {c.hunger.wfp_class && (
@@ -904,30 +901,30 @@ export default function TheSignalPage() {
                           onClick={() => handleRemove(c.iso3)}
                           className="text-xs px-2 py-1 border border-border-dim text-content-secondary hover:border-blood hover:text-blood-bright"
                         >
-                          ✕ REMOVE
+                          ✕ {tc(lang, "signal.remove")}
                         </button>
                       </div>
 
                       {/* Metric bars */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
                         <DataBar
-                          label="Undernourishment"
+                          label={tc(lang, "signal.undernourishment")}
                           value={under ?? 0}
                           max={60}
                           unit="%"
                         />
                         <DataBar
-                          label="Conflict Intensity"
+                          label={tc(lang, "signal.conflict_intensity")}
                           value={conflict}
                           max={5}
                         />
                         <DataBar
-                          label="Famine Risk"
+                          label={tc(lang, "signal.famine_risk")}
                           value={famine}
                           max={5}
                         />
                         <DataBar
-                          label="Corruption Perception (higher = cleaner)"
+                          label={tc(lang, "signal.corruption_perception")}
                           value={cpi ?? 0}
                           max={100}
                           inverse
@@ -941,7 +938,7 @@ export default function TheSignalPage() {
                           className="text-blood-bright hover:underline"
                           onClick={() => sound.select()}
                         >
-                          → FULL DOSSIER
+                          → {tc(lang, "signal.full_dossier")}
                         </Link>
                         {entry && (
                           <span>
@@ -964,7 +961,7 @@ export default function TheSignalPage() {
           {/* ═══ SECTION 4 — ALERT SUMMARY ═══ */}
           {watchedCountries.length > 0 && (
             <TerminalCard
-              title="HIGHEST PRIORITY ALERTS"
+              title={tc(lang, "signal.priority_alerts")}
               glow={threat === "CRITICAL" || threat === "HIGH"}
               accent={threat === "LOW" ? "green" : threat === "MODERATE" ? "amber" : "blood"}
               className="mb-6"
@@ -1008,7 +1005,7 @@ export default function TheSignalPage() {
                           </StatusPill>
                         ))}
                       </div>
-                      <span className="text-xs text-blood-bright">→ DOSSIER</span>
+                      <span className="text-xs text-blood-bright">→ {tc(lang, "signal.dossier")}</span>
                     </Link>
                   );
                 })}
@@ -1018,7 +1015,7 @@ export default function TheSignalPage() {
               <div className="mt-4 pt-3 border-t border-border-dim">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs text-content-dim uppercase tracking-widest">
-                    Overall Watchlist Threat
+                    {tc(lang, "signal.overall_threat")}
                   </span>
                   <StatusPill color={threatInfo.color}>{threat}</StatusPill>
                 </div>
@@ -1053,10 +1050,10 @@ export default function TheSignalPage() {
                   )}
                 </div>
                 <div className="flex justify-between mt-1 text-[10px] text-content-dim uppercase tracking-wider">
-                  <span>Low</span>
-                  <span>Moderate</span>
-                  <span>High</span>
-                  <span>Critical</span>
+                  <span>{tc(lang, "signal.threat_low")}</span>
+                  <span>{tc(lang, "signal.threat_moderate")}</span>
+                  <span>{tc(lang, "signal.threat_high")}</span>
+                  <span>{tc(lang, "signal.threat_critical")}</span>
                 </div>
                 <div className="text-xs text-content-secondary mt-2">
                   {threatInfo.label}

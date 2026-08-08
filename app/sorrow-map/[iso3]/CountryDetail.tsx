@@ -87,6 +87,7 @@ function CollapsibleSection({
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(defaultOpen);
+  const { lang } = useStore();
   const accentColor =
     accent === "green"
       ? "var(--color-terminal-green)"
@@ -105,7 +106,7 @@ function CollapsibleSection({
           {open ? "▼" : "▶"} {title}
         </span>
         <span className="text-content-dim normal-case text-[10px]">
-          {open ? "collapse" : "expand"}
+          {open ? tc(lang, "ui.collapse") : tc(lang, "ui.expand")}
         </span>
       </button>
       {open && <div className="mt-3">{children}</div>}
@@ -125,15 +126,15 @@ function StructuralBlockers({ country }: { country: CountryData }) {
 
     // Armed conflict
     result.push({
-      name: "Armed Conflict",
+      name: tc(lang, "detail.armed_conflict"),
       active:
         country.conflict.intensity_1to5 >= 3 ||
         country.is_hotspot ||
         country.conflict.access_blocked_1to5 >= 3,
-      detail: `Conflict intensity: ${country.conflict.intensity_1to5}/5 — ${
+      detail: `${tc(lang, "detail.conflict_intensity")} ${country.conflict.intensity_1to5}/5 — ${
         country.conflict.intensity_1to5 >= 3
-          ? "ACTIVE CONFLICT ZONE — direct investment blocked"
-          : "Not currently a primary blocker"
+          ? tc(lang, "detail.conflict_zone")
+          : tc(lang, "detail.not_primary_blocker")
       }`,
     });
 
@@ -143,31 +144,31 @@ function StructuralBlockers({ country }: { country: CountryData }) {
         (country.environment.renewable_energy_pct ?? 100) < 20) ||
       country.hunger.famine_risk_1to5 !== null && (country.hunger.famine_risk_1to5 ?? 0) >= 3;
     result.push({
-      name: "Climate Change",
+      name: tc(lang, "detail.climate_change"),
       active: Boolean(climateRisk),
-      detail: `Air pollution: ${formatVal(country.environment.air_pollution_pm25_ugm3, " µg/m³")}`,
+      detail: `${tc(lang, "detail.air_pollution")} ${formatVal(country.environment.air_pollution_pm25_ugm3, " µg/m³")}`,
     });
 
     // Corruption & governance
     const cpi = country.governance.corruption_perceptions_index;
     result.push({
-      name: "Corruption & Governance",
+      name: tc(lang, "detail.corruption_governance"),
       active: cpi !== null && cpi < 35,
-      detail: `CPI: ${formatVal(cpi)} / 100 — ${
+      detail: `${tc(lang, "detail.cpi_label")} ${formatVal(cpi)} / 100 — ${
         cpi !== null && cpi < 35
-          ? "HIGH CORRUPTION — resources at risk of diversion"
-          : "Governance functional"
+          ? tc(lang, "detail.high_corruption")
+          : tc(lang, "detail.governance_functional")
       }`,
     });
 
     // Last-mile access
     result.push({
-      name: "Restricted Access (Last Mile)",
+      name: tc(lang, "detail.restricted_access"),
       active: country.conflict.access_blocked_1to5 >= 3,
-      detail: `Access blocked: ${country.conflict.access_blocked_1to5}/5 — ${
+      detail: `${tc(lang, "detail.access_blocked")} ${country.conflict.access_blocked_1to5}/5 — ${
         country.conflict.access_blocked_1to5 >= 3
-          ? "HUMANITARIAN ACCESS SEVERELY RESTRICTED"
-          : "Access feasible"
+          ? tc(lang, "detail.access_severely_restricted")
+          : tc(lang, "detail.access_feasible")
       }`,
     });
 
@@ -184,7 +185,7 @@ function StructuralBlockers({ country }: { country: CountryData }) {
           >
             <div className="flex items-center gap-2">
               <StatusPill color={b.active ? "blood" : "dim"}>
-                {b.active ? "ACTIVE" : "CLEAR"}
+                {b.active ? tc(lang, "detail.active") : tc(lang, "detail.clear")}
               </StatusPill>
               <span className="text-xs text-content-primary">{b.name}</span>
             </div>
@@ -338,7 +339,7 @@ function ProofOfMiseryForm({ iso3 }: { iso3: string }) {
         <div className="flex items-center gap-2 mb-1">
           <StatusPill color="blood">{tc(lang, "status.unverified")}</StatusPill>
           <span className="text-[10px] text-content-dim">
-            Evidence stored locally. Requires on-chain attestation to become permanent.
+            {tc(lang, "evidence.stored_locally")}
           </span>
         </div>
       </div>
@@ -346,20 +347,20 @@ function ProofOfMiseryForm({ iso3 }: { iso3: string }) {
       <form onSubmit={handleSubmit} className="space-y-3">
         <div>
           <label className="text-xs text-content-secondary uppercase tracking-widest block mb-1">
-            Testimony / Evidence Description
+            {tc(lang, "evidence.testimony")}
           </label>
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
             rows={4}
-            placeholder="Describe the situation on the ground..."
+            placeholder={tc(lang, "evidence.describe")}
             className="w-full bg-void border border-border-dim text-content-primary text-xs p-2 focus:border-blood focus:outline-none font-mono resize-y"
           />
         </div>
 
         <div>
           <label className="text-xs text-content-secondary uppercase tracking-widest block mb-1">
-            Attach Evidence File (hash computed locally — file never uploaded)
+            {tc(lang, "evidence.attach")}
           </label>
           <input
             ref={fileInputRef}
@@ -369,7 +370,7 @@ function ProofOfMiseryForm({ iso3 }: { iso3: string }) {
           />
           {fileName && (
             <div className="mt-2 p-2 border border-border-dim bg-abyss">
-              <div className="text-[10px] text-content-dim uppercase">SHA-256 HASH</div>
+              <div className="text-[10px] text-content-dim uppercase">{tc(lang, "evidence.sha256_hash")}</div>
               {fileHash ? (
                 <div className="flex items-center gap-2 mt-1">
                   <code className="text-[10px] text-terminal-green break-all flex-1">
@@ -380,7 +381,7 @@ function ProofOfMiseryForm({ iso3 }: { iso3: string }) {
                     onClick={copyHash}
                     className="text-[10px] px-1.5 py-0.5 border border-border-dim hover:border-terminal-green text-content-secondary hover:text-terminal-green shrink-0"
                   >
-                    {copied ? "✓ COPIED" : "COPY"}
+                    {copied ? tc(lang, "ui.copied") : tc(lang, "ui.copy")}
                   </button>
                 </div>
               ) : (
@@ -398,14 +399,14 @@ function ProofOfMiseryForm({ iso3 }: { iso3: string }) {
           disabled={!text.trim() && !fileHash}
           className="w-full py-2 text-xs uppercase tracking-widest border border-blood text-blood-bright hover:bg-blood hover:text-void transition-all disabled:opacity-30 disabled:cursor-not-allowed font-bold"
         >
-          {submitted ? "✓ SUBMITTED (UNVERIFIED)" : "> SUBMIT EVIDENCE"}
+          {submitted ? tc(lang, "evidence.submitted") : tc(lang, "evidence.submit")}
         </button>
       </form>
 
       {pastSubmissions.length > 0 && (
         <div className="mt-4 pt-3 border-t border-border-dim">
           <div className="text-[10px] text-content-dim uppercase tracking-widest mb-2">
-            LOCAL SUBMISSIONS ({pastSubmissions.length})
+            {tc(lang, "evidence.local_submissions")} ({pastSubmissions.length})
           </div>
           <div className="space-y-1 max-h-32 overflow-y-auto">
             {pastSubmissions.slice().reverse().map((s, i) => (
@@ -620,7 +621,7 @@ export default function CountryDetail({ params }: PageProps) {
           {(() => {
             const f = computeDataFreshness(c);
             return f.newestYear !== null && (
-              <FreshnessBadge year={f.newestYear} label={`Data through`} />
+              <FreshnessBadge year={f.newestYear} label={tc(lang, "detail.data_through")} />
             );
           })()}
         </div>
@@ -644,7 +645,7 @@ export default function CountryDetail({ params }: PageProps) {
         {/* LEFT — main data */}
         <div className="space-y-4">
           {/* Overview */}
-          <CollapsibleSection title="OVERVIEW" defaultOpen accent="blood">
+          <CollapsibleSection title={tc(lang, "section.overview")} defaultOpen accent="blood">
             <DataRow label="Name (EN)" value={c.name_en} />
             <DataRow label="Name (PT)" value={c.name_pt} />
             <DataRow label="ISO3" value={c.iso3} />
@@ -659,17 +660,17 @@ export default function CountryDetail({ params }: PageProps) {
           </CollapsibleSection>
 
           {/* Hunger */}
-          <CollapsibleSection title="HUNGER & FOOD SECURITY" defaultOpen accent="blood">
+          <CollapsibleSection title={tc(lang, "section.hunger_food")} defaultOpen accent="blood">
             <HungerSection c={c} />
           </CollapsibleSection>
 
           {/* Conflict */}
-          <CollapsibleSection title="CONFLICT & DISPLACEMENT" accent="blood">
+          <CollapsibleSection title={tc(lang, "section.conflict_displacement")} accent="blood">
             <ConflictSection c={c} />
           </CollapsibleSection>
 
           {/* Economy */}
-          <CollapsibleSection title="ECONOMY" accent="amber">
+          <CollapsibleSection title={tc(lang, "section.economy")} accent="amber">
             <GenericSection
               title="Economy"
               entries={[
@@ -684,7 +685,7 @@ export default function CountryDetail({ params }: PageProps) {
           </CollapsibleSection>
 
           {/* Health */}
-          <CollapsibleSection title="HEALTH" accent="blood">
+          <CollapsibleSection title={tc(lang, "section.health")} accent="blood">
             <GenericSection
               title="Health"
               entries={[
@@ -706,7 +707,7 @@ export default function CountryDetail({ params }: PageProps) {
           </CollapsibleSection>
 
           {/* HDI */}
-          <CollapsibleSection title="HUMAN DEVELOPMENT (HDI)" accent="amber">
+          <CollapsibleSection title={tc(lang, "section.hdi")} accent="amber">
             <GenericSection
               title="HDI"
               entries={[
@@ -721,7 +722,7 @@ export default function CountryDetail({ params }: PageProps) {
           </CollapsibleSection>
 
           {/* Military */}
-          <CollapsibleSection title="MILITARY" accent="amber">
+          <CollapsibleSection title={tc(lang, "section.military")} accent="amber">
             <GenericSection
               title="Military"
               entries={[
@@ -733,7 +734,7 @@ export default function CountryDetail({ params }: PageProps) {
           </CollapsibleSection>
 
           {/* Climate */}
-          <CollapsibleSection title="CLIMATE & EMISSIONS" accent="green">
+          <CollapsibleSection title={tc(lang, "section.climate_emissions")} accent="green">
             <GenericSection
               title="Climate"
               entries={[
@@ -746,7 +747,7 @@ export default function CountryDetail({ params }: PageProps) {
           </CollapsibleSection>
 
           {/* Inequality */}
-          <CollapsibleSection title="INEQUALITY" accent="amber">
+          <CollapsibleSection title={tc(lang, "section.inequality")} accent="amber">
             <GenericSection
               title="Inequality"
               entries={[
@@ -760,7 +761,7 @@ export default function CountryDetail({ params }: PageProps) {
           </CollapsibleSection>
 
           {/* Water & Sanitation */}
-          <CollapsibleSection title="WATER & SANITATION" accent="green">
+          <CollapsibleSection title={tc(lang, "section.water_sanitation")} accent="green">
             <GenericSection
               title="Water"
               entries={[
@@ -777,7 +778,7 @@ export default function CountryDetail({ params }: PageProps) {
           </CollapsibleSection>
 
           {/* Education */}
-          <CollapsibleSection title="EDUCATION" accent="green">
+          <CollapsibleSection title={tc(lang, "section.education")} accent="green">
             <GenericSection
               title="Education"
               entries={[
@@ -794,7 +795,7 @@ export default function CountryDetail({ params }: PageProps) {
           </CollapsibleSection>
 
           {/* Connectivity */}
-          <CollapsibleSection title="CONNECTIVITY" accent="green">
+          <CollapsibleSection title={tc(lang, "section.connectivity")} accent="green">
             <GenericSection
               title="Connectivity"
               entries={[
@@ -809,7 +810,7 @@ export default function CountryDetail({ params }: PageProps) {
           </CollapsibleSection>
 
           {/* Migration */}
-          <CollapsibleSection title="MIGRATION & DISPLACEMENT" accent="amber">
+          <CollapsibleSection title={tc(lang, "section.migration")} accent="amber">
             <GenericSection
               title="Migration"
               entries={[
@@ -826,7 +827,7 @@ export default function CountryDetail({ params }: PageProps) {
           </CollapsibleSection>
 
           {/* Environment */}
-          <CollapsibleSection title="ENVIRONMENT" accent="green">
+          <CollapsibleSection title={tc(lang, "section.environment")} accent="green">
             <GenericSection
               title="Environment"
               entries={[
@@ -840,7 +841,7 @@ export default function CountryDetail({ params }: PageProps) {
           </CollapsibleSection>
 
           {/* Gender */}
-          <CollapsibleSection title="GENDER" accent="amber">
+          <CollapsibleSection title={tc(lang, "section.gender")} accent="amber">
             <GenericSection
               title="Gender"
               entries={[
@@ -855,7 +856,7 @@ export default function CountryDetail({ params }: PageProps) {
           </CollapsibleSection>
 
           {/* Governance */}
-          <CollapsibleSection title="GOVERNANCE" accent="blood">
+          <CollapsibleSection title={tc(lang, "section.governance")} accent="blood">
             <GenericSection
               title="Governance"
               entries={[
@@ -874,7 +875,7 @@ export default function CountryDetail({ params }: PageProps) {
           </CollapsibleSection>
 
           {/* Security */}
-          <CollapsibleSection title="SECURITY" accent="blood">
+          <CollapsibleSection title={tc(lang, "section.security")} accent="blood">
             <GenericSection
               title="Security"
               entries={[
@@ -889,7 +890,7 @@ export default function CountryDetail({ params }: PageProps) {
           </CollapsibleSection>
 
           {/* Poverty */}
-          <CollapsibleSection title="POVERTY" accent="blood">
+          <CollapsibleSection title={tc(lang, "section.poverty")} accent="blood">
             <GenericSection
               title="Poverty"
               entries={[
@@ -903,7 +904,7 @@ export default function CountryDetail({ params }: PageProps) {
           </CollapsibleSection>
 
           {/* Employment */}
-          <CollapsibleSection title="EMPLOYMENT" accent="amber">
+          <CollapsibleSection title={tc(lang, "section.employment")} accent="amber">
             <GenericSection
               title="Employment"
               entries={[
@@ -931,7 +932,7 @@ export default function CountryDetail({ params }: PageProps) {
           {/* These only show when data is present for this country */}
 
           {c.energy && (c.energy.renewable_electric_pct !== null || c.energy.renewable_matrix_pct !== null) && (
-            <CollapsibleSection title="ENERGY MATRIX" accent="green">
+            <CollapsibleSection title={tc(lang, "section.energy_matrix")} accent="green">
               <GenericSection
                 title="Energy"
                 entries={[
@@ -952,7 +953,7 @@ export default function CountryDetail({ params }: PageProps) {
           )}
 
           {c.justice && c.justice.prison_population !== null && (
-            <CollapsibleSection title="JUSTICE & INCARCERATION" accent="amber">
+            <CollapsibleSection title={tc(lang, "section.justice_incarceration")} accent="amber">
               <GenericSection
                 title="Justice"
                 entries={[
@@ -970,7 +971,7 @@ export default function CountryDetail({ params }: PageProps) {
           )}
 
           {c.taxation && c.taxation.tax_burden_pct_gdp !== null && (
-            <CollapsibleSection title="TAXATION" accent="amber">
+            <CollapsibleSection title={tc(lang, "section.taxation")} accent="amber">
               <GenericSection
                 title="Taxation"
                 entries={[
@@ -987,7 +988,7 @@ export default function CountryDetail({ params }: PageProps) {
           )}
 
           {c.food_security && c.food_security.severe_food_insecurity_m !== null && (
-            <CollapsibleSection title="FOOD SECURITY (DEEP)" accent="blood">
+            <CollapsibleSection title={tc(lang, "section.food_security_deep")} accent="blood">
               <GenericSection
                 title="Food Security"
                 entries={[

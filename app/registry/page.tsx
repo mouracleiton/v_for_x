@@ -95,12 +95,12 @@ export default function RegistroPage() {
     <div className="p-3 sm:p-6 md:p-10 max-w-5xl mx-auto">
       {/* Header */}
       <div className="mb-8 pt-4">
-        <div className="text-xs text-content-dim mb-1">[04] THE REGISTRY</div>
+        <div className="text-xs text-content-dim mb-1">{tc(lang, "registry.tag")}</div>
         <h1 className="text-2xl md:text-3xl text-blood-bright font-bold glow-blood">
-          THE REGISTRY
+          {tc(lang, "registry.title")}
         </h1>
         <p className="text-content-secondary text-sm mt-2">
-          // Accountability infrastructure. {dossiers.length} dossiers — {dossiers.filter(d => d.source_provenance?.authority_type?.includes("icc") || d.source_provenance?.authority_type?.includes("icj") || d.source_provenance?.authority_type?.includes("un")).length} from international courts, {dossiers.filter(d => !d.source_provenance).length} community-validated. Every entry traces to a legal finding — no witch hunts.
+          // {tc(lang, "registry.subtitle_extra")} {dossiers.length} {tc(lang, "registry.dossiers")} — {dossiers.filter(d => d.source_provenance?.authority_type?.includes("icc") || d.source_provenance?.authority_type?.includes("icj") || d.source_provenance?.authority_type?.includes("un")).length} {tc(lang, "registry.from_courts")}, {dossiers.filter(d => !d.source_provenance).length} {tc(lang, "registry.community_validated")}. {tc(lang, "registry.legal_finding")}
         </p>
       </div>
 
@@ -110,44 +110,42 @@ export default function RegistroPage() {
           <div className="flex items-start gap-2">
             <span className="text-blood-bright">■</span>
             <div>
-              <div className="font-bold text-blood-bright">ICC Arrest Warrants</div>
-              <div className="text-content-dim">Adjudicated by International Criminal Court. Active warrants for war crimes, crimes against humanity. 124 states obligated to enforce.</div>
-              <div className="text-content-dim mt-1">→ {dossiers.filter(d => d.source_provenance?.authority_type === "icc_arrest_warrant").length} dossiers</div>
+              <div className="font-bold text-blood-bright">{tc(lang, "registry.icc_warrants")}</div>
+              <div className="text-content-dim">{tc(lang, "registry.icc_desc")}</div>
+              <div className="text-content-dim mt-1">→ {dossiers.filter(d => d.source_provenance?.authority_type === "icc_arrest_warrant").length} {tc(lang, "registry.dossiers")}</div>
             </div>
           </div>
           <div className="flex items-start gap-2">
             <span className="text-warning-amber">■</span>
             <div>
-              <div className="font-bold text-warning-amber">ICJ Proceedings</div>
-              <div className="text-content-dim">Cases before the International Court of Justice — provisional measures and ongoing genocide proceedings.</div>
-              <div className="text-content-dim mt-1">→ {dossiers.filter(d => d.source_provenance?.authority_type === "icj_proceedings").length} dossiers</div>
+              <div className="font-bold text-warning-amber">{tc(lang, "registry.icj_proceedings")}</div>
+              <div className="text-content-dim">{tc(lang, "registry.icj_desc")}</div>
+              <div className="text-content-dim mt-1">→ {dossiers.filter(d => d.source_provenance?.authority_type === "icj_proceedings").length} {tc(lang, "registry.dossiers")}</div>
             </div>
           </div>
           <div className="flex items-start gap-2">
             <span className="text-blood">■</span>
             <div>
-              <div className="font-bold text-blood">UN Security Council Findings</div>
-              <div className="text-content-dim">Panel of Experts reports, Chapter VII resolutions, sanctions committee designations.</div>
-              <div className="text-content-dim mt-1">→ {dossiers.filter(d => d.source_provenance?.authority_type === "un_investigation" || d.source_provenance?.authority_type === "un_sanctions").length} dossiers</div>
+              <div className="font-bold text-blood">{tc(lang, "registry.un_findings")}</div>
+              <div className="text-content-dim">{tc(lang, "registry.un_desc")}</div>
+              <div className="text-content-dim mt-1">→ {dossiers.filter(d => d.source_provenance?.authority_type === "un_investigation" || d.source_provenance?.authority_type === "un_sanctions").length} {tc(lang, "registry.dossiers")}</div>
             </div>
           </div>
           <div className="flex items-start gap-2">
             <span className="text-content-dim">■</span>
             <div>
-              <div className="font-bold text-content-secondary">Community Dossiers (safeguarded)</div>
-              <div className="text-content-dim">Submitted by contributors with evidence scoring. Redacted until peer-validated. Right-of-response mandatory.</div>
-              <div className="text-content-dim mt-1">→ {dossiers.filter(d => !d.source_provenance).length} dossiers</div>
+              <div className="font-bold text-content-secondary">{tc(lang, "registry.community_dossiers")}</div>
+              <div className="text-content-dim">{tc(lang, "registry.community_desc")}</div>
+              <div className="text-content-dim mt-1">→ {dossiers.filter(d => !d.source_provenance).length} {tc(lang, "registry.dossiers")}</div>
             </div>
           </div>
         </div>
         <div className="border-t border-border-dim mt-4 pt-3">
           <div className="text-[10px] text-content-dim uppercase tracking-widest mb-2">
-            // AUTO-POPULATION PIPELINE
+            {tc(lang, "registry.auto_pipeline")}
           </div>
           <p className="text-xs text-content-secondary">
-            Run <code className="text-blood-bright bg-void px-1 py-0.5 border border-border-dim">python3 scripts/fetch_sanctions_dossiers.py</code> to pull
-            fresh dossiers from OpenSanctions (OFAC, EU, UN SC, UK HMT). Each entry carries
-            source provenance — every accusation traces to a legal finding by a recognized body.
+            {tc(lang, "registry.run")} <code className="text-blood-bright bg-void px-1 py-0.5 border border-border-dim">python3 scripts/fetch_sanctions_dossiers.py</code> {tc(lang, "registry.pull_desc")}
           </p>
         </div>
       </TerminalCard>
@@ -157,27 +155,27 @@ export default function RegistroPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
           <div className="flex items-start gap-2">
             <span className="text-terminal-green">✓</span>
-            <span>Minimum 5 peer validations required for public visibility</span>
+            <span>{tc(lang, "registry.sg_5_validations")}</span>
           </div>
           <div className="flex items-start gap-2">
             <span className="text-terminal-green">✓</span>
-            <span>Evidence quality scoring (primary=3pts, secondary=1pt, testimony=0.5pt)</span>
+            <span>{tc(lang, "registry.sg_evidence_scoring")}</span>
           </div>
           <div className="flex items-start gap-2">
             <span className="text-terminal-green">✓</span>
-            <span>Mandatory right-of-response field for accused parties</span>
+            <span>{tc(lang, "registry.sg_right_response")}</span>
           </div>
           <div className="flex items-start gap-2">
             <span className="text-terminal-green">✓</span>
-            <span>72-hour cooldown between creation and public visibility</span>
+            <span>{tc(lang, "registry.sg_cooldown")}</span>
           </div>
           <div className="flex items-start gap-2">
             <span className="text-terminal-green">✓</span>
-            <span>67% supermajority required for CONFIRMED status</span>
+            <span>{tc(lang, "registry.sg_supermajority")}</span>
           </div>
           <div className="flex items-start gap-2">
             <span className="text-terminal-green">✓</span>
-            <span>Reputation-weighted validation — trust is earned through contributions</span>
+            <span>{tc(lang, "registry.sg_reputation")}</span>
           </div>
         </div>
       </TerminalCard>
@@ -185,7 +183,7 @@ export default function RegistroPage() {
       {/* Filters */}
       <div className="flex flex-wrap gap-4 mb-6">
         <div>
-          <div className="text-xs text-content-dim mb-1">STATUS:</div>
+          <div className="text-xs text-content-dim mb-1">{tc(lang, "registry.status_label")}:</div>
           <div className="flex gap-1">
             {["ALL", "ACCUSATION", "UNDER_REVIEW", "PEER_VALIDATED", "CONFIRMED"].map((s) => (
               <button
@@ -203,7 +201,7 @@ export default function RegistroPage() {
           </div>
         </div>
         <div>
-          <div className="text-xs text-content-dim mb-1">SEVERITY:</div>
+          <div className="text-xs text-content-dim mb-1">{tc(lang, "registry.severity_label")}:</div>
           <div className="flex gap-1">
             {["ALL", "critical", "high", "moderate"].map((s) => (
               <button
@@ -251,8 +249,8 @@ export default function RegistroPage() {
             </div>
             <div className="flex flex-wrap items-center gap-3 text-xs text-content-dim mt-2">
               <span>▸ {categoryLabels[d.category] || d.category}</span>
-              <span>▸ Evidence: {d.evidence_quality_score}pts</span>
-              <span>▸ Validations: {d.peer_validations}/{d.required_validations}</span>
+              <span>▸ {tc(lang, "registry.evidence")}: {d.evidence_quality_score}{tc(lang, "registry.pts")}</span>
+              <span>▸ {tc(lang, "registry.validations")}: {d.peer_validations}/{d.required_validations}</span>
               {d.source_provenance?.case_number && (
                 <span>▸ {d.source_provenance.case_number}</span>
               )}

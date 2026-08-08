@@ -129,13 +129,12 @@ export default function TheFrontsPage() {
     <div className="p-3 sm:p-6 md:p-10 max-w-6xl mx-auto">
       {/* Header */}
       <div className="mb-8 pt-4">
-        <div className="text-xs text-content-dim mb-1">[19] THE FRONTS</div>
+        <div className="text-xs text-content-dim mb-1">{tc(lang, "fronts.tag")}</div>
         <h1 className="text-2xl md:text-3xl text-blood-bright font-bold glow-blood tracking-widest">
-          THE FRONTS
+          {tc(lang, "fronts.title")}
         </h1>
         <p className="text-content-secondary text-sm mt-2">
-          // The crisis is not distributed evenly. Africa holds 68% of the world&apos;s hunger hotspots.
-          Here is where each front stands.
+          {tc(lang, "fronts.subtitle_extra")}
         </p>
       </div>
 
@@ -166,14 +165,14 @@ export default function TheFrontsPage() {
       {/* Selected region overview */}
       <TerminalCard
         key={region.name}
-        title={`${region.name.toUpperCase()} // ${region.count} COUNTRIES · ${formatNumber(region.totalPop)}M PEOPLE`}
+        title={`${region.name.toUpperCase()} // ${region.count} ${tc(lang, "fronts.countries")} · ${formatNumber(region.totalPop)}M ${tc(lang, "act.people_word")}`}
         accent="blood"
         glow
         className="mb-6"
       >
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
           <div>
-            <div className="text-[10px] text-content-dim uppercase tracking-widest">AVG VULNERABILITY</div>
+            <div className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "fronts.avg_vulnerability")}</div>
             <div className="text-3xl font-bold" style={{ color: scoreColor(region.avgVulnerability) }}>
               {region.avgVulnerability.toFixed(1)}
             </div>
@@ -182,34 +181,34 @@ export default function TheFrontsPage() {
             </div>
           </div>
           <div>
-            <div className="text-[10px] text-content-dim uppercase tracking-widest">HOTSPOTS</div>
+            <div className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "fronts.hotspots")}</div>
             <div className="text-3xl text-blood-bright font-bold">{region.hotspotCount}</div>
-            <div className="text-[10px] text-content-dim">of {data.hotspots.all.length} worldwide</div>
+            <div className="text-[10px] text-content-dim">{tc(lang, "fronts.of")} {data.hotspots.all.length} {tc(lang, "fronts.worldwide")}</div>
           </div>
           <div>
-            <div className="text-[10px] text-content-dim uppercase tracking-widest">CONFLICT ZONES</div>
+            <div className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "fronts.conflict_zones")}</div>
             <div className="text-3xl text-blood font-bold">{region.conflictCount}</div>
-            <div className="text-[10px] text-content-dim">intensity ≥3/5</div>
+            <div className="text-[10px] text-content-dim">{tc(lang, "fronts.intensity_3_5")}</div>
           </div>
           <div>
-            <div className="text-[10px] text-content-dim uppercase tracking-widest">DISPLACED</div>
+            <div className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "fronts.displaced")}</div>
             <div className="text-3xl text-content-primary font-bold">{formatNumber(region.displaced)}</div>
-            <div className="text-[10px] text-content-dim">forcibly displaced</div>
+            <div className="text-[10px] text-content-dim">{tc(lang, "fronts.forcibly_displaced")}</div>
           </div>
         </div>
 
         {/* Sub-stats */}
         <div className="grid grid-cols-2 gap-4 text-xs">
           <div className="p-2 border border-border-dim bg-void">
-            <span className="text-content-dim">UNDERNOURISHED:</span>{" "}
+            <span className="text-content-dim">{tc(lang, "fronts.undernourished_label")}:</span>{" "}
             <span className="text-blood-bright font-bold">{formatNumber(region.undernourished)}M</span>
             {" "}({((region.undernourished / region.totalPop) * 100).toFixed(1)}% of population)
           </div>
           <div className="p-2 border border-border-dim bg-void">
-            <span className="text-content-dim">REFUGEE BURDEN:</span>{" "}
-            <span className="text-terminal-green font-bold">hosts {formatNumber(region.refugeesHosted)}</span>
+            <span className="text-content-dim">{tc(lang, "fronts.refugee_burden")}:</span>{" "}
+            <span className="text-terminal-green font-bold">{tc(lang, "fronts.hosts")} {formatNumber(region.refugeesHosted)}</span>
             {" · "}
-            <span className="text-blood-bright font-bold">produces {formatNumber(region.refugeesOrigin)}</span>
+            <span className="text-blood-bright font-bold">{tc(lang, "fronts.produces")} {formatNumber(region.refugeesOrigin)}</span>
           </div>
         </div>
       </TerminalCard>
@@ -217,7 +216,7 @@ export default function TheFrontsPage() {
       {/* Two-column: radar + top crises */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Region vulnerability radar */}
-        <TerminalCard title={`${region.name.toUpperCase()} — VULNERABILITY PROFILE`}>
+        <TerminalCard title={`${region.name.toUpperCase()} — ${tc(lang, "fronts.vulnerability_profile")}`}>
           <div style={{ width: "100%", height: 320 }}>
             <ResponsiveContainer>
               <RadarChart data={radarData} outerRadius="70%">
@@ -241,7 +240,7 @@ export default function TheFrontsPage() {
         </TerminalCard>
 
         {/* Top crises in region */}
-        <TerminalCard title={`WORST CRISES IN ${region.name.toUpperCase()}`} accent="blood">
+        <TerminalCard title={`${tc(lang, "fronts.worst_crises_in")} ${region.name.toUpperCase()}`} accent="blood">
           <div className="space-y-2">
             {region.topCrises.map((c, i) => (
               <Link
@@ -269,18 +268,18 @@ export default function TheFrontsPage() {
       </div>
 
       {/* All countries in region */}
-      <TerminalCard title={`ALL COUNTRIES IN ${region.name.toUpperCase()} (${region.count})`} className="mb-6">
+      <TerminalCard title={`${tc(lang, "fronts.all_countries_in")} ${region.name.toUpperCase()} (${region.count})`} className="mb-6">
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
               <tr className="border-b border-border-dim text-content-dim text-[10px] uppercase tracking-widest">
-                <th className="text-left p-2">Country</th>
-                <th className="text-right p-2">Vulnerability</th>
-                <th className="text-right p-2">Under-nourish</th>
-                <th className="text-right p-2">Conflict</th>
-                <th className="text-right p-2">GDP/cap</th>
-                <th className="text-right p-2">Homicide</th>
-                <th className="text-left p-2">Status</th>
+                <th className="text-left p-2">{tc(lang, "fronts.th_country")}</th>
+                <th className="text-right p-2">{tc(lang, "fronts.th_vulnerability")}</th>
+                <th className="text-right p-2">{tc(lang, "fronts.th_undernourish")}</th>
+                <th className="text-right p-2">{tc(lang, "fronts.th_conflict")}</th>
+                <th className="text-right p-2">{tc(lang, "fronts.th_gdp_cap")}</th>
+                <th className="text-right p-2">{tc(lang, "fronts.th_homicide")}</th>
+                <th className="text-left p-2">{tc(lang, "fronts.th_status")}</th>
               </tr>
             </thead>
             <tbody>
@@ -315,7 +314,7 @@ export default function TheFrontsPage() {
                         {c.security.homicide_rate_per100k !== null ? c.security.homicide_rate_per100k.toFixed(1) : "—"}
                       </td>
                       <td className="p-2">
-                        {c.is_hotspot && <StatusPill color="blood">HOTSPOT</StatusPill>}
+                        {c.is_hotspot && <StatusPill color="blood">{tc(lang, "act.hotspot")}</StatusPill>}
                       </td>
                     </tr>
                   );
@@ -328,7 +327,7 @@ export default function TheFrontsPage() {
       {/* Cross-region comparison */}
       <TerminalCard title={tc(lang, "fronts.regional_comparison")} accent="amber" className="mb-6">
         <p className="text-xs text-content-dim mb-3">
-          // Vulnerability scores overlaid. Africa is in a category of its own.
+          {tc(lang, "fronts.comparison_desc")}
         </p>
         <div style={{ width: "100%", height: 380 }}>
           <ResponsiveContainer>
@@ -363,7 +362,7 @@ export default function TheFrontsPage() {
             >
               <span className="inline-block w-3 h-3" style={{ backgroundColor: regionColors[r.name] ?? "#888" }} />
               <span style={{ color: regionColors[r.name] ?? "#888" }}>{r.name}</span>
-              <span className="text-content-dim">avg {r.avgVulnerability.toFixed(0)}</span>
+              <span className="text-content-dim">{tc(lang, "fronts.avg")} {r.avgVulnerability.toFixed(0)}</span>
             </button>
           ))}
         </div>
@@ -372,13 +371,13 @@ export default function TheFrontsPage() {
       {/* Cross-links */}
       <div className="flex flex-wrap gap-2">
         <Link href="/the-index/" className="text-xs px-3 py-1.5 border border-border-dim text-content-secondary hover:border-blood hover:text-blood-bright">
-          ▶ GLOBAL VULNERABILITY INDEX
+          {tc(lang, "fronts.link_index")}
         </Link>
         <Link href="/the-exodus/" className="text-xs px-3 py-1.5 border border-border-dim text-content-secondary hover:border-blood hover:text-blood-bright">
-          ▶ DISPLACEMENT FLOWS
+          {tc(lang, "fronts.link_exodus")}
         </Link>
         <Link href="/sorrow-map/" className="text-xs px-3 py-1.5 border border-border-dim text-content-secondary hover:border-blood hover:text-blood-bright">
-          ▶ WORLD MAP
+          {tc(lang, "fronts.link_map")}
         </Link>
       </div>
     </div>
