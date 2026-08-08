@@ -94,6 +94,18 @@ const DIMENSIONS: DimensionDef[] = [
   { key: "environment_renewable_energy_pct", label: "label.renewable_energy", category: "cat.environment", unit: "%", inverse: true },
   { key: "connectivity_broadband_per100", label: "label.broadband", category: "cat.connectivity", unit: "/100", inverse: true },
   { key: "demographics_population", label: "label.population", category: "cat.demographics", unit: "" },
+  // ── Mental Health ──
+  { key: "mental_health_suicide_rate_per100k", label: "label.suicide_rate", category: "cat.mental_health", unit: "/100k" },
+  { key: "mental_health_suicide_rate_male_per100k", label: "label.suicide_rate_male", category: "cat.mental_health", unit: "/100k" },
+  { key: "mental_health_suicide_rate_female_per100k", label: "label.suicide_rate_female", category: "cat.mental_health", unit: "/100k" },
+  { key: "mental_health_psychiatrists_per100k", label: "label.psychiatrists", category: "cat.mental_health", unit: "/100k", inverse: true },
+  { key: "mental_health_psychologists_per100k", label: "label.psychologists", category: "cat.mental_health", unit: "/100k", inverse: true },
+  { key: "mental_health_mental_health_nurses_per100k", label: "label.mh_nurses", category: "cat.mental_health", unit: "/100k", inverse: true },
+  { key: "mental_health_mh_beds_general_hospital_per100k", label: "label.mh_beds_hospital", category: "cat.mental_health", unit: "/100k", inverse: true },
+  { key: "mental_health_mh_beds_mental_hospital_per100k", label: "label.mh_beds_mental", category: "cat.mental_health", unit: "/100k", inverse: true },
+  { key: "mental_health_alcohol_per_capita_liters", label: "label.alcohol_per_capita", category: "cat.mental_health", unit: "L" },
+  { key: "mental_health_alcohol_use_disorders_pct", label: "label.alcohol_disorders", category: "cat.mental_health", unit: "%" },
+  { key: "mental_health_govt_mh_expenditure_pct", label: "label.govt_mh_expenditure", category: "cat.mental_health", unit: "%", inverse: true },
 ];
 
 /**

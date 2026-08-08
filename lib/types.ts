@@ -198,6 +198,25 @@ export interface CountryData {
     food_cost_affordability_ratio: number | null;
     _meta?: { sources: string[]; year: number | null };
   };
+  mental_health?: {
+    suicide_rate_per100k: number | null;
+    suicide_rate_male_per100k: number | null;
+    suicide_rate_female_per100k: number | null;
+    psychiatrists_per100k: number | null;
+    psychologists_per100k: number | null;
+    mental_health_nurses_per100k: number | null;
+    mh_beds_general_hospital_per100k: number | null;
+    mh_beds_mental_hospital_per100k: number | null;
+    govt_mh_expenditure_pct: number | null;
+    alcohol_per_capita_liters: number | null;
+    alcohol_use_disorders_pct: number | null;
+    _meta?: {
+      sources: string[];
+      year_range: string | null;
+      suicide_rate_source?: string;
+      alcohol_source?: string;
+    };
+  };
 }
 
 // ── SDG parallel equations (SDG 3, 4, 6, 7, 10, 13) ──

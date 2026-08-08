@@ -115,6 +115,15 @@ export const METRIC_CATALOG: MetricDef[] = [
   { path: "employment.youth_unemployment_pct", label: "Youth Unemployment", unit: "%", domain: "economy", defaultThreshold: 25 },
   { path: "military.pct_gdp", label: "Military Spending", unit: "% GDP", domain: "economy", defaultThreshold: 5 },
 
+  // ── Mental Health ──
+  { path: "mental_health.suicide_rate_per100k", label: "Suicide Rate", unit: "/100k", domain: "health", defaultThreshold: 15 },
+  { path: "mental_health.psychiatrists_per100k", label: "Psychiatrists per 100k", unit: "/100k", higherIsBetter: true, domain: "health", defaultThreshold: 1.0 },
+  { path: "mental_health.psychologists_per100k", label: "Psychologists per 100k", unit: "/100k", higherIsBetter: true, domain: "health", defaultThreshold: 3.0 },
+  { path: "mental_health.mental_health_nurses_per100k", label: "Mental Health Nurses per 100k", unit: "/100k", higherIsBetter: true, domain: "health", defaultThreshold: 5.0 },
+  { path: "mental_health.alcohol_per_capita_liters", label: "Alcohol Consumption per Capita", unit: "L", domain: "health", defaultThreshold: 10 },
+  { path: "mental_health.alcohol_use_disorders_pct", label: "Alcohol Use Disorders", unit: "%", domain: "health", defaultThreshold: 5 },
+  { path: "mental_health.govt_mh_expenditure_pct", label: "Govt MH Expenditure", unit: "%", higherIsBetter: true, domain: "health", defaultThreshold: 2 },
+
   // ── Security ──
   { path: "security.homicide_rate_per100k", label: "Homicide Rate", unit: "/100k", domain: "security", defaultThreshold: 20 },
 

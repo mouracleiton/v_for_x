@@ -1741,6 +1741,62 @@ export const CONTENT_T: Dict = {
     en: "Status quo", pt: "Status quo", es: "Status quo", fr: "Statu quo",
     zh: "现状", ja: "現状維持", ko: "현상유지", hi: "वर्तमान स्थिति", ar: "الوضع الراهن", ru: "Статус-кво",
   },
+  "cat.mental_health": {
+    en: "MENTAL HEALTH", pt: "SAÚDE MENTAL", es: "SALUD MENTAL", fr: "SANTÉ MENTALE",
+    zh: "心理健康", ja: "メンタルヘルス", ko: "정신 건강", hi: "मानसिक स्वास्थ्य", ar: "الصحة النفسية", ru: "ПСИХИЧЕСКОЕ ЗДОРОВЬЕ",
+  },
+  "label.mental_health": {
+    en: "MENTAL HEALTH", pt: "SAÚDE MENTAL", es: "SALUD MENTAL", fr: "SANTÉ MENTALE",
+    zh: "心理健康", ja: "メンタルヘルス", ko: "정신 건강", hi: "मानसिक स्वास्थ्य", ar: "الصحة النفسية", ru: "ПСИХИЧЕСКОЕ ЗДОРОВЬЕ",
+  },
+  "label.suicide_rate": {
+    en: "SUICIDE RATE", pt: "TAXA DE SUICÍDIO", es: "TASA DE SUICIDIO", fr: "TAUX DE SUICIDE",
+    zh: "自杀率", ja: "自殺率", ko: "자살률", hi: "आत्महत्या दर", ar: "معدل الانتحار", ru: "УРОВЕНЬ СУИЦИДА",
+  },
+  "label.suicide_rate_male": {
+    en: "SUICIDE RATE (MALE)", pt: "TAXA DE SUICÍDIO (MASCULINO)", es: "TASA DE SUICIDIO (MASCULINO)", fr: "TAUX DE SUICIDE (HOMMES)",
+    zh: "自杀率(男)", ja: "自殺率(男性)", ko: "자살률(남성)", hi: "आत्महत्या दर (पुरुष)", ar: "معدل الانتحار (ذكور)", ru: "СУИЦИД (МУЖЧИНЫ)",
+  },
+  "label.suicide_rate_female": {
+    en: "SUICIDE RATE (FEMALE)", pt: "TAXA DE SUICÍDIO (FEMININO)", es: "TASA DE SUICIDIO (FEMENINO)", fr: "TAUX DE SUICIDE (FEMMES)",
+    zh: "自杀率(女)", ja: "自殺率(女性)", ko: "자살률(여성)", hi: "आत्महत्या दर (महिला)", ar: "معدل الانتحار (إناث)", ru: "СУИЦИД (ЖЕНЩИНЫ)",
+  },
+  "label.psychiatrists": {
+    en: "PSYCHIATRISTS", pt: "PSIQUIATRAS", es: "PSIQUIATRAS", fr: "PSYCHIATRES",
+    zh: "精神科医生", ja: "精神科医", ko: "정신과 의사", hi: "मनोचिकित्सक", ar: "أطباء نفسيين", ru: "ПСИХИАТРЫ",
+  },
+  "label.psychologists": {
+    en: "PSYCHOLOGISTS", pt: "PSICÓLOGOS", es: "PSICÓLOGOS", fr: "PSYCHOLOGUES",
+    zh: "心理学家", ja: "心理学者", ko: "심리학자", hi: "मनोवैज्ञानिक", ar: "علماء النفس", ru: "ПСИХОЛОГИ",
+  },
+  "label.mh_nurses": {
+    en: "MH NURSES", pt: "ENF. SAÚDE MENTAL", es: "ENF. SALUD MENTAL", fr: "INF. SANTÉ MENTALE",
+    zh: "心理健康护士", ja: "メンタルヘルス看護師", ko: "정신건강 간호사", hi: "मानसिक स्वास्थ्य नर्स", ar: "ممرضي الصحة النفسية", ru: "МЕДСЁСТРЫ ПЗ",
+  },
+  "label.mh_beds_hospital": {
+    en: "MH BEDS (GEN HOSPITAL)", pt: "LEITOS SM (HOSP. GERAL)", es: "CAMAS SM (HOSP. GENERAL)", fr: "LITS SM (HÔP. GÉNÉRAL)",
+    zh: "精神健康床位(综合医院)", ja: "メンタルヘルス病床(総合病院)", ko: "정신건강 병상(종합병원)", hi: "मानसिक स्वास्थ्य बिस्तर (जनरल अस्पताल)", ar: "أسرّة الصحة النفسية (مستشفى عام)", ru: "КОЙКИ ПЗ (ОБЩ. Б-ЦА)",
+  },
+  "label.mh_beds_mental": {
+    en: "BEDS (MENTAL HOSPITAL)", pt: "LEITOS (HOSP. PSIQUIÁTRICO)", es: "CAMAS (HOSP. PSIQUIÁTRICO)", fr: "LITS (HÔP. PSYCHIATRIQUE)",
+    zh: "床位(精神病院)", ja: "病床(精神科病院)", ko: "병상(정신병원)", hi: "बिस्तर (मनोचिकित्सा अस्पताल)", ar: "أسرّة (مستشفى نفسي)", ru: "КОЙКИ (ПСИХ. Б-ЦА)",
+  },
+  "label.alcohol_per_capita": {
+    en: "ALCOHOL/CAPITA", pt: "ÁLCOOL/PER CAPITA", es: "ALCOHOL/PER CÁPITA", fr: "ALCOOL/HABITANT",
+    zh: "人均酒精", ja: "一人当たりアルコール", ko: "1인당 알코올", hi: "प्रति व्यक्ति शराब", ar: "الكحول للفرد", ru: "АЛКОГОЛЬ/ДУШУ НАС.",
+  },
+  "label.alcohol_disorders": {
+    en: "ALCOHOL USE DISORDERS", pt: "TRANSTORNOS POR ÁLCOOL", es: "TRASTORNOS POR ALCOHOL", fr: "TROUBLES LIÉS À L'ALCOOL",
+    zh: "酒精使用障碍", ja: "アルコール使用障害", ko: "알코올 사용 장애", hi: "शराब उपयोग विकार", ar: "اضطرابات تعاطي الكحول", ru: "РАССТРОЙСТВА ОТ АЛКОГОЛЯ",
+  },
+  "label.govt_mh_expenditure": {
+    en: "GOVT MH EXPENDITURE", pt: "GASTO GOV. SAÚDE MENTAL", es: "GASTO GUB. SALUD MENTAL", fr: "DÉPENSES GOUV. SANTÉ MENTALE",
+    zh: "政府心理健康支出", ja: "政府メンタルヘルス支出", ko: "정부 정신건강 지출", hi: "सरकारी मानसिक स्वास्थ्य व्यय", ar: "الإنفاق الحكومي على الصحة النفسية", ru: "ГОС. РАСХОДЫ НА ПЗ",
+  },
+  "label.mh_note": {
+    en: "Age-standardized rates", pt: "Taxas padronizadas por idade", es: "Tasas estandarizadas por edad", fr: "Taux standardisés par âge",
+    zh: "年龄标准化率", ja: "年齢調整済み率", ko: "연령표준화율", hi: "आयु-मानकीकृत दरें", ar: "معدلات معيارية حسب العمر", ru: "Возрастно-стандартизованные ставки",
+  },
 
   /* ═══════════════════════════════════════════════════════════════
    *  TERMINAL CARD TITLES (prominent, per page)
@@ -4290,6 +4346,9 @@ export const CONTENT_T: Dict = {
 
 
   "protocol.kit_default": { en: "Kit", pt: "Kit", es: "Kit", fr: "Kit", zh: "套件", ja: "キット", ko: "키트", hi: "किट", ar: "طقم", ru: "Набор" },
+  "protocol.back_to_protocol_x": { en: "← BACK TO PROTOCOL X", pt: "← VOLTAR AO PROTOCOLO X", es: "← VOLVER A PROTOCOLO X", fr: "← RETOUR AU PROTOCOLE X", zh: "← 返回协议X", ja: "← プロトコルXに戻る", ko: "← 프로토콜 X로 돌아가기", hi: "← प्रोटोकॉल X पर वापस", ar: "← العودة إلى البروتوكول X", ru: "← НАЗАД К ПРОТОКОЛУ X" },
+  "protocol.print_blueprint": { en: "[ PRINT THIS BLUEPRINT ]", pt: "[ IMPRIMIR ESTE BLUEPRINT ]", es: "[ IMPRIMIR ESTE PLANO ]", fr: "[ IMPRIMER CE PLAN ]", zh: "[ 打印此蓝图 ]", ja: "[ このブループリントを印刷 ]", ko: "[ 이 청사진 인쇄 ]", hi: "[ इस ब्लूप्रिंट को प्रिंट करें ]", ar: "[ اطبع هذا المخطط ]", ru: "[ РАСПЕЧАТАТЬ ЧЕРТЁЖ ]" },
+  "protocol.time_label": { en: "Time", pt: "Tempo", es: "Tiempo", fr: "Temps", zh: "时间", ja: "時間", ko: "시간", hi: "समय", ar: "الوقت", ru: "Время" },
 
 
 };

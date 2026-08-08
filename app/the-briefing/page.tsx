@@ -238,6 +238,51 @@ export default function TheBriefingPage() {
           />
         </div>
 
+        {/* Mental Health */}
+        {country.mental_health && (() => {
+          const mh = country.mental_health;
+          const hasAny = mh.suicide_rate_per100k !== null || mh.psychiatrists_per100k !== null || mh.alcohol_per_capita_liters !== null;
+          if (!hasAny) return null;
+          return (
+            <div className="mb-6">
+              <div className="text-[10px] text-content-dim uppercase tracking-widest mb-2">{tc(lang, "label.mental_health")}</div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <StatBox
+                  label={tc(lang, "label.suicide_rate")}
+                  value={mh.suicide_rate_per100k != null ? mh.suicide_rate_per100k.toFixed(1) : "—"}
+                  unit="/100k"
+                  vs={mh.suicide_rate_male_per100k != null ? `M: ${mh.suicide_rate_male_per100k.toFixed(1)} F: ${mh.suicide_rate_female_per100k?.toFixed(1)}` : ""}
+                  bad={mh.suicide_rate_per100k !== null && mh.suicide_rate_per100k > 15}
+                />
+                <StatBox
+                  label={tc(lang, "label.psychiatrists")}
+                  value={mh.psychiatrists_per100k != null ? mh.psychiatrists_per100k.toFixed(1) : "—"}
+                  unit="/100k"
+                  vs="WHO: 1/100k"
+                  bad={mh.psychiatrists_per100k !== null && mh.psychiatrists_per100k < 1}
+                />
+                <StatBox
+                  label={tc(lang, "label.alcohol_per_capita")}
+                  value={mh.alcohol_per_capita_liters != null ? mh.alcohol_per_capita_liters.toFixed(1) : "—"}
+                  unit="L"
+                  vs={mh.alcohol_use_disorders_pct != null ? `AUD: ${mh.alcohol_use_disorders_pct.toFixed(1)}%` : ""}
+                  bad={mh.alcohol_per_capita_liters !== null && mh.alcohol_per_capita_liters > 10}
+                />
+                <StatBox
+                  label={tc(lang, "label.govt_mh_expenditure")}
+                  value={mh.govt_mh_expenditure_pct != null ? mh.govt_mh_expenditure_pct.toFixed(1) : "—"}
+                  unit="%"
+                  vs=""
+                  bad={mh.govt_mh_expenditure_pct !== null && mh.govt_mh_expenditure_pct < 2}
+                />
+              </div>
+              <div className="text-[9px] text-content-dim mt-1">
+                Source: WHO Global Health Observatory · {tc(lang, "label.mh_note")}
+              </div>
+            </div>
+          );
+        })()}
+
         {/* The Choice box */}
         {milB > 0 && healthB > 0 && (
           <div className="mb-6 p-4 border border-border-dim bg-void">

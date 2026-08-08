@@ -7,6 +7,7 @@ import TerminalCard from "@/components/ui/TerminalCard";
 import StatusPill from "@/components/ui/StatusPill";
 import { useStore } from "@/stores/useStore";
 import { tc } from "@/lib/i18n-content";
+import { tbp } from "@/lib/blueprints-i18n";
 
 interface Blueprint {
   id: string;
@@ -32,6 +33,7 @@ export default function BlueprintContent({
   const { id } = use(params);
   const { lang } = useStore();
   const bp = blueprints.find((b) => b.id === id);
+  const tbpData = bp ? tbp(lang, bp.id) : null;
 
   if (!bp) {
     return (
@@ -51,41 +53,41 @@ export default function BlueprintContent({
           href="/protocol-x/"
           className="text-xs text-content-dim hover:text-blood"
         >
-          ← BACK TO PROTOCOL X
+          {tc(lang, "protocol.back_to_protocol_x")}
         </Link>
       </div>
 
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-2">
           <StatusPill color={bp.tech_level === "HIGH" ? "amber" : "green"}>
-            {bp.tech_level}-TECH
+            {bp.tech_level === "HIGH" ? tc(lang, "protocol.high_tech") : tc(lang, "protocol.low_tech")}
           </StatusPill>
-          <StatusPill color="dim">{bp.category}</StatusPill>
+          <StatusPill color="dim">{tc(lang, `bp.cat.${bp.category}`)}</StatusPill>
         </div>
         <h1 className="text-2xl md:text-3xl text-blood-bright font-bold glow-blood">
-          {bp.title}
+          {tbpData?.title ?? bp.title}
         </h1>
-        <p className="text-content-secondary text-sm mt-3">{bp.summary}</p>
+        <p className="text-content-secondary text-sm mt-3">{tbpData?.summary ?? bp.summary}</p>
       </div>
 
       <TerminalCard title={tc(lang, "card.specifications")} className="mb-6 no-print">
         <div className="grid grid-cols-2 gap-4 text-xs">
           <div>
-            <span className="text-content-dim">Difficulty: </span>
+            <span className="text-content-dim">{tc(lang, "protocol.difficulty")}: </span>
             <span className="text-blood-bright">
               {"★".repeat(bp.difficulty)}{"☆".repeat(5 - bp.difficulty)}
             </span>
           </div>
           <div>
-            <span className="text-content-dim">Time: </span>
-            <span className="text-content-primary">{bp.time_estimate}</span>
+            <span className="text-content-dim">{tc(lang, "protocol.time_label")}: </span>
+            <span className="text-content-primary">{tbpData?.time_estimate ?? bp.time_estimate}</span>
           </div>
         </div>
       </TerminalCard>
 
       <TerminalCard title={tc(lang, "card.requirements")} className="mb-6 no-print">
         <ul className="space-y-1">
-          {bp.requirements.map((r, i) => (
+          {(tbpData?.requirements ?? bp.requirements).map((r, i) => (
             <li key={i} className="text-xs text-content-primary flex items-start gap-2">
               <span className="text-blood mt-0.5">▸</span>
               <span>{r}</span>
@@ -96,7 +98,7 @@ export default function BlueprintContent({
 
       <TerminalCard title={tc(lang, "card.procedure")} className="mb-6 no-print">
         <ol className="space-y-3">
-          {bp.steps.map((step, i) => (
+          {(tbpData?.steps ?? bp.steps).map((step, i) => (
             <li key={i} className="text-xs text-content-primary flex items-start gap-3">
               <span className="text-blood-bright font-bold shrink-0 w-6">
                 {String(i + 1).padStart(2, "0")}.
@@ -108,7 +110,7 @@ export default function BlueprintContent({
       </TerminalCard>
 
       <TerminalCard title={tc(lang, "card.notes_sources")} accent="amber" className="mb-6 no-print">
-        <p className="text-xs text-content-secondary italic">{bp.notes}</p>
+        <p className="text-xs text-content-secondary italic">{tbpData?.notes ?? bp.notes}</p>
         <div className="flex flex-wrap gap-2 mt-3">
           {bp.tags.map((t) => (
             <span key={t} className="text-xs text-content-dim">#{t}</span>
@@ -120,8 +122,9 @@ export default function BlueprintContent({
         onClick={() => window.print()}
         className="px-4 py-2 text-xs border border-border-dim text-content-secondary hover:border-blood hover:text-blood no-print"
       >
-        [ PRINT THIS BLUEPRINT ]
+        {tc(lang, "protocol.print_blueprint")}
       </button>
+
     </div>
   );
 }
