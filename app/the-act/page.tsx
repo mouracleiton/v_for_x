@@ -9,6 +9,11 @@ import StatusPill from "@/components/ui/StatusPill";
 import { sound } from "@/lib/sound";
 import { generateCountryCampaign, generateEquationCampaign, analyzeNeeds, type CampaignKit } from "@/lib/campaign";
 import { detectLang, CAMPAIGN_LANGS, type CampaignLang } from "@/lib/campaign-i18n";
+import {
+  loadAIConfig, saveAIConfig, clearAIConfig,
+  generateAIMessage, PLATFORM_STYLES,
+  type AIConfig, type AIGenerateResult,
+} from "@/lib/ai-generator";
 import { downloadJSON } from "@/lib/idb";
 import { calculateVulnerability, scoreColor } from "@/lib/vulnerability";
 
@@ -60,6 +65,18 @@ export default function TheActPage() {
   const [campaignLang, setCampaignLang] = useState<CampaignLang>("en");
   const [langManuallySet, setLangManuallySet] = useState(false);
 
+  // AI generator state
+  const [aiConfig, setAIConfig] = useState<AIConfig | null>(null);
+  const [aiBaseUrl, setAiBaseUrl] = useState("");
+  const [aiApiKey, setAiApiKey] = useState("");
+  const [aiModel, setAiModel] = useState("");
+  const [showAiConfig, setShowAiConfig] = useState(false);
+  const [aiPlatform, setAiPlatform] = useState("twitter");
+  const [aiGenerating, setAiGenerating] = useState(false);
+  const [aiResults, setAiResults] = useState<AIGenerateResult[]>([]);
+  const [aiError, setAiError] = useState<string | null>(null);
+  const [aiCustom, setAiCustom] = useState("");
+
   const country = useMemo<CountryData | undefined>(
     () => data.countries.find((c) => c.iso3 === selectedIso),
     [selectedIso]
@@ -95,6 +112,78 @@ export default function TheActPage() {
       setCampaignLang(detected);
     }
   }, [country, langManuallySet]);
+
+  // Load saved AI config on mount
+  useEffect(() => {
+    const saved = loadAIConfig();
+    if (saved) {
+      setAIConfig(saved);
+      setAiBaseUrl(saved.baseUrl);
+      setAiApiKey(saved.apiKey);
+      setAiModel(saved.model);
+    }
+  }, []);
+
+  // AI handlers
+  const handleSaveAIConfig = () => {
+    if (!aiBaseUrl.trim() || !aiApiKey.trim() || !aiModel.trim()) return;
+    const config: AIConfig = { baseUrl: aiBaseUrl.trim(), apiKey: aiApiKey.trim(), model: aiModel.trim() };
+    saveAIConfig(config);
+    setAIConfig(config);
+    setShowAiConfig(false);
+    sound.success();
+  };
+
+  const handleClearAIConfig = () => {
+    clearAIConfig();
+    setAIConfig(null);
+    setAiBaseUrl(""); setAiApiKey(""); setAiModel("");
+    sound.error();
+  };
+
+  const handleAIGenerate = async () => {
+    if (!aiConfig || !country) return;
+    setAiGenerating(true);
+    setAiError(null);
+    try {
+      const result = await generateAIMessage(aiConfig, country, data, aiPlatform, campaignLang, aiCustom.trim() || undefined);
+      setAiResults((prev) => [result, ...prev].slice(0, 20));
+      sound.success();
+    } catch (e) {
+      setAiError((e as Error).message);
+      sound.error();
+    } finally {
+      setAiGenerating(false);
+    }
+  };
+
+  const handleAIGenerateBatch = async () => {
+    if (!aiConfig || !country) return;
+    setAiGenerating(true);
+    setAiError(null);
+    try {
+      const platforms = Object.keys(PLATFORM_STYLES);
+      for (const p of platforms) {
+        try {
+          const result = await generateAIMessage(aiConfig, country, data, p, campaignLang, aiCustom.trim() || undefined);
+          setAiResults((prev) => [result, ...prev].slice(0, 20));
+        } catch (e) {
+          setAiResults((prev) => [{
+            text: `[ERROR: ${(e as Error).message}]`,
+            platform: PLATFORM_STYLES[p]?.name ?? p,
+            tone: "error",
+            timestamp: Date.now(),
+          }, ...prev].slice(0, 20));
+        }
+      }
+      sound.success();
+    } catch (e) {
+      setAiError((e as Error).message);
+      sound.error();
+    } finally {
+      setAiGenerating(false);
+    }
+  };
 
   const needs = useMemo(() => country ? analyzeNeeds(country) : [], [country]);
   const vuln = useMemo(() => country ? calculateVulnerability(country) : null, [country]);
@@ -278,6 +367,201 @@ export default function TheActPage() {
               </div>
             ))}
           </div>
+        </TerminalCard>
+      )}
+
+      {/* ═══ AI MESSAGE GENERATOR ═══ */}
+      {mode === "country" && country && (
+        <TerminalCard
+          title="AI MESSAGE GENERATOR // UNIQUE, VARIED, ANTI-BAN"
+          accent="amber"
+          className="mb-6"
+        >
+          <p className="text-xs text-content-dim mb-3">
+            // Generates unique social media messages from {country.name_en}'s real data.
+            Each generation uses random tone + angle + temperature — no two messages are alike.
+            Your API key stays on your device.
+          </p>
+
+          {/* Config status / toggle */}
+          <div className="flex items-center gap-2 mb-3">
+            {aiConfig ? (
+              <>
+                <StatusPill color="green">CONNECTED</StatusPill>
+                <span className="text-[10px] text-content-dim">{aiConfig.model} @ {aiConfig.baseUrl.replace(/https?:\/\//, "").split("/")[0]}</span>
+                <button onClick={() => setShowAiConfig(!showAiConfig)} className="text-[10px] px-2 py-0.5 border border-border-dim text-content-secondary hover:border-blood ml-auto">
+                  [ CONFIG ]
+                </button>
+              </>
+            ) : (
+              <button onClick={() => setShowAiConfig(true)} className="text-[10px] px-3 py-1 border border-blood text-blood-bright hover:bg-blood hover:text-void">
+                [ CONFIGURE API ]
+              </button>
+            )}
+          </div>
+
+          {/* Config form */}
+          {showAiConfig && (
+            <div className="p-3 border border-border-dim bg-void mb-3 space-y-2">
+              <div>
+                <label className="text-[10px] text-content-dim uppercase">API BASE URL</label>
+                <input
+                  type="text"
+                  value={aiBaseUrl}
+                  onChange={(e) => setAiBaseUrl(e.target.value)}
+                  placeholder="https://api.openai.com/v1"
+                  className="w-full bg-abyss border border-border-dim px-2 py-1 text-xs text-content-primary focus:border-terminal-green focus:outline-none mt-0.5"
+                />
+                <div className="text-[9px] text-content-dim mt-0.5">OpenAI: https://api.openai.com/v1 · Groq: https://api.groq.com/openai/v1 · OpenRouter: https://openrouter.ai/api/v1</div>
+              </div>
+              <div>
+                <label className="text-[10px] text-content-dim uppercase">API KEY</label>
+                <input
+                  type="password"
+                  value={aiApiKey}
+                  onChange={(e) => setAiApiKey(e.target.value)}
+                  placeholder="sk-..."
+                  className="w-full bg-abyss border border-border-dim px-2 py-1 text-xs text-content-primary focus:border-terminal-green focus:outline-none mt-0.5 font-mono"
+                />
+                <div className="text-[9px] text-content-dim mt-0.5">Stored only in your browser's localStorage. Never sent anywhere except the API URL above.</div>
+              </div>
+              <div>
+                <label className="text-[10px] text-content-dim uppercase">MODEL</label>
+                <input
+                  type="text"
+                  value={aiModel}
+                  onChange={(e) => setAiModel(e.target.value)}
+                  placeholder="gpt-4o-mini"
+                  className="w-full bg-abyss border border-border-dim px-2 py-1 text-xs text-content-primary focus:border-terminal-green focus:outline-none mt-0.5 font-mono"
+                />
+                <div className="text-[9px] text-content-dim mt-0.5">OpenAI: gpt-4o-mini · Groq: llama-3.3-70b-versatile · OpenRouter: meta-llama/llama-3.3-70b-instruct</div>
+              </div>
+              <div className="flex gap-2 pt-1">
+                <button
+                  onClick={handleSaveAIConfig}
+                  disabled={!aiBaseUrl.trim() || !aiApiKey.trim() || !aiModel.trim()}
+                  className="px-3 py-1 text-xs border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  [ SAVE ]
+                </button>
+                {aiConfig && (
+                  <button onClick={handleClearAIConfig} className="px-3 py-1 text-xs border border-blood text-blood hover:bg-blood hover:text-void">
+                    [ DISCONNECT ]
+                  </button>
+                )}
+                <button onClick={() => setShowAiConfig(false)} className="px-3 py-1 text-xs border border-border-dim text-content-secondary hover:border-blood ml-auto">
+                  [ CANCEL ]
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Generator controls */}
+          {aiConfig && (
+            <div className="space-y-2">
+              {/* Platform selector */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[10px] text-content-dim uppercase">PLATFORM:</span>
+                {Object.entries(PLATFORM_STYLES).map(([id, style]) => (
+                  <button
+                    key={id}
+                    onClick={() => { setAiPlatform(id); sound.select(); }}
+                    className={`text-[10px] px-2 py-1 border transition-colors ${
+                      aiPlatform === id
+                        ? "border-blood text-blood-bright bg-blood/5"
+                        : "border-border-dim text-content-secondary hover:border-blood"
+                    }`}
+                  >
+                    {style.name}
+                  </button>
+                ))}
+              </div>
+
+              {/* Custom instructions */}
+              <input
+                type="text"
+                value={aiCustom}
+                onChange={(e) => setAiCustom(e.target.value)}
+                placeholder="Optional: custom instructions (e.g. 'mention the upcoming election', 'reference specific NGO')"
+                className="w-full bg-void border border-border-dim px-2 py-1 text-xs text-content-primary focus:border-terminal-green focus:outline-none"
+              />
+
+              {/* Generate buttons */}
+              <div className="flex gap-2">
+                <button
+                  onClick={handleAIGenerate}
+                  disabled={aiGenerating}
+                  className="flex-1 px-3 py-2 text-xs border border-blood text-blood-bright hover:bg-blood hover:text-void transition-colors disabled:opacity-50 disabled:cursor-wait font-bold"
+                >
+                  {aiGenerating ? "[ GENERATING... ]" : `[ GENERATE ${PLATFORM_STYLES[aiPlatform]?.name.toUpperCase()} ]`}
+                </button>
+                <button
+                  onClick={handleAIGenerateBatch}
+                  disabled={aiGenerating}
+                  className="px-3 py-2 text-xs border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void transition-colors disabled:opacity-50 disabled:cursor-wait"
+                >
+                  [ ALL PLATFORMS ]
+                </button>
+              </div>
+
+              {/* Error */}
+              {aiError && (
+                <div className="p-2 border border-blood text-blood text-[10px] bg-abyss">
+                  ⚠ {aiError}
+                </div>
+              )}
+
+              {/* Results */}
+              {aiResults.length > 0 && (
+                <div className="space-y-2 mt-3">
+                  <div className="text-[10px] text-content-dim uppercase tracking-widest">
+                    GENERATED MESSAGES ({aiResults.length})
+                  </div>
+                  {aiResults.map((r, i) => (
+                    <div key={r.timestamp + "-" + i} className="p-2 border border-border-dim bg-void">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-[9px] text-terminal-green font-bold uppercase">{r.platform}</span>
+                        <span className="text-[9px] text-content-dim">{new Date(r.timestamp).toLocaleTimeString()}</span>
+                      </div>
+                      <pre className="text-xs text-content-primary whitespace-pre-wrap font-mono leading-relaxed">
+                        {r.text}
+                      </pre>
+                      <div className="flex items-center justify-end gap-1 mt-2 pt-1 border-t border-border-dim">
+                        <span className="text-[9px] text-content-dim mr-auto">{r.text.length} chars</span>
+                        <CopyButton text={r.text} label="[ COPY ]" />
+                        {r.platform === "Twitter/X" && (
+                          <a
+                            href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(r.text)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[9px] px-2 py-0.5 border border-border-dim text-content-secondary hover:border-blood hover:text-blood-bright"
+                          >
+                            [ TWEET ]
+                          </a>
+                        )}
+                        {r.platform === "WhatsApp" && (
+                          <a
+                            href={`https://wa.me/?text=${encodeURIComponent(r.text)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[9px] px-2 py-0.5 border border-border-dim text-content-secondary hover:border-terminal-green hover:text-terminal-green"
+                          >
+                            [ WHATSAPP ]
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                  <button
+                    onClick={() => { setAiResults([]); sound.error(); }}
+                    className="text-[9px] px-2 py-0.5 border border-border-dim text-content-dim hover:border-blood"
+                  >
+                    [ CLEAR ALL ]
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </TerminalCard>
       )}
 
