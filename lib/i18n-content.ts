@@ -2586,6 +2586,31 @@ export const CONTENT_T: Dict = {
   "tactics.days_weeks": { en: "Days-Weeks", pt: "Dias-Semanas", es: "Días-Semanas", fr: "Jours-Semaines", zh: "天-周", ja: "日-週間", ko: "일-주", hi: "दिन-सप्ताह", ar: "أيام-أسابيع", ru: "Дни-Недели" },
   "tactics.months_years": { en: "Months-Years", pt: "Meses-Anos", es: "Meses-Años", fr: "Mois-Ans", zh: "月-年", ja: "月-年", ko: "개월-년", hi: "महीने-वर्ष", ar: "أشهر-سنوات", ru: "Месяцы-Годы" },
   "tactics.high_immediate": { en: "High", pt: "Alto", es: "Alto", fr: "Élevé", zh: "高", ja: "高", ko: "높음", hi: "उच्च", ar: "عالي", ru: "Высокий" },
+
+  /* ═══════════════════════════════════════════════════════════════
+   *  SEARCH / GLOBAL SEARCH STRINGS
+   * ═══════════════════════════════════════════════════════════════ */
+  "search.placeholder": { en: "Search countries, blueprints, dossiers, equations...", pt: "Buscar países, planos, dossiês, equações...", es: "Buscar países, planes, expedientes, ecuaciones...", fr: "Rechercher pays, plans, dossiers, équations...", zh: "搜索国家、蓝图、档案、方程...", ja: "国、設計図、ファイル、方程式を検索...", ko: "국가, 청사진, 보고서, 방정식 검색...", hi: "देश, खाके, दस्तावेज़, समीकरण खोजें...", ar: "ابحث عن دول، مخططات، ملفات، معادلات...", ru: "Поиск стран, чертежей, досье, уравнений..." },
+  "search.type_to_search": { en: "Type to search", pt: "Digite para buscar", es: "Escribe para buscar", fr: "Tapez pour rechercher", zh: "输入搜索", ja: "入力して検索", ko: "입력하여 검색", hi: "खोजने के लिए टाइप करें", ar: "اكتب للبحث", ru: "Введите для поиска" },
+  "search.entries": { en: "entries", pt: "entradas", es: "entradas", fr: "entrées", zh: "条目", ja: "エントリー", ko: "항목", hi: "प्रविष्टियाँ", ar: "مداخل", ru: "записей" },
+  "search.countries": { en: "countries", pt: "países", es: "países", fr: "pays", zh: "国家", ja: "カ国", ko: "개국", hi: "देश", ar: "دولة", ru: "стран" },
+  "search.blueprints": { en: "blueprints", pt: "planos", es: "planes", fr: "plans", zh: "蓝图", ja: "設計図", ko: "청사진", hi: "खाके", ar: "مخططات", ru: "чертежей" },
+  "search.dossiers": { en: "dossiers", pt: "dossiês", es: "expedientes", fr: "dossiers", zh: "档案", ja: "ファイル", ko: "보고서", hi: "दस्तावेज़", ar: "ملفات", ru: "досье" },
+  "search.sections": { en: "sections", pt: "seções", es: "secciones", fr: "sections", zh: "板块", ja: "セクション", ko: "섹션", hi: "अनुभाग", ar: "أقسام", ru: "разделов" },
+  "search.no_results": { en: "No results for", pt: "Nenhum resultado para", es: "Sin resultados para", fr: "Aucun résultat pour", zh: "没有找到结果", ja: "結果なし:", ko: "결과 없음:", hi: "कोई परिणाम नहीं:", ar: "لا نتائج لـ", ru: "Нет результатов для" },
+  "search.navigate": { en: "navigate", pt: "navegar", es: "navegar", fr: "naviguer", zh: "导航", ja: "移動", ko: "이동", hi: "नेविगेट", ar: "تنقل", ru: "навигация" },
+  "search.select": { en: "select", pt: "selecionar", es: "seleccionar", fr: "sélectionner", zh: "选择", ja: "選択", ko: "선택", hi: "चुनें", ar: "اختيار", ru: "выбор" },
+  "search.close": { en: "close", pt: "fechar", es: "cerrar", fr: "fermer", zh: "关闭", ja: "閉じる", ko: "닫기", hi: "बंद करें", ar: "إغلاق", ru: "закрыть" },
+  "search.results": { en: "results", pt: "resultados", es: "resultados", fr: "résultats", zh: "结果", ja: "結果", ko: "결과", hi: "परिणाम", ar: "نتائج", ru: "результатов" },
+
+  /* ═══════════════════════════════════════════════════════════════
+   *  SEARCH TYPE LABELS
+   * ═══════════════════════════════════════════════════════════════ */
+  "search.type_country": { en: "COUNTRY", pt: "PAÍS", es: "PAÍS", fr: "PAYS", zh: "国家", ja: "国", ko: "국가", hi: "देश", ar: "دولة", ru: "СТРАНА" },
+  "search.type_blueprint": { en: "BLUEPRINT", pt: "PLANO", es: "PLAN", fr: "PLAN", zh: "蓝图", ja: "設計図", ko: "청사진", hi: "खाका", ar: "مخطط", ru: "ЧЕРТЕЖ" },
+  "search.type_dossier": { en: "DOSSIER", pt: "DOSSIÊ", es: "EXPEDIENTE", fr: "DOSSIER", zh: "档案", ja: "ファイル", ko: "보고서", hi: "दस्तावेज़", ar: "ملف", ru: "ДОСЬЕ" },
+  "search.type_equation": { en: "EQUATION", pt: "EQUAÇÃO", es: "ECUACIÓN", fr: "ÉQUATION", zh: "方程", ja: "方程式", ko: "방정식", hi: "समीकरण", ar: "معادلة", ru: "УРАВНЕНИЕ" },
+  "search.type_page": { en: "SECTION", pt: "SEÇÃO", es: "SECCIÓN", fr: "SECTION", zh: "板块", ja: "セクション", ko: "섹션", hi: "अनुभाग", ar: "قسم", ru: "РАЗДЕЛ" },
 };
 
 /**

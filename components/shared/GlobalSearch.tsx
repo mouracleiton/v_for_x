@@ -7,6 +7,9 @@ import blueprintsData from "@/data/blueprints.json";
 import dossiersData from "@/data/dossier-seed.json";
 import type { WorldBackbone } from "@/lib/types";
 import { sound } from "@/lib/sound";
+import { tc } from "@/lib/i18n-content";
+import { t } from "@/lib/i18n";
+import { useStore } from "@/stores/useStore";
 
 const data = backbone as WorldBackbone;
 const blueprints = (Array.isArray(blueprintsData) ? blueprintsData : (blueprintsData as { blueprints: unknown[] }).blueprints) as {
@@ -26,12 +29,12 @@ interface SearchResult {
   score: number;
 }
 
-const TYPE_META: Record<ResultType, { label: string; color: string; icon: string }> = {
-  country: { label: "COUNTRY", color: "#e10600", icon: "🌍" },
-  blueprint: { label: "BLUEPRINT", color: "#00ff41", icon: "📋" },
-  dossier: { label: "DOSSIER", color: "#ffaa00", icon: "⚖" },
-  equation: { label: "EQUATION", color: "#00ddff", icon: "∑" },
-  page: { label: "SECTION", color: "#aa44ff", icon: "▸" },
+const TYPE_META: Record<ResultType, { labelKey: string; color: string; icon: string }> = {
+  country: { labelKey: "search.type_country", color: "#e10600", icon: "🌍" },
+  blueprint: { labelKey: "search.type_blueprint", color: "#00ff41", icon: "📋" },
+  dossier: { labelKey: "search.type_dossier", color: "#ffaa00", icon: "⚖" },
+  equation: { labelKey: "search.type_equation", color: "#00ddff", icon: "∑" },
+  page: { labelKey: "search.type_page", color: "#aa44ff", icon: "▸" },
 };
 
 const STATIC_PAGES = [
@@ -89,6 +92,7 @@ function fuzzyScore(query: string, target: string): number {
 }
 
 export default function GlobalSearch() {
+  const { lang } = useStore();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -264,7 +268,7 @@ export default function GlobalSearch() {
             type="text"
             value={query}
             onChange={(e) => { setQuery(e.target.value); setSelectedIndex(0); }}
-            placeholder="Search countries, blueprints, dossiers, equations..."
+            placeholder={tc(lang, "search.placeholder")}
             className="flex-1 bg-transparent text-content-primary text-sm focus:outline-none placeholder:text-content-dim"
             autoComplete="off"
             spellCheck={false}
@@ -276,21 +280,21 @@ export default function GlobalSearch() {
         <div className="max-h-[50vh] overflow-y-auto">
           {query.trim() === "" ? (
             <div className="p-8 text-center text-content-dim text-xs">
-              <span className="cursor-blink">{'>'}</span> Type to search {index.length} entries...
+              <span className="cursor-blink">{'>'}</span> {tc(lang, "search.type_to_search")} {index.length} {tc(lang, "search.entries")}
               <div className="mt-4 text-[10px]">
-                {data.metadata.total_countries} countries · {blueprints.length} blueprints · {dossiers.length} dossiers · {STATIC_PAGES.length} sections
+                {data.metadata.total_countries} {tc(lang, "search.countries")} · {blueprints.length} {tc(lang, "search.blueprints")} · {dossiers.length} {tc(lang, "search.dossiers")} · {STATIC_PAGES.length} {tc(lang, "search.sections")}
               </div>
             </div>
           ) : flatResults.length === 0 ? (
             <div className="p-8 text-center text-content-dim text-xs">
-              No results for &quot;{query}&quot;
+              {tc(lang, "search.no_results")} &quot;{query}&quot;
             </div>
           ) : (
             <div className="p-2">
               {(Object.entries(grouped) as [ResultType, SearchResult[]][]).map(([type, results]) => (
                 <div key={type} className="mb-2">
                   <div className="text-[9px] text-content-dim uppercase tracking-widest px-2 py-1">
-                    {TYPE_META[type].label} ({results.length})
+                    {tc(lang, TYPE_META[type].labelKey)} ({results.length})
                   </div>
                   {results.map((r) => {
                     const flatIdx = flatResults.indexOf(r);
@@ -325,11 +329,11 @@ export default function GlobalSearch() {
         {/* Footer */}
         <div className="flex items-center justify-between px-4 py-2 border-t border-border-dim text-[10px] text-content-dim">
           <span>
-            <kbd className="px-1 border border-border-dim">↑↓</kbd> navigate ·{" "}
-            <kbd className="px-1 border border-border-dim">↵</kbd> select ·{" "}
-            <kbd className="px-1 border border-border-dim">esc</kbd> close
+            <kbd className="px-1 border border-border-dim">↑↓</kbd> {tc(lang, "search.navigate")} ·{" "}
+            <kbd className="px-1 border border-border-dim">↵</kbd> {tc(lang, "search.select")} ·{" "}
+            <kbd className="px-1 border border-border-dim">esc</kbd> {tc(lang, "search.close")}
           </span>
-          <span>V FOR X // {flatResults.length} results</span>
+          <span>V FOR X // {flatResults.length} {tc(lang, "search.results")}</span>
         </div>
       </div>
     </div>
