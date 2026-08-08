@@ -3,13 +3,19 @@
 import { useState } from "react";
 import { sound } from "@/lib/sound";
 import { EmbedButton, tweetIntent } from "@/components/shared/EmbedButton";
+import { tc } from "@/lib/i18n-content";
+import { useStore } from "@/stores/useStore";
+import type { Lang } from "@/lib/i18n";
 
 interface ShareableStatProps {
   text: string;
+  lang?: Lang;
 }
 
-export default function ShareableStat({ text }: ShareableStatProps) {
+export default function ShareableStat({ text, lang }: ShareableStatProps) {
   const [copied, setCopied] = useState(false);
+  const { lang: storeLang } = useStore();
+  const effectiveLang = lang ?? storeLang;
 
   const copy = async () => {
     try {
@@ -36,7 +42,7 @@ export default function ShareableStat({ text }: ShareableStatProps) {
                 : "text-content-dim group-hover:text-blood border-border-dim group-hover:border-blood"
             }`}
           >
-            {copied ? "[ COPIED ]" : "[ COPY ]"}
+            {copied ? `[ ${tc(effectiveLang, "ui.copied")} ]` : `[ ${tc(effectiveLang, "ui.copy")} ]`}
           </button>
           <a
             href={tweetIntent(text)}
@@ -44,10 +50,10 @@ export default function ShareableStat({ text }: ShareableStatProps) {
             rel="noopener noreferrer"
             className="text-[10px] px-2 py-0.5 border border-border-dim text-content-dim hover:border-blood hover:text-blood-bright text-center transition-colors no-print"
           >
-            TWEET
+            {tc(effectiveLang, "ui.tweet")}
           </a>
           <div className="no-print">
-            <EmbedButton text={text} />
+            <EmbedButton text={text} lang={effectiveLang} />
           </div>
         </div>
       </div>

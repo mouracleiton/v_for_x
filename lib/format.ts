@@ -3,6 +3,7 @@
  */
 
 import type { Lang } from "@/lib/i18n";
+import { CONTENT_T } from "@/lib/i18n-content";
 
 /** Map language to Intl locale */
 const LOCALE_MAP: Record<Lang, string> = {
@@ -93,4 +94,17 @@ export function wfpClassLabel(wfpClass: string): string {
     default:
       return "—";
   }
+}
+
+/** WFP class label with language support */
+export function wfpClassLabelLocalized(wfpClass: string, lang?: string): string {
+  if (!lang || lang === "en") return wfpClassLabel(wfpClass);
+  const key = wfpClass === "highest_concern" ? "wfp.highest"
+    : wfpClass === "very_high_concern" ? "wfp.very_high"
+    : wfpClass === "high_concern" ? "wfp.high"
+    : wfpClass === "concern" ? "wfp.concern"
+    : null;
+  if (!key) return "—";
+  // Use dynamic import-free approach: access CONTENT_T directly
+  return CONTENT_T[key]?.[lang as Lang] ?? CONTENT_T[key]?.en ?? wfpClassLabel(wfpClass);
 }

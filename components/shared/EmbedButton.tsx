@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { sound } from "@/lib/sound";
+import { tc } from "@/lib/i18n-content";
+import { useStore } from "@/stores/useStore";
+import type { Lang } from "@/lib/i18n";
 
 /**
  * Generates an embeddable iframe snippet for any page/stat.
@@ -31,9 +34,11 @@ export function tweetIntent(text: string, url?: string): string {
 }
 
 /** A button that opens embed options for a shareable stat */
-export function EmbedButton({ text, source }: { text: string; source?: string }) {
+export function EmbedButton({ text, source, lang }: { text: string; source?: string; lang?: Lang }) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const { lang: storeLang } = useStore();
+  const effectiveLang = lang ?? storeLang;
 
   const snippet = generateEmbedSnippet({ text, source });
 
@@ -54,14 +59,14 @@ export function EmbedButton({ text, source }: { text: string; source?: string })
         onClick={() => { setOpen(!open); sound.select(); }}
         className="text-[10px] px-2 py-0.5 border border-border-dim text-content-dim hover:border-blood hover:text-blood-bright transition-colors"
       >
-        {open ? "[ - ]" : "[ EMBED ]"}
+        {open ? "[ - ]" : `[ ${tc(effectiveLang, "ui.embed")} ]`}
       </button>
       {open && (
         <div className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4" onClick={() => setOpen(false)}>
           <div className="bg-abyss border border-blood max-w-lg w-full p-4" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-bold text-blood-bright uppercase">Embed Snippet</span>
-              <button onClick={() => setOpen(false)} className="text-content-dim hover:text-blood-bright">✕</button>
+              <span className="text-xs font-bold text-blood-bright uppercase">{tc(effectiveLang, "ui.embed")}</span>
+              <button onClick={() => setOpen(false)} className="text-content-dim hover:text-blood-bright">{tc(effectiveLang, "ui.close")} ✕</button>
             </div>
             <pre className="text-[10px] text-content-secondary bg-void border border-border-dim p-2 overflow-x-auto max-h-48 overflow-y-auto whitespace-pre-wrap">
               {snippet}
@@ -75,7 +80,7 @@ export function EmbedButton({ text, source }: { text: string; source?: string })
                     : "border-blood text-blood-bright hover:bg-blood hover:text-void"
                 }`}
               >
-                {copied ? "✓ COPIED" : "COPY HTML"}
+                {copied ? `✓ ${tc(effectiveLang, "ui.copied")}` : `${tc(effectiveLang, "ui.copy")} HTML`}
               </button>
               <a
                 href={tweetIntent(text)}
@@ -83,7 +88,7 @@ export function EmbedButton({ text, source }: { text: string; source?: string })
                 rel="noopener noreferrer"
                 className="flex-1 py-2 text-xs border border-border-dim text-content-secondary hover:border-blood hover:text-blood-bright text-center transition-colors"
               >
-                ↗ TWEET
+                ↗ {tc(effectiveLang, "ui.tweet")}
               </a>
             </div>
             <div className="text-[10px] text-content-dim mt-2 italic">

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { tc } from "@/lib/i18n-content";
+import { t } from "@/lib/i18n";
 import { useStore } from "@/stores/useStore";
 import { useMemo, useState, useEffect } from "react";
 import backbone from "@/data/world_backbone.json";
@@ -10,50 +11,19 @@ import TerminalCard from "@/components/ui/TerminalCard";
 import ShareableStat from "@/components/shared/ShareableStat";
 import DataBar from "@/components/ui/DataBar";
 import StatusPill from "@/components/ui/StatusPill";
-import { wfpClassColor, wfpClassLabel, formatNumber } from "@/lib/format";
+import { wfpClassColor, wfpClassLabel, wfpClassLabelLocalized, formatNumber } from "@/lib/format";
 import type { WorldBackbone } from "@/lib/types";
+import type { Lang } from "@/lib/i18n";
 
 const data = backbone as WorldBackbone;
 
-const shareableStats = [
-  "Ending global hunger costs $93B/year. World military spending: $2.4T/year. That's 0.9%. [Source: SIPRI/FAO]",
-  "667 million people are undernourished right now. That's 1 in 11 humans. [Source: FAO SOFI 2024]",
-  "School feeding programs return $7-35 for every $1 invested. We reach 400M children. 73M are still left out. [Source: World Bank]",
-  "Nonviolent resistance succeeds 53% of the time. Armed insurgency succeeds 26%. [Source: Chenoweth]",
-  "Investing in smallholder agriculture increases income by 34% and production by 35%. 70M farmers are reachable. [Source: IFAD]",
-  "2.8 billion people cannot afford a healthy diet. [Source: FAO]",
-  "The world spends more on military in 14 days than it would cost to end hunger for a year. [Source: SIPRI/FAO]",
-  // ── SDG equation stats ──
-  "5 days of world military spending would electrify the planet. 524M people still live in darkness. [Source: IEA/SIPRI]",
-  "186 of 194 countries are below the WHO minimum of 4.45 doctors per 1000. 27 days of military spending fixes it. [Source: WHO/SIPRI]",
-  "2 billion people lack safe water. 17 days of military spending buys clean water for every human alive. [Source: WHO/UN-Water/SIPRI]",
-  "1.1 billion adults are illiterate. 15 days of military spending covers a year of quality education for every child. [Source: UNESCO/SIPRI]",
-  "A 2% tax on the world's 3,000 billionaires would raise $313B/year — enough to end extreme poverty AND fund water, electricity, and education. [Source: Oxfam/G20]",
-  "$422B/year buys safe water + healthcare + electricity + education for everyone. That's 64 days of military spending. [Source: WHO/IEA/UNESCO/SIPRI]",
-  "Qatar emits 41 tons of CO2 per person. The DRC emits 0.05. A 764x gap. The countries least responsible will suffer first. [Source: Global Carbon Project]",
-];
+const shareableStatKeys = ["share.0", "share.1", "share.2", "share.3", "share.4", "share.5", "share.6", "share.7", "share.8", "share.9", "share.10", "share.11", "share.12", "share.13"];
 
-const rotatingNumbers = [
-  {
-    value: "$93B",
-    label: "annual cost to end global hunger",
-    comparison: "0.9% of world military spending",
-  },
-  {
-    value: "667M",
-    label: "people undernourished in 2024",
-    comparison: "1 in 11 humans on Earth",
-  },
-  {
-    value: "2.8B",
-    label: "people who cannot afford a healthy diet",
-    comparison: "over a third of humanity",
-  },
-  {
-    value: "140M",
-    label: "people trapped in active conflict zones",
-    comparison: "where aid cannot reach them",
-  },
+const rotatingNumberKeys = [
+  { value: "$93B", labelKey: "rn.93b_label", comparisonKey: "rn.93b_comparison" },
+  { value: "667M", labelKey: "rn.667m_label", comparisonKey: "rn.667m_comparison" },
+  { value: "2.8B", labelKey: "rn.2_8b_label", comparisonKey: "rn.2_8b_comparison" },
+  { value: "140M", labelKey: "rn.140m_label", comparisonKey: "rn.140m_comparison" },
 ];
 
 /* ═══ SDG ROTATING COUNTER ═══
@@ -65,68 +35,68 @@ const sdgCounterItems: {
   sdg: string;
   title: string;
   bigValue: string;
-  label: string;
-  comparison: string;
+  labelKey: string;
+  comparisonKey: string;
   color: string;
-  moral: string;
+  moralKey: string;
 }[] = [
   {
     sdg: "SDG 7",
     title: "ENERGY",
     bigValue: "$35B",
-    label: "to electrify the planet for 524M people in darkness",
-    comparison: "5 days of world military spending",
+    labelKey: "sdg.energy_label",
+    comparisonKey: "sdg.energy_comparison",
     color: "#ffaa00",
-    moral: "5 days of world military spending would electrify the planet.",
+    moralKey: "sdg.energy_moral",
   },
   {
     sdg: "SDG 6",
     title: "WATER",
     bigValue: "$114B",
-    label: "for safe water + sanitation for every human alive",
-    comparison: "17 days of world military spending",
+    labelKey: "sdg.water_label",
+    comparisonKey: "sdg.water_comparison",
     color: "#00ddff",
-    moral: "Less than 5% of world military spending buys safe water for every human alive.",
+    moralKey: "sdg.water_moral",
   },
   {
     sdg: "SDG 3",
     title: "HEALTH",
     bigValue: "$176B",
-    label: "for healthcare in the world's 54 poorest countries",
-    comparison: "27 days of world military spending",
+    labelKey: "sdg.health_label",
+    comparisonKey: "sdg.health_comparison",
     color: "#e10600",
-    moral: "186 of 194 countries are below the WHO minimum doctor threshold.",
+    moralKey: "sdg.health_moral",
   },
   {
     sdg: "SDG 4",
     title: "EDUCATION",
     bigValue: "$97B",
-    label: "for quality education for every child on Earth",
-    comparison: "15 days of world military spending",
+    labelKey: "sdg.education_label",
+    comparisonKey: "sdg.education_comparison",
     color: "#00ff41",
-    moral: "1.1 billion adults are illiterate. 15 days of military spending fixes it.",
+    moralKey: "sdg.education_moral",
   },
   {
     sdg: "SDG 10",
     title: "INEQUALITY",
     bigValue: "$313B",
-    label: "from a 2% tax on the world's 3,000 billionaires",
-    comparison: "47 days of world military spending",
+    labelKey: "sdg.inequality_label",
+    comparisonKey: "sdg.inequality_comparison",
     color: "#aa44ff",
-    moral: "A 2% billionaire tax funds water, electricity, AND education — with $50B left over.",
+    moralKey: "sdg.inequality_moral",
   },
   {
     sdg: "SDG 13",
     title: "CLIMATE",
     bigValue: "764×",
-    label: "CO2 gap: Qatar emits 41t/person, DRC emits 0.05t",
-    comparison: "the countries least responsible suffer first",
+    labelKey: "sdg.climate_label",
+    comparisonKey: "sdg.climate_comparison",
     color: "#cc6600",
-    moral: "The climate transition costs 1.8 years of military spending. Inaction costs 10–100x more.",
+    moralKey: "sdg.climate_moral",
   },
 ];
 
-function SdgRotatingCounter() {
+function SdgRotatingCounter({ lang }: { lang: Lang }) {
   const [idx, setIdx] = useState(0);
   const [paused, setPaused] = useState(false);
 
@@ -144,13 +114,13 @@ function SdgRotatingCounter() {
 
   return (
     <TerminalCard
-      title="THE 6 EQUATIONS // ONE PATTERN"
+      title={tc(lang, "home.the_6_equations")}
       accent="amber"
       glow
       className="mb-6"
     >
       <p className="text-xs text-content-dim mb-4">
-        // hunger is the proof of concept. every solvable crisis costs less than military spending.
+        {tc(lang, "home.6_eq_sub")}
       </p>
       <div
         onMouseEnter={() => setPaused(true)}
@@ -171,14 +141,14 @@ function SdgRotatingCounter() {
             {item.bigValue}
           </span>
           <span className="text-sm text-content-primary flex-1">
-            {item.label}
+            {tc(lang, item.labelKey)}
           </span>
         </div>
         <div className="text-xs text-content-secondary italic">
-          {item.moral}
+          {tc(lang, item.moralKey)}
         </div>
         <div className="text-[10px] text-content-dim mt-1">
-          = {item.comparison}
+          = {tc(lang, item.comparisonKey)}
         </div>
       </div>
 
@@ -202,16 +172,16 @@ function SdgRotatingCounter() {
           href="/equation/"
           className="text-[10px] text-blood-bright hover:underline uppercase tracking-widest"
         >
-          ALL 6 EQUATIONS →
+          {tc(lang, "home.all_equations")}
         </Link>
       </div>
 
       {data.sdg_equations?.meta.quick_wins_total_billion && (
         <div className="mt-3 border border-terminal-green bg-terminal-green/5 p-2 text-center">
           <span className="text-[10px] text-content-dim uppercase tracking-widest">
-            COMBINED: ${data.sdg_equations.meta.quick_wins_total_billion}B/yr ={" "}
-            {data.sdg_equations.meta.quick_wins_pct_military}% of military spending ({" "}
-            {data.sdg_equations.meta.quick_wins_days_military} days)
+            {tc(lang, "home.combined_label")} ${data.sdg_equations.meta.quick_wins_total_billion}B/yr ={" "}
+            {data.sdg_equations.meta.quick_wins_pct_military}% {tc(lang, "home.of_military")} ({" "}
+            {data.sdg_equations.meta.quick_wins_days_military} {tc(lang, "home.days")})
           </span>
         </div>
       )}
@@ -239,10 +209,10 @@ export default function HomePage() {
         <div className="text-5xl md:text-7xl mb-2 animate-pulse">🦀</div>
         <pre data-ascii-hero className="text-blood text-[6px] sm:text-[10px] md:text-xs leading-tight inline-block glow-blood" aria-hidden="true">{`
         .:::::::::::::::.
-      :::'   ._-___-_'  \`:   PEOPLE SHOULD NOT BE
-     ::    .'         '.  ::   AFRAID OF THEIR GOVERNMENTS.
-    ::    /   ^     ^   \\  ::   GOVERNMENTS SHOULD BE
-   ::   |    (*)   (*)   |  ::   AFRAID OF THEIR PEOPLE.
+      :::'   ._-___-_'  \`:   ${tc(lang, "home.hero_quote_1")}
+     ::    .'         '.  ::   ${tc(lang, "home.hero_quote_2")}
+    ::    /   ^     ^   \\  ::   ${tc(lang, "home.hero_quote_3")}
+   ::   |    (*)   (*)   |  ::   ${tc(lang, "home.hero_quote_4")}
    ::   |       o         | ::
     ::   \\     ___       /  ::
      ::   '.           .'  ::
@@ -254,7 +224,7 @@ export default function HomePage() {
         </h1>
         <p className="text-content-secondary mt-3 text-sm">
           <Typewriter
-            text="// the platform that refuses to die"
+            text={tc(lang, "home.platform_refuses")}
             speed={25}
             cursor={false}
           />
@@ -263,20 +233,20 @@ export default function HomePage() {
 
       {/* SDG2 Status */}
       <TerminalCard
-        title="SDG2 STATUS // ZERO HUNGER BY 2030"
+        title={tc(lang, "home.sdg2_status")}
         accent={data.global_indicators.sdg2.status === "off_track" ? "blood" : "green"}
         className="mb-6"
       >
         <div className="flex items-center gap-4 mb-3">
           <StatusPill color="blood">{tc(lang, "label.off_track")}</StatusPill>
           <span className="text-content-secondary text-xs">
-            Target: {data.global_indicators.sdg2.target}
+            {tc(lang, "home.target_label")} {data.global_indicators.sdg2.target}
           </span>
         </div>
         <DataBar
           value={currentHunger}
           max={currentHunger}
-          label={`Current: ${formatNumber(currentHunger)}M undernourished`}
+          label={`${tc(lang, "home.current_label")} ${formatNumber(currentHunger)}M ${tc(lang, "home.current_undernourished")}`}
           unit="M"
         />
         <div className="grid grid-cols-2 gap-4 mt-4">
@@ -292,7 +262,7 @@ export default function HomePage() {
             <div className="text-lg text-terminal-green glow-green">
               {formatNumber(data.global_indicators.sdg2.projected_2034_ambitious_m)}M
             </div>
-            <div className="text-xs text-content-dim">Below {targetHunger}M threshold</div>
+            <div className="text-xs text-content-dim">{tc(lang, "home.below_threshold").replace("{n}", String(targetHunger))}</div>
           </div>
         </div>
       </TerminalCard>
@@ -300,7 +270,7 @@ export default function HomePage() {
       {/* The Number */}
       <TerminalCard title={tc(lang, "card.the_number")} className="mb-6">
         <div className="space-y-3">
-          {rotatingNumbers.map((n, i) => (
+          {rotatingNumberKeys.map((n, i) => (
             <div
               key={i}
               className={`flex items-baseline gap-3 ${
@@ -310,15 +280,15 @@ export default function HomePage() {
               <span className="text-blood-bright font-bold glow-blood">
                 {n.value}
               </span>
-              <span className="text-content-primary">{n.label}</span>
-              <span className="text-content-dim text-xs">({n.comparison})</span>
+              <span className="text-content-primary">{tc(lang, n.labelKey)}</span>
+              <span className="text-content-dim text-xs">({tc(lang, n.comparisonKey)})</span>
             </div>
           ))}
         </div>
       </TerminalCard>
 
       {/* SDG Rotating Counter — 6 equations surfaced from /equation */}
-      <SdgRotatingCounter />
+      <SdgRotatingCounter lang={lang} />
 
       {/* Top 3 Crises */}
       <TerminalCard title={tc(lang, "card.worst_crises")} className="mb-6" glow>
@@ -343,19 +313,19 @@ export default function HomePage() {
                       {country?.name_en || c.name_pt}
                     </span>
                     <StatusPill color="blood">
-                      {wfpClassLabel(c.wfp_class)}
+                      {wfpClassLabelLocalized(c.wfp_class, lang)}
                     </StatusPill>
                   </div>
                   <div className="text-xs text-content-secondary mt-1">
-                    Hotspot score: {c.score} ·{" "}
+                    {tc(lang, "home.hotspot_score")} {c.score} ·{" "}
                     {country?.hunger.undernourishment_pct
-                      ? `${country.hunger.undernourishment_pct.toFixed(1)}% undernourished`
-                      : "data limited"}
+                      ? `${country.hunger.undernourishment_pct.toFixed(1)}% ${tc(lang, "home.current_undernourished")}`
+                      : tc(lang, "home.data_limited")}
                     {country?.conflict.intensity_1to5
-                      ? ` · conflict L${country.conflict.intensity_1to5}`
+                      ? ` · ${tc(lang, "home.conflict_l")}${country.conflict.intensity_1to5}`
                       : ""}
                     {country?.conflict.displacement_m
-                      ? ` · ${country.conflict.displacement_m}M displaced`
+                      ? ` · ${country.conflict.displacement_m}M ${tc(lang, "home.displaced_m")}`
                       : ""}
                   </div>
                 </div>
@@ -372,11 +342,11 @@ export default function HomePage() {
       {/* Shareable Ammunition */}
       <TerminalCard title={tc(lang, "card.shareable_ammo")} className="mb-6">
         <p className="text-xs text-content-dim mb-3">
-          // viral data points with source attribution — one click to copy
+          {tc(lang, "home.viral_sub")}
         </p>
         <div className="space-y-2">
-          {shareableStats.map((s, i) => (
-            <ShareableStat key={i} text={s} />
+          {shareableStatKeys.map((k, i) => (
+            <ShareableStat key={i} text={tc(lang, k)} lang={lang} />
           ))}
         </div>
       </TerminalCard>
@@ -384,24 +354,24 @@ export default function HomePage() {
       {/* Branch Portals */}
       {/* ═══ SECTION DIRECTORY — CLUSTERED ═══ */}
       <h2 className="text-sm uppercase tracking-widest text-content-secondary mb-4">
-        {" "}ENTRIES // 25 SECTIONS
+        {" "}{tc(lang, "home.entries")}
       </h2>
 
       {/* EXPLORE — understand the crisis */}
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-3">
-          <span className="text-[10px] text-blood-bright font-bold uppercase tracking-widest">[ EXPLORE ]</span>
-          <span className="text-[10px] text-content-dim">// understand the crisis</span>
+          <span className="text-[10px] text-blood-bright font-bold uppercase tracking-widest">{tc(lang, "home.explore")}</span>
+          <span className="text-[10px] text-content-dim">{tc(lang, "home.explore_sub")}</span>
           <div className="flex-1 h-px bg-border-dim" />
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
           {[
-            { href: "/sorrow-map/", code: "01", label: "SORROW MAP", desc: "Atlas of suffering", primary: true },
-            { href: "/the-dashboard/", code: "25", label: "DASHBOARD", desc: "World cockpit" },
-            { href: "/the-exodus/", code: "16", label: "EXODUS", desc: "Displacement flows" },
-            { href: "/the-fronts/", code: "19", label: "FRONTS", desc: "Regional crises" },
-            { href: "/the-stories/", code: "14", label: "STORIES", desc: "Narrative tours" },
-            { href: "/the-archive/", code: "10", label: "ARCHIVE", desc: "Sources & methods" },
+            { href: "/sorrow-map/", code: "01", label: t(lang, "nav.sorrow-map"), desc: tc(lang, "branch.sorrow_map"), primary: true },
+            { href: "/the-dashboard/", code: "25", label: t(lang, "nav.the-dashboard"), desc: tc(lang, "branch.dashboard") },
+            { href: "/the-exodus/", code: "16", label: t(lang, "nav.the-exodus"), desc: tc(lang, "branch.exodus") },
+            { href: "/the-fronts/", code: "19", label: t(lang, "nav.the-fronts"), desc: tc(lang, "branch.fronts") },
+            { href: "/the-stories/", code: "14", label: t(lang, "nav.the-stories"), desc: tc(lang, "branch.stories") },
+            { href: "/the-archive/", code: "10", label: t(lang, "nav.the-archive"), desc: tc(lang, "branch.archive") },
           ].map((b) => (
             <Link key={b.href} href={b.href} className={`terminal-card p-3 hover:border-blood transition-colors block ${b.primary ? "border-blood-dim" : ""}`}>
               <div className="text-[10px] text-content-dim">[{b.code}]</div>
@@ -415,23 +385,23 @@ export default function HomePage() {
       {/* ANALYZE — make the argument */}
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-3">
-          <span className="text-[10px] text-terminal-green font-bold uppercase tracking-widest">[ ANALYZE ]</span>
-          <span className="text-[10px] text-content-dim">// make the argument</span>
+          <span className="text-[10px] text-terminal-green font-bold uppercase tracking-widest">{tc(lang, "home.analyze")}</span>
+          <span className="text-[10px] text-content-dim">{tc(lang, "home.analyze_sub")}</span>
           <div className="flex-1 h-px bg-border-dim" />
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
           {[
-            { href: "/equation/", code: "02", label: "THE EQUATION", desc: "Model the fix", primary: true },
-            { href: "/the-choice/", code: "20", label: "THE CHOICE", desc: "Military vs health" },
-            { href: "/the-allocator/", code: "15", label: "ALLOCATOR", desc: "Budget simulator" },
-            { href: "/the-timeline/", code: "22", label: "TIMELINE", desc: "10-year model" },
-            { href: "/the-index/", code: "13", label: "THE INDEX", desc: "Vulnerability ranking" },
-            { href: "/the-lens/", code: "09", label: "THE LENS", desc: "Compare & correlate" },
-            { href: "/the-ledger/", code: "24", label: "THE LEDGER", desc: "Financing & blockers" },
-            { href: "/the-tactics/", code: "17", label: "THE TACTICS", desc: "Resistance tactics" },
-            { href: "/the-matrix/", code: "18", label: "THE MATRIX", desc: "Data transparency" },
-            { href: "/the-briefing/", code: "21", label: "THE BRIEFING", desc: "Country report" },
-            { href: "/the-api/", code: "23", label: "THE API", desc: "Public data API" },
+            { href: "/equation/", code: "02", label: t(lang, "nav.equation"), desc: tc(lang, "branch.equation"), primary: true },
+            { href: "/the-choice/", code: "20", label: t(lang, "nav.the-choice"), desc: tc(lang, "branch.choice") },
+            { href: "/the-allocator/", code: "15", label: t(lang, "nav.the-allocator"), desc: tc(lang, "branch.allocator") },
+            { href: "/the-timeline/", code: "22", label: t(lang, "nav.the-timeline"), desc: tc(lang, "branch.timeline") },
+            { href: "/the-index/", code: "13", label: t(lang, "nav.the-index"), desc: tc(lang, "branch.index") },
+            { href: "/the-lens/", code: "09", label: t(lang, "nav.the-lens"), desc: tc(lang, "branch.lens") },
+            { href: "/the-ledger/", code: "24", label: t(lang, "nav.the-ledger"), desc: tc(lang, "branch.ledger") },
+            { href: "/the-tactics/", code: "17", label: t(lang, "nav.the-tactics"), desc: tc(lang, "branch.tactics") },
+            { href: "/the-matrix/", code: "18", label: t(lang, "nav.the-matrix"), desc: tc(lang, "branch.matrix") },
+            { href: "/the-briefing/", code: "21", label: t(lang, "nav.the-briefing"), desc: tc(lang, "branch.briefing") },
+            { href: "/the-api/", code: "23", label: t(lang, "nav.the-api"), desc: tc(lang, "branch.api") },
           ].map((b) => (
             <Link key={b.href} href={b.href} className={`terminal-card p-3 hover:border-blood transition-colors block ${b.primary ? "border-blood-dim" : ""}`}>
               <div className="text-[10px] text-content-dim">[{b.code}]</div>
@@ -445,17 +415,17 @@ export default function HomePage() {
       {/* ACT — take action */}
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-3">
-          <span className="text-[10px] text-warning-amber font-bold uppercase tracking-widest">[ ACT ]</span>
-          <span className="text-[10px] text-content-dim">// take action</span>
+          <span className="text-[10px] text-warning-amber font-bold uppercase tracking-widest">{tc(lang, "home.act")}</span>
+          <span className="text-[10px] text-content-dim">{tc(lang, "home.act_sub")}</span>
           <div className="flex-1 h-px bg-border-dim" />
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
           {[
-            { href: "/the-act/", code: "12", label: "THE ACT", desc: "Campaign generator", primary: true },
-            { href: "/protocol-x/", code: "03", label: "PROTOCOL X", desc: "Survival blueprints" },
-            { href: "/registry/", code: "04", label: "REGISTRY", desc: "Accountability" },
-            { href: "/the-signal/", code: "11", label: "THE SIGNAL", desc: "Watchlist alerts" },
-            { href: "/the-trail/", code: "06", label: "THE TRAIL", desc: "Resource routing" },
+            { href: "/the-act/", code: "12", label: t(lang, "nav.the-act"), desc: tc(lang, "branch.act"), primary: true },
+            { href: "/protocol-x/", code: "03", label: t(lang, "nav.protocol-x"), desc: tc(lang, "branch.protocol") },
+            { href: "/registry/", code: "04", label: t(lang, "nav.registry"), desc: tc(lang, "branch.registry") },
+            { href: "/the-signal/", code: "11", label: t(lang, "nav.the-signal"), desc: tc(lang, "branch.signal") },
+            { href: "/the-trail/", code: "06", label: t(lang, "nav.the-trail"), desc: tc(lang, "branch.trail") },
           ].map((b) => (
             <Link key={b.href} href={b.href} className={`terminal-card p-3 hover:border-blood transition-colors block ${b.primary ? "border-blood-dim" : ""}`}>
               <div className="text-[10px] text-content-dim">[{b.code}]</div>
@@ -469,15 +439,15 @@ export default function HomePage() {
       {/* INFRASTRUCTURE — tools & security */}
       <div className="mb-12">
         <div className="flex items-center gap-2 mb-3">
-          <span className="text-[10px] text-content-dim font-bold uppercase tracking-widest">[ INFRASTRUCTURE ]</span>
-          <span className="text-[10px] text-content-dim">// tools & security</span>
+          <span className="text-[10px] text-content-dim font-bold uppercase tracking-widest">{tc(lang, "home.infra")}</span>
+          <span className="text-[10px] text-content-dim">{tc(lang, "home.infra_sub")}</span>
           <div className="flex-1 h-px bg-border-dim" />
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
           {[
-            { href: "/the-web/", code: "05", label: "THE WEB", desc: "Anonymous comms" },
-            { href: "/the-mask/", code: "08", label: "MASK", desc: "Identity & OpSec" },
-            { href: "/fortress/", code: "07", label: "FORTRESS", desc: "Infrastructure" },
+            { href: "/the-web/", code: "05", label: t(lang, "nav.the-web"), desc: tc(lang, "branch.web") },
+            { href: "/the-mask/", code: "08", label: t(lang, "nav.the-mask"), desc: tc(lang, "branch.mask") },
+            { href: "/fortress/", code: "07", label: t(lang, "nav.fortress"), desc: tc(lang, "branch.fortress") },
           ].map((b) => (
             <Link key={b.href} href={b.href} className="terminal-card p-3 hover:border-blood transition-colors block">
               <div className="text-[10px] text-content-dim">[{b.code}]</div>
@@ -492,8 +462,8 @@ export default function HomePage() {
       <footer className="border-t border-border-dim pt-4 pb-8">
         <div className="text-center text-3xl mb-3">🦀</div>
         <div className="flex flex-col md:flex-row justify-between gap-2 text-xs text-content-dim">
-          <span>Data sync: {data.metadata.created} · {data.metadata.total_countries} countries</span>
-          <span>Sources: {data.metadata.sources.length} official · CC0</span>
+          <span>{tc(lang, "home.data_sync")} {data.metadata.created} · {data.metadata.total_countries} {tc(lang, "home.countries_count")}</span>
+          <span>{tc(lang, "home.sources_count")} {data.metadata.sources.length} {tc(lang, "home.official_cc0")}</span>
         </div>
       </footer>
     </div>
