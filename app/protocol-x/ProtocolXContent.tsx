@@ -39,6 +39,32 @@ interface Blueprint {
 
 const blueprints = blueprintsData as Blueprint[];
 
+/* Blueprint data translation keys */
+const BP_TITLE_KEY = (id: string) => `bp.${id}.title`;
+const BP_SUMMARY_KEY = (id: string) => `bp.${id}.summary`;
+const BP_TIME_KEY = (id: string) => `bp.time.${id}`;
+const BP_CAT_KEY = (cat: string) => `bp.cat.${cat}`;
+
+/* Survival checklist scenario items — use translation keys */
+const SCENARIO_ITEMS: Record<string, string[]> = {
+  conflict: [
+    "bp.item.mesh_devices", "bp.item.dead_drop", "bp.item.first_aid_knowledge",
+    "bp.item.nonviolent_training", "bp.item.opsec_practices", "bp.item.mutual_aid_active", "bp.item.evac_route",
+  ],
+  disaster: [
+    "bp.item.water_supplies", "bp.item.garden_started", "bp.item.micro_solar",
+    "bp.item.food_reserve", "bp.item.radio", "bp.item.first_aid_supplies", "bp.item.physical_maps",
+  ],
+  economic: [
+    "bp.item.mutual_aid_est", "bp.item.garden_started", "bp.item.barter_inventory",
+    "bp.item.offgrid_power", "bp.item.water_capacity", "bp.item.community_defense",
+  ],
+  epidemic: [
+    "bp.item.water_purif", "bp.item.no_contact_care", "bp.item.isolation",
+    "bp.item.medical_supplies", "bp.item.comms_plan", "bp.item.nutrition",
+  ],
+};
+
 export default function ProtocolXContent() {
   const { lang } = useStore();
   const searchParams = useSearchParams();
@@ -188,7 +214,7 @@ export default function ProtocolXContent() {
                 : "border-border-dim text-content-dim hover:text-content-secondary"
             }`}
           >
-            {c}
+            {tc(lang, BP_CAT_KEY(c))}
           </button>
         ))}
       </div>
@@ -204,8 +230,8 @@ export default function ProtocolXContent() {
           >
             <div className="flex items-start justify-between gap-3 mb-2">
               <div>
-                <h3 className="text-sm font-bold text-content-primary">{b.title}</h3>
-                <p className="text-xs text-content-secondary mt-1">{b.summary}</p>
+                <h3 className="text-sm font-bold text-content-primary">{tc(lang, BP_TITLE_KEY(b.id))}</h3>
+                <p className="text-xs text-content-secondary mt-1">{tc(lang, BP_SUMMARY_KEY(b.id))}</p>
               </div>
               <StatusPill
                 color={b.tech_level === "HIGH" ? "amber" : "green"}
@@ -214,9 +240,9 @@ export default function ProtocolXContent() {
               </StatusPill>
             </div>
             <div className="flex flex-wrap items-center gap-3 text-xs text-content-dim mt-2">
-              <span>▸ {b.category}</span>
+              <span>▸ {tc(lang, BP_CAT_KEY(b.category))}</span>
               <span>▸ {tc(lang, "protocol.difficulty")}: {"★".repeat(b.difficulty)}{"☆".repeat(5 - b.difficulty)}</span>
-              <span>▸ {b.time_estimate}</span>
+              <span>▸ {tc(lang, BP_TIME_KEY(b.id))}</span>
             </div>
           </Link>
         ))}
@@ -264,11 +290,11 @@ type MatchedBlueprint = {
 
 const PRIORITY_META: Record<
   "critical" | "recommended" | "resilience",
-  { label: string; color: "blood" | "amber" | "green"; className: string }
+  { labelKey: string; color: "blood" | "amber" | "green"; className: string }
 > = {
-  critical: { label: "CRITICAL", color: "blood", className: "border-blood bg-blood/5" },
-  recommended: { label: "RECOMMENDED", color: "amber", className: "border-warning-amber bg-warning-amber/5" },
-  resilience: { label: "RESILIENCE", color: "green", className: "border-terminal-green bg-terminal-green/5" },
+  critical: { labelKey: "protocol.prio_critical", color: "blood", className: "border-blood bg-blood/5" },
+  recommended: { labelKey: "protocol.prio_recommended", color: "amber", className: "border-warning-amber bg-warning-amber/5" },
+  resilience: { labelKey: "protocol.prio_resilience", color: "green", className: "border-terminal-green bg-terminal-green/5" },
 };
 
 function BlueprintRecommender({
@@ -364,8 +390,8 @@ function BlueprintRecommender({
                 >
                   <div className="flex items-start justify-between gap-2 mb-1">
                     <div className="flex items-center gap-2">
-                      <StatusPill color={meta.color}>{meta.label}</StatusPill>
-                      <span className="text-xs font-bold text-content-primary">{m.blueprint.title}</span>
+                      <StatusPill color={meta.color}>{tc(lang, meta.labelKey)}</StatusPill>
+                      <span className="text-xs font-bold text-content-primary">{tc(lang, BP_TITLE_KEY(m.blueprint.id))}</span>
                     </div>
                     <StatusPill color={m.blueprint.tech_level === "HIGH" ? "amber" : "green"}>
                       {m.blueprint.tech_level === "HIGH" ? tc(lang, "protocol.high_tech_short") : tc(lang, "protocol.low_tech_short")}
@@ -375,11 +401,11 @@ function BlueprintRecommender({
                     ▸ {m.reason}
                   </div>
                   <div className="flex flex-wrap items-center gap-2 text-[10px] text-content-dim mt-1">
-                    <span>{m.blueprint.category}</span>
+                    <span>{tc(lang, BP_CAT_KEY(m.blueprint.category))}</span>
                     <span>·</span>
                     <span>{"★".repeat(m.blueprint.difficulty)}{"☆".repeat(5 - m.blueprint.difficulty)}</span>
                     <span>·</span>
-                    <span>{m.blueprint.time_estimate}</span>
+                    <span>{tc(lang, BP_TIME_KEY(m.blueprint.id))}</span>
                   </div>
                 </Link>
               );
@@ -426,19 +452,19 @@ function SurvivalChecklist() {
   const scenarioMap: Record<string, { label: string; items: string[] }> = {
     conflict: {
       label: tc(lang, "protocol.scn_conflict"),
-      items: ["Mesh network devices (encrypted comms)", "Dead drop protocol established", "Field first aid knowledge", "Nonviolent resistance strategy training", "Digital OpSec practices", "Mutual aid network activated", "Evacuation route planned"],
+      items: SCENARIO_ITEMS.conflict,
     },
     disaster: {
       label: tc(lang, "protocol.scn_disaster"),
-      items: ["Water purification supplies (solar + boiling)", "Emergency caloric garden started", "Micro solar setup (50W)", "3-day food reserve", "Battery-powered radio", "First aid supplies", "Physical maps of area"],
+      items: SCENARIO_ITEMS.disaster,
     },
     economic: {
       label: tc(lang, "protocol.scn_economic"),
-      items: ["Mutual aid network established", "Emergency garden (food sovereignty)", "Barter inventory (skills + goods)", "Off-grid power capability", "Water purification capacity", "Community defense plan"],
+      items: SCENARIO_ITEMS.economic,
     },
     epidemic: {
       label: tc(lang, "protocol.scn_epidemic"),
-      items: ["Water purification (boiling + solar)", "First aid knowledge (no-contact care)", "Isolation protocols", "Basic medical supplies (gloves, masks)", "Communications plan (remote coordination)", "Nutrition maintenance (garden)"],
+      items: SCENARIO_ITEMS.epidemic,
     },
   };
 
@@ -467,9 +493,9 @@ function SurvivalChecklist() {
   const saveKit = async () => {
     if (allItems.length === 0) return;
     const kit: ChecklistKit = {
-      name: kitName.trim() || `Kit ${new Date().toLocaleDateString()}`,
+      name: kitName.trim() || `${tc(lang, "protocol.kit_default")} ${new Date().toLocaleDateString()}`,
       scenarios,
-      items: allItems.map((text) => ({ text, checked: checkedItems.has(text) })),
+      items: allItems.map((text) => ({ text: tc(lang, text), checked: checkedItems.has(text) })),
       createdAt: Date.now(),
       updatedAt: Date.now(),
     };
@@ -498,10 +524,10 @@ function SurvivalChecklist() {
     const exportData = {
       type: "vfx-survival-kit",
       version: 1,
-      name: kitName.trim() || "Survival Kit",
+      name: kitName.trim() || tc(lang, "protocol.kit_default"),
       exportedAt: new Date().toISOString(),
       scenarios,
-      items: allItems.map((text) => ({ text, checked: checkedItems.has(text) })),
+      items: allItems.map((text) => ({ text: tc(lang, text), checked: checkedItems.has(text) })),
       progress,
     };
     const sig = await signData(exportData);
@@ -570,7 +596,7 @@ function SurvivalChecklist() {
                   [{checkedItems.has(item) ? "✓" : " "}]
                 </span>
                 <span className={checkedItems.has(item) ? "line-through text-content-dim" : ""}>
-                  {item}
+                  {tc(lang, item)}
                 </span>
               </button>
             ))}
