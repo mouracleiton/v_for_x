@@ -69,9 +69,9 @@ export default function MascaraPage() {
   return (
     <div className="p-3 sm:p-6 md:p-10 max-w-4xl mx-auto">
       <div className="mb-8 pt-4">
-        <div className="text-xs text-content-dim mb-1">[08] THE MASK</div>
+        <div className="text-xs text-content-dim mb-1">{tc(lang, "mask.section_label")}</div>
         <h1 className="text-2xl md:text-3xl text-blood-bright font-bold glow-blood">
-          THE MASK
+          {tc(lang, "mask.title")}
         </h1>
         <p className="text-content-secondary text-sm mt-2">
           {tc(lang, "subtitle.the_mask")}
@@ -84,36 +84,36 @@ export default function MascaraPage() {
           <table className="w-full text-xs">
             <thead>
               <tr className="border-b border-border-dim text-content-dim">
-                <th className="text-left py-2 px-2">ADVERSARY</th>
-                <th className="text-left py-2 px-2">WHAT THEY WANT</th>
-                <th className="text-left py-2 px-2">WHAT V FOR X DOES</th>
+                <th className="text-left py-2 px-2">{tc(lang, "mask.th_adversary")}</th>
+                <th className="text-left py-2 px-2">{tc(lang, "mask.th_what_they_want")}</th>
+                <th className="text-left py-2 px-2">{tc(lang, "mask.th_what_vfx_does")}</th>
               </tr>
             </thead>
             <tbody>
               <tr className="border-b border-border-dim">
-                <td className="py-2 px-2 text-blood-bright">Surveillance state</td>
-                <td className="py-2 px-2 text-content-secondary">Identify and locate users</td>
-                <td className="py-2 px-2 text-terminal-green">No registration, client-side crypto</td>
+                <td className="py-2 px-2 text-blood-bright">{tc(lang, "mask.adv_surveillance")}</td>
+                <td className="py-2 px-2 text-content-secondary">{tc(lang, "mask.adv_surveillance_want")}</td>
+                <td className="py-2 px-2 text-terminal-green">{tc(lang, "mask.adv_surveillance_does")}</td>
               </tr>
               <tr className="border-b border-border-dim">
-                <td className="py-2 px-2 text-blood-bright">Network ISP</td>
-                <td className="py-2 px-2 text-content-secondary">Track browsing patterns</td>
-                <td className="py-2 px-2 text-terminal-green">All client-side, recommend Tor</td>
+                <td className="py-2 px-2 text-blood-bright">{tc(lang, "mask.adv_isp")}</td>
+                <td className="py-2 px-2 text-content-secondary">{tc(lang, "mask.adv_isp_want")}</td>
+                <td className="py-2 px-2 text-terminal-green">{tc(lang, "mask.adv_isp_does")}</td>
               </tr>
               <tr className="border-b border-border-dim">
-                <td className="py-2 px-2 text-blood-bright">Platform operator</td>
-                <td className="py-2 px-2 text-content-secondary">Correlate user activity</td>
-                <td className="py-2 px-2 text-terminal-green">No operator — decentralized</td>
+                <td className="py-2 px-2 text-blood-bright">{tc(lang, "mask.adv_operator")}</td>
+                <td className="py-2 px-2 text-content-secondary">{tc(lang, "mask.adv_operator_want")}</td>
+                <td className="py-2 px-2 text-terminal-green">{tc(lang, "mask.adv_operator_does")}</td>
               </tr>
               <tr className="border-b border-border-dim">
-                <td className="py-2 px-2 text-blood-bright">Physical attacker</td>
-                <td className="py-2 px-2 text-content-secondary">Force disclosure</td>
-                <td className="py-2 px-2 text-terminal-green">Duress codes, decoy interface</td>
+                <td className="py-2 px-2 text-blood-bright">{tc(lang, "mask.adv_physical")}</td>
+                <td className="py-2 px-2 text-content-secondary">{tc(lang, "mask.adv_physical_want")}</td>
+                <td className="py-2 px-2 text-terminal-green">{tc(lang, "mask.adv_physical_does")}</td>
               </tr>
               <tr className="border-b border-border-dim">
-                <td className="py-2 px-2 text-blood-bright">Malicious peer</td>
-                <td className="py-2 px-2 text-content-secondary">Impersonate or deceive</td>
-                <td className="py-2 px-2 text-terminal-green">Keypair signatures, reputation</td>
+                <td className="py-2 px-2 text-blood-bright">{tc(lang, "mask.adv_peer")}</td>
+                <td className="py-2 px-2 text-content-secondary">{tc(lang, "mask.adv_peer_want")}</td>
+                <td className="py-2 px-2 text-terminal-green">{tc(lang, "mask.adv_peer_does")}</td>
               </tr>
             </tbody>
           </table>
@@ -127,7 +127,7 @@ export default function MascaraPage() {
       {/* ZK Identity — REAL Implementation */}
       <TerminalCard title={tc(lang, "card.zk_identity")} accent="green" className="mb-6">
         <p className="text-xs text-content-secondary mb-3">
-          Prove attributes about yourself without revealing your identity. Uses SHA-256 commitment scheme with Fiat-Shamir heuristic.
+          {tc(lang, "mask.zk_desc")}
         </p>
 
         {/* Set membership proof */}
@@ -145,7 +145,7 @@ export default function MascaraPage() {
               type="text"
               value={revealValue}
               onChange={(e) => setRevealValue(e.target.value.toUpperCase())}
-              placeholder="Your country ISO3 (e.g. SDN, YEM...)"
+              placeholder={tc(lang, "mask.zk_iso3_ph")}
               className="flex-1 min-w-[180px] bg-void border border-border-dim px-3 py-1.5 text-xs text-content-primary focus:border-blood focus:outline-none"
               maxLength={3}
             />
@@ -168,7 +168,7 @@ export default function MascaraPage() {
               disabled={!HOTSPOT_ISO3S.includes(revealValue)}
               className="px-3 py-1.5 text-xs border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void disabled:opacity-30"
             >
-              [ GENERATE PROOF ]
+              {tc(lang, "mask.zk_generate_proof")}
             </button>
           </div>
 
@@ -182,7 +182,7 @@ export default function MascaraPage() {
               </div>
               <div className="text-[10px] font-mono space-y-1">
                 <div><span className="text-content-dim">claim:</span> <span className="text-terminal-green">{zkProof.claim}</span></div>
-                <div><span className="text-content-dim">commitment:</span> <span className="text-blood-bright">{zkProof.commitment.slice(0, 24)}...</span></div>
+                <div><span className="text-content-dim">{tc(lang, "mask.commitment_label")}</span> <span className="text-blood-bright">{zkProof.commitment.slice(0, 24)}...</span></div>
                 <div><span className="text-content-dim">challenge:</span> <span className="text-content-secondary">{zkProof.challenge.slice(0, 24)}...</span></div>
                 <div><span className="text-content-dim">response:</span> <span className="text-content-secondary">{zkProof.response.slice(0, 24)}...</span></div>
               </div>
@@ -203,7 +203,7 @@ export default function MascaraPage() {
               }}
               className="px-3 py-1.5 text-xs border border-border-dim text-content-secondary hover:border-terminal-green hover:text-terminal-green"
             >
-              [ COMMIT TO SECRET ]
+              {tc(lang, "mask.commit_to_secret")}
             </button>
             {commitment && (
               <button
@@ -214,7 +214,7 @@ export default function MascaraPage() {
                 }}
                 className="px-3 py-1.5 text-xs border border-border-dim text-content-secondary hover:border-blood hover:text-blood"
               >
-                [ VERIFY COMMITMENT ]
+                {tc(lang, "mask.verify_commitment")}
               </button>
             )}
           </div>
@@ -231,7 +231,7 @@ export default function MascaraPage() {
         </div>
 
         <div className="text-xs text-content-dim mt-3">
-          ▸ Production upgrade path: Replace hash commitments with ZK-SNARK proofs (Groth16/PLONK via WASM). Current implementation uses SHA-256 commitments + Fiat-Shamir heuristic — a genuine zero-knowledge argument, not a mock.
+          {tc(lang, "mask.zk_upgrade_path")}
         </div>
       </TerminalCard>
 
@@ -247,7 +247,7 @@ export default function MascaraPage() {
               type="password"
               value={duressCode}
               onChange={(e) => setDuressCode(e.target.value)}
-              placeholder="Enter duress code (memorize it)"
+              placeholder={tc(lang, "mask.duress_code_ph")}
               className="w-full bg-void border border-border-dim px-3 py-2 text-xs text-content-primary focus:border-blood focus:outline-none"
             />
             <button
@@ -262,17 +262,17 @@ export default function MascaraPage() {
               }}
               className="px-4 py-2 text-xs border border-blood text-blood-bright hover:bg-blood hover:text-void"
             >
-              [ ACTIVATE DURESS SYSTEM ]
+              {tc(lang, "mask.activate_duress")}
             </button>
             <div className="text-xs text-content-dim">
-              PANIC SHORTCUT (when activated): Ctrl+Shift+Delete — instant wipe + decoy.
+              {tc(lang, "mask.panic_hint")}
             </div>
           </div>
         ) : (
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <StatusPill color="green">DURESS SYSTEM ACTIVE</StatusPill>
-              <span className="text-xs text-content-secondary">Panic shortcut: Ctrl+Shift+Delete</span>
+              <StatusPill color="green">{tc(lang, "mask.duress_active")}</StatusPill>
+              <span className="text-xs text-content-secondary">{tc(lang, "mask.panic_shortcut")}</span>
             </div>
             <button
               onClick={() => {
@@ -281,10 +281,10 @@ export default function MascaraPage() {
               }}
               className="px-4 py-2 text-xs border border-blood text-blood hover:bg-blood"
             >
-              [ TEST DURESS WIPE ]
+              {tc(lang, "mask.test_duress")}
             </button>
             <p className="text-xs text-content-dim">
-              This will wipe all local data and show the decoy interface.
+              {tc(lang, "mask.test_duress_desc")}
             </p>
           </div>
         )}
@@ -299,7 +299,7 @@ export default function MascaraPage() {
                 ● SESSION ACTIVE — Started {new Date(session.startTime).toLocaleTimeString()}
               </span>
             ) : (
-              <span className="text-xs text-content-dim">○ No active session</span>
+              <span className="text-xs text-content-dim">{tc(lang, "mask.no_session")}</span>
             )}
           </div>
           {identity && (
@@ -315,10 +315,10 @@ export default function MascaraPage() {
           }}
           className="px-4 py-2 text-xs border border-blood text-blood hover:bg-blood hover:text-void w-full"
         >
-          [ PANIC — WIPE EVERYTHING ]
+          {tc(lang, "mask.panic_wipe")}
         </button>
         <p className="text-xs text-content-dim mt-2">
-          Clears localStorage, deletes IndexedDB, destroys session and identity.
+          {tc(lang, "mask.panic_wipe_desc")}
         </p>
       </TerminalCard>
 
@@ -359,10 +359,10 @@ export default function MascaraPage() {
         {expandedSection === "browser" && (
           <div className="mt-3 p-3 border border-border-dim text-xs text-content-secondary space-y-2">
             <p>▸ Use <span className="text-content-primary">Tor Browser</span> for anonymous web access. It's designed to minimize fingerprinting.</p>
-            <p>▸ Your browser fingerprint (canvas, fonts, plugins, screen size) is nearly unique. Tor Browser standardizes this.</p>
-            <p>▸ If Tor is unavailable: use a hardened Firefox with Privacy Badger, uBlock Origin, and NoScript. Set privacy.strict to maximum.</p>
-            <p>▸ Never use your personal browser for sensitive activity. Use a dedicated browser profile or separate device.</p>
-            <p>▸ Clear cookies on close. Disable third-party cookies entirely. Use container tabs to isolate sessions.</p>
+            <p>{tc(lang, "mask.opsec_content7")}</p>
+            <p>{tc(lang, "mask.opsec_content8")}</p>
+            <p>{tc(lang, "mask.opsec_content9")}</p>
+            <p>{tc(lang, "mask.opsec_content10")}</p>
           </div>
         )}
 
@@ -396,7 +396,7 @@ export default function MascaraPage() {
 
         {expandedSection === "social" && (
           <div className="mt-3 p-3 border border-border-dim text-xs text-content-secondary space-y-2">
-            <p>▸ Social engineering is the #1 attack vector. Humans are the weakest link.</p>
+            <p>{tc(lang, "mask.opsec_content24")}</p>
             <p>▸ <span className="text-content-primary">Verify identity:</span> Use pre-shared passwords or challenge-response. Never trust an unsolicited contact.</p>
             <p>▸ <span className="text-content-primary">Phishing:</span> Check URLs character by character. Bookmark critical sites. Never click links in messages.</p>
             <p>▸ <span className="text-content-primary">Pretext calls:</span> "I'm from IT, I need your password" — never share credentials. Verify through independent channels.</p>

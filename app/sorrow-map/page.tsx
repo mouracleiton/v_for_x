@@ -19,7 +19,7 @@ const ChoroplethMap = dynamic(
     ssr: false,
     loading: () => (
       <div className="h-full w-full flex items-center justify-center text-blood-bright text-xs">
-        <span className="cursor-blink">&gt; LOADING GEOSPATIAL DATA...</span>
+        <span className="cursor-blink">&gt; {tc(useStore().lang, "sorrow.loading_geospatial")}</span>
       </div>
     ),
   }

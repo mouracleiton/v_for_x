@@ -192,9 +192,9 @@ export default function TrilhaPage() {
   return (
     <div className="p-3 sm:p-6 md:p-10 max-w-5xl mx-auto">
       <div className="mb-8 pt-4">
-        <div className="text-xs text-content-dim mb-1">[06] THE TRAIL</div>
+        <div className="text-xs text-content-dim mb-1">{tc(lang, "trail.section_label")}</div>
         <h1 className="text-2xl md:text-3xl text-blood-bright font-bold glow-blood">
-          THE TRAIL
+          {tc(lang, "trail.title")}
         </h1>
         <p className="text-content-secondary text-sm mt-2">
           {tc(lang, "subtitle.the_trail")}
@@ -204,15 +204,15 @@ export default function TrilhaPage() {
       {/* Ledger stats */}
       <div className="grid grid-cols-3 gap-3 mb-6">
         <div className="terminal-card p-3 text-center">
-          <div className="text-xs text-content-dim">ENTRIES</div>
+          <div className="text-xs text-content-dim">{tc(lang, "trail.entries")}</div>
           <div className="text-xl font-bold text-content-primary">{loading ? "—" : ledger.length}</div>
         </div>
         <div className="terminal-card p-3 text-center">
-          <div className="text-xs text-content-dim">VERIFIED</div>
+          <div className="text-xs text-content-dim">{tc(lang, "trail.verified")}</div>
           <div className="text-xl font-bold text-terminal-green">{totalVerified}</div>
         </div>
         <div className="terminal-card p-3 text-center">
-          <div className="text-xs text-content-dim">TOTAL ROUTED</div>
+          <div className="text-xs text-content-dim">{tc(lang, "trail.total_routed")}</div>
           <div className="text-xl font-bold text-blood-bright">${totalValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
         </div>
       </div>
@@ -220,35 +220,35 @@ export default function TrilhaPage() {
       {/* Create entry */}
       <TerminalCard title={tc(lang, "card.create_ledger")} accent="green" className="mb-6">
         <p className="text-xs text-content-secondary mb-4">
-          Log a resource transfer. Entries are stored locally in your browser (IndexedDB) and persist across sessions.
+          {tc(lang, "trail.create_desc")}
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
           <input
             type="text"
             value={source}
             onChange={(e) => { setSource(e.target.value); sound.keystroke(); }}
-            placeholder="Source (handle or org)"
+            placeholder={tc(lang, "trail.source_ph")}
             className="bg-void border border-border-dim px-3 py-2 text-xs text-content-primary focus:border-blood focus:outline-none"
           />
           <input
             type="text"
             value={destination}
             onChange={(e) => { setDestination(e.target.value); sound.keystroke(); }}
-            placeholder="Destination (zone/city)"
+            placeholder={tc(lang, "trail.destination_ph")}
             className="bg-void border border-border-dim px-3 py-2 text-xs text-content-primary focus:border-blood focus:outline-none"
           />
           <input
             type="text"
             value={amount}
             onChange={(e) => { setAmount(e.target.value); sound.keystroke(); }}
-            placeholder="Amount ($5,000)"
+            placeholder={tc(lang, "trail.amount_ph")}
             className="bg-void border border-border-dim px-3 py-2 text-xs text-content-primary focus:border-blood focus:outline-none"
           />
           <input
             type="text"
             value={purpose}
             onChange={(e) => { setPurpose(e.target.value); sound.keystroke(); }}
-            placeholder="Purpose (food, medical...)"
+            placeholder={tc(lang, "trail.purpose_ph")}
             className="bg-void border border-border-dim px-3 py-2 text-xs text-content-primary focus:border-blood focus:outline-none"
           />
         </div>
@@ -258,16 +258,16 @@ export default function TrilhaPage() {
             onChange={(e) => setStatus(e.target.value as LedgerEntry["status"])}
             className="bg-void border border-border-dim px-3 py-2 text-xs text-content-primary"
           >
-            <option value="PENDING">PENDING</option>
-            <option value="IN_TRANSIT">IN_TRANSIT</option>
-            <option value="VERIFIED">VERIFIED</option>
+            <option value="PENDING">{tc(lang, "trail.pending")}</option>
+            <option value="IN_TRANSIT">{tc(lang, "trail.in_transit")}</option>
+            <option value="VERIFIED">{tc(lang, "trail.verified")}</option>
           </select>
           <button
             onClick={addEntry}
             disabled={!source.trim() || !destination.trim() || !amount.trim()}
             className="px-4 py-2 text-xs border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void disabled:opacity-30 disabled:cursor-not-allowed"
           >
-            [ ADD TO LEDGER ]
+            {tc(lang, "trail.add_to_ledger")}
           </button>
         </div>
       </TerminalCard>
@@ -284,14 +284,14 @@ export default function TrilhaPage() {
               disabled={ledger.length === 0}
               className="text-xs px-3 py-1 border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void disabled:opacity-30"
             >
-              [ SIGN & EXPORT JSON ]
+              {tc(lang, "trail.sign_export")}
             </button>
             {ledger.length > 0 && (
               <button
                 onClick={clearAll}
                 className="text-xs px-3 py-1 border border-blood-dim text-content-secondary hover:border-blood hover:text-blood"
               >
-                [ CLEAR ALL ]
+                {tc(lang, "trail.clear_all")}
               </button>
             )}
           </div>
@@ -303,18 +303,18 @@ export default function TrilhaPage() {
           </div>
         ) : ledger.length === 0 ? (
           <div className="py-8 text-center text-content-dim text-xs">
-            No entries yet. Create your first ledger entry above.
+            {tc(lang, "trail.no_entries")}
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
                 <tr className="border-b border-border-dim text-content-dim">
-                  <th className="text-left py-2 px-2">TIMESTAMP</th>
-                  <th className="text-left py-2 px-2 hidden sm:table-cell">FROM</th>
+                  <th className="text-left py-2 px-2">{tc(lang, "trail.th_timestamp")}</th>
+                  <th className="text-left py-2 px-2 hidden sm:table-cell">{tc(lang, "trail.th_from")}</th>
                   <th className="text-left py-2 px-2">TO</th>
-                  <th className="text-left py-2 px-2">AMOUNT</th>
-                  <th className="text-left py-2 px-2 hidden md:table-cell">PURPOSE</th>
+                  <th className="text-left py-2 px-2">{tc(lang, "trail.th_amount")}</th>
+                  <th className="text-left py-2 px-2 hidden md:table-cell">{tc(lang, "trail.th_purpose")}</th>
                   <th className="text-left py-2 px-2">STATUS</th>
                   <th className="text-left py-2 px-2"></th>
                 </tr>
@@ -359,7 +359,7 @@ export default function TrilhaPage() {
         )}
         {ledger.length > 0 && (
           <div className="text-[10px] text-content-dim mt-3">
-            ▸ Click STATUS to cycle (PENDING → IN_TRANSIT → VERIFIED). All data stored in IndexedDB. Export creates a signed JSON artifact verifiable offline.
+            {tc(lang, "trail.click_status_hint")}
           </div>
         )}
       </TerminalCard>
@@ -435,14 +435,14 @@ export default function TrilhaPage() {
               type="text"
               value={source}
               onChange={(e) => setSource(e.target.value)}
-              placeholder="What do you need? (food, water, medical)"
+              placeholder={tc(lang, "trail.need_ph")}
               className="w-full bg-void border border-border-dim px-3 py-2 text-xs text-content-primary focus:border-blood focus:outline-none"
             />
             <input
               type="text"
               value={destination}
               onChange={(e) => setDestination(e.target.value)}
-              placeholder="Location (city/coordinates)"
+              placeholder={tc(lang, "trail.location_ph")}
               className="w-full bg-void border border-border-dim px-3 py-2 text-xs text-content-primary focus:border-blood focus:outline-none"
             />
             <button
@@ -450,7 +450,7 @@ export default function TrilhaPage() {
               disabled={!source.trim()}
               className="w-full px-3 py-2 text-xs border border-blood text-blood-bright hover:bg-blood hover:text-void disabled:opacity-30"
             >
-              [ BROADCAST NEED ]
+              {tc(lang, "trail.broadcast_need")}
             </button>
             {needsMatch.length > 0 && (
               <div className="space-y-1 mt-2">
@@ -471,14 +471,14 @@ export default function TrilhaPage() {
               type="text"
               value={source}
               onChange={(e) => setSource(e.target.value)}
-              placeholder="What can you offer?"
+              placeholder={tc(lang, "trail.offer_ph")}
               className="w-full bg-void border border-border-dim px-3 py-2 text-xs text-content-primary focus:border-blood focus:outline-none"
             />
             <input
               type="text"
               value={destination}
               onChange={(e) => setDestination(e.target.value)}
-              placeholder="Location"
+              placeholder={tc(lang, "trail.location_short_ph")}
               className="w-full bg-void border border-border-dim px-3 py-2 text-xs text-content-primary focus:border-blood focus:outline-none"
             />
             <button
@@ -486,7 +486,7 @@ export default function TrilhaPage() {
               disabled={!source.trim()}
               className="w-full px-3 py-2 text-xs border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void disabled:opacity-30"
             >
-              [ OFFER RESOURCE ]
+              {tc(lang, "trail.offer_resource")}
             </button>
             {havesMatch.length > 0 && (
               <div className="space-y-1 mt-2">
@@ -505,7 +505,7 @@ export default function TrilhaPage() {
       {/* Priority routing */}
       <TerminalCard title={tc(lang, "card.priority_routing")} accent="amber" className="mb-6">
         <p className="text-xs text-content-secondary mb-3">
-          These zones have the highest measured need. Route resources here for maximum impact.
+          {tc(lang, "trail.priority_desc")}
         </p>
         <div className="space-y-2">
           {topHotspots.map((h) => {
@@ -527,7 +527,7 @@ export default function TrilhaPage() {
                       : "N/A"}
                   </span>
                 </div>
-                <span className="text-xs text-blood-bright">→ ROUTE HERE</span>
+                <span className="text-xs text-blood-bright">{tc(lang, "trail.route_here")}</span>
               </Link>
             );
           })}
@@ -537,7 +537,7 @@ export default function TrilhaPage() {
       {/* Financing integration */}
       <TerminalCard title={tc(lang, "trail.fund_solution")} className="mb-6">
         <Link href="/equation/" className="text-sm text-blood-bright hover:underline">
-          → See The Equation: How $93B/year can end global hunger
+          {tc(lang, "trail.equation_link")}
         </Link>
         <div className="mt-3 grid grid-cols-2 md:grid-cols-3 gap-2">
           {data.financing.allocation.slice(0, 6).map((a, i) => (

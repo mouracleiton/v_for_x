@@ -426,9 +426,9 @@ export default function TeiaPage() {
   return (
     <div className="p-3 sm:p-6 md:p-10 max-w-5xl mx-auto">
       <div className="mb-8 pt-4">
-        <div className="text-xs text-content-dim mb-1">[05] THE WEB</div>
+        <div className="text-xs text-content-dim mb-1">{tc(lang, "web.section_label")}</div>
         <h1 className="text-2xl md:text-3xl text-blood-bright font-bold glow-blood">
-          THE WEB
+          {tc(lang, "web.title")}
         </h1>
         <p className="text-content-secondary text-sm mt-2">
           {tc(lang, "subtitle.the_web")}
@@ -440,11 +440,11 @@ export default function TeiaPage() {
         {identity ? (
           <div className="flex flex-wrap items-center gap-4">
             <div>
-              <div className="text-xs text-content-dim">YOUR HANDLE</div>
+              <div className="text-xs text-content-dim">{tc(lang, "web.your_handle")}</div>
               <div className="text-lg text-terminal-green glow-green font-bold">{identity.handle}</div>
             </div>
             <div>
-              <div className="text-xs text-content-dim">PUBLIC KEY (truncated)</div>
+              <div className="text-xs text-content-dim">{tc(lang, "web.public_key")}</div>
               <div className="text-xs text-content-secondary font-mono break-all">
                 {identity.publicKey}...
               </div>
@@ -459,19 +459,19 @@ export default function TeiaPage() {
               }}
               className="text-xs px-3 py-1 border border-blood text-blood hover:bg-blood hover:text-void ml-auto"
             >
-              [ BURN IDENTITY ]
+              {tc(lang, "web.burn_identity")}
             </button>
           </div>
         ) : (
           <div className="text-center py-6">
             <p className="text-sm text-content-secondary mb-4">
-              No identity loaded. Generate a new anonymous identity to participate.
+              {tc(lang, "web.no_identity")}
             </p>
             <button
               onClick={generateIdentity}
               className="px-4 py-2 text-sm border border-blood text-blood-bright hover:bg-blood hover:text-void"
             >
-              [ GENERATE IDENTITY ]
+              {tc(lang, "web.generate_identity")}
             </button>
             <p className="text-xs text-content-dim mt-3">
               Your identity is a cryptographic keypair. It never leaves this device.
@@ -505,9 +505,9 @@ export default function TeiaPage() {
                   onClick={createOffer}
                   className="p-3 border border-blood-dim hover:border-blood hover:bg-blood/5 text-left"
                 >
-                  <div className="text-xs text-blood-bright font-bold">▸ CREATE OFFER</div>
+                  <div className="text-xs text-blood-bright font-bold">{tc(lang, "web.create_offer")}</div>
                   <div className="text-[10px] text-content-secondary mt-1">
-                    You are the initiator. Generates an SDP offer to send to your peer.
+                    {tc(lang, "web.create_offer_desc")}
                   </div>
                 </button>
                 <button
@@ -517,9 +517,9 @@ export default function TeiaPage() {
                   }}
                   className="p-3 border border-terminal-green hover:bg-terminal-green/5 text-left"
                 >
-                  <div className="text-xs text-terminal-green font-bold">▸ ACCEPT OFFER</div>
+                  <div className="text-xs text-terminal-green font-bold">{tc(lang, "web.accept_offer")}</div>
                   <div className="text-[10px] text-content-secondary mt-1">
-                    You received an offer. Paste it to generate an answer SDP.
+                    {tc(lang, "web.accept_offer_desc")}
                   </div>
                 </button>
               </div>
@@ -557,13 +557,13 @@ export default function TeiaPage() {
             {(peerStatus === "connecting" || peerStatus === "waiting" || peerStatus === "connected") && (
               <div className="mb-4">
                 <div className="text-[10px] text-content-dim uppercase tracking-widest mb-1">
-                  REMOTE SDP (paste peer's offer or answer)
+                  {tc(lang, "web.remote_sdp")}
                 </div>
                 <textarea
                   value={remoteSDP}
                   onChange={(e) => setRemoteSDP(e.target.value)}
                   rows={4}
-                  placeholder="Paste the SDP JSON from your peer here..."
+                  placeholder={tc(lang, "web.remote_sdp_placeholder")}
                   className="w-full bg-void border border-border-dim p-2 text-[10px] text-blood-bright font-mono resize-y focus:border-blood focus:outline-none"
                 />
                 <div className="flex gap-2 mt-2">
@@ -573,7 +573,7 @@ export default function TeiaPage() {
                       disabled={!remoteSDP.trim()}
                       className="px-3 py-1.5 text-xs border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void disabled:opacity-30 disabled:cursor-not-allowed"
                     >
-                      [ CREATE ANSWER ]
+                      {tc(lang, "web.create_answer_btn")}
                     </button>
                   )}
                   {peerStatus === "waiting" && pcRef.current?.localDescription?.type === "offer" && (
@@ -582,7 +582,7 @@ export default function TeiaPage() {
                       disabled={!remoteSDP.trim()}
                       className="px-3 py-1.5 text-xs border border-blood text-blood-bright hover:bg-blood hover:text-void disabled:opacity-30 disabled:cursor-not-allowed"
                     >
-                      [ ACCEPT ANSWER ]
+                      {tc(lang, "web.accept_answer_btn")}
                     </button>
                   )}
                   {(peerStatus === "connected" || peerStatus === "waiting" || peerStatus === "connecting") && (
@@ -590,7 +590,7 @@ export default function TeiaPage() {
                       onClick={closeConnection}
                       className="px-3 py-1.5 text-xs border border-border-dim text-content-secondary hover:border-blood hover:text-blood ml-auto"
                     >
-                      [ CLOSE ]
+                      {tc(lang, "web.close_btn")}
                     </button>
                   )}
                 </div>
@@ -600,7 +600,7 @@ export default function TeiaPage() {
             {/* Connection log */}
             {connectionLog.length > 0 && (
               <div className="border border-border-dim bg-void p-2 max-h-32 overflow-y-auto">
-                <div className="text-[9px] text-content-dim uppercase mb-1">CONNECTION LOG</div>
+                <div className="text-[9px] text-content-dim uppercase mb-1">{tc(lang, "web.connection_log")}</div>
                 {connectionLog.slice(-10).map((l, i) => (
                   <div key={i} className="text-[10px] text-content-secondary">{l}</div>
                 ))}
@@ -608,7 +608,7 @@ export default function TeiaPage() {
             )}
 
             <div className="text-[10px] text-content-dim mt-3">
-              ▸ How it works: No signaling server needed. You copy-paste SDP descriptions between peers via any channel (email, USB, voice). WebRTC handles NAT traversal via STUN. All data is end-to-end encrypted by DTLS.
+              {tc(lang, "web.how_it_works")}
             </div>
           </TerminalCard>
 
@@ -619,7 +619,7 @@ export default function TeiaPage() {
                 <div className="h-80 overflow-y-auto bg-void border border-border-dim p-3 mb-3 space-y-1">
                   {localMessages.length === 0 ? (
                     <div className="text-xs text-content-dim text-center mt-20">
-                      <span className="cursor-blink">&gt;</span> Channel open. Send the first message...
+                      <span className="cursor-blink">&gt;</span> {tc(lang, "web.channel_open")}
                     </div>
                   ) : (
                     localMessages.map((m) => (
@@ -645,24 +645,24 @@ export default function TeiaPage() {
                     value={input}
                     onChange={(e) => { setInput(e.target.value); sound.keystroke(); }}
                     onKeyDown={(e) => e.key === "Enter" && sendP2PMessage()}
-                    placeholder="type your encrypted message..."
+                    placeholder={tc(lang, "web.message_placeholder")}
                     className="flex-1 bg-void border border-border-dim px-3 py-2 text-xs text-content-primary focus:border-blood focus:outline-none"
                   />
                   <button
                     onClick={sendP2PMessage}
                     className="px-4 py-2 text-xs border border-blood text-blood-bright hover:bg-blood hover:text-void"
                   >
-                    [ SEND ]
+                    {tc(lang, "web.send_btn")}
                   </button>
                 </div>
                 <div className="text-[10px] text-terminal-green mt-2">
-                  ▸ Messages are end-to-end encrypted via DTLS-SRTP. Signed by your ECDSA keypair. Ephemeral — no persistence.
+                  {tc(lang, "web.messages_encrypted")}
                 </div>
               </>
             ) : (
               <div className="py-12 text-center">
                 <div className="text-blood-bright text-sm mb-2">
-                  <span className="cursor-blink">&gt;</span> NO ACTIVE P2P CONNECTION
+                  <span className="cursor-blink">&gt;</span> {tc(lang, "web.no_active_p2p")}
                 </div>
                 <p className="text-xs text-content-dim">
                   Establish a peer link above to start sending encrypted messages.
@@ -675,7 +675,7 @@ export default function TeiaPage() {
           {/* Dead drops */}
           <TerminalCard title={tc(lang, "web.dead_drops")} accent="amber" className="mb-6">
             <p className="text-xs text-content-secondary mb-4">
-              Plant messages at geographic coordinates. Stored locally, persisted across sessions.
+              {tc(lang, "web.dead_drops_desc")}
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-3">
               <input
@@ -683,7 +683,7 @@ export default function TeiaPage() {
                 step="0.0001"
                 value={deadDropLat}
                 onChange={(e) => setDeadDropLat(e.target.value)}
-                placeholder="Latitude"
+                placeholder={tc(lang, "web.latitude_ph")}
                 className="bg-void border border-border-dim px-3 py-2 text-xs text-content-primary focus:border-blood focus:outline-none"
               />
               <input
@@ -691,14 +691,14 @@ export default function TeiaPage() {
                 step="0.0001"
                 value={deadDropLng}
                 onChange={(e) => setDeadDropLng(e.target.value)}
-                placeholder="Longitude"
+                placeholder={tc(lang, "web.longitude_ph")}
                 className="bg-void border border-border-dim px-3 py-2 text-xs text-content-primary focus:border-blood focus:outline-none"
               />
               <input
                 type="text"
                 value={deadDropMsg}
                 onChange={(e) => setDeadDropMsg(e.target.value)}
-                placeholder="Message..."
+                placeholder={tc(lang, "web.message_ph")}
                 className="bg-void border border-border-dim px-3 py-2 text-xs text-content-primary focus:border-blood focus:outline-none"
               />
             </div>
@@ -707,7 +707,7 @@ export default function TeiaPage() {
               disabled={!deadDropLat || !deadDropLng || !deadDropMsg}
               className="px-4 py-2 text-xs border border-border-dim text-content-secondary hover:border-blood hover:text-blood disabled:opacity-30"
             >
-              [ PLANT DEAD DROP ]
+              {tc(lang, "web.plant_dead_drop")}
             </button>
 
             {deadDrops.length > 0 && (

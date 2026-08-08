@@ -18,9 +18,9 @@ export default function FortalezaPage() {
   return (
     <div className="p-3 sm:p-6 md:p-10 max-w-4xl mx-auto">
       <div className="mb-8 pt-4">
-        <div className="text-xs text-content-dim mb-1">[07] THE FORTRESS</div>
+        <div className="text-xs text-content-dim mb-1">{tc(lang, "fortress.section_label")}</div>
         <h1 className="text-2xl md:text-3xl text-blood-bright font-bold glow-blood">
-          THE FORTRESS
+          {tc(lang, "fortress.title")}
         </h1>
         <p className="text-content-secondary text-sm mt-2">
           {tc(lang, "subtitle.fortress")}
@@ -49,9 +49,9 @@ export default function FortalezaPage() {
           No databases, no servers, no central authority. You download it, you host it, you are a node.
         </p>
         <div className="flex gap-2 mt-3">
-          <StatusPill color="green">ACTIVE</StatusPill>
-          <StatusPill color="dim">NODES: 1 (this one)</StatusPill>
-          <StatusPill color="dim">MIRRORS: 0</StatusPill>
+          <StatusPill color="green">{tc(lang, "status.active")}</StatusPill>
+          <StatusPill color="dim">{tc(lang, "fortress.nodes")}</StatusPill>
+          <StatusPill color="dim">{tc(lang, "fortress.mirrors")}</StatusPill>
         </div>
       </TerminalCard>
 
@@ -59,7 +59,7 @@ export default function FortalezaPage() {
       <TerminalCard title={tc(lang, "fortress.self_hosting")} className="mb-6">
         <div className="space-y-4">
           <div>
-            <div className="text-xs font-bold text-blood-bright mb-2">DOCKER</div>
+            <div className="text-xs font-bold text-blood-bright mb-2">{tc(lang, "fortress.docker")}</div>
             <pre className="text-xs text-terminal-green bg-void border border-border-dim p-3 overflow-x-auto">{`# Clone the repository
 git clone https://github.com/mouracleiton/v_for_vigilance
 cd v_for_vigilance/v-for-x
@@ -77,7 +77,7 @@ docker run -p 8080:80 v-for-x`}</pre>
           </div>
 
           <div>
-            <div className="text-xs font-bold text-blood-bright mb-2">RASPBERRY PI</div>
+            <div className="text-xs font-bold text-blood-bright mb-2">{tc(lang, "fortress.raspberry_pi")}</div>
             <pre className="text-xs text-terminal-green bg-void border border-border-dim p-3 overflow-x-auto">{`# On the Pi (ARM64)
 sudo apt install nodejs npm
 git clone https://github.com/mouracleiton/v_for_vigilance
@@ -92,7 +92,7 @@ npx serve out/ -l 8080
           </div>
 
           <div>
-            <div className="text-xs font-bold text-blood-bright mb-2">USB SNEAKERNET (OFFLINE DISTRIBUTION)</div>
+            <div className="text-xs font-bold text-blood-bright mb-2">{tc(lang, "fortress.usb_sneakernet")}</div>
             <div className="text-xs text-content-secondary">
               Copy the <code className="text-blood">out/</code> directory to a USB drive.
               Open <code className="text-blood">index.html</code> in any browser.
@@ -106,7 +106,7 @@ npx serve out/ -l 8080
       <TerminalCard title={tc(lang, "card.decentralized_hosting")} className="mb-6">
         <div className="space-y-4">
           <div>
-            <div className="text-xs font-bold text-blood-bright mb-2">IPFS</div>
+            <div className="text-xs font-bold text-blood-bright mb-2">{tc(lang, "fortress.ipfs")}</div>
             <pre className="text-xs text-terminal-green bg-void border border-border-dim p-3 overflow-x-auto">{`# Pin the build to IPFS
 npm run build
 npx thirdweb upload out/
@@ -122,7 +122,7 @@ ipfs add -r out/
           </div>
 
           <div>
-            <div className="text-xs font-bold text-blood-bright mb-2">TOR HIDDEN SERVICE</div>
+            <div className="text-xs font-bold text-blood-bright mb-2">{tc(lang, "fortress.tor")}</div>
             <pre className="text-xs text-terminal-green bg-void border border-border-dim p-3 overflow-x-auto">{`# Install Tor
 sudo apt install tor
 
@@ -145,7 +145,7 @@ sudo cat /var/lib/tor/v-for-x/hostname`}</pre>
           </div>
 
           <div>
-            <div className="text-xs font-bold text-blood-bright mb-2">LOCAL MESH NETWORK</div>
+            <div className="text-xs font-bold text-blood-bright mb-2">{tc(lang, "fortress.mesh")}</div>
             <p className="text-xs text-content-secondary">
               Serve the static files from a device connected to a local mesh network
               (see Protocol X → Mesh Network blueprint). Anyone on the mesh can access it.
@@ -159,25 +159,25 @@ sudo cat /var/lib/tor/v-for-x/hostname`}</pre>
       <TerminalCard title={tc(lang, "card.anti_censorship")} accent="amber" className="mb-6">
         <div className="space-y-3 text-xs">
           <div>
-            <span className="text-blood-bright font-bold">DOMAIN ROTATION:</span>
+            <span className="text-blood-bright font-bold">{tc(lang, "fortress.domain_rotation")}</span>
             <span className="text-content-secondary">
-              {" "}Register multiple domains in different jurisdictions. If one is seized, traffic redirects automatically.
+              {" "}{tc(lang, "fortress.domain_rotation_desc")}
             </span>
           </div>
           <div>
-            <span className="text-blood-bright font-bold">MIRROR NETWORK:</span>
+            <span className="text-blood-bright font-bold">{tc(lang, "fortress.mirror_network")}</span>
             <span className="text-content-secondary">
-              {" "}Volunteers host identical copies. A shared list of mirrors is distributed via the platform itself.
+              {" "}{tc(lang, "fortress.mirror_network_desc")}
             </span>
           </div>
           <div>
-            <span className="text-blood-bright font-bold">ACCESSING FROM RESTRICTED NETWORKS:</span>
+            <span className="text-blood-bright font-bold">{tc(lang, "fortress.accessing_restricted")}</span>
             <span className="text-content-secondary">
-              {" "}Use Tor Browser, VPNs, or proxy chains. The Tor hidden service address is shared through trusted channels.
+              {" "}{tc(lang, "fortress.accessing_restricted_desc")}
             </span>
           </div>
           <div>
-            <span className="text-blood-bright font-bold">DEAD DROP DISTRIBUTION:</span>
+            <span className="text-blood-bright font-bold">{tc(lang, "fortress.dead_drop_distribution")}</span>
             <span className="text-content-secondary">
               {" "}Physical USB distribution for areas with total internet blackout.
               See Protocol X → Dead Drop Protocol.
@@ -204,7 +204,7 @@ npm run build
 # Output is in out/ — fully self-contained static site
 # No external API calls. No tracking. Works offline.`}</pre>
         <p className="text-xs text-content-dim mt-3">
-          This project is CC0 (Public Domain). Fork it, modify it, redistribute it. You are the infrastructure.
+          {tc(lang, "fortress.cc0_notice")}
         </p>
       </TerminalCard>
     </div>
