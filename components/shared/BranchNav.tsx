@@ -5,14 +5,16 @@ import { usePathname } from "next/navigation";
 import { useStore } from "@/stores/useStore";
 import { branchLinks } from "@/lib/crosslinks";
 import { sound } from "@/lib/sound";
-import { LANGS, t, SECTION_DESC } from "@/lib/i18n";
+import { LANGS, t, SECTION_DESC, getStoredLang } from "@/lib/i18n";
 import SoundToggle from "@/components/ui/SoundToggle";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function BranchNav() {
   const pathname = usePathname();
   const { navOpen, setNavOpen, lang, setLang } = useStore();
   const drawerRef = useRef<HTMLDivElement>(null);
+  const [langOpen, setLangOpen] = useState(false);
+  const langRef = useRef<HTMLDivElement>(null);
 
   const guyFawkesAscii = [
     "    .:::::::::::.",
@@ -33,8 +35,8 @@ export default function BranchNav() {
 
   // Init language from localStorage
   useEffect(() => {
-    const stored = localStorage.getItem("vfx-lang");
-    if (stored === "pt" && lang !== "pt") setLang("pt");
+    const stored = getStoredLang();
+    if (stored !== lang) setLang(stored);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Close drawer on Escape
@@ -46,6 +48,18 @@ export default function BranchNav() {
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [navOpen, setNavOpen]);
+
+  // Close language dropdown on outside click
+  useEffect(() => {
+    if (!langOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (langRef.current && !langRef.current.contains(e.target as Node)) {
+        setLangOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [langOpen]);
 
   // Lock body scroll when drawer open
   useEffect(() => {
@@ -98,21 +112,28 @@ export default function BranchNav() {
         <div className="p-3 border-t border-border-dim">
           <div className="flex items-center justify-between gap-2 mb-2">
             <SoundToggle />
-            <div className="flex items-center gap-1">
-              {LANGS.map((l) => (
-                <button
-                  key={l.id}
-                  onClick={() => { setLang(l.id); sound.select(); }}
-                  className={`text-[9px] px-1.5 py-1 border transition-colors ${
-                    lang === l.id
-                      ? "border-blood text-blood-bright"
-                      : "border-border-dim text-content-dim hover:border-blood"
-                  }`}
-                  aria-label={`Switch to ${l.label}`}
-                >
-                  {l.flag} {l.label}
-                </button>
-              ))}
+            <div ref={langRef} className="relative">
+              <button
+                onClick={() => { setLangOpen(!langOpen); sound.select(); }}
+                className="text-[9px] px-1.5 py-1 border border-border-dim text-content-secondary hover:border-blood hover:text-blood-bright transition-colors flex items-center gap-1"
+              >
+                {LANGS.find(l => l.id === lang)?.flag} {LANGS.find(l => l.id === lang)?.label} ▾
+              </button>
+              {langOpen && (
+                <div className="absolute bottom-full right-0 mb-1 bg-abyss border border-border-bright z-50 min-w-[100px]">
+                  {LANGS.map((l) => (
+                    <button
+                      key={l.id}
+                      onClick={() => { setLang(l.id); setLangOpen(false); sound.select(); }}
+                      className={`flex items-center gap-2 w-full text-left px-2 py-1.5 text-[10px] hover:bg-panel transition-colors ${
+                        lang === l.id ? "text-blood-bright bg-panel" : "text-content-secondary"
+                      }`}
+                    >
+                      {l.flag} {l.label}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
           <button
@@ -220,6 +241,22 @@ export default function BranchNav() {
           className="px-4 py-3 border-t border-border-dim"
           style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 0.75rem)" }}
         >
+          {/* Language selector in mobile drawer */}
+          <div className="flex items-center gap-1 flex-wrap mb-3 justify-center">
+            {LANGS.map((l) => (
+              <button
+                key={l.id}
+                onClick={() => { setLang(l.id); sound.select(); }}
+                className={`text-[10px] px-2 py-1 border transition-colors ${
+                  lang === l.id
+                    ? "border-blood text-blood-bright"
+                    : "border-border-dim text-content-dim hover:border-blood"
+                }`}
+              >
+                {l.flag} {l.label}
+              </button>
+            ))}
+          </div>
           <Link
             href="/"
             className="block text-center text-xs text-content-dim"

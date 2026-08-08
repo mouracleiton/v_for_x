@@ -2,7 +2,20 @@
  * V FOR X — Formatting utilities
  */
 
-export function formatNumber(n: number | null | undefined): string {
+import type { Lang } from "@/lib/i18n";
+
+/** Map language to Intl locale */
+const LOCALE_MAP: Record<Lang, string> = {
+  en: "en-US", pt: "pt-BR", es: "es-ES", fr: "fr-FR",
+  zh: "zh-CN", ja: "ja-JP", ko: "ko-KR", hi: "hi-IN",
+  ar: "ar-SA", ru: "ru-RU",
+};
+
+export function localeOf(lang: Lang): string {
+  return LOCALE_MAP[lang] ?? "en-US";
+}
+
+export function formatNumber(n: number | null | undefined, lang?: Lang): string {
   if (n === null || n === undefined) return "N/A";
   if (Math.abs(n) >= 1e12) return (n / 1e12).toFixed(2) + "T";
   if (Math.abs(n) >= 1e9) return (n / 1e9).toFixed(2) + "B";

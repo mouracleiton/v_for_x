@@ -93,9 +93,14 @@ export const useStore = create<VFXState>((set) => ({
   navOpen: false,
   setNavOpen: (open) => set({ navOpen: open }),
 
-  lang: "en",
+  lang: typeof window !== "undefined" ? getStoredLang() : "en",
   setLang: (lang) => {
     setStoredLang(lang);
+    // Apply RTL/LTR direction and lang attribute
+    if (typeof window !== "undefined") {
+      document.documentElement.lang = lang;
+      document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+    }
     set({ lang });
   },
 }));

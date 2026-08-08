@@ -33,6 +33,14 @@ export interface CountryData {
   iso3: string;
   name_en: string;
   name_pt: string;
+  name_es?: string;
+  name_fr?: string;
+  name_zh?: string;
+  name_ja?: string;
+  name_ko?: string;
+  name_hi?: string;
+  name_ar?: string;
+  name_ru?: string;
   iso2: string;
   un_m49: number;
   region: string;
