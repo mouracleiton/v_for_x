@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { useStore } from "@/stores/useStore";
 import { tc } from "@/lib/i18n-content";
+import { t } from "@/lib/i18n";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   ReferenceLine, Legend, Area, AreaChart,
@@ -19,12 +20,58 @@ import type { WorldBackbone, Scenario, SdgEquation } from "@/lib/types";
 const data = backbone as WorldBackbone;
 
 const scenarioPresets = [
-  { key: "bau", label: "BAU", budget: 0, desc: "—" },
-  { key: "minimo", label: "MINIMO", budget: 15, desc: "$15B/yr" },
-  { key: "moderado", label: "MODERADO", budget: 45, desc: "$45B/yr" },
-  { key: "ambicioso", label: "AMBICIOSO", budget: 93, desc: "$93B/yr" },
-  { key: "maximo", label: "MAXIMO", budget: 150, desc: "$150B/yr" },
+  { key: "bau", labelKey: "eq.bau", budget: 0, desc: "—" },
+  { key: "minimo", labelKey: "eq.scenario_min", budget: 15, desc: "$15B/yr" },
+  { key: "moderado", labelKey: "eq.scenario_mod", budget: 45, desc: "$45B/yr" },
+  { key: "ambicioso", labelKey: "eq.scenario_amb", budget: 93, desc: "$93B/yr" },
+  { key: "maximo", labelKey: "eq.scenario_max", budget: 150, desc: "$150B/yr" },
 ];
+
+/* Translation key arrays for data-bound strings */
+const ALLOC_NAME_KEYS = [
+  "eq.alloc_smallholder", "eq.alloc_social", "eq.alloc_school",
+  "eq.alloc_rural", "eq.alloc_rnd", "eq.alloc_emergency",
+];
+const ALLOC_JUST_KEYS = [
+  "common.multiplier_effect", "common.immediate_safety_net", "common.breaks_cycle",
+  "eq.just_rural_lag", "eq.just_rnd_lag", "common.save_lives",
+];
+const FIN_NAME_KEYS = [
+  "eq.fin_military_name", "eq.fin_wealth_name", "eq.fin_tobin_name",
+  "eq.fin_beps_name", "eq.fin_debt_name",
+];
+const FIN_DETAIL_KEYS = [
+  "eq.fin_military_detail", "eq.fin_wealth_detail", "eq.fin_tobin_detail",
+  "eq.fin_beps_detail", "eq.fin_debt_detail",
+];
+const TACTIC_NAME_KEYS = [
+  "eq.tactic_1", "eq.tactic_2", "eq.tactic_3", "eq.tactic_4", "eq.tactic_5",
+  "eq.tactic_6", "eq.tactic_7", "eq.tactic_8", "eq.tactic_9", "eq.tactic_10",
+  "eq.tactic_11", "eq.tactic_12", "eq.tactic_13", "eq.tactic_14", "eq.tactic_15",
+  "eq.tactic_16", "eq.tactic_17",
+];
+const CASUALTY_MAP: Record<string, string> = {
+  "~0": "eq.cas_zero", "0": "eq.cas_zero",
+  "Low": "eq.cas_low", "Baixas": "eq.cas_low",
+  "Moderate": "eq.cas_moderate", "Moderadas": "eq.cas_moderate",
+  "High": "eq.cas_high", "Altas": "eq.cas_high",
+  "High-Cat": "eq.cas_high_cat", "Altas-Cat": "eq.cas_high_cat",
+  "Catastrophic": "eq.cas_catastrophic", "Catastrof": "eq.cas_catastrophic",
+};
+const SPEED_MAP: Record<string, string> = {
+  "Immediate": "eq.spd_immediate", "Imediato": "eq.spd_immediate",
+  "Days": "eq.spd_days", "Dias": "eq.spd_days",
+  "Weeks": "eq.spd_weeks", "Semanas": "eq.spd_weeks",
+  "Months": "eq.spd_months", "Meses": "eq.spd_months",
+  "Years": "eq.spd_years", "Anos": "eq.spd_years",
+  "Months-Years": "eq.spd_months_years", "Meses-Anos": "eq.spd_months_years",
+  "Days-Weeks": "eq.spd_days_weeks", "Dias-Semanas": "eq.spd_days_weeks",
+  "Slow": "eq.spd_slow", "Lento": "eq.spd_slow",
+};
+const SUCCESS_MAP: Record<string, string> = {
+  "High": "eq.success_high", "Medium": "eq.success_medium",
+  "Variable": "eq.success_variable", "Slow": "eq.success_slow",
+};
 
 const scenarioColors: Record<string, string> = {
   bau: "#444444",
@@ -115,9 +162,9 @@ export default function EquationPage() {
     <div className="p-3 sm:p-6 md:p-10 max-w-5xl mx-auto">
       {/* Header */}
       <div className="mb-8 pt-4">
-        <div className="text-xs text-content-dim mb-1">[02] THE EQUATION</div>
+        <div className="text-xs text-content-dim mb-1">[02] {t(lang, "nav.equation")}</div>
         <h1 className="text-2xl md:text-3xl text-blood-bright font-bold glow-blood">
-          THE EQUATION
+          {t(lang, "nav.equation")}
         </h1>
         <p className="text-content-secondary text-sm mt-2">
           {tc(lang, "subtitle.equation")}
@@ -142,7 +189,7 @@ export default function EquationPage() {
                   : "border-border-dim text-content-secondary hover:border-blood-dim"
               }`}
             >
-              <span className="font-bold">{p.label}</span>
+              <span className="font-bold">{tc(lang, p.labelKey)}</span>
               <span className="text-content-dim ml-2">{p.desc}</span>
             </button>
           ))}
@@ -269,11 +316,11 @@ export default function EquationPage() {
               <Tooltip {...chartTooltipStyle} />
               <Legend wrapperStyle={{ fontSize: "10px", fontFamily: "monospace" }} />
               <ReferenceLine y={sdgThreshold} stroke="#00ff41" strokeDasharray="5 5" label={{ value: `${tc(lang, "eq.sdg2_label")} ${sdgThreshold}M`, fill: "#00ff41", fontSize: 9, position: "right" }} />
-              <Line type="monotone" dataKey="bau" name="BAU ($0)" stroke={scenarioColors.bau} strokeWidth={2} dot={{ r: 2 }} />
-              <Line type="monotone" dataKey="minimo" name="MINIMO ($15B)" stroke={scenarioColors.minimo} strokeWidth={2} dot={{ r: 2 }} />
-              <Line type="monotone" dataKey="moderado" name="MODERADO ($40B)" stroke={scenarioColors.moderado} strokeWidth={2} dot={{ r: 2 }} />
-              <Line type="monotone" dataKey="ambicioso" name="AMBICIOSO ($93B)" stroke={scenarioColors.ambicioso} strokeWidth={3} dot={{ r: 3 }} />
-              <Line type="monotone" dataKey="maximo" name="MAXIMO ($150B)" stroke={scenarioColors.maximo} strokeWidth={2} dot={{ r: 2 }} />
+              <Line type="monotone" dataKey="bau" name={tc(lang, "eq.bau")} stroke={scenarioColors.bau} strokeWidth={2} dot={{ r: 2 }} />
+              <Line type="monotone" dataKey="minimo" name={`${tc(lang, "eq.scenario_min")} ($15B)`} stroke={scenarioColors.minimo} strokeWidth={2} dot={{ r: 2 }} />
+              <Line type="monotone" dataKey="moderado" name={`${tc(lang, "eq.scenario_mod")} ($40B)`} stroke={scenarioColors.moderado} strokeWidth={2} dot={{ r: 2 }} />
+              <Line type="monotone" dataKey="ambicioso" name={`${tc(lang, "eq.scenario_amb")} ($93B)`} stroke={scenarioColors.ambicioso} strokeWidth={3} dot={{ r: 3 }} />
+              <Line type="monotone" dataKey="maximo" name={`${tc(lang, "eq.scenario_max")} ($150B)`} stroke={scenarioColors.maximo} strokeWidth={2} dot={{ r: 2 }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -284,7 +331,7 @@ export default function EquationPage() {
             const gap = data.scenarios.bau.final_hunger_m - finalM;
             return (
               <div key={p.key} className="border border-border-dim p-2 text-center" style={{ borderColor: scenarioColors[p.key] + "66" }}>
-                <div className="text-[9px] text-content-dim uppercase">{p.label}</div>
+                <div className="text-[9px] text-content-dim uppercase">{tc(lang, p.labelKey)}</div>
                 <div className="text-sm font-bold" style={{ color: scenarioColors[p.key] }}>
                   {finalM.toFixed(0)}M
                 </div>
@@ -520,10 +567,10 @@ export default function EquationPage() {
               <DataBar
                 value={a.pct}
                 max={100}
-                label={`${a.name} — $${a.billion_yr}B/yr`}
+                label={`${ALLOC_NAME_KEYS[i] ? tc(lang, ALLOC_NAME_KEYS[i]) : a.name} — $${a.billion_yr}B/yr`}
                 unit="%"
               />
-              <div className="text-xs text-content-dim mt-0.5 ml-2">{a.justification}</div>
+              <div className="text-xs text-content-dim mt-0.5 ml-2">{ALLOC_JUST_KEYS[i] ? tc(lang, ALLOC_JUST_KEYS[i]) : a.justification}</div>
             </div>
           ))}
         </div>
@@ -532,11 +579,11 @@ export default function EquationPage() {
       {/* C. Financing Mechanisms */}
       <TerminalCard title={tc(lang, "card.eq.financing")} className="mb-6">
         <p className="text-xs text-content-secondary mb-4">
-          Select mechanisms to build a funding package. Target: $93B/yr.
+          {tc(lang, "eq.select_mechanisms_sub")}
         </p>
         <div className="flex items-center gap-4 mb-4">
           <div className="text-xs">
-            <span className="text-content-dim">YOUR PACKAGE: </span>
+            <span className="text-content-dim">{tc(lang, "eq.your_package")} </span>
             <span
               className={`text-lg font-bold ${
                 financingTotal >= 93 ? "text-terminal-green" : "text-blood"
@@ -544,10 +591,10 @@ export default function EquationPage() {
             >
               ${financingTotal.toFixed(0)}B
             </span>
-            <span className="text-content-dim"> / $93B target</span>
+            <span className="text-content-dim"> {tc(lang, "eq.93b_target")}</span>
           </div>
           {financingTotal >= 93 && (
-            <StatusPill color="green">TARGET REACHED</StatusPill>
+            <StatusPill color="green">{tc(lang, "eq.target_reached")}</StatusPill>
           )}
         </div>
         <div className="space-y-2">
@@ -569,8 +616,8 @@ export default function EquationPage() {
                 className="mt-1 accent-blood"
               />
               <div className="flex-1">
-                <div className="text-xs font-bold text-content-primary">{m.name}</div>
-                <div className="text-xs text-content-secondary mt-1">{m.detail}</div>
+                <div className="text-xs font-bold text-content-primary">{FIN_NAME_KEYS[i] ? tc(lang, FIN_NAME_KEYS[i]) : m.name}</div>
+                <div className="text-xs text-content-secondary mt-1">{FIN_DETAIL_KEYS[i] ? tc(lang, FIN_DETAIL_KEYS[i]) : m.detail}</div>
               </div>
             </label>
           ))}
@@ -580,17 +627,17 @@ export default function EquationPage() {
       {/* D. Conflict Zone Tactics */}
       <TerminalCard title={tc(lang, "card.eq.conflict_tactics")} accent="amber" className="mb-6">
         <p className="text-xs text-content-secondary mb-4">
-          17 documented approaches to deliver aid in active conflict zones. Tier S = zero-casualty, immediate.
+          {tc(lang, "eq.conflict_tactics_sub")}
         </p>
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
               <tr className="border-b border-border-dim text-content-dim">
-                <th className="text-left py-2 px-2">TIER</th>
-                <th className="text-left py-2 px-2">TACTIC</th>
-                <th className="text-left py-2 px-2 hidden sm:table-cell">CASUALTIES</th>
-                <th className="text-left py-2 px-2">SUCCESS</th>
-                <th className="text-left py-2 px-2 hidden sm:table-cell">SPEED</th>
+                <th className="text-left py-2 px-2">{tc(lang, "eq.tier_header")}</th>
+                <th className="text-left py-2 px-2">{tc(lang, "eq.tactic_header")}</th>
+                <th className="text-left py-2 px-2 hidden sm:table-cell">{tc(lang, "eq.casualties_header")}</th>
+                <th className="text-left py-2 px-2">{tc(lang, "eq.success_header")}</th>
+                <th className="text-left py-2 px-2 hidden sm:table-cell">{tc(lang, "eq.speed_header")}</th>
               </tr>
             </thead>
             <tbody>
@@ -607,9 +654,9 @@ export default function EquationPage() {
                       {t.tier}
                     </span>
                   </td>
-                  <td className="py-2 px-2 text-content-primary">{t.name}</td>
+                  <td className="py-2 px-2 text-content-primary">{TACTIC_NAME_KEYS[t.id - 1] ? tc(lang, TACTIC_NAME_KEYS[t.id - 1]) : t.name}</td>
                   <td className="py-2 px-2 text-content-secondary hidden sm:table-cell">
-                    {t.casualties}
+                    {CASUALTY_MAP[t.casualties] ? tc(lang, CASUALTY_MAP[t.casualties]) : t.casualties}
                   </td>
                   <td className="py-2 px-2">
                     <span
@@ -622,11 +669,11 @@ export default function EquationPage() {
                               : "#cc0000",
                       }}
                     >
-                      {t.success}
+                      {SUCCESS_MAP[t.success] ? tc(lang, SUCCESS_MAP[t.success]) : t.success}
                     </span>
                   </td>
                   <td className="py-2 px-2 text-content-secondary hidden sm:table-cell">
-                    {t.speed}
+                    {SPEED_MAP[t.speed] ? tc(lang, SPEED_MAP[t.speed]) : t.speed}
                   </td>
                 </tr>
               ))}
@@ -634,9 +681,9 @@ export default function EquationPage() {
           </table>
         </div>
         <div className="mt-3 flex gap-4 text-xs">
-          <span style={{ color: "#00ff41" }}>■ S: Zero-casualty, immediate</span>
-          <span style={{ color: "#ffaa00" }}>■ A: Low casualty, variable</span>
-          <span style={{ color: "#cc0000" }}>■ B: High casualty, last resort</span>
+          <span style={{ color: "#00ff41" }}>■ S: {tc(lang, "eq.tier_s_desc")}</span>
+          <span style={{ color: "#ffaa00" }}>■ A: {tc(lang, "eq.tier_a_desc")}</span>
+          <span style={{ color: "#cc0000" }}>■ B: {tc(lang, "eq.tier_b_desc")}</span>
         </div>
       </TerminalCard>
 
@@ -656,12 +703,12 @@ export default function EquationPage() {
                   <span className="text-xs text-content-dim">({p.period})</span>
                 </div>
                 <div className="text-xs text-content-secondary mt-1">
-                  Target: {p.target_hunger_m}M hungry (-{p.reduction_pct}%)
+                  {tc(lang, "eq.target_label")} {p.target_hunger_m}{tc(lang, "eq.target_m_hungry")} (-{p.reduction_pct}%)
                 </div>
                 <DataBar
                   value={p.reduction_pct}
                   max={100}
-                  label={`Hunger reduction`}
+                  label={tc(lang, "eq.hunger_reduction")}
                   unit="%"
                   inverse
                 />
@@ -684,16 +731,16 @@ export default function EquationPage() {
       <TerminalCard title={tc(lang, "card.cross_links")}>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <Link href="/the-trail/" className="terminal-card p-3 hover:border-blood block">
-            <div className="text-xs text-blood-bright font-bold">→ FUND THE SOLUTION</div>
-            <div className="text-xs text-content-secondary mt-1">Route resources using this allocation</div>
+            <div className="text-xs text-blood-bright font-bold">→ {tc(lang, "eq.fund_solution")}</div>
+            <div className="text-xs text-content-secondary mt-1">{tc(lang, "eq.route_resources")}</div>
           </Link>
           <Link href="/protocol-x/" className="terminal-card p-3 hover:border-blood block">
-            <div className="text-xs text-blood-bright font-bold">→ IMPLEMENTATION GUIDES</div>
-            <div className="text-xs text-content-secondary mt-1">How to advocate for each mechanism</div>
+            <div className="text-xs text-blood-bright font-bold">→ {tc(lang, "eq.implementation_guides")}</div>
+            <div className="text-xs text-content-secondary mt-1">{tc(lang, "eq.how_advocate")}</div>
           </Link>
           <Link href="/registry/" className="terminal-card p-3 hover:border-blood block">
-            <div className="text-xs text-blood-bright font-bold">→ DOCUMENT FOR TRIBUNAL</div>
-            <div className="text-xs text-content-secondary mt-1">War crimes → ICJ accountability</div>
+            <div className="text-xs text-blood-bright font-bold">→ {tc(lang, "eq.document_tribunal")}</div>
+            <div className="text-xs text-content-secondary mt-1">{tc(lang, "eq.war_crimes_icj")}</div>
           </Link>
         </div>
       </TerminalCard>
@@ -723,6 +770,7 @@ function SdgEquationsSection({
   selectedSdg: string;
   onSelectSdg: (key: string) => void;
 }) {
+  const { lang } = useStore();
   const eq = equations.equations[selectedSdg] as SdgEquation;
   const meta = sdgTabMeta[selectedSdg] || sdgTabMeta.sdg6_water;
   const keys = Object.keys(equations.equations);
@@ -736,22 +784,20 @@ function SdgEquationsSection({
     <>
       {/* Section header */}
       <TerminalCard
-        title="CROSS-DOMAIN EQUATIONS — 6 GAPS, 1 PATTERN"
+        title={tc(lang, "eq.cross_domain")}
         accent="amber"
         glow
         className="mb-6"
       >
         <p className="text-xs text-content-secondary mb-4">
-          Hunger is the proof of concept. The same equation structure — gap, cost, affordability —
-          applies to every solvable crisis. Every gap below is cheaper than military spending.
-          Every one has published, evidence-backed interventions.
+          {tc(lang, "eq.every_gap_cheaper")}
         </p>
 
         {/* Quick-wins aggregate */}
         {eqMeta.quick_wins_total_billion && (
           <div className="border border-terminal-green bg-terminal-green/5 p-4 mb-4">
             <div className="text-[10px] text-content-dim uppercase tracking-widest mb-1">
-              THE COMBINED EQUATION
+              {tc(lang, "eq.combined_eq")}
             </div>
             <div className="text-lg text-terminal-green font-bold glow-green">
               ${eqMeta.quick_wins_total_billion}B/year
@@ -804,7 +850,7 @@ function SdgEquationsSection({
         {/* The gap */}
         <div className="terminal-card p-3 mb-4">
           <div className="text-[10px] text-content-dim uppercase tracking-widest mb-2">
-            THE GAP — computed from {data.metadata.total_countries}-country data
+            {tc(lang, "eq.the_gap_dynamic").replace("{N}", String(data.metadata.total_countries))}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {Object.entries(eq.current_gap).filter(([, v]) => typeof v === "number" || typeof v === "string").slice(0, 6).map(([k, v]) => (
@@ -821,28 +867,28 @@ function SdgEquationsSection({
         {/* The cost */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
           <div className="border border-blood bg-blood/5 p-3 text-center">
-            <div className="text-[9px] text-content-dim uppercase">ANNUAL COST</div>
+            <div className="text-[9px] text-content-dim uppercase">{tc(lang, "eq.annual_cost")}</div>
             <div className="text-xl font-bold text-blood-bright">
               {eq.cost.annual_trillion ? `$${eq.cost.annual_trillion}T` : `$${costB}B`}
             </div>
-            <div className="text-[9px] text-content-dim mt-1">/year</div>
+            <div className="text-[9px] text-content-dim mt-1">{tc(lang, "eq.per_year")}</div>
           </div>
           <div className="border p-3 text-center" style={{ borderColor: meta.color + "66", background: meta.color + "0d" }}>
-            <div className="text-[9px] text-content-dim uppercase">% OF MILITARY</div>
+            <div className="text-[9px] text-content-dim uppercase">{tc(lang, "eq.pct_military_short")}</div>
             <div className="text-xl font-bold" style={{ color: meta.color }}>
               {eq.affordability.pct_military}%
             </div>
-            <div className="text-[9px] text-content-dim mt-1">{eq.affordability.days_of_military} days</div>
+            <div className="text-[9px] text-content-dim mt-1">{eq.affordability.days_of_military} {tc(lang, "eq.days_lower")}</div>
           </div>
           <div className="border border-border-dim p-3 text-center">
-            <div className="text-[9px] text-content-dim uppercase">% OF WORLD GDP</div>
+            <div className="text-[9px] text-content-dim uppercase">{tc(lang, "eq.pct_gdp_short")}</div>
             <div className="text-xl font-bold text-content-primary">
               {eq.affordability.pct_world_gdp}%
             </div>
-            <div className="text-[9px] text-content-dim mt-1">of ~${eqMeta.world_gdp_trillion}T</div>
+            <div className="text-[9px] text-content-dim mt-1">{tc(lang, "eq.of_world_gdp_approx")}</div>
           </div>
           <div className="border border-terminal-green bg-terminal-green/5 p-3 text-center">
-            <div className="text-[9px] text-content-dim uppercase">STATUS</div>
+            <div className="text-[9px] text-content-dim uppercase">{tc(lang, "eq.status_label")}</div>
             <div className="text-sm font-bold text-terminal-green uppercase mt-1">
               {eq.status.replace(/_/g, " ")}
             </div>
@@ -853,7 +899,7 @@ function SdgEquationsSection({
         {/* Scale comparison bar */}
         <div className="mb-4">
           <div className="flex justify-between text-[10px] text-content-dim mb-1">
-            <span>SCALE COMPARISON (annual, USD)</span>
+            <span>{tc(lang, "eq.scale_comparison")}</span>
           </div>
           <div className="space-y-1">
             <div className="flex items-center gap-2">
@@ -866,7 +912,7 @@ function SdgEquationsSection({
             </div>
             <div className="flex items-center gap-2">
               <span className="text-[10px] text-content-secondary w-32 shrink-0">
-                World military (${eqMeta.world_military_trillion_yr}T)
+                {tc(lang, "eq.world_military_scale")} (${eqMeta.world_military_trillion_yr}T)
               </span>
               <div className="flex-1 h-4 bg-void border border-border-dim">
                 <div className="h-full bg-blood" style={{ width: "100%" }} />
@@ -884,7 +930,7 @@ function SdgEquationsSection({
 
         {/* Interventions */}
         <div className="text-[10px] text-content-dim uppercase tracking-widest mb-2">
-          EVIDENCE-BACKED INTERVENTIONS
+          {tc(lang, "eq.evidence_backed")}
         </div>
         <div className="space-y-2">
           {eq.interventions.map((iv, i) => (
@@ -901,7 +947,7 @@ function SdgEquationsSection({
                   {iv.revenue_billion_yr !== undefined && (
                     <div className="text-xs font-bold text-terminal-green">+${iv.revenue_billion_yr}B/yr</div>
                   )}
-                  <div className="text-[9px] text-content-dim">{iv.reach_m >= 1000 ? `${(iv.reach_m / 1000).toFixed(1)}B` : `${iv.reach_m}M`} reached</div>
+                  <div className="text-[9px] text-content-dim">{iv.reach_m >= 1000 ? `${(iv.reach_m / 1000).toFixed(1)}B` : `${iv.reach_m}M`} {tc(lang, "common.reached")}</div>
                 </div>
               </div>
             </div>
@@ -910,7 +956,7 @@ function SdgEquationsSection({
 
         {/* Source */}
         <div className="text-[10px] text-content-dim italic mt-3">
-          [Source: {eq.cost.source}]
+          {tc(lang, "eq.source_prefix")} {eq.cost.source}]
         </div>
       </TerminalCard>
     </>
