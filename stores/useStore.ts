@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { getStoredLang, setStoredLang, type Lang } from "@/lib/i18n";
 
 export interface AnonymousIdentity {
   handle: string;
@@ -37,6 +38,10 @@ interface VFXState {
   // Navigation
   navOpen: boolean;
   setNavOpen: (open: boolean) => void;
+
+  // Language
+  lang: Lang;
+  setLang: (lang: Lang) => void;
 }
 
 export const useStore = create<VFXState>((set) => ({
@@ -71,4 +76,10 @@ export const useStore = create<VFXState>((set) => ({
 
   navOpen: false,
   setNavOpen: (open) => set({ navOpen: open }),
+
+  lang: "en",
+  setLang: (lang) => {
+    setStoredLang(lang);
+    set({ lang });
+  },
 }));

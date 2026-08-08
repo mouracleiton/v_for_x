@@ -5,12 +5,13 @@ import { usePathname } from "next/navigation";
 import { useStore } from "@/stores/useStore";
 import { branchLinks } from "@/lib/crosslinks";
 import { sound } from "@/lib/sound";
+import { LANGS, t, SECTION_DESC } from "@/lib/i18n";
 import SoundToggle from "@/components/ui/SoundToggle";
 import { useEffect, useRef } from "react";
 
 export default function BranchNav() {
   const pathname = usePathname();
-  const { navOpen, setNavOpen } = useStore();
+  const { navOpen, setNavOpen, lang, setLang } = useStore();
   const drawerRef = useRef<HTMLDivElement>(null);
 
   const guyFawkesAscii = [
@@ -29,6 +30,12 @@ export default function BranchNav() {
   useEffect(() => {
     setNavOpen(false);
   }, [pathname, setNavOpen]);
+
+  // Init language from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem("vfx-lang");
+    if (stored === "pt" && lang !== "pt") setLang("pt");
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Close drawer on Escape
   useEffect(() => {
@@ -82,26 +89,41 @@ export default function BranchNav() {
                 onClick={() => sound.nav()}
               >
                 <span className="text-content-dim">[{b.code}]</span>
-                <span>{b.label}</span>
+                <span>{t(lang, `nav.${b.href.replace(/\//g, "")}`)}</span>
               </Link>
             );
           })}
         </div>
 
         <div className="p-3 border-t border-border-dim">
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center justify-between gap-2 mb-2">
             <SoundToggle />
-            <button
-              onClick={() => {
-                // Dispatch the Cmd+K shortcut programmatically
-                const evt = new KeyboardEvent("keydown", { key: "k", metaKey: true, ctrlKey: navigator.platform.includes("Mac") });
-                window.dispatchEvent(evt);
-              }}
-              className="text-[9px] px-2 py-1 border border-border-dim text-content-dim hover:border-blood hover:text-blood-bright transition-colors"
-            >
-              ⌘K SEARCH
-            </button>
+            <div className="flex items-center gap-1">
+              {LANGS.map((l) => (
+                <button
+                  key={l.id}
+                  onClick={() => { setLang(l.id); sound.select(); }}
+                  className={`text-[9px] px-1.5 py-1 border transition-colors ${
+                    lang === l.id
+                      ? "border-blood text-blood-bright"
+                      : "border-border-dim text-content-dim hover:border-blood"
+                  }`}
+                  aria-label={`Switch to ${l.label}`}
+                >
+                  {l.flag} {l.label}
+                </button>
+              ))}
+            </div>
           </div>
+          <button
+            onClick={() => {
+              const evt = new KeyboardEvent("keydown", { key: "k", metaKey: true, ctrlKey: navigator.platform.includes("Mac") });
+              window.dispatchEvent(evt);
+            }}
+            className="text-[9px] px-2 py-1 border border-border-dim text-content-dim hover:border-blood hover:text-blood-bright transition-colors w-full"
+          >
+            ⌘K {t(lang, "ui.search").toUpperCase()}
+          </button>
         </div>
       </nav>
 
