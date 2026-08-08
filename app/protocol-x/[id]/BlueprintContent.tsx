@@ -5,6 +5,8 @@ import Link from "next/link";
 import blueprintsData from "@/data/blueprints.json";
 import TerminalCard from "@/components/ui/TerminalCard";
 import StatusPill from "@/components/ui/StatusPill";
+import { useStore } from "@/stores/useStore";
+import { tc } from "@/lib/i18n-content";
 
 interface Blueprint {
   id: string;
@@ -28,12 +30,13 @@ export default function BlueprintContent({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+  const { lang } = useStore();
   const bp = blueprints.find((b) => b.id === id);
 
   if (!bp) {
     return (
       <div className="p-3 sm:p-3 sm:p-6 md:p-10 max-w-3xl mx-auto text-center">
-        <h1 className="text-2xl text-blood mb-4">BLUEPRINT NOT FOUND</h1>
+        <h1 className="text-2xl text-blood mb-4">{tc(lang, "card.blueprint_not_found")}</h1>
         <Link href="/protocol-x/" className="text-blood-bright hover:underline">
           ← Back to Protocol X
         </Link>
@@ -65,7 +68,7 @@ export default function BlueprintContent({
         <p className="text-content-secondary text-sm mt-3">{bp.summary}</p>
       </div>
 
-      <TerminalCard title="SPECIFICATIONS" className="mb-6 no-print">
+      <TerminalCard title={tc(lang, "card.specifications")} className="mb-6 no-print">
         <div className="grid grid-cols-2 gap-4 text-xs">
           <div>
             <span className="text-content-dim">Difficulty: </span>
@@ -80,7 +83,7 @@ export default function BlueprintContent({
         </div>
       </TerminalCard>
 
-      <TerminalCard title="REQUIREMENTS" className="mb-6 no-print">
+      <TerminalCard title={tc(lang, "card.requirements")} className="mb-6 no-print">
         <ul className="space-y-1">
           {bp.requirements.map((r, i) => (
             <li key={i} className="text-xs text-content-primary flex items-start gap-2">
@@ -91,7 +94,7 @@ export default function BlueprintContent({
         </ul>
       </TerminalCard>
 
-      <TerminalCard title="PROCEDURE" className="mb-6 no-print">
+      <TerminalCard title={tc(lang, "card.procedure")} className="mb-6 no-print">
         <ol className="space-y-3">
           {bp.steps.map((step, i) => (
             <li key={i} className="text-xs text-content-primary flex items-start gap-3">
@@ -104,7 +107,7 @@ export default function BlueprintContent({
         </ol>
       </TerminalCard>
 
-      <TerminalCard title="NOTES & SOURCES" accent="amber" className="mb-6 no-print">
+      <TerminalCard title={tc(lang, "card.notes_sources")} accent="amber" className="mb-6 no-print">
         <p className="text-xs text-content-secondary italic">{bp.notes}</p>
         <div className="flex flex-wrap gap-2 mt-3">
           {bp.tags.map((t) => (

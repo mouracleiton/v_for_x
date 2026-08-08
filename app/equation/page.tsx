@@ -256,7 +256,7 @@ export default function EquationPage() {
       </TerminalCard>
 
       {/* SCENARIO TIMELINE — recharts multi-line */}
-      <TerminalCard title="SCENARIO TIMELINE — 5 PATHS DIVERGE (2025-2034)" accent="blood" glow className="mb-6">
+      <TerminalCard title={tc(lang, "card.eq.scenario_timeline")} accent="blood" glow className="mb-6">
         <p className="text-xs text-content-secondary mb-4">
           Every line is a future. BAU is the road we're on. Ambitious is the road we could take. The gap between them is 607 million lives.
         </p>
@@ -513,7 +513,7 @@ export default function EquationPage() {
       </TerminalCard>
 
       {/* Budget allocation */}
-      <TerminalCard title="BUDGET ALLOCATION — RECOMMENDED SCENARIO ($93B/YR)" className="mb-6">
+      <TerminalCard title={tc(lang, "card.eq.budget_allocation")} className="mb-6">
         <div className="space-y-2">
           {data.financing.allocation.map((a, i) => (
             <div key={i}>
@@ -530,7 +530,7 @@ export default function EquationPage() {
       </TerminalCard>
 
       {/* C. Financing Mechanisms */}
-      <TerminalCard title="FINANCING MECHANISMS — BUILD YOUR PACKAGE" className="mb-6">
+      <TerminalCard title={tc(lang, "card.eq.financing")} className="mb-6">
         <p className="text-xs text-content-secondary mb-4">
           Select mechanisms to build a funding package. Target: $93B/yr.
         </p>
@@ -578,7 +578,7 @@ export default function EquationPage() {
       </TerminalCard>
 
       {/* D. Conflict Zone Tactics */}
-      <TerminalCard title="CONFLICT ZONE TACTICS — RANKED BY EFFICACY" accent="amber" className="mb-6">
+      <TerminalCard title={tc(lang, "card.eq.conflict_tactics")} accent="amber" className="mb-6">
         <p className="text-xs text-content-secondary mb-4">
           17 documented approaches to deliver aid in active conflict zones. Tier S = zero-casualty, immediate.
         </p>
@@ -641,7 +641,7 @@ export default function EquationPage() {
       </TerminalCard>
 
       {/* E. Implementation Timeline */}
-      <TerminalCard title="IMPLEMENTATION TIMELINE" accent="green" className="mb-6">
+      <TerminalCard title={tc(lang, "card.eq.implementation")} accent="green" className="mb-6">
         <div className="space-y-4">
           {data.implementation_phases.map((p) => (
             <div key={p.phase} className="flex items-start gap-4">
@@ -681,7 +681,7 @@ export default function EquationPage() {
       )}
 
       {/* Cross-links */}
-      <TerminalCard title="CROSS-LINKS">
+      <TerminalCard title={tc(lang, "card.cross_links")}>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <Link href="/the-trail/" className="terminal-card p-3 hover:border-blood block">
             <div className="text-xs text-blood-bright font-bold">→ FUND THE SOLUTION</div>

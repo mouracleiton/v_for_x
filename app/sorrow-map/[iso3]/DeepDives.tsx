@@ -11,6 +11,8 @@ import { countryToBlueprints } from "@/lib/crosslinks";
 import backbone from "@/data/world_backbone.json";
 import blueprintsData from "@/data/blueprints.json";
 import type { WorldBackbone } from "@/lib/types";
+import { useStore } from "@/stores/useStore";
+import { tc } from "@/lib/i18n-content";
 
 interface BlueprintDef {
   id: string;
@@ -110,6 +112,7 @@ export function MigrationDeepDive({
   country: CountryData;
   hotspotIso3s: Set<string>;
 }) {
+  const { lang } = useStore();
   const m = country.migration;
   const pop = country.demographics.population;
 
@@ -157,7 +160,7 @@ export function MigrationDeepDive({
   );
 
   return (
-    <TerminalCard title="MIGRATION & DISPLACEMENT // DEEP DIVE" accent="amber">
+    <TerminalCard title={tc(lang, "card.deep.migration")} accent="amber">
       <div className="space-y-3">
         <InsightBanner severity={severity}>
           {derived.isOriginCountry && m.refugees_origin !== null && (
@@ -294,6 +297,7 @@ export function MigrationDeepDive({
    ═══════════════════════════════════════════════════════════════ */
 
 export function GovernanceDeepDive({ country }: { country: CountryData }) {
+  const { lang } = useStore();
   const g = country.governance;
 
   const derived = useMemo(() => {
@@ -346,7 +350,7 @@ export function GovernanceDeepDive({ country }: { country: CountryData }) {
   }, [derived]);
 
   return (
-    <TerminalCard title="GOVERNANCE & CORRUPTION // DEEP DIVE" accent="blood">
+    <TerminalCard title={tc(lang, "card.deep.governance")} accent="blood">
       <div className="space-y-3">
         <InsightBanner severity={severity}>
           {derived.cpiTier === "highly-corrupt" && (
@@ -461,6 +465,7 @@ export function GovernanceDeepDive({ country }: { country: CountryData }) {
    ═══════════════════════════════════════════════════════════════ */
 
 export function ClimateHungerDeepDive({ country }: { country: CountryData }) {
+  const { lang } = useStore();
   const cl = country.climate;
   const env = country.environment;
   const hunger = country.hunger;
@@ -515,7 +520,7 @@ export function ClimateHungerDeepDive({ country }: { country: CountryData }) {
   }, [derived]);
 
   return (
-    <TerminalCard title="CLIMATE FOOTPRINT vs HUNGER // DEEP DIVE" accent="green">
+    <TerminalCard title={tc(lang, "card.deep.climate_hunger")} accent="green">
       <div className="space-y-3">
         <InsightBanner severity={severity}>
           {derived.isClimateVictim && (
@@ -616,6 +621,7 @@ export function ClimateHungerDeepDive({ country }: { country: CountryData }) {
    ═══════════════════════════════════════════════════════════════ */
 
 export function MilitaryHealthDeepDive({ country }: { country: CountryData }) {
+  const { lang } = useStore();
   const mil = country.military;
   const health = country.health;
   const econ = country.economy;
@@ -652,7 +658,7 @@ export function MilitaryHealthDeepDive({ country }: { country: CountryData }) {
   }, [derived]);
 
   return (
-    <TerminalCard title="MILITARY vs HEALTH SPENDING // DEEP DIVE" accent="amber">
+    <TerminalCard title={tc(lang, "card.deep.military_health")} accent="amber">
       <div className="space-y-3">
         <InsightBanner severity={severity}>
           {derived.milToHealthRatio !== null ? (
@@ -758,6 +764,7 @@ export function MilitaryHealthDeepDive({ country }: { country: CountryData }) {
    ═══════════════════════════════════════════════════════════════ */
 
 export function GenderDeepDive({ country }: { country: CountryData }) {
+  const { lang } = useStore();
   const g = country.gender;
 
   const derived = useMemo(() => {
@@ -809,7 +816,7 @@ export function GenderDeepDive({ country }: { country: CountryData }) {
 
   if (!derived.hasData) {
     return (
-      <TerminalCard title="GENDER GAP // DEEP DIVE" accent="amber">
+      <TerminalCard title={tc(lang, "card.deep.gender_gap")} accent="amber">
         <div className="p-2 border border-border-dim bg-void/50 text-[11px] text-content-dim">
           {">"} Gender data unavailable for this country. Female labor force participation and parliamentary representation metrics are not reported.
         </div>
@@ -818,7 +825,7 @@ export function GenderDeepDive({ country }: { country: CountryData }) {
   }
 
   return (
-    <TerminalCard title="GENDER GAP // DEEP DIVE" accent="amber">
+    <TerminalCard title={tc(lang, "card.deep.gender_gap")} accent="amber">
       <div className="space-y-3">
         <InsightBanner severity={severity}>
           {derived.parlTier === "minimal" && (
@@ -1194,6 +1201,7 @@ function buildSdgRows(country: CountryData): SdgRow[] {
 }
 
 export function SdgScorecardDeepDive({ country }: { country: CountryData }) {
+  const { lang } = useStore();
   const rows = useMemo(() => buildSdgRows(country), [country]);
   const eqMeta = sdgData.sdg_equations?.meta;
 
@@ -1214,7 +1222,7 @@ export function SdgScorecardDeepDive({ country }: { country: CountryData }) {
   }, [severityCount]);
 
   return (
-    <TerminalCard title="SDG SCORECARD // 6 EQUATIONS" accent="green" glow>
+    <TerminalCard title={tc(lang, "card.deep.sdg_scorecard")} accent="green" glow>
       <div className="space-y-3">
         {/* Verdict banner */}
         <InsightBanner severity={verdict.severity === "critical" ? "critical" : verdict.severity === "warning" ? "warning" : "stable"}>

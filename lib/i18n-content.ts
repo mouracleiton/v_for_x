@@ -1925,6 +1925,352 @@ export const CONTENT_T: Dict = {
     en: "BLUEPRINT RECOMMENDER", pt: "RECOMENDADOR DE BLUEPRINTS", es: "RECOMENDADOR DE PLANOS", fr: "RECOMMANDATEUR DE PLANS",
     zh: "蓝图推荐器", ja: "ブループリント推奨", ko: "청사진 추천기", hi: "ब्लूप्रिंट अनुशंसक", ar: "موصي بالمخططات", ru: "РЕКОМЕНДАТЕЛЬ ЧЕРТЕЖЕЙ",
   },
+
+  /* ═══════════════════════════════════════════════════════════════
+   *  TERMINAL CARD TITLES + PAGE HEADERS
+   * ═══════════════════════════════════════════════════════════════ */
+  "card.cross_links": {
+    en: "CROSS-LINKS", pt: "LINKS CRUZADOS", es: "ENLACES CRUZADOS", fr: "LIENS CROISÉS",
+    zh: "交叉链接", ja: "クロスリンク", ko: "교차 링크", hi: "क्रॉस-लिंक", ar: "روابط متقاطعة", ru: "ПЕРЕКРЁСТНЫЕ ССЫЛКИ",
+  },
+  "card.key_indicators": {
+    en: "KEY INDICATORS", pt: "INDICADORES-CHAVE", es: "INDICADORES CLAVE", fr: "INDICATEURS CLÉS",
+    zh: "关键指标", ja: "主要指標", ko: "핵심 지표", hi: "प्रमुख संकेतक", ar: "المؤشرات الرئيسية", ru: "КЛЮЧЕВЫЕ ПОКАЗАТЕЛИ",
+  },
+  "card.specifications": {
+    en: "SPECIFICATIONS", pt: "ESPECIFICAÇÕES", es: "ESPECIFICACIONES", fr: "SPÉCIFICATIONS",
+    zh: "规格", ja: "仕様", ko: "사양", hi: "विशिष्टताएं", ar: "المواصفات", ru: "СПЕЦИФИКАЦИИ",
+  },
+  "card.requirements": {
+    en: "REQUIREMENTS", pt: "REQUISITOS", es: "REQUISITOS", fr: "EXIGENCES",
+    zh: "要求", ja: "要件", ko: "요구사항", hi: "आवश्यकताएं", ar: "المتطلبات", ru: "ТРЕБОВАНИЯ",
+  },
+  "card.procedure": {
+    en: "PROCEDURE", pt: "PROCEDIMENTO", es: "PROCEDIMIENTO", fr: "PROCÉDURE",
+    zh: "步骤", ja: "手順", ko: "절차", hi: "प्रक्रिया", ar: "الإجراء", ru: "ПРОЦЕДУРА",
+  },
+  "card.notes_sources": {
+    en: "NOTES & SOURCES", pt: "NOTAS & FONTES", es: "NOTAS Y FUENTES", fr: "NOTES ET SOURCES",
+    zh: "注释与来源", ja: "メモと出典", ko: "메모 및 출처", hi: "टिप्पणी एवं स्रोत", ar: "ملاحظات ومصادر", ru: "ПРИМЕЧАНИЯ И ИСТОЧНИКИ",
+  },
+  "card.blueprint_not_found": {
+    en: "BLUEPRINT NOT FOUND", pt: "BLUEPRINT NÃO ENCONTRADO", es: "PLANO NO ENCONTRADO", fr: "PLAN INTROUVABLE",
+    zh: "未找到蓝图", ja: "ブループリントが見つかりません", ko: "청사진을 찾을 수 없음", hi: "ब्लूप्रिंट नहीं मिला", ar: "المخطط غير موجود", ru: "ЧЕРТЁЖ НЕ НАЙДЕН",
+  },
+  "card.dossier_not_found": {
+    en: "DOSSIER NOT FOUND", pt: "DOSSIÊ NÃO ENCONTRADO", es: "EXPEDIENTE NO ENCONTRADO", fr: "DOSSIER INTROUVABLE",
+    zh: "未找到档案", ja: "件名が見つかりません", ko: "서류를 찾을 수 없음", hi: "दस्तावेज़ नहीं मिला", ar: "الملف غير موجود", ru: "ДОСЬЕ НЕ НАЙДЕНО",
+  },
+  "card.weather_report": {
+    en: "Weather Report", pt: "Boletim Meteorológico", es: "Reporte del Clima", fr: "Bulletin Météorologique",
+    zh: "气象报告", ja: "天気予報", ko: "기상 보고", hi: "मौसम रिपोर्ट", ar: "تقرير الطقس", ru: "Сводка погоды",
+  },
+
+  /* — Equation page — */
+  "card.eq.scenario_timeline": {
+    en: "SCENARIO TIMELINE — 5 PATHS DIVERGE (2025-2034)", pt: "LINHA DO TEMPO DE CENÁRIOS — 5 CAMINHOS DIVERGEM (2025-2034)", es: "LÍNEA DE TIEMPO DE ESCENARIOS — 5 CAMINOS DIVERGEN (2025-2034)", fr: "CHRONOLOGIE DES SCÉNARIOS — 5 VOIES DIVERGENT (2025-2034)",
+    zh: "情景时间线——5条路径分叉（2025-2034）", ja: "シナリオ年表 — 5つの道が分かれる（2025-2034）", ko: "시나리오 연표 — 5개 경로 분기(2025-2034)", hi: "परिदृश्य समयरेखा — 5 रास्ते अलग होते हैं (2025-2034)", ar: "الجدول الزمني للسيناريوهات — 5 مسارات تتباين (2025-2034)", ru: "ХРОНОЛОГИЯ СЦЕНАРИЕВ — 5 ПУТЕЙ РАСХОДЯТСЯ (2025-2034)",
+  },
+  "card.eq.budget_allocation": {
+    en: "BUDGET ALLOCATION — RECOMMENDED SCENARIO ($93B/YR)", pt: "ALOCAÇÃO DE ORÇAMENTO — CENÁRIO RECOMENDADO ($93B/ANO)", es: "ASIGNACIÓN PRESUPUESTARIA — ESCENARIO RECOMENDADO ($93B/AÑO)", fr: "ALLOCATION BUDGÉTAIRE — SCÉNARIO RECOMMANDÉ ($93B/AN)",
+    zh: "预算分配——推荐情景（$93B/年）", ja: "予算配分 — 推奨シナリオ（$93B/年）", ko: "예산 배분 — 권장 시나리오($93B/년)", hi: "बजट आवंटन — अनुशंसित परिदृश्य ($93B/वर्ष)", ar: "تخصيص الميزانية — السيناريو الموصى به (93 مليار $/سنة)", ru: "РАСПРЕДЕЛЕНИЕ БЮДЖЕТА — РЕКОМЕНДОВАННЫЙ СЦЕНАРИЙ ($93 млрд/год)",
+  },
+  "card.eq.financing": {
+    en: "FINANCING MECHANISMS — BUILD YOUR PACKAGE", pt: "MECANISMOS DE FINANCIAMENTO — MONTE SEU PACOTE", es: "MECANISMOS DE FINANCIAMIENTO — ARMA TU PAQUETE", fr: "MÉCANISMES DE FINANCEMENT — COMPOSEZ VOTRE PACK",
+    zh: "融资机制——构建你的方案", ja: "資金調達メカニズム — パッケージを組み立てる", ko: "재원 메커니즘 — 패키지 구성", hi: "वित्तपोषण तंत्र — अपना पैकेज बनाएं", ar: "آليات التمويل — جهّز حزمتك", ru: "МЕХАНИЗМЫ ФИНАНСИРОВАНИЯ — СОБЕРИТЕ СВОЙ ПАКЕТ",
+  },
+  "card.eq.conflict_tactics": {
+    en: "CONFLICT ZONE TACTICS — RANKED BY EFFICACY", pt: "TÁTICAS EM ZONAS DE CONFLITO — RANQUEADAS POR EFICÁCIA", es: "TÁCTICAS EN ZONAS DE CONFLICTO — ORDENADAS POR EFICACIA", fr: "TACTIQUES EN ZONE DE CONFLIT — CLASSÉES PAR EFFICACITÉ",
+    zh: "冲突地区战术——按效果排序", ja: "紛争地帯の戦術 — 有効性順", ko: "분쟁 지역 전술 — 효과 순", hi: "संघर्ष क्षेत्र रणनीतियाँ — प्रभावशीलता क्रम", ar: "تكتيكات مناطق النزاع — مرتبة حسب الفعالية", ru: "ТАКТИКИ В ЗОНАХ КОНФЛИКТА — ПО ЭФФЕКТИВНОСТИ",
+  },
+  "card.eq.implementation": {
+    en: "IMPLEMENTATION TIMELINE", pt: "CRONOGRAMA DE IMPLEMENTAÇÃO", es: "CRONOGRAMA DE IMPLEMENTACIÓN", fr: "CALENDRIER DE MISE EN ŒUVRE",
+    zh: "实施时间表", ja: "実装スケジュール", ko: "실행 일정", hi: "कार्यान्वयन समयरेखा", ar: "الجدول الزمني للتنفيذ", ru: "ГРАФИК ВНЕДРЕНИЯ",
+  },
+
+  /* — Sorrow-map deep dives — */
+  "card.deep.migration": {
+    en: "MIGRATION & DISPLACEMENT // DEEP DIVE", pt: "MIGRAÇÃO & DESLOCAMENTO // ANÁLISE PROFUNDA", es: "MIGRACIÓN Y DESPLAZAMIENTO // ANÁLISIS PROFUNDO", fr: "MIGRATION ET DÉPLACEMENT // ANALYSE APPROFONDIE",
+    zh: "移民与流离失所 // 深度分析", ja: "移住と避難 // 詳細分析", ko: "이주와 실향 // 심층 분석", hi: "प्रवास एवं विस्थापन // गहन विश्लेषण", ar: "الهجرة والنزوح // تحليل معمّق", ru: "МИГРАЦИЯ И ПЕРЕМЕЩЕНИЕ // УГЛУБЛЁННЫЙ АНАЛИЗ",
+  },
+  "card.deep.governance": {
+    en: "GOVERNANCE & CORRUPTION // DEEP DIVE", pt: "GOVERNANÇA & CORRUPÇÃO // ANÁLISE PROFUNDA", es: "GOBERNANZA Y CORRUPCIÓN // ANÁLISIS PROFUNDO", fr: "GOUVERNANCE ET CORRUPTION // ANALYSE APPROFONDIE",
+    zh: "治理与腐败 // 深度分析", ja: "ガバナンスと腐敗 // 詳細分析", ko: "거버넌스와 부패 // 심층 분석", hi: "शासन एवं भ्रष्टाचार // गहन विश्लेषण", ar: "الحوكمة والفساد // تحليل معمّق", ru: "УПРАВЛЕНИЕ И КОРРУПЦИЯ // УГЛУБЛЁННЫЙ АНАЛИЗ",
+  },
+  "card.deep.climate_hunger": {
+    en: "CLIMATE FOOTPRINT vs HUNGER // DEEP DIVE", pt: "PEGADA CLIMÁTICA vs FOME // ANÁLISE PROFUNDA", es: "HUELLA CLIMÁTICA vs HAMBRE // ANÁLISIS PROFUNDO", fr: "EMPREINTE CLIMATIQUE vs FAIM // ANALYSE APPROFONDIE",
+    zh: "气候足迹 vs 饥饿 // 深度分析", ja: "気候フットプリント vs 飢餓 // 詳細分析", ko: "기후 발자국 vs 기아 // 심층 분석", hi: "जलवायु पदचिह्न vs भूख // गहन विश्लेषण", ar: "البصمة المناخية مقابل الجوع // تحليل معمّق", ru: "КЛИМАТИЧЕСКИЙ СЛЕД vs ГОЛОД // УГЛУБЛЁННЫЙ АНАЛИЗ",
+  },
+  "card.deep.military_health": {
+    en: "MILITARY vs HEALTH SPENDING // DEEP DIVE", pt: "GASTOS MILITARES vs SAÚDE // ANÁLISE PROFUNDA", es: "GASTO MILITAR vs SALUD // ANÁLISIS PROFUNDO", fr: "DÉPENSES MILITAIRES vs SANTÉ // ANALYSE APPROFONDIE",
+    zh: "军费 vs 卫生支出 // 深度分析", ja: "軍事費 vs 保健費 // 詳細分析", ko: "군사비 vs 보건비 // 심층 분석", hi: "सैन्य vs स्वास्थ्य खर्च // गहन विश्लेषण", ar: "الإنفاق العسكري مقابل الصحة // تحليل معمّق", ru: "ВОЕННЫЕ vs ЗДРАВООХРАНЕНИЕ // УГЛУБЛЁННЫЙ АНАЛИЗ",
+  },
+  "card.deep.gender_gap": {
+    en: "GENDER GAP // DEEP DIVE", pt: "LACUNA DE GÊNERO // ANÁLISE PROFUNDA", es: "BRECHA DE GÉNERO // ANÁLISIS PROFUNDO", fr: "ÉCART ENTRE LES SEXES // ANALYSE APPROFONDIE",
+    zh: "性别差距 // 深度分析", ja: "ジェンダー格差 // 詳細分析", ko: "성별 격차 // 심층 분석", hi: "लिंग अंतर // गहन विश्लेषण", ar: "الفجوة بين الجنسين // تحليل معمّق", ru: "ГЕНДЕРНЫЙ РАЗРЫВ // УГЛУБЛЁННЫЙ АНАЛИЗ",
+  },
+  "card.deep.sdg_scorecard": {
+    en: "SDG SCORECARD // 6 EQUATIONS", pt: "PAINEL DOS ODS // 6 EQUAÇÕES", es: "PANEL DE LOS ODS // 6 ECUACIONES", fr: "TABLEAU DE BORD ODD // 6 ÉQUATIONS",
+    zh: "SDG 计分卡 // 6 个方程", ja: "SDGスコアカード // 6つの方程式", ko: "SDG 스코어카드 // 6개 방정식", hi: "SDG स्कोरकार्ड // 6 समीकरण", ar: "بطاقة أداء أهداف التنمية // 6 معادلات", ru: "ТАБЛИЦА ЦУР // 6 УРАВНЕНИЙ",
+  },
+
+  /* — Country detail cards — */
+  "card.structural_blockers": {
+    en: "STRUCTURAL BLOCKERS", pt: "BLOQUEIOS ESTRUTURAIS", es: "BLOQUEOS ESTRUCTURALES", fr: "OBSTACLES STRUCTURELS",
+    zh: "结构性障碍", ja: "構造的な障害", ko: "구조적 장애물", hi: "संरचनात्मक बाधाएं", ar: "العوائق الهيكلية", ru: "СТРУКТУРНЫЕ БАРЬЕРЫ",
+  },
+  "card.cross_branch_links": {
+    en: "CROSS-BRANCH LINKS", pt: "LINKS ENTRE RAMOS", es: "ENLACES ENTRE RAMAS", fr: "LIENS INTER-BRANCHES",
+    zh: "跨分支链接", ja: "ブランチ間リンク", ko: "지부 간 링크", hi: "शाखा-अंतर लिंक", ar: "روابط بين الفروع", ru: "МЕЖВЕТВЕВЫЕ ССЫЛКИ",
+  },
+  "card.proof_of_misery": {
+    en: "PROOF OF MISERY // SUBMISSION", pt: "PROVA DA MISÉRIA // ENVIO", es: "PRUEBA DE LA MISERIA // ENVÍO", fr: "PREUVE DE LA MISÈRE // SOUMISSION",
+    zh: "苦难证据 // 提交", ja: "苦境の証明 // 提出", ko: "비참의 증명 // 제출", hi: "दुःख का प्रमाण // प्रस्तुति", ar: "دليل البؤس // إرسال", ru: "ДОКАЗАТЕЛЬСТВО НИЩЕТЫ // ПОДАЧА",
+  },
+
+  /* — Registry dossier cards — */
+  "card.accusation": {
+    en: "ACCUSATION", pt: "ACUSAÇÃO", es: "ACUSACIÓN", fr: "ACCUSATION",
+    zh: "指控", ja: "告発", ko: "고발", hi: "आरोप", ar: "الاتهام", ru: "ОБВИНЕНИЕ",
+  },
+  "card.evidence_chain": {
+    en: "EVIDENCE CHAIN", pt: "CADEIA DE EVIDÊNCIAS", es: "CADENA DE EVIDENCIA", fr: "CHAÎNE DE PREUVES",
+    zh: "证据链", ja: "証拠チェーン", ko: "증거 체인", hi: "साक्ष्य श्रृंखला", ar: "سلسلة الأدلة", ru: "ЦЕПОЧКА УЛИК",
+  },
+  "card.tribunal_peers": {
+    en: "TRIBUNAL DOS PARES — PEER VALIDATION", pt: "TRIBUNAL DOS PARES — VALIDAÇÃO POR PARES", es: "TRIBUNAL DE PARES — VALIDACIÓN DE PARES", fr: "TRIBUNAL DES PAIRS — VALIDATION PAR LES PAIRS",
+    zh: "同行评审庭——同伴验证", ja: "ピア裁判 — ピア検証", ko: "동료 재판소 — 동료 검증", hi: "सहकर्मी न्यायालय — सहकर्मी सत्यापन", ar: "محكمة الأقران — تحقق الأقران", ru: "ТРИБУНАЛ РАВНЫХ — ПРОВЕРКА ОДНОГОДКОВ",
+  },
+  "card.right_of_response": {
+    en: "RIGHT OF RESPONSE", pt: "DIREITO DE RESPOSTA", es: "DERECHO DE RESPUESTA", fr: "DROIT DE RÉPONSE",
+    zh: "回应权", ja: "反論の権利", ko: "반론권", hi: "जवाबी हक़", ar: "حق الرد", ru: "ПРАВО НА ОТВЕТ",
+  },
+  "card.country_data": {
+    en: "COUNTRY DATA REFERENCE", pt: "REFERÊNCIA DE DADOS DO PAÍS", es: "REFERENCIA DE DATOS DEL PAÍS", fr: "RÉFÉRENCE DES DONNÉES DU PAYS",
+    zh: "国家数据参考", ja: "国別データ参照", ko: "국가 데이터 참조", hi: "देश डेटा संदर्भ", ar: "مرجع بيانات البلد", ru: "СПРАВКА ПО ДАННЫМ СТРАНЫ",
+  },
+  "card.source_provenance": {
+    en: "SOURCE PROVENANCE — LEGAL CHAIN OF CUSTODY", pt: "PROCEDÊNCIA DA FONTE — CADEIA DE CUSTÓDIA LEGAL", es: "PROCEDENCIA DE LA FUENTE — CADENA DE CUSTODIA LEGAL", fr: "PROVENANCE DE LA SOURCE — CHAÎNE DE GARDE LÉGALE",
+    zh: "来源溯源——法律监管链", ja: "ソースの出所 — 法的証拠保管連鎖", ko: "출처 추적 — 법적 증거 보존 사슬", hi: "स्रोत उद्गम — विधिक हिरासत श्रृंखला", ar: "مصدر المنشأ — سلسلة الحفظ القانونية", ru: "ПРОИСХОЖДЕНИЕ ИСТОЧНИКА — ЮРИДИЧЕСКАЯ ЦЕПЬ СОХРАНЕНИЯ",
+  },
+  "card.accountability_actions": {
+    en: "ACCOUNTABILITY ACTIONS", pt: "AÇÕES DE RESPONSABILIZAÇÃO", es: "ACCIONES DE RENDICIÓN DE CUENTAS", fr: "ACTIONS DE REDDITION DE COMPTES",
+    zh: "问责行动", ja: "責任追及アクション", ko: "책임 추궁 조치", hi: "जवाबदेही कार्रवाइयां", ar: "إجراءات المساءلة", ru: "МЕРЫ ПОДОТЧЁТНОСТИ",
+  },
+  "card.version_history": {
+    en: "VERSION HISTORY", pt: "HISTÓRICO DE VERSÕES", es: "HISTORIAL DE VERSIONES", fr: "HISTORIQUE DES VERSIONS",
+    zh: "版本历史", ja: "バージョン履歴", ko: "버전 기록", hi: "संस्करण इतिहास", ar: "سجل الإصدارات", ru: "ИСТОРИЯ ВЕРСИЙ",
+  },
+
+  /* — The Web page — */
+  "card.web.p2p_manual": {
+    en: "P2P LINK — MANUAL SIGNALING (NO SERVER)", pt: "LINK P2P — SINALIZAÇÃO MANUAL (SEM SERVIDOR)", es: "ENLACE P2P — SEÑALIZACIÓN MANUAL (SIN SERVIDOR)", fr: "LIEN P2P — SIGNALISATION MANUELLE (SANS SERVEUR)",
+    zh: "P2P 链接——手动信令（无服务器）", ja: "P2Pリンク — 手動シグナリング（サーバーなし）", ko: "P2P 링크 — 수동 시그널링(서버 없음)", hi: "P2P लिंक — मैनुअल सिग्नलिंग (कोई सर्वर नहीं)", ar: "اتصال P2P — إشارة يدوية (بدون خادم)", ru: "P2P-СВЯЗЬ — РУЧНАЯ СИГНАЛИЗАЦИЯ (БЕЗ СЕРВЕРА)",
+  },
+
+  /* — The Trail page — */
+  "card.trail.create_entry": {
+    en: "CREATE LEDGER ENTRY", pt: "CRIAR ENTRADA NO LIVRO-RAZÃO", es: "CREAR ENTRADA DE LIBRO MAYOR", fr: "CRÉER UNE ENTRÉE DE REGISTRE",
+    zh: "创建账本条目", ja: "台帳エントリーを作成", ko: "원장 항목 생성", hi: "बही प्रविष्टि बनाएं", ar: "إنشاء إدخال في السجل", ru: "СОЗДАТЬ ЗАПИСЬ ЖУРНАЛА",
+  },
+  "card.trail.chain_integrity": {
+    en: "CHAIN INTEGRITY — TAMPER-EVIDENT HASH VERIFICATION", pt: "INTEGRIDADE DA CADEIA — VERIFICAÇÃO DE HASH À PROVA DE ADULTERAÇÃO", es: "INTEGRIDAD DE LA CADENA — VERIFICACIÓN DE HASH A PRUEBA DE MANIPULACIÓN", fr: "INTÉGRITÉ DE LA CHAÎNE — VÉRIFICATION DE HASH ANTI-FALSIFICATION",
+    zh: "链完整性——防篡改哈希验证", ja: "チェーンの完全性 — 改ざん検知ハッシュ検証", ko: "체인 무결성 — 변조 감지 해시 검증", hi: "चेन अखंडता — छेड़छाड़-प्रतिरोधी हैश सत्यापन", ar: "سلامة السلسلة — تحقق تجزئة مقاوم للعبث", ru: "ЦЕЛОСТНОСТЬ ЦЕПИ — ПРОВЕРКА ХЭША С ЗАЩИТОЙ ОТ ПОДДЕЛКИ",
+  },
+  "card.trail.priority_routing": {
+    en: "PRIORITY ROUTING — HIGHEST-NEED ZONES", pt: "ROTEAMENTO PRIORITÁRIO — ZONAS DE MAIOR NECESSIDADE", es: "ENRUTAMIENTO PRIORITARIO — ZONAS DE MAYOR NECESIDAD", fr: "ROUTAGE PRIORITAIRE — ZONES AUX BESOINS LES PLUS ÉLEVÉS",
+    zh: "优先路由——最高需求区域", ja: "優先ルーティング — 最優先ゾーン", ko: "우선 라우팅 — 최고 필요 지역", hi: "प्राथमिकता रूटिंग — उच्चतम-आवश्यकता क्षेत्र", ar: "التوجيه ذو الأولوية — المناطق الأكثر احتياجاً", ru: "ПРИОРИТЕТНАЯ МАРШРУТИЗАЦИЯ — ЗОНЫ НАИВЫСШЕЙ ПОТРЕБНОСТИ",
+  },
+
+  /* — Fortress page — */
+  "card.fortress.decentralized_hosting": {
+    en: "DECENTRALIZED HOSTING", pt: "HOSPEDAGEM DESCENTRALIZADA", es: "ALOJAMIENTO DESCENTRALIZADO", fr: "HÉBERGEMENT DÉCENTRALISÉ",
+    zh: "去中心化托管", ja: "分散型ホスティング", ko: "분산 호스팅", hi: "विकेंद्रीकृत होस्टिंग", ar: "استضافة لامركزية", ru: "ДЕЦЕНТРАЛИЗОВАННЫЙ ХОСТИНГ",
+  },
+  "card.fortress.anti_censorship": {
+    en: "ANTI-CENSORSHIP TOOLKIT", pt: "KIT ANTICENSURA", es: "KIT ANTICENSURA", fr: "KIT ANTI-CENSURE",
+    zh: "反审查工具包", ja: "検閲回避ツールキット", ko: "검열 방지 키트", hi: "सेंसर-रोधी टूलकिट", ar: "حزمة مكافحة الرقابة", ru: "ИНСТРУМЕНТАРИЙ ПРОТИВ ЦЕНЗУРЫ",
+  },
+  "card.fortress.build_from_source": {
+    en: "BUILD FROM SOURCE — VERIFY INTEGRITY", pt: "COMPILAR A PARTIR DO FONTE — VERIFICAR INTEGRIDADE", es: "COMPILAR DESDE EL CÓDIGO — VERIFICAR INTEGRIDAD", fr: "COMPILER DEPUIS LA SOURCE — VÉRIFIER L'INTÉGRITÉ",
+    zh: "从源码构建——验证完整性", ja: "ソースからビルド — 完全性を検証", ko: "소스에서 빌드 — 무결성 검증", hi: "स्रोत से बिल्ड करें — अखंडता सत्यापित करें", ar: "البناء من المصدر — تحقق السلامة", ru: "СОБРАТЬ ИЗ ИСХОДНИКОВ — ПРОВЕРИТЬ ЦЕЛОСТНОСТЬ",
+  },
+
+  /* — The Mask page — */
+  "card.mask.zk_identity": {
+    en: "ZK IDENTITY SYSTEM — HASH-COMMITMENT PROOFS", pt: "SISTEMA DE IDENTIDADE ZK — PROVAS DE HASH-COMPROMISSO", es: "SISTEMA DE IDENTIDAD ZK — PRUEBAS DE COMPROMISO HASH", fr: "SYSTÈME D'IDENTITÉ ZK — PREUVES D'ENGAGEMENT PAR HASH",
+    zh: "ZK 身份系统——哈希承诺证明", ja: "ZKアイデンティティシステム — ハッシュコミットメント証明", ko: "ZK 신원 시스템 — 해시 커밋 증명", hi: "ZK पहचान प्रणाली — हैश-प्रतिबद्ध प्रमाण", ar: "نظام الهوية ZK — إثباتات الالتزام بالتجزئة", ru: "СИСТЕМА ZK-ИДЕНТИФИКАЦИИ — ДОКАЗАТЕЛЬСТВА ХЭШ-ОБЯЗАТЕЛЬСТВА",
+  },
+
+  /* — The Archive page — */
+  "card.archive.hotspot_scoring": {
+    en: "HOTSPOT SCORING", pt: "PONTUAÇÃO DE HOTSPOTS", es: "PUNTUACIÓN DE ZONAS CRÍTICAS", fr: "SCORE DES POINTS CHAUDS",
+    zh: "热点评分", ja: "ホットスポット採点", ko: "핫스팟 점수", hi: "हॉटस्पॉट स्कोरिंग", ar: "تقييم النقاط الساخنة", ru: "ОЦЕНКА ГОРЯЧИХ ТОЧЕК",
+  },
+  "card.archive.scenario_modeling": {
+    en: "SCENARIO MODELING", pt: "MODELAGEM DE CENÁRIOS", es: "MODELADO DE ESCENARIOS", fr: "MODÉLISATION DE SCÉNARIOS",
+    zh: "情景建模", ja: "シナリオモデリング", ko: "시나리오 모델링", hi: "परिदृश्य मॉडलिंग", ar: "نمذجة السيناريوهات", ru: "МОДЕЛИРОВАНИЕ СЦЕНАРИЕВ",
+  },
+  "card.archive.governance_scales": {
+    en: "GOVERNANCE SCALES", pt: "ESCALAS DE GOVERNANÇA", es: "ESCALAS DE GOBERNANZA", fr: "ÉCHELLES DE GOUVERNANCE",
+    zh: "治理规模", ja: "ガバナンスの規模", ko: "거버넌스 규모", hi: "शासन पैमाने", ar: "مقاييس الحوكمة", ru: "ШКАЛЫ УПРАВЛЕНИЯ",
+  },
+  "card.archive.open_license": {
+    en: "OPEN DATA LICENSE", pt: "LICENÇA DE DADOS ABERTOS", es: "LICENCIA DE DATOS ABIERTOS", fr: "LICENCE DE DONNÉES OUVERTES",
+    zh: "开放数据许可证", ja: "オープンデータライセンス", ko: "오픈 데이터 라이선스", hi: "खुला डेटा लाइसेंस", ar: "رخصة البيانات المفتوحة", ru: "ЛИЦЕНЗИЯ ОТКРЫТЫХ ДАННЫХ",
+  },
+  "card.archive.json_api": {
+    en: "JSON API — READ-ONLY, CC0", pt: "API JSON — SOMENTE LEITURA, CC0", es: "API JSON — SOLO LECTURA, CC0", fr: "API JSON — LECTURE SEULE, CC0",
+    zh: "JSON API——只读，CC0", ja: "JSON API — 読み取り専用、CC0", ko: "JSON API — 읽기 전용, CC0", hi: "JSON API — केवल-पठन, CC0", ar: "واجهة JSON — للقراءة فقط، CC0", ru: "JSON API — ТОЛЬКО ЧТЕНИЕ, CC0",
+  },
+
+  /* — The Act page — */
+  "card.act.whatsapp": {
+    en: "💬 WHATSAPP / TELEGRAM MESSAGE", pt: "💬 MENSAGEM WHATSAPP / TELEGRAM", es: "💬 MENSAJE DE WHATSAPP / TELEGRAM", fr: "💬 MESSAGE WHATSAPP / TELEGRAM",
+    zh: "💬 WHATSAPP / TELEGRAM 消息", ja: "💬 WHATSAPP / TELEGRAM メッセージ", ko: "💬 WHATSAPP / TELEGRAM 메시지", hi: "💬 WHATSAPP / TELEGRAM संदेश", ar: "💬 رسالة WHATSAPP / TELEGRAM", ru: "💬 СООБЩЕНИЕ WHATSAPP / TELEGRAM",
+  },
+  "card.act.instagram": {
+    en: "📸 INSTAGRAM / FACEBOOK CAPTION", pt: "📸 LEGENDA INSTAGRAM / FACEBOOK", es: "📸 PIE DE FOTO INSTAGRAM / FACEBOOK", fr: "📸 LÉGENDE INSTAGRAM / FACEBOOK",
+    zh: "📸 INSTAGRAM / FACEBOOK 配文", ja: "📸 INSTAGRAM / FACEBOOK キャプション", ko: "📸 INSTAGRAM / FACEBOOK 캡션", hi: "📸 INSTAGRAM / FACEBOOK कैप्शन", ar: "📸 تعليق INSTAGRAM / FACEBOOK", ru: "📸 ПОДПИСЬ INSTAGRAM / FACEBOOK",
+  },
+  "card.act.email": {
+    en: "✉ EMAIL TO REPRESENTATIVE", pt: "✉ E-MAIL PARA REPRESENTANTE", es: "✉ CORREO AL REPRESENTANTE", fr: "✉ E-MAIL AU REPRÉSENTANT",
+    zh: "✉ 致代表的邮件", ja: "✉ 議員へのEメール", ko: "✉ 대표자에게 이메일", hi: "✉ प्रतिनिधि को ईमेल", ar: "✉ بريد إلكتروني للممثل", ru: "✉ ПИСЬМО ПРЕДСТАВИТЕЛЮ",
+  },
+  "card.act.awaiting_input": {
+    en: "AWAITING INPUT", pt: "AGUARDANDO ENTRADA", es: "ESPERANDO ENTRADA", fr: "EN ATTENTE D'ENTRÉE",
+    zh: "等待输入", ja: "入力待ち", ko: "입력 대기 중", hi: "इनपुट की प्रतीक्षा", ar: "في انتظار الإدخال", ru: "ОЖИДАНИЕ ВВОДА",
+  },
+
+  /* — The Index page — */
+  "card.index.select_countries": {
+    en: "SELECT COUNTRIES (MAX 4)", pt: "SELECIONE PAÍSES (MÁX. 4)", es: "SELECCIONA PAÍSES (MÁX. 4)", fr: "SÉLECTIONNEZ LES PAYS (MAX 4)",
+    zh: "选择国家（最多4个）", ja: "国を選択（最大4）", ko: "국가 선택(최대 4)", hi: "देश चुनें (अधिकतम 4)", ar: "اختر الدول (بحد أقصى 4)", ru: "ВЫБЕРИТЕ СТРАНЫ (МАКС. 4)",
+  },
+  "card.index.radar": {
+    en: "CRISIS PROFILE RADAR — DOMAIN VULNERABILITY", pt: "RADAR DE PERFIL DE CRISE — VULNERABILIDADE POR DOMÍNIO", es: "RADAR DE PERFIL DE CRISIS — VULNERABILIDAD POR DOMINIO", fr: "RADAR DU PROFIL DE CRISE — VULNÉRABILITÉ PAR DOMAINE",
+    zh: "危机画像雷达——领域脆弱性", ja: "危機プロファイルレーダー — ドメイン別脆弱性", ko: "위기 프로필 레이더 — 영역별 취약성", hi: "संकट प्रोफ़ाइल रडार — डोमेन भेद्यता", ar: "رادار ملف الأزمة — هشاشة المجال", ru: "РАДАР ПРОФИЛЯ КРИЗИСА — УЯЗВИМОСТЬ ПО ДОМЕНАМ",
+  },
+  "card.index.regional": {
+    en: "REGIONAL AGGREGATION — POPULATION-WEIGHTED", pt: "AGREGAÇÃO REGIONAL — PONDERADA POR POPULAÇÃO", es: "AGREGACIÓN REGIONAL — PONDERADA POR POBLACIÓN", fr: "AGRÉGATION RÉGIONALE — PONDÉRÉE PAR POPULATION",
+    zh: "区域汇总——按人口加权", ja: "地域集計 — 人口加重平均", ko: "지역 집계 — 인구 가중", hi: "क्षेत्रीय समुच्चय — जनसंख्या-भारित", ar: "التجميع الإقليمي — مرجّح بالسكان", ru: "РЕГИОНАЛЬНАЯ АГРЕГАЦИЯ — С ВЕСАМИ ПО НАСЕЛЕНИЮ",
+  },
+
+  /* — The Stories page — */
+  "card.stories.crisis_timelines": {
+    en: "CRISIS TIMELINES — HOW WE GOT HERE", pt: "LINHAS DO TEMPO DE CRISES — COMO CHEGAMOS AQUI", es: "LÍNEAS DE TIEMPO DE CRISIS — CÓMO LLEGAMOS AQUÍ", fr: "CHRONOLOGIES DES CRISES — COMMENT NOUS EN SOMMES LÀ",
+    zh: "危机时间线——我们是如何走到这一步的", ja: "危機の年表 — どうやってここに至ったか", ko: "위기 연표 — 어떻게 여기까지 왔나", hi: "संकट समयरेखाएं — हम यहाँ कैसे पहुँचे", ar: "جداول الأزمات الزمنية — كيف وصلنا إلى هنا", ru: "ХРОНОЛОГИИ КРИЗИСОВ — КАК МЫ СЮДА ПОПАЛИ",
+  },
+
+  /* — The Allocator page — */
+  "card.allocator.allocate": {
+    en: "ALLOCATE THE BUDGET", pt: "ALOCAR O ORÇAMENTO", es: "ASIGNAR EL PRESUPUESTO", fr: "ALLOUER LE BUDGET",
+    zh: "分配预算", ja: "予算を配分", ko: "예산 배분", hi: "बजट आवंटित करें", ar: "خصّص الميزانية", ru: "РАСПРЕДЕЛИТЬ БЮДЖЕТ",
+  },
+  "card.allocator.funding": {
+    en: "FUNDING BREAKDOWN", pt: "DETALHAMENTO DE FINANCIAMENTO", es: "DESGLOSE DE FINANCIAMIENTO", fr: "DÉTAIL DU FINANCEMENT",
+    zh: "资金明细", ja: "資金の内訳", ko: "자금 내역", hi: "वित्तपोषण विवरण", ar: "تفصيل التمويل", ru: "СТРУКТУРА ФИНАНСИРОВАНИЯ",
+  },
+
+  /* — The Tactics page — */
+  "card.tactics.casualties": {
+    en: "CASUALTIES vs SUCCESS // THE MORAL CALCULUS", pt: "BAIXAS vs SUCESSO // O CÁLCULO MORAL", es: "BAJAS vs ÉXITO // EL CÁLCULO MORAL", fr: "VICTIMES vs SUCCÈS // LE CALCUL MORAL",
+    zh: "伤亡 vs 成功 // 道德计算", ja: "死傷者 vs 成功 // 道徳的計算", ko: "사상자 vs 성공 // 도덕적 계산", hi: "हताहत vs सफलता // नैतिक गणना", ar: "الخسائر مقابل النجاح // الحساب الأخلاقي", ru: "ПОТЕРИ vs УСПЕХ // МОРАЛЬНЫЙ РАСЧЁТ",
+  },
+
+  /* — The Matrix page — */
+  "card.matrix.completeness": {
+    en: "COUNTRY COMPLETENESS // WHERE THE GAPS ARE", pt: "COMPLETUDE POR PAÍS // ONDE ESTÃO AS LACUNAS", es: "COMPLETITUD POR PAÍS // DÓNDE ESTÁN LOS VACÍOS", fr: "COMPLÉTUDE PAR PAYS // OÙ SONT LES LACUNES",
+    zh: "国家完整度 // 哪里有缺口", ja: "国別の完全性 // どこに欠損があるか", ko: "국가별 완전성 // 어디에 공백이 있는가", hi: "देश पूर्णता // कमियाँ कहाँ हैं", ar: "اكتمال بيانات الدول // أين الفجوات", ru: "ПОЛНОТА ПО СТРАНАМ // ГДЕ ПРОБЕЛЫ",
+  },
+  "card.matrix.sources": {
+    en: "SOURCES & METHODOLOGY", pt: "FONTES & METODOLOGIA", es: "FUENTES Y METODOLOGÍA", fr: "SOURCES ET MÉTHODOLOGIE",
+    zh: "来源与方法论", ja: "出典と手法", ko: "출처 및 방법론", hi: "स्रोत एवं कार्यप्रणाली", ar: "المصادر والمنهجية", ru: "ИСТОЧНИКИ И МЕТОДОЛОГИЯ",
+  },
+
+  /* — The Choice page — */
+  "card.choice.ranking": {
+    en: "THE RANKING // MORAL CALCULUS PER COUNTRY", pt: "O RANKING // CÁLCULO MORAL POR PAÍS", es: "EL RANKING // CÁLCULO MORAL POR PAÍS", fr: "LE CLASSEMENT // CALCUL MORAL PAR PAYS",
+    zh: "排名 // 各国道德计算", ja: "ランキング // 国別の道徳的計算", ko: "순위 // 국가별 도덕적 계산", hi: "रैंकिंग // देश-वार नैतिक गणना", ar: "الترتيب // الحساب الأخلاقي لكل دولة", ru: "РЕЙТИНГ // МОРАЛЬНЫЙ РАСЧЁТ ПО СТРАНАМ",
+  },
+
+  /* — The Timeline page — */
+  "card.timeline.hunger_10yr": {
+    en: "HUNGER OVER 10 YEARS // MILLIONS UNDERNOURISHED", pt: "FOME EM 10 ANOS // MILHÕES SUBNUTRIDOS", es: "HAMBRE EN 10 AÑOS // MILLONES SUBALIMENTADOS", fr: "FAIM SUR 10 ANS // MILLIONS SOUS-NOURRIS",
+    zh: "10年饥饿 // 数百万营养不良", ja: "10年間の飢餓 // 数百万の低栄養", ko: "10년간의 기아 // 수백만 명 영양부족", hi: "10 वर्षों में भूख // लाखों कुपोषित", ar: "الجوع على مدى 10 سنوات // ملايين يعانون سوء التغذية", ru: "ГОЛОД ЗА 10 ЛЕТ // МИЛЛИОНЫ ГОЛОДАЮЩИХ",
+  },
+  "card.timeline.lives_saved": {
+    en: "LIVES SAVED // CUMULATIVE DEATHS AVOIDED", pt: "VIDAS SALVAS // MORTES EVITADAS (ACUMULADO)", es: "VIDAS SALVADAS // MUERTES EVITADAS (ACUMULADO)", fr: "VIES SAUVÉES // DÉCÈS ÉVITÉS (CUMULÉS)",
+    zh: "挽救生命 // 累计避免死亡", ja: "救われた命 // 累計回避された死亡", ko: "구조된 생명 // 누적 방지 사망", hi: "बचाए गए जीवन // संचयी रोकी गई मौतें", ar: "أرواح نُجدت // وفيات متفادية تراكمياً", ru: "СПАСЁННЫЕ ЖИЗНИ // ПРЕДОТВРАЩЁННЫЕ СМЕРТИ (НАКОПИТЕЛЬНО)",
+  },
+  "card.timeline.regional": {
+    en: "REGIONAL IMPACT // WHO GETS FED", pt: "IMPACTO REGIONAL // QUEM É ALIMENTADO", es: "IMPACTO REGIONAL // QUIÉN ES ALIMENTADO", fr: "IMPACT RÉGIONAL // QUI EST NOURRI",
+    zh: "区域影响 // 谁得到粮食", ja: "地域的影響 // 誰が食を得るか", ko: "지역적 영향 // 누가 먹는가", hi: "क्षेत्रीय प्रभाव // किसे भोजन मिलता है", ar: "الأثر الإقليمي // من يحصل على الطعام", ru: "РЕГИОНАЛЬНОЕ ВЛИЯНИЕ // КТО КОРМИТСЯ",
+  },
+  "card.timeline.roi": {
+    en: "INTERVENTION ROI // WHERE EVERY DOLLAR GOES", pt: "ROI DA INTERVENÇÃO // PARA ONDE VAI CADA DÓLAR", es: "ROI DE LA INTERVENCIÓN // A DÓNDE VA CADA DÓLAR", fr: "ROI DE L'INTERVENTION // OÙ VA CHAQUE DOLLAR",
+    zh: "干预投资回报 // 每一美元去哪了", ja: "介入のROI // 1ドルがどこへ行くか", ko: "개입의 ROI // 달러가 어디로 가는가", hi: "हस्तक्षेप ROI // हर डॉलर कहाँ जाता है", ar: "عائد التدخل // أين يذهب كل دولار", ru: "ROI ВМЕШАТЕЛЬСТВА // КУДА ИДЁТ КАЖДЫЙ ДОЛЛАР",
+  },
+  "card.timeline.scrubber": {
+    en: "TIMELINE SCRUBBER // EXPLORE ANY YEAR", pt: "CONTROLE DE LINHA DO TEMPO // EXPLORE QUALQUER ANO", es: "EXPLORADOR DE LÍNEA DE TIEMPO // EXPLORA CUALQUIER AÑO", fr: "NAVIGATEUR TEMPOREL // EXPLOREZ CHAQUE ANNÉE",
+    zh: "时间线拖动器 // 探索任意年份", ja: "タイムラインスクラバー // 任意の年を探索", ko: "연표 스크러버 // 어떤 연도든 탐색", hi: "समयरेखा स्क्रबर // कोई भी वर्ष खोजें", ar: "متحكم الجدول الزمني // استكشف أي سنة", ru: "ПРОКРУТКА ХРОНОЛОГИИ // ИЗУЧИТЕ ЛЮБОЙ ГОД",
+  },
+
+  /* — The API page — */
+  "card.api.live_query": {
+    en: "LIVE QUERY // FETCH ANY COUNTRY", pt: "CONSULTA AO VIVO // OBTENHA QUALQUER PAÍS", es: "CONSULTA EN VIVO // OBTÉN CUALQUIER PAÍS", fr: "REQUÊTE EN DIRECT // RÉCUPÉREZ N'IMPORTE QUEL PAYS",
+    zh: "实时查询 // 获取任意国家", ja: "ライブクエリ // 任意の国を取得", ko: "실시간 쿼리 // 어떤 국가든 가져오기", hi: "लाइव क्वेरी // कोई भी देश प्राप्त करें", ar: "استعلام مباشر // اجلب أي دولة", ru: "ЖИВОЙ ЗАПРОС // ПОЛУЧИТЕ ЛЮБУЮ СТРАНУ",
+  },
+  "card.api.code_samples": {
+    en: "CODE SAMPLES // USE THE DATA", pt: "EXEMPLOS DE CÓDIGO // USE OS DADOS", es: "EJEMPLOS DE CÓDIGO // USA LOS DATOS", fr: "EXEMPLES DE CODE // UTILISEZ LES DONNÉES",
+    zh: "代码示例 // 使用数据", ja: "コードサンプル // データを使う", ko: "코드 예시 // 데이터 활용", hi: "कोड नमूने // डेटा का उपयोग करें", ar: "نماذج الكود // استخدم البيانات", ru: "ПРИМЕРЫ КОДА // ИСПОЛЬЗУЙТЕ ДАННЫЕ",
+  },
+  "card.api.data_schema": {
+    en: "DATA SCHEMA // 23 DIMENSIONS", pt: "ESQUEMA DE DADOS // 23 DIMENSÕES", es: "ESQUEMA DE DATOS // 23 DIMENSIONES", fr: "SCHÉMA DE DONNÉES // 23 DIMENSIONS",
+    zh: "数据架构 // 23 个维度", ja: "データスキーマ // 23の次元", ko: "데이터 스키마 // 23개 차원", hi: "डेटा स्कीमा // 23 आयाम", ar: "مخطط البيانات // 23 بُعداً", ru: "СХЕМА ДАННЫХ // 23 ИЗМЕРЕНИЯ",
+  },
+  "card.api.license": {
+    en: "LICENSE // NO RIGHTS RESERVED", pt: "LICENÇA // SEM DIREITOS RESERVADOS", es: "LICENCIA // SIN DERECHOS RESERVADOS", fr: "LICENCE // SANS DROITS RÉSERVÉS",
+    zh: "许可证 // 无保留权利", ja: "ライセンス // 権利留保なし", ko: "라이선스 // 모든 권리 보유 안 함", hi: "लाइसेंस // कोई अधिकार सुरक्षित नहीं", ar: "الرخصة // لا حقوق محفوظة", ru: "ЛИЦЕНЗИЯ // БЕЗ ОГРАНИЧЕНИЯ ПРАВ",
+  },
+
+  /* — The Ledger page — */
+  "card.ledger.where_money": {
+    en: "WHERE THE $93B GOES // RECOMMENDED ALLOCATION", pt: "PARA ONDE VÃO OS $93B // ALOCAÇÃO RECOMENDADA", es: "A DÓNDE VAN LOS $93B // ASIGNACIÓN RECOMENDADA", fr: "OÙ VONT LES $93B // ALLOCATION RECOMMANDÉE",
+    zh: "$93B 去向 // 推荐分配", ja: "$93Bの行方 // 推奨配分", ko: "$93B의 행방 // 권장 배분", hi: "$93B कहाँ जाता है // अनुशंसित आवंटन", ar: "أين يذهب الـ93 مليار $ // التخصيص الموصى به", ru: "КУДА ИДУТ $93 млрд // РЕКОМЕНДОВАННОЕ РАСПРЕДЕЛЕНИЕ",
+  },
+  "card.ledger.roadmap": {
+    en: "THE 10-YEAR ROADMAP // END HUNGER BY 2034", pt: "O PLANO DE 10 ANOS // FIM DA FOME ATÉ 2034", es: "LA HOJA DE RUTA DE 10 AÑOS // FIN DEL HAMBRE PARA 2034", fr: "LA FEUILLE DE ROUTE SUR 10 ANS // FAIM ZÉRO EN 2034",
+    zh: "10年路线图 // 到2034年终结饥饿", ja: "10年間のロードマップ // 2034年までに飢餓を終わらせる", ko: "10년 로드맵 // 2034년까지 기아 종식", hi: "10-वर्षीय रोडमैप // 2034 तक भूख समाप्त", ar: "خريطة الطريق لعشر سنوات // إنهاء الجوع بحلول 2034", ru: "10-ЛЕТНИЙ ПЛАН // ПОКОНЧИТЬ С ГОЛОДОМ К 2034 ГОДУ",
+  },
+
+  /* — The Dashboard page — */
+  "card.dashboard.contrasts": {
+    en: "EXTREME CONTRASTS // THE INEQUALITY OF EXISTENCE", pt: "CONTRASTES EXTREMOS // A DESIGUALDADE DA EXISTÊNCIA", es: "CONTRASTES EXTREMOS // LA DESIGUALDAD DE LA EXISTENCIA", fr: "CONTRASTES EXTRÊMES // L'INÉGALITÉ DE L'EXISTENCE",
+    zh: "极端对比 // 生存的不平等", ja: "極端な対比 // 存在の不平等", ko: "극단적 대비 // 존재의 불평등", hi: "चरम विरोधाभास // अस्तित्व की असमानता", ar: "التباينات المتطرفة // عدم مساواة الوجود", ru: "КРАЙНИЕ КОНТРАСТЫ // НЕРАВЕНСТВО СУЩЕСТВОВАНИЯ",
+  },
+  "card.dashboard.cost": {
+    en: "THE COST // AFFORDABILITY", pt: "O CUSTO // ACESSIBILIDADE", es: "EL COSTO // ASEQUIBILIDAD", fr: "LE COÛT // ABORDABILITÉ",
+    zh: "成本 // 可负担性", ja: "コスト // 手頃さ", ko: "비용 // 감당 가능성", hi: "लागत // वहनीयता", ar: "التكلفة // القدرة على التحمل", ru: "ЦЕНА // ДОСТУПНОСТЬ",
+  },
+  "card.dashboard.explore": {
+    en: "EXPLORE THE DATA", pt: "EXPLORAR OS DADOS", es: "EXPLORA LOS DATOS", fr: "EXPLOREZ LES DONNÉES",
+    zh: "探索数据", ja: "データを探る", ko: "데이터 탐색", hi: "डेटा खोजें", ar: "استكشف البيانات", ru: "ИЗУЧИТЕ ДАННЫЕ",
+  },
+
+  /* — Home page — */
+  "card.home.the_number": {
+    en: "THE NUMBER", pt: "O NÚMERO", es: "EL NÚMERO", fr: "LE NOMBRE",
+    zh: "这个数字", ja: "その数字", ko: "그 숫자", hi: "वह संख्या", ar: "الرقم", ru: "ЧИСЛО",
+  },
+  "card.home.worst_crises": {
+    en: "TODAY'S 3 WORST CRISES", pt: "AS 3 PIORES CRISES DE HOJE", es: "LAS 3 PEORES CRISIS DE HOY", fr: "LES 3 PIRE CRISES DU JOUR",
+    zh: "今日3大最严重危机", ja: "今日の3つの最悪の危機", ko: "오늘의 3대 최악의 위기", hi: "आज के 3 सबसे भयंकर संकट", ar: "أسوأ 3 أزمات اليوم", ru: "3 ХУДШИХ КРИЗИСА СЕГОДНЯ",
+  },
+  "card.home.shareable": {
+    en: "SHAREABLE AMMUNITION", pt: "MUNIÇÃO COMPARTILHÁVEL", es: "MUNICIÓN PARA COMPARTIR", fr: "MUNITIONS PARTAGEABLES",
+    zh: "可分享的弹药", ja: "シェア可能な弾薬", ko: "공유 가능한 탄약", hi: "साझा करने योग्य गोला-बारूद", ar: "ذخيرة قابلة للمشاركة", ru: "БОЕПРИПАСЫ ДЛЯ ШЕРИНГА",
+  },
 };
 
 /**

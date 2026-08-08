@@ -7,6 +7,8 @@ import TerminalCard from "@/components/ui/TerminalCard";
 import StatusPill from "@/components/ui/StatusPill";
 import DataBar from "@/components/ui/DataBar";
 import { sound } from "@/lib/sound";
+import { useStore } from "@/stores/useStore";
+import { tc } from "@/lib/i18n-content";
 
 interface Dossier {
   id: string;
@@ -69,12 +71,13 @@ export default function DossierContent({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+  const { lang } = useStore();
   const d = dossiers.find((x) => x.id === id);
 
   if (!d) {
     return (
       <div className="p-3 sm:p-3 sm:p-6 md:p-10 max-w-3xl mx-auto text-center">
-        <h1 className="text-2xl text-blood mb-4">DOSSIER NOT FOUND</h1>
+        <h1 className="text-2xl text-blood mb-4">{tc(lang, "card.dossier_not_found")}</h1>
         <Link href="/registry/" className="text-blood-bright hover:underline">
           ← Back to Registry
         </Link>
@@ -121,7 +124,7 @@ export default function DossierContent({
       </div>
 
       {/* Accusation */}
-      <TerminalCard title="ACCUSATION" className="mb-6">
+      <TerminalCard title={tc(lang, "card.accusation")} className="mb-6">
         <p className="text-sm text-content-primary">{d.accusation}</p>
         <div className="text-xs text-content-dim mt-3">
           Category: {d.category.replace(/_/g, " ").toUpperCase()} · Country:{" "}
@@ -135,7 +138,7 @@ export default function DossierContent({
       </TerminalCard>
 
       {/* Evidence chain */}
-      <TerminalCard title="EVIDENCE CHAIN" className="mb-6">
+      <TerminalCard title={tc(lang, "card.evidence_chain")} className="mb-6">
         <div className="mb-3">
           <DataBar
             value={d.evidence_quality_score}
@@ -183,7 +186,7 @@ export default function DossierContent({
       </TerminalCard>
 
       {/* Tribunal status */}
-      <TerminalCard title="TRIBUNAL DOS PARES — PEER VALIDATION" accent="green" className="mb-6">
+      <TerminalCard title={tc(lang, "card.tribunal_peers")} accent="green" className="mb-6">
         <DataBar
           value={d.peer_validations}
           max={d.required_validations * 3}
@@ -196,12 +199,12 @@ export default function DossierContent({
       </TerminalCard>
 
       {/* Right of response */}
-      <TerminalCard title="RIGHT OF RESPONSE" accent="amber" className="mb-6">
+      <TerminalCard title={tc(lang, "card.right_of_response")} accent="amber" className="mb-6">
         <p className="text-xs text-content-secondary">{d.right_of_response}</p>
       </TerminalCard>
 
       {/* Country data reference */}
-      <TerminalCard title="COUNTRY DATA REFERENCE" className="mb-6">
+      <TerminalCard title={tc(lang, "card.country_data")} className="mb-6">
         <p className="text-xs text-content-primary">{d.country_data_ref}</p>
         <Link
           href={`/sorrow-map/${d.country_iso3.toLowerCase()}/`}
@@ -213,7 +216,7 @@ export default function DossierContent({
 
       {/* Source provenance */}
       {d.source_provenance && (
-        <TerminalCard title="SOURCE PROVENANCE — LEGAL CHAIN OF CUSTODY" accent="amber" className="mb-6">
+        <TerminalCard title={tc(lang, "card.source_provenance")} accent="amber" className="mb-6">
           <div className="space-y-2 text-xs">
             <div className="flex justify-between">
               <span className="text-content-dim">Designating authority:</span>
@@ -261,7 +264,7 @@ export default function DossierContent({
       )}
 
       {/* Accountability actions */}
-      <TerminalCard title="ACCOUNTABILITY ACTIONS" accent="blood" glow className="mb-6">
+      <TerminalCard title={tc(lang, "card.accountability_actions")} accent="blood" glow className="mb-6">
         <p className="text-xs text-content-secondary mb-4">
           // this dossier documents violations. here's what you can do with it —
           templates pre-filled with this case's data for submission to international bodies.
@@ -365,7 +368,7 @@ export default function DossierContent({
       </TerminalCard>
 
       {/* Version history */}
-      <TerminalCard title="VERSION HISTORY">
+      <TerminalCard title={tc(lang, "card.version_history")}>
         <div className="text-xs text-content-secondary space-y-1">
           <div>Created: {d.created_at}</div>
           <div>Last updated: {d.updated_at}</div>

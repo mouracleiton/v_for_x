@@ -232,7 +232,7 @@ export default function ProtocolXContent() {
 
       {/* Cross-links */}
       <div className="mt-6">
-        <TerminalCard title="CROSS-LINKS">
+        <TerminalCard title={tc(lang, "card.cross_links")}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <Link href="/the-trail/" className="terminal-card p-3 hover:border-blood block">
               <div className="text-xs text-blood-bright font-bold">→ NEED SUPPLIES?</div>
