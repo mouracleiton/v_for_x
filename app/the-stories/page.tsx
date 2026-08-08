@@ -194,14 +194,13 @@ export default function StoriesPage() {
     <div className="p-3 sm:p-6 md:p-10 max-w-4xl mx-auto">
       {/* Header */}
       <div className="mb-8 pt-4">
-        <div className="text-xs text-content-dim mb-1">[14] STORIES</div>
+        <div className="text-xs text-content-dim mb-1">{tc(lang, "branch.stories")}</div>
         <h1 className="text-2xl md:text-3xl text-blood-bright font-bold glow-blood">
-          STORIES
+          {tc(lang, "branch.stories")}
         </h1>
         <p className="text-content-secondary text-sm mt-2">
           {tc(lang, "subtitle.the_stories")}
-          the problem → the people → the solution → the action. crisis timelines
-          show how we got here.
+          {tc(lang, "sub.stories_extra")}
         </p>
       </div>
 
@@ -225,7 +224,7 @@ export default function StoriesPage() {
                   <div className="text-[10px] text-content-dim mt-1">
                     {s.duration} · {s.steps.length} steps
                   </div>
-                  <div className="text-[10px] text-blood-bright mt-2">▶ START STORY</div>
+                  <div className="text-[10px] text-blood-bright mt-2">▶ {tc(lang, "stories.modes")}</div>
                 </button>
               ))}
             </div>

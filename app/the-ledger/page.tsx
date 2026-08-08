@@ -63,22 +63,22 @@ export default function TheLedgerPage() {
     <div className="p-3 sm:p-6 md:p-10 max-w-5xl mx-auto">
       {/* Header */}
       <div className="mb-8 pt-4">
-        <div className="text-xs text-content-dim mb-1">[24] THE LEDGER</div>
+        <div className="text-xs text-content-dim mb-1">{tc(lang, "branch.ledger")}</div>
         <h1 className="text-2xl md:text-3xl text-blood-bright font-bold glow-blood tracking-widest">
-          THE LEDGER
+          {tc(lang, "branch.ledger")}
         </h1>
         <p className="text-content-secondary text-sm mt-2">
           {tc(lang, "subtitle.the_ledger")}
-          What&apos;s missing is political will. Here&apos;s the full accounting.
+          {tc(lang, "sub.ledger_extra")}
         </p>
       </div>
 
       {/* Tab selector */}
       <div className="flex gap-2 mb-6">
         {([
-          { id: "financing", label: "HOW TO PAY", count: data.financing.alternatives.length },
-          { id: "blockers", label: "STRUCTURAL BLOCKERS", count: data.structural_blockers.length },
-          { id: "phases", label: "THE ROADMAP", count: data.implementation_phases.length },
+          { id: "financing", label: tc(lang, "ledger.how_to_pay"), count: data.financing.alternatives.length },
+          { id: "blockers", label: tc(lang, "ledger.structural_blockers"), count: data.structural_blockers.length },
+          { id: "phases", label: tc(lang, "ledger.the_roadmap"), count: data.implementation_phases.length },
         ] as const).map((t) => (
           <button
             key={t.id}
@@ -106,7 +106,7 @@ export default function TheLedgerPage() {
             {/* Recommended allocation reminder */}
             <div className="p-3 border border-blood-dim bg-abyss mb-4">
               <div className="text-[10px] text-content-dim uppercase tracking-widest mb-1">
-                RECOMMENDED: {data.financing.recommended_scenario}
+                {tc(lang, "ledger.recommended")}: {data.financing.recommended_scenario}
               </div>
               <div className="text-lg text-blood-bright font-bold">
                 ${data.financing.annual_budget_billion}B/yr
@@ -137,20 +137,20 @@ export default function TheLedgerPage() {
                   {/* What it funds */}
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <div className="text-[9px] text-content-dim uppercase">FUNDS HUNGER FIX</div>
+                      <div className="text-[9px] text-content-dim uppercase">{tc(lang, "ledger.funds_hunger")}</div>
                       <DataBar
                         value={Math.min(alt.fundsHungerPct, 100)}
                         max={100}
-                        label={alt.fundsHungerPct >= 100 ? "✓ FULLY FUNDED" : `${alt.fundsHungerPct.toFixed(0)}% of need`}
+                        label={alt.fundsHungerPct >= 100 ? tc(lang, "ledger.fully_funded_chk") : `${alt.fundsHungerPct.toFixed(0)}% ${tc(lang, "ledger.of_need")}`}
                         unit="%"
                       />
                     </div>
                     <div>
-                      <div className="text-[9px] text-content-dim uppercase">FUNDS ALL 6 SDGs ($422B)</div>
+                      <div className="text-[9px] text-content-dim uppercase">{tc(lang, "ledger.funds_sdgs")}</div>
                       <DataBar
                         value={Math.min(alt.fundsQuickWinsPct, 100)}
                         max={100}
-                        label={alt.fundsQuickWinsPct >= 100 ? "✓ FULLY FUNDED" : `${alt.fundsQuickWinsPct.toFixed(0)}% of need`}
+                        label={alt.fundsQuickWinsPct >= 100 ? tc(lang, "ledger.fully_funded_chk") : `${alt.fundsQuickWinsPct.toFixed(0)}% ${tc(lang, "ledger.of_need")}`}
                         unit="%"
                       />
                     </div>
@@ -209,7 +209,7 @@ export default function TheLedgerPage() {
                 {/* Related tactics */}
                 <div className="mt-3 pt-3 border-t border-border-dim">
                   <div className="text-[10px] text-content-dim uppercase tracking-widest mb-2">
-                    COUNTERMEASURES
+                    {tc(lang, "ledger.countermeasures")}
                   </div>
                   <div className="flex flex-wrap gap-1">
                     {data.tactics_conflict_zones
@@ -250,7 +250,7 @@ export default function TheLedgerPage() {
                 return (
                   <div key={key} className="text-xs">
                     <div className="font-bold text-content-primary uppercase">{key.replace(/_/g, " ")}</div>
-                    {v.is_primary && <StatusPill color="blood">PRIMARY DRIVER</StatusPill>}
+                    {v.is_primary && <StatusPill color="blood">{tc(lang, "ledger.primary_driver")}</StatusPill>}
                     <div className="text-content-secondary mt-1">
                       {v.affected_m ? `${formatNumber(v.affected_m)}M affected` : v.note}
                     </div>
@@ -304,7 +304,7 @@ export default function TheLedgerPage() {
 
                     {/* Progress toward target */}
                     <div className="mb-3">
-                      <div className="text-[10px] text-content-dim uppercase mb-1">TARGET</div>
+                      <div className="text-[10px] text-content-dim uppercase mb-1">{tc(lang, "ledger.target")}</div>
                       <div className="flex items-baseline gap-3">
                         <span className="text-2xl font-bold" style={{ color: colors[phase.phase - 1] }}>
                           {formatNumber(phase.target_hunger_m)}M
@@ -345,7 +345,7 @@ export default function TheLedgerPage() {
 
           {/* Final outcome */}
           <div className="p-4 border border-terminal-green bg-terminal-green/5 mt-4">
-            <div className="text-[10px] text-terminal-green uppercase tracking-widest mb-1">END STATE (2034)</div>
+            <div className="text-[10px] text-terminal-green uppercase tracking-widest mb-1">{tc(lang, "ledger.end_state")}</div>
             <div className="text-xl text-terminal-green font-bold glow-green">
               19M undernourished globally — down from 667M.
             </div>
@@ -359,16 +359,16 @@ export default function TheLedgerPage() {
       {/* Cross-links */}
       <div className="flex flex-wrap gap-2">
         <Link href="/the-allocator/" className="text-xs px-3 py-1.5 border border-border-dim text-content-secondary hover:border-blood hover:text-blood-bright">
-          ▶ ALLOCATE THE BUDGET
+          ▶ {tc(lang, "link.allocate_budget")}
         </Link>
         <Link href="/the-timeline/" className="text-xs px-3 py-1.5 border border-border-dim text-content-secondary hover:border-blood hover:text-blood-bright">
-          ▶ SCENARIO TIMELINE
+          ▶ {tc(lang, "link.scenario_timeline")}
         </Link>
         <Link href="/the-choice/" className="text-xs px-3 py-1.5 border border-border-dim text-content-secondary hover:border-blood hover:text-blood-bright">
-          ▶ MILITARY vs HEALTH
+          ▶ {tc(lang, "link.military_vs_health")}
         </Link>
         <Link href="/equation/" className="text-xs px-3 py-1.5 border border-border-dim text-content-secondary hover:border-blood hover:text-blood-bright">
-          ▶ THE EQUATION
+          ▶ {tc(lang, "link.the_equation")}
         </Link>
       </div>
     </div>

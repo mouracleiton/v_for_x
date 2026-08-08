@@ -160,9 +160,9 @@ export default function TheMatrixPage() {
     <div className="p-3 sm:p-6 md:p-10 max-w-6xl mx-auto">
       {/* Header */}
       <div className="mb-8 pt-4">
-        <div className="text-xs text-content-dim mb-1">[18] THE MATRIX</div>
+        <div className="text-xs text-content-dim mb-1">{tc(lang, "branch.matrix")}</div>
         <h1 className="text-2xl md:text-3xl text-blood-bright font-bold glow-blood tracking-widest">
-          THE MATRIX
+          {tc(lang, "branch.matrix")}
         </h1>
         <p className="text-content-secondary text-sm mt-2">
           // {formatNumber(globalStats.totalNulls)} of {formatNumber(globalStats.totalFields)} data points are null.
@@ -174,22 +174,22 @@ export default function TheMatrixPage() {
       <TerminalCard title={tc(lang, "matrix.inventory")} accent="blood" className="mb-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
           <div>
-            <div className="text-[10px] text-content-dim uppercase tracking-widest">AVG COMPLETENESS</div>
+            <div className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "matrix.avg_completeness")}</div>
             <div className="text-3xl font-bold" style={{ color: completenessColor(globalStats.avgCompleteness) }}>
               {globalStats.avgCompleteness.toFixed(1)}%
             </div>
           </div>
           <div>
-            <div className="text-[10px] text-content-dim uppercase tracking-widest">NULL FIELDS</div>
+            <div className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "matrix.null_fields")}</div>
             <div className="text-3xl text-blood-bright font-bold">{formatNumber(globalStats.totalNulls)}</div>
           </div>
           <div>
-            <div className="text-[10px] text-content-dim uppercase tracking-widest">FULLY COVERED</div>
+            <div className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "matrix.fully_covered")}</div>
             <div className="text-3xl text-terminal-green font-bold">{globalStats.fullyComplete}</div>
             <div className="text-[10px] text-content-dim">of {globalStats.totalCountries} countries ≥95%</div>
           </div>
           <div>
-            <div className="text-[10px] text-content-dim uppercase tracking-widest">SEVERE GAPS</div>
+            <div className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "matrix.severe_gaps")}</div>
             <div className="text-3xl text-blood font-bold">{globalStats.veryIncomplete}</div>
             <div className="text-[10px] text-content-dim">countries &lt;60% complete</div>
           </div>
@@ -236,7 +236,7 @@ export default function TheMatrixPage() {
         {/* Controls */}
         <div className="flex flex-wrap items-center gap-3 mb-4">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] text-content-dim uppercase tracking-widest">REGION:</span>
+            <span className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "common.region_lbl")}</span>
             <button
               onClick={() => { setRegionFilter("all"); sound.select(); }}
               className={`text-[10px] px-2 py-1 border ${regionFilter === "all" ? "border-blood text-blood-bright" : "border-border-dim text-content-secondary hover:border-blood"}`}
@@ -254,11 +254,11 @@ export default function TheMatrixPage() {
             ))}
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] text-content-dim uppercase tracking-widest">SORT:</span>
+            <span className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "common.sort_lbl")}</span>
             {([
-              { id: "incomplete", label: "MOST GAPS" },
-              { id: "completeness", label: "BEST COVERED" },
-              { id: "name", label: "A-Z" },
+              { id: "incomplete", label: tc(lang, "matrix.most_gaps") },
+              { id: "completeness", label: tc(lang, "matrix.best_covered") },
+              { id: "name", label: tc(lang, "matrix.az") },
             ] as const).map((s) => (
               <button
                 key={s.id}
@@ -321,7 +321,7 @@ export default function TheMatrixPage() {
       {/* Selected country dimension breakdown */}
       {selectedCountryData && (
         <TerminalCard
-          title={`${selectedCountryData.country.name_en} (${selectedCountryData.country.iso3}) — DIMENSION BREAKDOWN`}
+          title={`${selectedCountryData.country.name_en} (${selectedCountryData.country.iso3}) — {tc(lang, "matrix.dim_breakdown")}`}
           accent="amber"
           className="mb-6"
         >

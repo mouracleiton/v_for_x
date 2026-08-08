@@ -402,15 +402,15 @@ export default function TheLensPage() {
       {/* ── HEADER ── */}
       <div className="mb-6 border-b border-border-dim pb-4">
         <div className="flex items-baseline gap-4 flex-wrap">
-          <span className="text-xs text-content-dim">[09]</span>
+          <span className="text-xs text-content-dim">{tc(lang, "branch.lens")}[09]</span>
           <h1 className="text-2xl md:text-3xl font-bold text-blood-bright glow-blood tracking-widest">
-            THE LENS
+            {tc(lang, "branch.lens")}
           </h1>
           <StatusPill color="amber">{tc(lang, "label.analytics")}</StatusPill>
         </div>
         <p className="text-sm text-content-secondary mt-2">
           {tc(lang, "subtitle.the_lens")}
-          Compare countries. Find patterns. Make arguments.
+          {tc(lang, "sub.lens_extra")}
         </p>
       </div>
 
@@ -418,7 +418,7 @@ export default function TheLensPage() {
          SECTION 1 — CORRELATION EXPLORER
          ═══════════════════════════════════════════════════════════════ */}
       <TerminalCard
-        title="CORRELATION EXPLORER // CROSS-DIMENSION ANALYSIS"
+        title={tc(lang, "lens.correlation_explorer")}
         accent="amber"
         className="mb-6"
       >
@@ -426,7 +426,7 @@ export default function TheLensPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
             <label className="text-xs text-content-dim uppercase tracking-widest mb-1 block">
-              X-AXIS METRIC
+              {tc(lang, "lens.x_axis")}
             </label>
             <select
               value={xMetricId}
@@ -443,7 +443,7 @@ export default function TheLensPage() {
           </div>
           <div>
             <label className="text-xs text-content-dim uppercase tracking-widest mb-1 block">
-              Y-AXIS METRIC
+              {tc(lang, "lens.y_axis")}
             </label>
             <select
               value={yMetricId}
@@ -464,7 +464,7 @@ export default function TheLensPage() {
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
           <div className="border border-border-dim p-3 bg-abyss">
             <div className="text-[10px] text-content-dim uppercase tracking-widest">
-              PEARSON r
+              {tc(lang, "lens.pearson_r")}
             </div>
             <div
               className="text-3xl font-bold mt-1"
@@ -475,7 +475,7 @@ export default function TheLensPage() {
           </div>
           <div className="border border-border-dim p-3 bg-abyss">
             <div className="text-[10px] text-content-dim uppercase tracking-widest">
-              INTERPRETATION
+              {tc(lang, "lens.interpretation")}
             </div>
             <div
               className="text-xs font-bold mt-1"
@@ -486,7 +486,7 @@ export default function TheLensPage() {
           </div>
           <div className="border border-border-dim p-3 bg-abyss col-span-2 md:col-span-1">
             <div className="text-[10px] text-content-dim uppercase tracking-widest">
-              DATA POINTS (N)
+              {tc(lang, "lens.data_points")}
             </div>
             <div className="text-3xl font-bold mt-1 text-content-primary">
               {nPlotted}
@@ -561,14 +561,14 @@ export default function TheLensPage() {
               className="inline-block w-3 h-3"
               style={{ backgroundColor: "#e10600", border: "1px solid #ff3333" }}
             />
-            HOTSPOT COUNTRIES ({hotspotsData.length})
+            {tc(lang, "lens.hotspot_countries")} ({hotspotsData.length})
           </div>
           <div className="flex items-center gap-2">
             <span
               className="inline-block w-3 h-3"
               style={{ backgroundColor: "#00aa33", border: "1px solid #00ff41" }}
             />
-            STANDARD COUNTRIES ({normalData.length})
+            {tc(lang, "lens.standard_countries")} ({normalData.length})
           </div>
         </div>
       </TerminalCard>
@@ -577,7 +577,7 @@ export default function TheLensPage() {
          SECTION 2 — COUNTRY COMPARISON TOOL
          ═══════════════════════════════════════════════════════════════ */}
       <TerminalCard
-        title="COUNTRY COMPARISON TOOL // SIDE-BY-SIDE ANALYSIS"
+        title={tc(lang, "lens.country_comparison")}
         accent="green"
         className="mb-6"
       >
@@ -689,7 +689,7 @@ export default function TheLensPage() {
               <thead>
                 <tr>
                   <th className="text-left p-2 border border-border-dim bg-abyss text-content-dim uppercase tracking-widest text-[10px] sticky left-0">
-                    DIMENSION
+                    {tc(lang, "lens.dimension")}
                   </th>
                   {selectedCountries.map((c) => (
                     <th
@@ -782,18 +782,18 @@ export default function TheLensPage() {
               className="inline-block w-3 h-3 border"
               style={{ backgroundColor: "rgba(0,255,65,0.08)", borderColor: "#00ff41" }}
             />
-            <span className="text-terminal-green">BEST VALUE IN ROW</span>
+            <span className="text-terminal-green">{tc(lang, "lens.best_value")}</span>
           </div>
           <div className="flex items-center gap-2">
             <span
               className="inline-block w-3 h-3 border"
               style={{ backgroundColor: "rgba(225,6,0,0.08)", borderColor: "#e10600" }}
             />
-            <span className="text-blood-bright">WORST VALUE IN ROW</span>
+            <span className="text-blood-bright">{tc(lang, "lens.worst_value")}</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-content-dim">—</span>
-            <span>NO DATA AVAILABLE</span>
+            <span>{tc(lang, "lens.no_data_avail")}</span>
           </div>
         </div>
 
@@ -842,7 +842,7 @@ export default function TheLensPage() {
                 {/* Composite scores ranked */}
                 <div>
                   <div className="text-[10px] text-content-dim uppercase tracking-widest mb-2">
-                    COMPOSITE VULNERABILITY SCORE
+                    {tc(lang, "lens.composite_vuln")}
                   </div>
                   <div className="space-y-1.5">
                     {[...selectedCountries]
@@ -878,7 +878,7 @@ export default function TheLensPage() {
                 {/* Gap analysis: worst domain for each country */}
                 <div>
                   <div className="text-[10px] text-content-dim uppercase tracking-widest mb-2">
-                    BIGGEST VULNERABILITY GAP
+                    {tc(lang, "lens.biggest_gap")}
                   </div>
                   <div className="space-y-1">
                     {selectedCountries.map((c) => {
@@ -948,7 +948,7 @@ export default function TheLensPage() {
         {selectedCountries.length >= 2 && (
           <div className="mt-4 pt-4 border-t border-border-dim">
             <div className="text-[10px] text-content-dim uppercase tracking-widest mb-2">
-              // FULL DOSSIERS
+              // {tc(lang, "lens.full_dossiers")}
             </div>
             <div className="flex flex-wrap gap-2">
               {selectedCountries.map((c) => (

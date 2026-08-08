@@ -71,9 +71,9 @@ export default function AllocatorPage() {
     <div className="p-3 sm:p-6 md:p-10 max-w-5xl mx-auto">
       {/* Header */}
       <div className="mb-8 pt-4">
-        <div className="text-xs text-content-dim mb-1">[15] THE ALLOCATOR</div>
+        <div className="text-xs text-content-dim mb-1">{tc(lang, "branch.allocator")}</div>
         <h1 className="text-2xl md:text-3xl text-blood-bright font-bold glow-blood tracking-widest">
-          THE ALLOCATOR
+          {tc(lang, "branch.allocator")}
         </h1>
         <p className="text-content-secondary text-sm mt-2">
           {tc(lang, "subtitle.the_allocator")}
@@ -84,27 +84,27 @@ export default function AllocatorPage() {
       <TerminalCard title={tc(lang, "allocator.budget")} accent="blood" glow className="mb-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
           <div>
-            <div className="text-[10px] text-content-dim uppercase tracking-widest">ALLOCATED</div>
+            <div className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "common.allocated")}</div>
             <div className="text-2xl text-blood-bright font-bold glow-blood">
               ${formatNumber(result.totalAllocatedB)}B
             </div>
           </div>
           <div>
-            <div className="text-[10px] text-content-dim uppercase tracking-widest">REACH</div>
+            <div className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "common.reach")}</div>
             <div className="text-2xl text-terminal-green font-bold glow-green">
               {formatNumber(result.totalReachM)}M
             </div>
-            <div className="text-[10px] text-content-dim">people impacted</div>
+            <div className="text-[10px] text-content-dim">{tc(lang, "common.people_impacted")}</div>
           </div>
           <div>
-            <div className="text-[10px] text-content-dim uppercase tracking-widest">= MILITARY DAYS</div>
+            <div className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "common.military_days")}</div>
             <div className="text-2xl text-content-primary font-bold">
               {result.daysOfMilitary.toFixed(1)}
             </div>
-            <div className="text-[10px] text-content-dim">{result.pctMilitary.toFixed(1)}% of annual</div>
+            <div className="text-[10px] text-content-dim">{result.pctMilitary.toFixed(1)}% {tc(lang, "alloc.of_annual")}</div>
           </div>
           <div>
-            <div className="text-[10px] text-content-dim uppercase tracking-widest">= WORLD GDP</div>
+            <div className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "common.world_gdp_eq")}</div>
             <div className="text-2xl text-content-primary font-bold">
               {result.pctWorldGdp.toFixed(2)}%
             </div>
@@ -114,18 +114,18 @@ export default function AllocatorPage() {
 
         {/* Funding status pills */}
         <div className="flex flex-wrap gap-2">
-          <StatusPill color="green">{result.fullyFundedCount} FULLY FUNDED</StatusPill>
+          <StatusPill color="green">{result.fullyFundedCount} {tc(lang, "common.fully_funded")}</StatusPill>
           {result.partiallyFundedCount > 0 && (
-            <StatusPill color="amber">{result.partiallyFundedCount} PARTIAL</StatusPill>
+            <StatusPill color="amber">{result.partiallyFundedCount} {tc(lang, "common.partial")}</StatusPill>
           )}
           {result.unfundedCount > 0 && (
-            <StatusPill color="blood">{result.unfundedCount} UNFUNDED</StatusPill>
+            <StatusPill color="blood">{result.unfundedCount} {tc(lang, "common.unfunded")}</StatusPill>
           )}
           <button
             onClick={resetAll}
             className="text-[10px] px-2 py-0.5 border border-border-dim text-content-secondary hover:border-blood hover:text-blood-bright ml-auto"
           >
-            [ RESET ]
+            {tc(lang, "common.reset_btn")}
           </button>
         </div>
 
@@ -201,7 +201,7 @@ export default function AllocatorPage() {
                     <span className="text-sm font-bold" style={{ color: item.color }}>
                       {item.label}
                     </span>
-                    {isFullyFunded && <StatusPill color="green">FULL</StatusPill>}
+                    {isFullyFunded && <StatusPill color="green">{tc(lang, "common.fully_funded")}</StatusPill>}
                     {isPartiallyFunded && <StatusPill color="amber">{fundedPct.toFixed(0)}%</StatusPill>}
                   </div>
                   <div className="text-right">
@@ -238,7 +238,7 @@ export default function AllocatorPage() {
                         {item.metricLabel}
                       </>
                     ) : (
-                      <span className="text-content-dim">No allocation</span>
+                      <span className="text-content-dim">{tc(lang, "alloc.no_allocation")}</span>
                     )}
                   </span>
                   <span className="text-content-dim">{item.description}</span>
@@ -343,13 +343,13 @@ export default function AllocatorPage() {
           href="/the-act/"
           className="text-xs px-3 py-1.5 border border-border-dim text-content-secondary hover:border-blood hover:text-blood-bright"
         >
-          ▶ TURN THIS INTO A CAMPAIGN
+          ▶ {tc(lang, "link.turn_campaign")}
         </Link>
         <Link
           href="/sorrow-map/"
           className="text-xs px-3 py-1.5 border border-border-dim text-content-secondary hover:border-blood hover:text-blood-bright"
         >
-          ▶ SEE WHO SUFFERS
+          ▶ {tc(lang, "link.see_who_suffers")}
         </Link>
       </div>
     </div>

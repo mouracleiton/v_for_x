@@ -141,9 +141,9 @@ export default function TheDashboardPage() {
     <div className="p-3 sm:p-6 md:p-10 max-w-6xl mx-auto">
       {/* Header */}
       <div className="mb-8 pt-4">
-        <div className="text-xs text-content-dim mb-1">[25] THE DASHBOARD</div>
+        <div className="text-xs text-content-dim mb-1">{tc(lang, "branch.dashboard")}</div>
         <h1 className="text-2xl md:text-3xl text-blood-bright font-bold glow-blood tracking-widest">
-          THE DASHBOARD
+          {tc(lang, "branch.dashboard")}
         </h1>
         <p className="text-content-secondary text-sm mt-2">
           {tc(lang, "subtitle.the_dashboard")}
@@ -161,14 +161,14 @@ export default function TheDashboardPage() {
                 : "border-blood text-blood-bright hover:bg-blood hover:text-void"
             }`}
           >
-            {animateCounters ? "● LIVE" : "[ START COUNTERS ]"}
+            {animateCounters ? tc(lang, "common.live") : tc(lang, "common.start_counters")}
           </button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Military spending counter */}
           <div className="p-4 border border-blood/30 bg-blood/5">
-            <div className="text-[10px] text-content-dim uppercase tracking-widest">MILITARY SPENT SINCE YOU OPENED THIS PAGE</div>
+            <div className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "dash.military_spent")}</div>
             <div className="text-3xl md:text-4xl text-blood-bright font-bold glow-blood font-mono">
               ${formatNumber(animateCounters ? militaryCounter : 0)}
             </div>
@@ -179,7 +179,7 @@ export default function TheDashboardPage() {
 
           {/* Hunger deaths counter */}
           <div className="p-4 border border-blood/30 bg-void">
-            <div className="text-[10px] text-content-dim uppercase tracking-widest">HUNGER-RELATED DEATHS SINCE YOU OPENED THIS PAGE</div>
+            <div className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "dash.hunger_deaths")}</div>
             <div className="text-3xl md:text-4xl text-blood font-bold font-mono">
               {animateCounters ? Math.floor(hungerDeathsCounter).toLocaleString() : "0"}
             </div>
@@ -193,14 +193,14 @@ export default function TheDashboardPage() {
       {/* Global indicators grid */}
       <TerminalCard title={tc(lang, "dashboard.global_indicators")} accent="amber" className="mb-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Indicator label="WORLD POPULATION" value={formatNumber(globalStats.totalPop / 1e6)} unit="M" color="#999" />
-          <Indicator label="UNDERNOURISHED" value={`${globalStats.totalUndernourished}`} unit="M" color="#cc0000" sub="1 in 11 humans" />
-          <Indicator label="FORCIBLY DISPLACED" value={formatNumber(globalStats.totalDisplaced)} unit="" color="#ff6600" sub="UNHCR" />
-          <Indicator label="NO ELECTRICITY" value={formatNumber(globalStats.totalNoElectricity)} unit="M" color="#ffaa00" sub="IEA" />
-          <Indicator label="ILLITERATE ADULTS" value={formatNumber(globalStats.totalIlliterate / 1e6)} unit="M" color="#aa44ff" sub="UNESCO" />
-          <Indicator label="BELOW WHO MIN. DOCTORS" value={`${globalStats.totalBelowWhoMin}`} unit="/200" color="#e10600" sub="need 4.45/1000" />
-          <Indicator label="MILITARY SPENDING" value={`$${(globalStats.totalMilitary / 1e9).toFixed(0)}`} unit="B/yr" color="#cc0000" sub="SIPRI" />
-          <Indicator label="HUNGER HOTSPOTS" value={`${data.hotspots.all.length}`} unit="" color="#ff0000" sub="WFP" />
+          <Indicator label={tc(lang, "dash.world_pop")} value={formatNumber(globalStats.totalPop / 1e6)} unit="M" color="#999" />
+          <Indicator label={tc(lang, "dash.undernourished")} value={`${globalStats.totalUndernourished}`} unit="M" color="#cc0000" sub="1 in 11 humans" />
+          <Indicator label={tc(lang, "dash.forcibly_displaced")} value={formatNumber(globalStats.totalDisplaced)} unit="" color="#ff6600" sub="UNHCR" />
+          <Indicator label={tc(lang, "dash.no_electricity")} value={formatNumber(globalStats.totalNoElectricity)} unit="M" color="#ffaa00" sub="IEA" />
+          <Indicator label={tc(lang, "dash.illiterate")} value={formatNumber(globalStats.totalIlliterate / 1e6)} unit="M" color="#aa44ff" sub="UNESCO" />
+          <Indicator label={tc(lang, "dash.below_who")} value={`${globalStats.totalBelowWhoMin}`} unit="/200" color="#e10600" sub="need 4.45/1000" />
+          <Indicator label={tc(lang, "dash.military_spending")} value={`$${(globalStats.totalMilitary / 1e9).toFixed(0)}`} unit="B/yr" color="#cc0000" sub="SIPRI" />
+          <Indicator label={tc(lang, "dash.hunger_hotspots")} value={`${data.hotspots.all.length}`} unit="" color="#ff0000" sub="WFP" />
         </div>
       </TerminalCard>
 
@@ -246,7 +246,7 @@ export default function TheDashboardPage() {
             href={`/sorrow-map/${globalStats.worst.c.iso3.toLowerCase()}/`}
             className="block p-4 border border-blood-dim bg-abyss hover:bg-blood/5 transition-colors"
           >
-            <div className="text-[10px] text-content-dim uppercase tracking-widest">VULNERABILITY SCORE</div>
+            <div className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "dash.vuln_score")}</div>
             <div className="text-5xl font-bold mb-2" style={{ color: scoreColor(globalStats.worst.score) }}>
               {globalStats.worst.score.toFixed(0)}
             </div>
@@ -273,7 +273,7 @@ export default function TheDashboardPage() {
             href={`/sorrow-map/${globalStats.best.c.iso3.toLowerCase()}/`}
             className="block p-4 border border-terminal-green/30 bg-abyss hover:bg-terminal-green/5 transition-colors"
           >
-            <div className="text-[10px] text-content-dim uppercase tracking-widest">VULNERABILITY SCORE</div>
+            <div className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "dash.vuln_score")}</div>
             <div className="text-5xl font-bold mb-2" style={{ color: scoreColor(globalStats.best.score) }}>
               {globalStats.best.score.toFixed(0)}
             </div>
@@ -298,17 +298,17 @@ export default function TheDashboardPage() {
       <TerminalCard title={tc(lang, "card.the_cost")} accent="green" className="mb-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="p-3 border border-terminal-green/30 bg-terminal-green/5">
-            <div className="text-[10px] text-content-dim uppercase">END HUNGER</div>
+            <div className="text-[10px] text-content-dim uppercase">{tc(lang, "dash.end_hunger")}</div>
             <div className="text-2xl text-terminal-green font-bold">$93B/yr</div>
             <div className="text-[10px] text-content-dim">14 days of military</div>
           </div>
           <div className="p-3 border border-terminal-green/30 bg-terminal-green/5">
-            <div className="text-[10px] text-content-dim uppercase">ALL 6 SDGs (WATER+HEALTH+ENERGY+EDUCATION+HUNGER)</div>
+            <div className="text-[10px] text-content-dim uppercase">{tc(lang, "dash.all_6_sdgs")}</div>
             <div className="text-2xl text-terminal-green font-bold">$422B/yr</div>
             <div className="text-[10px] text-content-dim">64 days of military</div>
           </div>
           <div className="p-3 border border-terminal-green/30 bg-terminal-green/5">
-            <div className="text-[10px] text-content-dim uppercase">EVERYTHING (INCL. CLIMATE)</div>
+            <div className="text-[10px] text-content-dim uppercase">{tc(lang, "dash.everything")}</div>
             <div className="text-2xl text-terminal-green font-bold">$828B/yr</div>
             <div className="text-[10px] text-content-dim">34% of military</div>
           </div>
@@ -324,14 +324,14 @@ export default function TheDashboardPage() {
       <TerminalCard title={tc(lang, "card.explore_data")} className="mb-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
           {[
-            { href: "/sorrow-map/", label: "MAP" },
-            { href: "/the-index/", label: "INDEX" },
-            { href: "/the-fronts/", label: "REGIONS" },
-            { href: "/the-choice/", label: "MILITARY" },
-            { href: "/the-timeline/", label: "SCENARIOS" },
-            { href: "/the-exodus/", label: "DISPLACEMENT" },
-            { href: "/the-ledger/", label: "FINANCING" },
-            { href: "/the-briefing/", label: "COUNTRY" },
+            { href: "/sorrow-map/", label: tc(lang, "link.sorrow_map") },
+            { href: "/the-index/", label: tc(lang, "link.vuln_index") },
+            { href: "/the-fronts/", label: tc(lang, "fronts.regions") },
+            { href: "/the-choice/", label: tc(lang, "choice.world_military") },
+            { href: "/the-timeline/", label: tc(lang, "link.scenario_timeline") },
+            { href: "/the-exodus/", label: tc(lang, "link.displacement_flows") },
+            { href: "/the-ledger/", label: tc(lang, "ledger.how_to_pay") },
+            { href: "/the-briefing/", label: tc(lang, "briefing.the_choice") },
           ].map((l) => (
             <Link
               key={l.href}

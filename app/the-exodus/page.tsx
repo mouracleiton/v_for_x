@@ -68,9 +68,9 @@ export default function TheExodusPage() {
     <div className="p-3 sm:p-6 md:p-10 max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-8 pt-4">
-        <div className="text-xs text-content-dim mb-1">[16] THE EXODUS</div>
+        <div className="text-xs text-content-dim mb-1">{tc(lang, "branch.exodus")}</div>
         <h1 className="text-2xl md:text-3xl text-blood-bright font-bold glow-blood tracking-widest">
-          THE EXODUS
+          {tc(lang, "branch.exodus")}
         </h1>
         <p className="text-content-secondary text-sm mt-2">
           // {formatNumber(stats.totalDisplaced)} people are forcibly displaced right now.
@@ -86,28 +86,28 @@ export default function TheExodusPage() {
             <div className="text-2xl text-blood-bright font-bold glow-blood">
               {formatNumber(stats.totalRefugees)}
             </div>
-            <div className="text-[10px] text-content-dim">crossed a border</div>
+            <div className="text-[10px] text-content-dim">{tc(lang, "common.crossed_border")}</div>
           </div>
           <div>
             <div className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "label.forcibly_displaced")}</div>
             <div className="text-2xl text-blood font-bold">
               {formatNumber(stats.totalDisplaced)}
             </div>
-            <div className="text-[10px] text-content-dim">total</div>
+            <div className="text-[10px] text-content-dim">{tc(lang, "common.total")}</div>
           </div>
           <div>
             <div className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "label.idps")}</div>
             <div className="text-2xl text-content-primary font-bold">
               {formatNumber(stats.totalIDPs)}
             </div>
-            <div className="text-[10px] text-content-dim">displaced internally</div>
+            <div className="text-[10px] text-content-dim">{tc(lang, "common.displaced_internally")}</div>
           </div>
           <div>
-            <div className="text-[10px] text-content-dim uppercase tracking-widest">ORIGIN/HOST</div>
+            <div className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "common.origin_host")}</div>
             <div className="text-2xl text-content-primary font-bold">
               {stats.totalOrigins}/{stats.totalHosts}
             </div>
-            <div className="text-[10px] text-content-dim">countries involved</div>
+            <div className="text-[10px] text-content-dim">{tc(lang, "common.countries_involved")}</div>
           </div>
         </div>
       </TerminalCard>
@@ -117,7 +117,7 @@ export default function TheExodusPage() {
         <div className="flex flex-wrap items-center gap-3 mb-4">
           {/* Layer mode */}
           <div className="flex items-center gap-2">
-            <span className="text-[10px] text-content-dim uppercase tracking-widest">LAYER:</span>
+            <span className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "common.layer_lbl")}</span>
             {([
               { id: "refugees", label: tc(lang, "label.refugees") },
               { id: "displaced", label: tc(lang, "label.displaced") },
@@ -139,11 +139,11 @@ export default function TheExodusPage() {
 
           {/* Flow filter */}
           <div className="flex items-center gap-2">
-            <span className="text-[10px] text-content-dim uppercase tracking-widest">FLOWS:</span>
+            <span className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "common.flows_lbl")}</span>
             {([
-              { id: "all", label: "ALL" },
-              { id: "regional", label: "REGIONAL" },
-              { id: "continental", label: "GLOBAL" },
+              { id: "all", label: tc(lang, "common.all_caps") },
+              { id: "regional", label: tc(lang, "common.regional_caps") },
+              { id: "continental", label: tc(lang, "common.global_caps") },
             ] as const).map((m) => (
               <button
                 key={m.id}
@@ -164,7 +164,7 @@ export default function TheExodusPage() {
               onClick={() => { setSelectedOrigin(null); sound.select(); }}
               className="text-[10px] px-2 py-1 border border-blood text-blood-bright hover:bg-blood hover:text-void"
             >
-              [ CLEAR FILTER: {selectedOrigin} ]
+              {tc(lang, "common.clear_filter")}: {selectedOrigin} ]
             </button>
           )}
         </div>
@@ -201,19 +201,19 @@ export default function TheExodusPage() {
         <div className="flex flex-wrap items-center gap-4 mt-3 text-[10px] text-content-secondary">
           <div className="flex items-center gap-2">
             <span className="inline-block w-3 h-3 rounded-full border border-blood" style={{ backgroundColor: "#cc0000", opacity: 0.7 }} />
-            ORIGIN COUNTRY
+            {tc(lang, "common.origin_country")}
           </div>
           <div className="flex items-center gap-2">
             <span className="inline-block w-3 h-3 rounded-full border border-terminal-green" style={{ backgroundColor: "#006633", opacity: 0.6 }} />
-            HOST COUNTRY
+            {tc(lang, "common.host_country")}
           </div>
           <div className="flex items-center gap-2">
             <span className="inline-block w-6 h-px bg-blood" />
-            REGIONAL FLOW
+            {tc(lang, "common.regional_flow")}
           </div>
           <div className="flex items-center gap-2">
             <span className="inline-block w-6 h-px" style={{ backgroundColor: "#ff6600" }} />
-            GLOBAL FLOW
+            {tc(lang, "common.global_flow")}
           </div>
           <span className="text-content-dim ml-auto">
             // Flows estimated from UNHCR origin/host data · bilateral detail not available
@@ -223,7 +223,7 @@ export default function TheExodusPage() {
 
       {/* Top origins table */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <TerminalCard title={`TOP ORIGINS // ${selectedOrigin ? "FILTERED" : "WORLD"}`} accent="blood">
+        <TerminalCard title={`{tc(lang, "exodus.top_origins")} // ${selectedOrigin ? "FILTERED" : "WORLD"}`} accent="blood">
           {(selectedOrigin ? stats.topOrigins.filter((n) => n.iso3 === selectedOrigin) : stats.topOrigins.slice(0, 10)).map((n, i) => (
             <Link
               key={n.iso3}
@@ -240,7 +240,7 @@ export default function TheExodusPage() {
               </div>
               <div className="text-right">
                 <div className="text-sm font-bold text-blood-bright">{formatNumber(n.refugeesOrigin)}</div>
-                <div className="text-[9px] text-content-dim">refugees</div>
+                <div className="text-[9px] text-content-dim">{tc(lang, "common.refugees")}</div>
               </div>
               <button
                 onClick={(e) => { e.preventDefault(); setSelectedOrigin(selectedOrigin === n.iso3 ? null : n.iso3); sound.select(); }}
@@ -268,7 +268,7 @@ export default function TheExodusPage() {
               </div>
               <div className="text-right">
                 <div className="text-sm font-bold text-terminal-green">{formatNumber(n.refugeesHosted)}</div>
-                <div className="text-[9px] text-content-dim">hosting</div>
+                <div className="text-[9px] text-content-dim">{tc(lang, "common.hosting")}</div>
               </div>
             </Link>
           ))}
@@ -314,19 +314,19 @@ export default function TheExodusPage() {
           href="/sorrow-map/"
           className="text-xs px-3 py-1.5 border border-border-dim text-content-secondary hover:border-blood hover:text-blood-bright"
         >
-          ▶ SORROW MAP
+          ▶ {tc(lang, "link.sorrow_map")}
         </Link>
         <Link
           href="/registry/"
           className="text-xs px-3 py-1.5 border border-border-dim text-content-secondary hover:border-blood hover:text-blood-bright"
         >
-          ▶ ACCOUNTABILITY
+          ▶ {tc(lang, "link.accountability")}
         </Link>
         <Link
           href="/the-index/"
           className="text-xs px-3 py-1.5 border border-border-dim text-content-secondary hover:border-blood hover:text-blood-bright"
         >
-          ▶ VULNERABILITY INDEX
+          ▶ {tc(lang, "link.vuln_index")}
         </Link>
       </div>
     </div>

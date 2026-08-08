@@ -153,13 +153,13 @@ export default function TheApiPage() {
     <div className="p-3 sm:p-6 md:p-10 max-w-5xl mx-auto">
       {/* Header */}
       <div className="mb-8 pt-4">
-        <div className="text-xs text-content-dim mb-1">[23] THE API</div>
+        <div className="text-xs text-content-dim mb-1">{tc(lang, "branch.api")}</div>
         <h1 className="text-2xl md:text-3xl text-blood-bright font-bold glow-blood tracking-widest">
-          THE API
+          {tc(lang, "branch.api")}
         </h1>
         <p className="text-content-secondary text-sm mt-2">
           // {data.metadata.total_countries} countries · {data.metadata.sources.length} sources · 23 dimensions · CC0.
-          No auth. No rate limit. No tracking. Just data.
+          {tc(lang, "api.subtitle_extra")}
         </p>
       </div>
 
@@ -167,26 +167,26 @@ export default function TheApiPage() {
       <TerminalCard title={tc(lang, "api.public")} accent="green" glow className="mb-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
           <div>
-            <div className="text-[10px] text-content-dim uppercase tracking-widest">ENDPOINTS</div>
+            <div className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "common.endpoints")}</div>
             <div className="text-2xl text-terminal-green font-bold">{ENDPOINTS.length}</div>
           </div>
           <div>
-            <div className="text-[10px] text-content-dim uppercase tracking-widest">COUNTRIES</div>
+            <div className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "common.countries")}</div>
             <div className="text-2xl text-content-primary font-bold">{data.metadata.total_countries}</div>
           </div>
           <div>
-            <div className="text-[10px] text-content-dim uppercase tracking-widest">FIELDS/COUNTRY</div>
+            <div className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "common.fields_country")}</div>
             <div className="text-2xl text-content-primary font-bold">~87</div>
           </div>
           <div>
-            <div className="text-[10px] text-content-dim uppercase tracking-widest">LICENSE</div>
+            <div className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "common.license_lbl")}</div>
             <div className="text-2xl text-terminal-green font-bold">CC0</div>
           </div>
         </div>
         <div className="p-3 border border-border-dim bg-void text-xs text-content-secondary">
           Base URL: <span className="text-terminal-green font-mono">https://mouracleiton.github.io/v_for_x</span>
           <br />
-          All endpoints return JSON. No authentication required. CORS-enabled.
+          {tc(lang, "api.no_auth")}
           Data is static — generated at build time from {data.metadata.sources.length} primary sources.
         </div>
       </TerminalCard>
@@ -221,12 +221,12 @@ export default function TheApiPage() {
         {/* JSON preview */}
         <div className="relative">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-[10px] text-content-dim uppercase tracking-widest">SAMPLE RESPONSE</span>
+            <span className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "common.sample_response")}</span>
             <button
               onClick={copyJson}
               className="text-[10px] px-2 py-0.5 border border-border-dim text-content-secondary hover:border-terminal-green hover:text-terminal-green"
             >
-              {copied ? "✓ COPIED" : "COPY JSON"}
+              {copied ? tc(lang, "common.copied_chk") : tc(lang, "common.copy_json")}
             </button>
           </div>
           <pre className="bg-void border border-border-dim p-3 text-[10px] text-terminal-green font-mono overflow-x-auto max-h-80 overflow-y-auto">
@@ -254,7 +254,7 @@ export default function TheApiPage() {
             onClick={runQuery}
             className="text-xs px-3 py-1 border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void font-bold"
           >
-            [ RUN QUERY ]
+            {tc(lang, "common.run_query")}
           </button>
         </div>
 

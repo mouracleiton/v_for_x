@@ -72,13 +72,13 @@ export default function TheBriefingPage() {
     <div className="p-3 sm:p-6 md:p-10 max-w-4xl mx-auto">
       {/* Header */}
       <div className="mb-8 pt-4 no-print">
-        <div className="text-xs text-content-dim mb-1">[21] THE BRIEFING</div>
+        <div className="text-xs text-content-dim mb-1">{tc(lang, "branch.briefing")}</div>
         <h1 className="text-2xl md:text-3xl text-blood-bright font-bold glow-blood tracking-widest">
-          THE BRIEFING
+          {tc(lang, "branch.briefing")}
         </h1>
         <p className="text-content-secondary text-sm mt-2">
           {tc(lang, "subtitle.the_briefing")}
-          Print it. Share it. Make the argument undeniable.
+          {tc(lang, "sub.briefing_extra")}
         </p>
       </div>
 
@@ -241,7 +241,7 @@ export default function TheBriefingPage() {
         {/* The Choice box */}
         {milB > 0 && healthB > 0 && (
           <div className="mb-6 p-4 border border-border-dim bg-void">
-            <div className="text-[10px] text-content-dim uppercase tracking-widest mb-2">THE CHOICE</div>
+            <div className="text-[10px] text-content-dim uppercase tracking-widest mb-2">{tc(lang, "briefing.the_choice")}</div>
             <div className="grid grid-cols-3 gap-4">
               <div>
                 <div className="text-xs text-content-dim">MILITARY</div>

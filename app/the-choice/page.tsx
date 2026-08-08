@@ -96,13 +96,13 @@ export default function TheChoicePage() {
     <div className="p-3 sm:p-6 md:p-10 max-w-6xl mx-auto">
       {/* Header */}
       <div className="mb-8 pt-4">
-        <div className="text-xs text-content-dim mb-1">[20] THE CHOICE</div>
+        <div className="text-xs text-content-dim mb-1">{tc(lang, "branch.choice")}</div>
         <h1 className="text-2xl md:text-3xl text-blood-bright font-bold glow-blood tracking-widest">
-          THE CHOICE
+          {tc(lang, "branch.choice")}
         </h1>
         <p className="text-content-secondary text-sm mt-2">
           {tc(lang, "subtitle.the_choice")}
-          {globalStats.offenderCount} countries spend more on military than health.
+          {globalStats.offenderCount} {tc(lang, "sub.choice_extra")}
           The world spends ${formatNumber(globalStats.totalMil)}B/yr on weapons and ${formatNumber(globalStats.totalHealth)}B on health.
         </p>
       </div>
@@ -111,32 +111,32 @@ export default function TheChoicePage() {
       <TerminalCard title={tc(lang, "choice.global_choice")} accent="blood" glow className="mb-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
           <div>
-            <div className="text-[10px] text-content-dim uppercase tracking-widest">WORLD MILITARY</div>
+            <div className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "choice.world_military")}</div>
             <div className="text-2xl text-blood-bright font-bold glow-blood">
               ${formatNumber(globalStats.totalMil)}B
             </div>
-            <div className="text-[10px] text-content-dim">per year</div>
+            <div className="text-[10px] text-content-dim">{tc(lang, "choice.per_year")}</div>
           </div>
           <div>
-            <div className="text-[10px] text-content-dim uppercase tracking-widest">WORLD HEALTH</div>
+            <div className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "choice.world_health")}</div>
             <div className="text-2xl text-terminal-green font-bold">
               ${formatNumber(globalStats.totalHealth)}B
             </div>
-            <div className="text-[10px] text-content-dim">per year</div>
+            <div className="text-[10px] text-content-dim">{tc(lang, "choice.per_year")}</div>
           </div>
           <div>
-            <div className="text-[10px] text-content-dim uppercase tracking-widest">RATIO</div>
+            <div className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "choice.ratio")}</div>
             <div className="text-2xl text-content-primary font-bold">
               {globalStats.globalRatio.toFixed(2)}×
             </div>
-            <div className="text-[10px] text-content-dim">military / health</div>
+            <div className="text-[10px] text-content-dim">{tc(lang, "choice.mil_health_ratio")}</div>
           </div>
           <div>
-            <div className="text-[10px] text-content-dim uppercase tracking-widest">OFFENDERS</div>
+            <div className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "choice.offenders")}</div>
             <div className="text-2xl text-blood font-bold">
               {globalStats.offenderCount}
             </div>
-            <div className="text-[10px] text-content-dim">military &gt; health</div>
+            <div className="text-[10px] text-content-dim">{tc(lang, "choice.mil_gt_health")}</div>
           </div>
         </div>
         <div className="p-3 border border-blood-dim bg-void text-xs text-blood">
@@ -211,10 +211,10 @@ export default function TheChoicePage() {
       {/* Controls */}
       <div className="flex flex-wrap items-center gap-3 mb-4">
         <div className="flex items-center gap-2">
-          <span className="text-[10px] text-content-dim uppercase tracking-widest">VIEW:</span>
+          <span className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "common.view_lbl")}</span>
           {([
-            { id: "offenders", label: "WORST OFFENDERS" },
-            { id: "all", label: "ALL COUNTRIES" },
+            { id: "offenders", label: tc(lang, "choice.worst_offenders") },
+            { id: "all", label: tc(lang, "choice.all_countries") },
           ] as const).map((v) => (
             <button
               key={v.id}
@@ -230,12 +230,12 @@ export default function TheChoicePage() {
           ))}
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-[10px] text-content-dim uppercase tracking-widest">SORT:</span>
+          <span className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "common.sort_lbl")}</span>
           {([
-            { id: "ratio", label: "RATIO" },
-            { id: "daysLocal", label: "DAYS TO FIX" },
-            { id: "military", label: "MILITARY $" },
-            { id: "undernourished", label: "HUNGRY" },
+            { id: "ratio", label: tc(lang, "choice.ratio") },
+            { id: "daysLocal", label: tc(lang, "choice.days_to_fix") },
+            { id: "military", label: tc(lang, "choice.military_dollar") },
+            { id: "undernourished", label: tc(lang, "choice.hungry") },
           ] as const).map((s) => (
             <button
               key={s.id}
@@ -259,13 +259,13 @@ export default function TheChoicePage() {
             <thead>
               <tr className="border-b border-border-dim text-content-dim text-[10px] uppercase tracking-widest">
                 <th className="text-left p-2">#</th>
-                <th className="text-left p-2">Country</th>
-                <th className="text-right p-2">Military</th>
-                <th className="text-right p-2">Health</th>
-                <th className="text-center p-2">Ratio</th>
-                <th className="text-right p-2">Hungry</th>
-                <th className="text-right p-2">Cost to Fix</th>
-                <th className="text-center p-2">Days of Local Mil.</th>
+                <th className="text-left p-2">{tc(lang, "th.country")}</th>
+                <th className="text-right p-2">{tc(lang, "th.military")}</th>
+                <th className="text-right p-2">{tc(lang, "th.health")}</th>
+                <th className="text-center p-2">{tc(lang, "th.ratio")}</th>
+                <th className="text-right p-2">{tc(lang, "th.hungry")}</th>
+                <th className="text-right p-2">{tc(lang, "th.cost_fix")}</th>
+                <th className="text-center p-2">{tc(lang, "th.days_local_mil")}</th>
               </tr>
             </thead>
             <tbody>
@@ -382,13 +382,13 @@ export default function TheChoicePage() {
       {/* Cross-links */}
       <div className="flex flex-wrap gap-2">
         <Link href="/the-allocator/" className="text-xs px-3 py-1.5 border border-border-dim text-content-secondary hover:border-blood hover:text-blood-bright">
-          ▶ ALLOCATE THE BUDGET
+          ▶ {tc(lang, "link.allocate_budget")}
         </Link>
         <Link href="/equation/" className="text-xs px-3 py-1.5 border border-border-dim text-content-secondary hover:border-blood hover:text-blood-bright">
-          ▶ THE HUNGER EQUATION
+          ▶ {tc(lang, "link.hunger_equation")}
         </Link>
         <Link href="/sorrow-map/" className="text-xs px-3 py-1.5 border border-border-dim text-content-secondary hover:border-blood hover:text-blood-bright">
-          ▶ WHO SUFFERS
+          ▶ {tc(lang, "link.who_suffers")}
         </Link>
       </div>
     </div>

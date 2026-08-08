@@ -103,9 +103,9 @@ const TIER_COLOR: Record<string, string> = {
 };
 
 const CATEGORY_LABEL: Record<string, string> = {
-  humanitarian: "HUMANITARIAN",
-  political: "POLITICAL",
-  military: "MILITARY",
+  humanitarian: tc("en", "tactics.humanitarian"),
+  political: tc("en", "tactics.political"),
+  military: tc("en", "tactics.military_cat"),
 };
 
 function normalizeTactics(): NormalizedTactic[] {
@@ -168,13 +168,13 @@ export default function TheTacticsPage() {
     <div className="p-3 sm:p-6 md:p-10 max-w-6xl mx-auto">
       {/* Header */}
       <div className="mb-8 pt-4">
-        <div className="text-xs text-content-dim mb-1">[17] THE TACTICS</div>
+        <div className="text-xs text-content-dim mb-1">{tc(lang, "branch.tactics")}</div>
         <h1 className="text-2xl md:text-3xl text-blood-bright font-bold glow-blood tracking-widest">
-          THE TACTICS
+          {tc(lang, "branch.tactics")}
         </h1>
         <p className="text-content-secondary text-sm mt-2">
           {tc(lang, "subtitle.the_tactics")}
-          succeeds 53% of the time. Armed insurgency: 26%. The data is clear.
+          {tc(lang, "sub.tactics_extra")}
         </p>
       </div>
 
@@ -182,14 +182,14 @@ export default function TheTacticsPage() {
       <TerminalCard title={tc(lang, "tactics.evidence")} accent="green" glow className="mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <div className="text-xs text-content-dim mb-1">NONVIOLENT RESISTANCE</div>
+            <div className="text-xs text-content-dim mb-1">{tc(lang, "tactics.nonviolent")}</div>
             <div className="text-5xl text-terminal-green glow-green font-bold">53%</div>
             <div className="text-xs text-content-secondary mt-1">
               Success rate across 323 campaigns (1900-2006). Erica Chenoweth / Maria Stephan, "Why Civil Resistance Works."
             </div>
           </div>
           <div>
-            <div className="text-xs text-content-dim mb-1">ARMED INSURGENCY</div>
+            <div className="text-xs text-content-dim mb-1">{tc(lang, "tactics.armed_insurgency")}</div>
             <div className="text-5xl text-blood font-bold glow-blood">26%</div>
             <div className="text-xs text-content-secondary mt-1">
               Half the success rate. 4x the civilian casualties. And the resulting regimes are
@@ -294,12 +294,12 @@ export default function TheTacticsPage() {
       {/* Filter controls */}
       <div className="flex flex-wrap items-center gap-3 mb-4">
         <div className="flex items-center gap-2">
-          <span className="text-[10px] text-content-dim uppercase tracking-widest">FILTER:</span>
+          <span className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "common.filter_lbl")}</span>
           {([
-            { id: "all", label: "ALL" },
-            { id: "humanitarian", label: "HUMANITARIAN" },
-            { id: "political", label: "POLITICAL" },
-            { id: "military", label: "MILITARY" },
+            { id: "all", label: tc(lang, "common.all_caps") },
+            { id: "humanitarian", label: tc(lang, "tactics.humanitarian") },
+            { id: "political", label: tc(lang, "tactics.political") },
+            { id: "military", label: tc(lang, "tactics.military_cat") },
           ] as const).map((f) => (
             <button
               key={f.id}
@@ -315,12 +315,12 @@ export default function TheTacticsPage() {
           ))}
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-[10px] text-content-dim uppercase tracking-widest">SORT:</span>
+          <span className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "common.sort_lbl")}</span>
           {([
-            { id: "success", label: "SUCCESS" },
-            { id: "casualties", label: "LOWEST COST" },
-            { id: "speed", label: "FASTEST" },
-            { id: "tier", label: "TIER" },
+            { id: "success", label: tc(lang, "tactics.success") },
+            { id: "casualties", label: tc(lang, "tactics.lowest_cost") },
+            { id: "speed", label: tc(lang, "tactics.fastest") },
+            { id: "tier", label: tc(lang, "tactics.tier_lbl") },
           ] as const).map((s) => (
             <button
               key={s.id}
@@ -351,9 +351,7 @@ export default function TheTacticsPage() {
                 <span
                   className="text-xs font-mono font-bold px-2 py-1 border"
                   style={{ borderColor: TIER_COLOR[t.tier], color: TIER_COLOR[t.tier] }}
-                >
-                  TIER {t.tier}
-                </span>
+                >{tc(lang, "tactics.tier_lbl")} {t.tier}</span>
                 <span className="text-[9px] text-content-dim uppercase tracking-widest">
                   {CATEGORY_LABEL[t.category]}
                 </span>
@@ -410,11 +408,11 @@ export default function TheTacticsPage() {
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="p-3 border border-terminal-green/30 bg-terminal-green/5">
-              <div className="text-terminal-green font-bold mb-1">WORKS (Tier S-A)</div>
+              <div className="text-terminal-green font-bold mb-1">{tc(lang, "tactics.works")}</div>
               <p>Humanitarian corridors, nonviolent resistance, sanctions, documentation, induced defection, negotiation. Low casualties, proven success.</p>
             </div>
             <div className="p-3 border border-blood/30 bg-blood/5">
-              <div className="text-blood-bright font-bold mb-1">DOESN&apos;T (Tier B)</div>
+              <div className="text-blood-bright font-bold mb-1">{tc(lang, "tactics.doesnt_work")}</div>
               <p>Bombing, invasion, armed insurgency. High civilian death, low success rate, creates the next crisis. Every war proves this.</p>
             </div>
           </div>
@@ -428,13 +426,13 @@ export default function TheTacticsPage() {
       {/* Cross-links */}
       <div className="flex flex-wrap gap-2">
         <Link href="/protocol-x/" className="text-xs px-3 py-1.5 border border-border-dim text-content-secondary hover:border-blood hover:text-blood-bright">
-          ▶ SURVIVAL BLUEPRINTS
+          ▶ {tc(lang, "link.survival_blueprints")}
         </Link>
         <Link href="/registry/" className="text-xs px-3 py-1.5 border border-border-dim text-content-secondary hover:border-blood hover:text-blood-bright">
-          ▶ ACCOUNTABILITY DOSSIERS
+          ▶ {tc(lang, "link.accountability")} DOSSIERS
         </Link>
         <Link href="/equation/" className="text-xs px-3 py-1.5 border border-border-dim text-content-secondary hover:border-blood hover:text-blood-bright">
-          ▶ THE EQUATION
+          ▶ {tc(lang, "link.the_equation")}
         </Link>
       </div>
     </div>
