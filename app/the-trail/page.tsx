@@ -17,6 +17,14 @@ import {
   downloadJSON,
   type LedgerEntry,
 } from "@/lib/idb";
+import {
+  createDagEntry,
+  verifyChain,
+  getLastHash,
+  shortHash,
+  type DagEntry,
+  type ChainVerification,
+} from "@/lib/dag";
 
 const data = backbone as WorldBackbone;
 
@@ -34,6 +42,9 @@ export default function TrilhaPage() {
 
   const [needsMatch, setNeedsMatch] = useState<{ type: string; location: string }[]>([]);
   const [havesMatch, setHavesMatch] = useState<{ type: string; location: string }[]>([]);
+  const [chainVerification, setChainVerification] = useState<ChainVerification | null>(null);
+  const [verifying, setVerifying] = useState(false);
+  const [showHashes, setShowHashes] = useState(false);
 
   const loadLedger = useCallback(async () => {
     try {
@@ -59,7 +70,21 @@ export default function TrilhaPage() {
 
   const addEntry = async () => {
     if (!source.trim() || !destination.trim() || !amount.trim()) return;
-    const entry: LedgerEntry = {
+    // Build hash-chained DAG entry
+    const existing = ledger.map((e) => {
+      const raw = e as unknown as Record<string, unknown>;
+      return {
+        hash: (raw.hash as string) ?? "",
+        prevHash: (raw.prevHash as string) ?? "",
+        ts: e.ts, source: e.source, destination: e.destination,
+        amount: e.amount, purpose: e.purpose, status: e.status,
+        signerHandle: e.signerHandle,
+      };
+    }) as DagEntry[];
+    // Sort by timestamp to get chronological order
+    existing.sort((a, b) => a.ts - b.ts);
+    const prevHash = getLastHash(existing);
+    const dagEntry = await createDagEntry({
       ts: Date.now(),
       source: source.trim(),
       destination: destination.trim(),
@@ -67,8 +92,9 @@ export default function TrilhaPage() {
       purpose: purpose.trim() || "—",
       status,
       signerHandle: identity || undefined,
-    };
-    await ledgerAdd(entry);
+    }, prevHash);
+    await ledgerAdd(dagEntry as unknown as LedgerEntry);
+    setChainVerification(null); // invalidate previous verification
     sound.success();
     setSource("");
     setDestination("");
@@ -95,6 +121,30 @@ export default function TrilhaPage() {
     await ledgerClear();
     sound.error();
     loadLedger();
+  };
+
+  const verifyLedgerChain = async () => {
+    setVerifying(true);
+    try {
+      const entries = ledger.map((e) => {
+        const raw = e as unknown as Record<string, unknown>;
+        return {
+          hash: (raw.hash as string) ?? "",
+          prevHash: (raw.prevHash as string) ?? "",
+          ts: e.ts, source: e.source, destination: e.destination,
+          amount: e.amount, purpose: e.purpose, status: e.status,
+          signerHandle: e.signerHandle,
+        };
+      }) as DagEntry[];
+      entries.sort((a, b) => a.ts - b.ts);
+      const result = await verifyChain(entries);
+      setChainVerification(result);
+      if (result.valid) sound.success(); else sound.error();
+    } catch {
+      setChainVerification({ valid: false, brokenAt: null, totalEntries: 0, brokenHash: null, message: "Verification failed" });
+      sound.error();
+    }
+    setVerifying(false);
   };
 
   const signAndExport = async () => {
@@ -310,6 +360,69 @@ export default function TrilhaPage() {
           </div>
         )}
       </TerminalCard>
+
+      {/* Chain verification panel */}
+      {ledger.length > 0 && (
+        <TerminalCard title="CHAIN INTEGRITY — TAMPER-EVIDENT HASH VERIFICATION" accent="amber" className="mb-6">
+          <div className="flex items-center gap-3 mb-3">
+            <button
+              onClick={verifyLedgerChain}
+              disabled={verifying}
+              className="px-3 py-1.5 text-xs border border-blood text-blood-bright hover:bg-blood hover:text-void disabled:opacity-30"
+            >
+              {verifying ? "[ VERIFYING... ]" : "[ VERIFY CHAIN ]"}
+            </button>
+            <button
+              onClick={() => setShowHashes(!showHashes)}
+              className="text-xs px-3 py-1.5 border border-border-dim text-content-secondary hover:border-terminal-green hover:text-terminal-green"
+            >
+              {showHashes ? "[ HIDE HASHES ]" : "[ SHOW HASHES ]"}
+            </button>
+          </div>
+
+          {chainVerification && (
+            <div className={`p-2 border ${chainVerification.valid ? "border-terminal-green/40 bg-terminal-green/5" : "border-blood/40 bg-blood/5"}`}>
+              <div className="flex items-center gap-2">
+                <StatusPill color={chainVerification.valid ? "green" : "blood"}>
+                  {chainVerification.valid ? "✓ CHAIN VALID" : "✗ CHAIN BROKEN"}
+                </StatusPill>
+                <span className="text-xs text-content-secondary">{chainVerification.message}</span>
+              </div>
+              {!chainVerification.valid && chainVerification.brokenAt !== null && (
+                <div className="text-[10px] text-blood-bright mt-1">
+                  Broken at entry index {chainVerification.brokenAt} — content was modified after hashing.
+                </div>
+              )}
+            </div>
+          )}
+
+          {showHashes && ledger.length > 0 && (
+            <div className="mt-3 space-y-1 max-h-48 overflow-y-auto">
+              <div className="text-[9px] text-content-dim uppercase tracking-widest mb-1">
+                HASH CHAIN ({ledger.length} entries, oldest → newest)
+              </div>
+              {ledger.slice().sort((a, b) => a.ts - b.ts).map((e, i) => {
+                const raw = e as unknown as Record<string, unknown>;
+                const hash = raw.hash as string | undefined;
+                const prevHash = raw.prevHash as string | undefined;
+                return (
+                  <div key={e.id ?? i} className="flex items-center gap-2 text-[10px] font-mono">
+                    <span className="text-content-dim shrink-0">#{i}</span>
+                    <span className="text-terminal-green shrink-0">{hash ? shortHash(hash) : "no-hash"}</span>
+                    <span className="text-content-dim shrink-0">←</span>
+                    <span className="text-content-dim shrink-0">{prevHash ? shortHash(prevHash) : "—"}</span>
+                    <span className="text-content-dim ml-auto truncate">{e.source} → {e.destination}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          <div className="text-[10px] text-content-dim mt-3">
+            ▸ Each entry's SHA-256 hash includes the previous entry's hash, forming a tamper-evident chain. Modify any past entry and the entire chain breaks. This is client-side only — for external verification, export the signed ledger JSON.
+          </div>
+        </TerminalCard>
+      )}
 
       {/* Needs matching */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">

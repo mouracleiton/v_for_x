@@ -1,9 +1,8 @@
 "use client";
 
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
-import geoDataRaw from "@/data/world_backbone_geo.json";
 import backbone from "@/data/world_backbone.json";
 import TerminalCard from "@/components/ui/TerminalCard";
 import GlitchText from "@/components/ui/GlitchText";
@@ -25,7 +24,9 @@ const ChoroplethMap = dynamic(
 );
 
 const data = backbone as WorldBackbone;
-const geoData = geoDataRaw as { type: "FeatureCollection"; features: unknown[] };
+
+/* GeoJSON type — loaded lazily at runtime to avoid 2.5MB bundle bloat */
+type GeoFeatureCollection = { type: "FeatureCollection"; features: { properties: Record<string, unknown> }[] };
 
 /* ═══════════════════════════════════════════════════════════════
    DIMENSION CONFIGURATION
@@ -96,10 +97,11 @@ const DIMENSIONS: DimensionDef[] = [
 /**
  * Compute min/max of a dimension from the GeoJSON feature properties.
  */
-function computeRange(dimKey: string): [number, number] {
+function computeRange(dimKey: string, geoData: GeoFeatureCollection | null): [number, number] {
   let min = Infinity;
   let max = -Infinity;
-  const features = (geoData as { features: { properties: Record<string, unknown> }[] }).features;
+  if (!geoData) return [0, 1];
+  const features = geoData.features;
   for (const f of features) {
     const raw = f.properties[dimKey];
     if (typeof raw === "number" && !isNaN(raw) && isFinite(raw)) {
@@ -267,13 +269,23 @@ export default function MapaDaDorPage() {
   const router = useRouter();
   const { setCurrentCountry } = useStore();
   const [activeDimKey, setActiveDimKey] = useState(DIMENSIONS[0].key);
+  const [geoData, setGeoData] = useState<GeoFeatureCollection | null>(null);
+  const basePath = process.env.NODE_ENV === "production" ? "/v_for_x" : "";
+
+  // Lazy-load 2.5MB GeoJSON at runtime instead of bundling into JS
+  useEffect(() => {
+    fetch(`${basePath}/data/world_backbone_geo.json`)
+      .then((r) => r.json() as Promise<GeoFeatureCollection>)
+      .then((d) => setGeoData(d))
+      .catch(() => { /* offline fallback handled by null check */ });
+  }, [basePath]);
 
   const activeDim = useMemo(
     () => DIMENSIONS.find((d) => d.key === activeDimKey) ?? DIMENSIONS[0],
     [activeDimKey]
   );
 
-  const severityRange = useMemo(() => computeRange(activeDimKey), [activeDimKey]);
+  const severityRange = useMemo(() => computeRange(activeDimKey, geoData), [activeDimKey, geoData]);
 
   const hotspotIso3s = useMemo(() => {
     return new Set(data.hotspots.all.map((h) => h.iso3));
@@ -318,13 +330,19 @@ export default function MapaDaDorPage() {
 
         {/* Center — map */}
         <div className="border border-border-dim h-[50vh] sm:h-[60vh] lg:h-[70vh] bg-abyss">
-          <ChoroplethMap
-            geoData={geoData as never}
-            dimension={activeDimKey}
-            onCountryClick={handleCountryClick}
-            severityRange={severityRange}
-            hotspotIso3s={hotspotIso3s}
-          />
+          {geoData ? (
+            <ChoroplethMap
+              geoData={geoData as never}
+              dimension={activeDimKey}
+              onCountryClick={handleCountryClick}
+              severityRange={severityRange}
+              hotspotIso3s={hotspotIso3s}
+            />
+          ) : (
+            <div className="h-full w-full flex items-center justify-center text-blood-bright text-xs">
+              <span className="cursor-blink">&gt; FETCHING 2.5MB GEOSPATIAL DATA...</span>
+            </div>
+          )}
         </div>
 
         {/* Right sidebar — hotspot list */}

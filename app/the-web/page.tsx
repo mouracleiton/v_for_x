@@ -12,6 +12,12 @@ interface P2PMessage {
   text: string;
   ts: number;
   self: boolean;
+  /** ECDSA signature hex (signs over author+text+ts) */
+  sig?: string;
+  /** Truncated public key hex of signer */
+  pubKey?: string;
+  /** Whether the signature was verified on receipt */
+  verified?: boolean;
 }
 
 interface DeadDrop {
@@ -21,6 +27,10 @@ interface DeadDrop {
   msg: string;
   ts: number;
   author: string;
+  /** Encrypted message (AES-GCM hex). Present when stored encrypted. */
+  enc?: string;
+  /** AES-GCM IV hex (12 bytes). */
+  iv?: string;
 }
 
 export default function TeiaPage() {
@@ -42,6 +52,7 @@ export default function TeiaPage() {
 
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const dcRef = useRef<RTCDataChannel | null>(null);
+  const keyPairRef = useRef<CryptoKeyPair | null>(null);
 
   useEffect(() => {
     if (!session) startSession();
@@ -77,6 +88,7 @@ export default function TeiaPage() {
       const pubKeyHex = Array.from(new Uint8Array(pubKey))
         .map((b) => b.toString(16).padStart(2, "0"))
         .join("");
+      keyPairRef.current = keyPair; // store for message signing
       setIdentity({
         handle,
         publicKey: pubKeyHex.slice(0, 32),
@@ -84,9 +96,17 @@ export default function TeiaPage() {
       });
       sound.success();
     } catch {
+      // crypto.subtle unavailable (non-secure context) — use SHA-256 fallback
+      const fallbackHash = await crypto.subtle.digest(
+        "SHA-256",
+        new TextEncoder().encode(handle + Date.now())
+      ).catch(() => null);
+      const fallbackKey = fallbackHash
+        ? Array.from(new Uint8Array(fallbackHash)).map((b) => b.toString(16).padStart(2, "0")).join("").slice(0, 32)
+        : Array.from(crypto.getRandomValues(new Uint8Array(16))).map((b) => b.toString(16).padStart(2, "0")).join("");
       setIdentity({
         handle,
-        publicKey: "simulated_key_" + Date.now(),
+        publicKey: fallbackKey,
         createdAt: Date.now(),
       });
       sound.success();
@@ -109,10 +129,40 @@ export default function TeiaPage() {
       log("DATA CHANNEL CLOSED — P2P link severed");
       setPeerStatus("idle");
     };
-    dc.onmessage = (e) => {
+    dc.onmessage = async (e) => {
       try {
         const msg = JSON.parse(e.data) as P2PMessage;
-        setLocalMessages((prev) => [...prev, { ...msg, self: false }]);
+        // Verify ECDSA signature if present
+        let verified = false;
+        if (msg.sig && msg.pubKey) {
+          try {
+            const pubKeyData = Uint8Array.from(
+              msg.pubKey.match(/.{1,2}/g)!.map((b) => parseInt(b, 16))
+            );
+            const cryptoKey = await crypto.subtle.importKey(
+              "raw",
+              pubKeyData,
+              { name: "ECDSA", namedCurve: "P-256" },
+              false,
+              ["verify"]
+            );
+            const sigData = Uint8Array.from(
+              msg.sig.match(/.{1,2}/g)!.map((b) => parseInt(b, 16))
+            );
+            const content = new TextEncoder().encode(
+              JSON.stringify({ author: msg.author, text: msg.text, ts: msg.ts })
+            );
+            verified = await crypto.subtle.verify(
+              { name: "ECDSA", hash: "SHA-256" },
+              cryptoKey,
+              sigData,
+              content
+            );
+          } catch {
+            verified = false;
+          }
+        }
+        setLocalMessages((prev) => [...prev, { ...msg, self: false, verified }]);
         sound.select();
       } catch {
         log("Received malformed message");
@@ -240,7 +290,7 @@ export default function TeiaPage() {
     log("Connection closed manually");
   };
 
-  const sendP2PMessage = () => {
+  const sendP2PMessage = async () => {
     if (!input.trim() || !identity) return;
     if (!dcRef.current || dcRef.current.readyState !== "open") {
       sound.error();
@@ -253,6 +303,29 @@ export default function TeiaPage() {
       ts: Date.now(),
       self: true,
     };
+    // Sign message with ECDSA private key
+    if (keyPairRef.current) {
+      try {
+        const content = new TextEncoder().encode(
+          JSON.stringify({ author: msg.author, text: msg.text, ts: msg.ts })
+        );
+        const sigBuf = await crypto.subtle.sign(
+          { name: "ECDSA", hash: "SHA-256" },
+          keyPairRef.current.privateKey,
+          content
+        );
+        msg.sig = Array.from(new Uint8Array(sigBuf))
+          .map((b) => b.toString(16).padStart(2, "0"))
+          .join("");
+        const pubRaw = await crypto.subtle.exportKey("raw", keyPairRef.current.publicKey);
+        msg.pubKey = Array.from(new Uint8Array(pubRaw))
+          .map((b) => b.toString(16).padStart(2, "0"))
+          .join("");
+        msg.verified = true;
+      } catch {
+        log("Failed to sign message — sending unsigned");
+      }
+    }
     try {
       dcRef.current.send(JSON.stringify(msg));
       setLocalMessages((prev) => [...prev, msg]);
@@ -264,15 +337,63 @@ export default function TeiaPage() {
     }
   };
 
-  const plantDeadDrop = () => {
+  /* ═══════════════════════════════════════════════════════════════
+     AES-GCM Dead Drop encryption (at-rest)
+     ═══════════════════════════════════════════════════════════════ */
+  const deriveDropKey = async (): Promise<CryptoKey | null> => {
+    if (!identity) return null;
+    try {
+      const keyMaterial = await crypto.subtle.importKey(
+        "raw",
+        new TextEncoder().encode(identity.handle),
+        "PBKDF2",
+        false,
+        ["deriveKey"]
+      );
+      return crypto.subtle.deriveKey(
+        { name: "PBKDF2", salt: new TextEncoder().encode("vfx-dead-drop-v1"), iterations: 10000, hash: "SHA-256" },
+        keyMaterial,
+        { name: "AES-GCM", length: 256 },
+        false,
+        ["encrypt", "decrypt"]
+      );
+    } catch { return null; }
+  };
+
+  const encryptMsg = async (plaintext: string): Promise<{ enc: string; iv: string } | null> => {
+    const key = await deriveDropKey();
+    if (!key) return null;
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, new TextEncoder().encode(plaintext));
+    return {
+      enc: Array.from(new Uint8Array(ct)).map((b) => b.toString(16).padStart(2, "0")).join(""),
+      iv: Array.from(iv).map((b) => b.toString(16).padStart(2, "0")).join(""),
+    };
+  };
+
+  const decryptMsg = async (enc: string, ivHex: string): Promise<string | null> => {
+    const key = await deriveDropKey();
+    if (!key) return null;
+    try {
+      const iv = Uint8Array.from(ivHex.match(/.{1,2}/g)!.map((b) => parseInt(b, 16)));
+      const ct = Uint8Array.from(enc.match(/.{1,2}/g)!.map((b) => parseInt(b, 16)));
+      const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ct);
+      return new TextDecoder().decode(pt);
+    } catch { return null; }
+  };
+
+  const plantDeadDrop = async () => {
     if (!deadDropLat || !deadDropLng || !deadDropMsg || !identity) return;
     const lat = parseFloat(deadDropLat).toFixed(4);
     const lng = parseFloat(deadDropLng).toFixed(4);
+    const encrypted = await encryptMsg(deadDropMsg.slice(0, 200));
     const drop: DeadDrop = {
       id: Date.now() + "-" + Math.random().toString(36).slice(2),
       lat,
       lng,
-      msg: deadDropMsg.slice(0, 200),
+      msg: encrypted ? "[ENCRYPTED]" : deadDropMsg.slice(0, 200),
+      enc: encrypted?.enc,
+      iv: encrypted?.iv,
       ts: Date.now(),
       author: identity.handle,
     };
@@ -331,6 +452,7 @@ export default function TeiaPage() {
             <button
               onClick={() => {
                 setIdentity(null);
+                keyPairRef.current = null;
                 closeConnection();
                 sound.error();
               }}
@@ -506,6 +628,11 @@ export default function TeiaPage() {
                           {m.author}:
                         </span>
                         <span className={`text-content-primary break-words ${m.self ? "text-right" : ""}`}>{m.text}</span>
+                        {m.sig && (
+                          <span className={`shrink-0 text-[9px] ${m.verified ? "text-terminal-green" : "text-blood-bright"}`} title={m.verified ? "ECDSA signature verified" : "Signature verification failed"}>
+                            {m.verified ? "✓" : "✗"}
+                          </span>
+                        )}
                         {m.self && <span className="text-content-dim shrink-0">[{new Date(m.ts).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false })}]</span>}
                       </div>
                     ))
@@ -604,7 +731,7 @@ export default function TeiaPage() {
                     <div className="text-[10px] text-terminal-green mt-1">
                       {d.lat}, {d.lng}
                     </div>
-                    <div className="text-xs text-content-primary mt-1">{d.msg}</div>
+                    <DecryptedDrop drop={d} decrypt={decryptMsg} />
                   </div>
                 ))}
               </div>
@@ -614,4 +741,23 @@ export default function TeiaPage() {
       )}
     </div>
   );
+}
+
+/* Decrypts a dead drop message on render. Shows placeholder while encrypted. */
+function DecryptedDrop({
+  drop,
+  decrypt,
+}: {
+  drop: DeadDrop;
+  decrypt: (enc: string, iv: string) => Promise<string | null>;
+}) {
+  const [text, setText] = useState(drop.msg);
+  useEffect(() => {
+    if (drop.enc && drop.iv) {
+      decrypt(drop.enc, drop.iv).then((pt) => {
+        if (pt) setText(pt);
+      });
+    }
+  }, [drop.enc, drop.iv, decrypt]);
+  return <div className="text-xs text-content-primary mt-1">{text}</div>;
 }

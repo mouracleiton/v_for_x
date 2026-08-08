@@ -68,8 +68,24 @@ export const useStore = create<VFXState>((set) => ({
   isDuress: false,
   triggerDuress: () => {
     if (typeof window !== "undefined") {
+      // Clear all client-side storage
       localStorage.clear();
+      try {
+        sessionStorage.clear();
+      } catch { /* ignore */ }
       indexedDB.deleteDatabase("vfx-store");
+      // Purge service worker caches (critical for panic wipe)
+      if ("caches" in window) {
+        caches.keys().then((names) => {
+          for (const name of names) caches.delete(name);
+        });
+      }
+      // Unregister service worker so cached pages are not retrievable
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.getRegistrations().then((regs) => {
+          for (const reg of regs) reg.unregister();
+        });
+      }
     }
     set({ isDuress: true, identity: null, session: null });
   },

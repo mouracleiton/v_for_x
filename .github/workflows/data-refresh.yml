@@ -1,0 +1,79 @@
+name: Scheduled Data Refresh
+
+on:
+  schedule:
+    # Run every Sunday at 00:00 UTC
+    - cron: "0 0 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install requests beautifulsoup4
+
+      - name: Save snapshot of current data
+        run: python3 scripts/snapshot.py save
+
+      - name: Run data update pipeline
+        run: python3 scripts/update_data.py
+        continue-on-error: true
+
+      - name: Rebuild static API endpoints
+        run: |
+          npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Check for changes
+        id: changes
+        run: |
+          git add -A
+          if git diff --cached --quiet; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Pull Request with updated data
+        if: steps.changes.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "data: scheduled refresh $(date -u +%Y-%m-%d)"
+          title: "🔄 Scheduled Data Refresh — $(date -u +%Y-%m-%d)"
+          body: |
+            ## Automated Data Refresh
+
+            This PR was created by the scheduled data refresh workflow.
+
+            **What changed:**
+            - Snapshot of previous data saved
+            - Data update pipeline executed
+            - Static API endpoints rebuilt
+
+            Review the diff carefully before merging.
+          branch: data/refresh-$(date -u +%Y-%m-%d)
+          delete-branch: true
+          labels: data, automated
