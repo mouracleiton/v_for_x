@@ -510,7 +510,7 @@ export default function TheArchivePage() {
           </TerminalCard>
 
           {/* Hotspot scoring */}
-          <TerminalCard title="HOTSPOT SCORING" accent="blood" glow>
+          <TerminalCard title={tc(lang, "card.hotspot_scoring")} accent="blood" glow>
             <p className="text-xs text-content-secondary leading-relaxed mb-3">
               Countries are classified into WFP concern tiers based on acute food
               insecurity, famine risk, and conflict intensity. The{" "}
@@ -538,7 +538,7 @@ export default function TheArchivePage() {
           </TerminalCard>
 
           {/* Scenario modeling */}
-          <TerminalCard title="SCENARIO MODELING" accent="amber">
+          <TerminalCard title={tc(lang, "card.scenario_modeling")} accent="amber">
             <p className="text-xs text-content-secondary leading-relaxed mb-3">
               Five budget-level scenarios project hunger trajectories from{" "}
               <span className="text-warning-amber font-mono">2025–2034</span>. Each
@@ -571,7 +571,7 @@ export default function TheArchivePage() {
           </TerminalCard>
 
           {/* CPI / Democracy scales */}
-          <TerminalCard title="GOVERNANCE SCALES" accent="green">
+          <TerminalCard title={tc(lang, "card.governance_scales")} accent="green">
             <p className="text-xs text-content-secondary leading-relaxed mb-3">
               Two governance indices use fixed scales for cross-country comparison.
             </p>
@@ -698,7 +698,7 @@ export default function TheArchivePage() {
           </h2>
         </div>
 
-        <TerminalCard title="OPEN DATA LICENSE" accent="amber">
+        <TerminalCard title={tc(lang, "card.open_data_license")} accent="amber">
           <p className="text-xs text-content-secondary leading-relaxed mb-3">
             This dataset is released under{" "}
             <span className="text-warning-amber font-mono">{data.metadata.license}</span>{" "}
@@ -748,7 +748,7 @@ export default function TheArchivePage() {
         <h2 className="text-sm uppercase tracking-widest text-blood-bright mb-4">
           §05 // PUBLIC DATA API
         </h2>
-        <TerminalCard title="JSON API — READ-ONLY, CC0" accent="green">
+        <TerminalCard title={tc(lang, "card.json_api")} accent="green">
           <p className="text-xs text-content-secondary mb-4">
             The entire dataset is served as static JSON. No keys, no rate limits, no authentication.
             Build apps, dashboards, research tools on top of this data.

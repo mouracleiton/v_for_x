@@ -125,7 +125,7 @@ export default function MascaraPage() {
       </TerminalCard>
 
       {/* ZK Identity — REAL Implementation */}
-      <TerminalCard title="ZK IDENTITY SYSTEM — HASH-COMMITMENT PROOFS" accent="green" className="mb-6">
+      <TerminalCard title={tc(lang, "card.zk_identity")} accent="green" className="mb-6">
         <p className="text-xs text-content-secondary mb-3">
           Prove attributes about yourself without revealing your identity. Uses SHA-256 commitment scheme with Fiat-Shamir heuristic.
         </p>

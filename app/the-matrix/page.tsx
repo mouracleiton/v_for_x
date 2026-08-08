@@ -232,7 +232,7 @@ export default function TheMatrixPage() {
       </TerminalCard>
 
       {/* Country completeness explorer */}
-      <TerminalCard title="COUNTRY COMPLETENESS // WHERE THE GAPS ARE" className="mb-6">
+      <TerminalCard title={tc(lang, "card.country_completeness")} className="mb-6">
         {/* Controls */}
         <div className="flex flex-wrap items-center gap-3 mb-4">
           <div className="flex items-center gap-2">
@@ -356,7 +356,7 @@ export default function TheMatrixPage() {
       )}
 
       {/* Source attribution */}
-      <TerminalCard title="SOURCES & METHODOLOGY" className="mb-6">
+      <TerminalCard title={tc(lang, "card.sources_methodology")} className="mb-6">
         <div className="space-y-2 text-xs text-content-secondary">
           <p>
             <span className="text-content-dim">// {data.metadata.sources.length} primary sources · {data.metadata.total_countries} countries · CC0</span>

@@ -650,7 +650,7 @@ export default function TheActPage() {
 
           {/* WhatsApp */}
           {activeTab === "whatsapp" && (
-            <TerminalCard title="💬 WHATSAPP / TELEGRAM MESSAGE" accent="green">
+            <TerminalCard title={tc(lang, "card.whatsapp_msg")} accent="green">
               <pre className="text-xs text-content-primary whitespace-pre-wrap font-mono leading-relaxed p-3 border border-border-dim bg-void max-h-[400px] overflow-y-auto">
                 {kit.whatsapp}
               </pre>
@@ -673,7 +673,7 @@ export default function TheActPage() {
 
           {/* Instagram */}
           {activeTab === "instagram" && (
-            <TerminalCard title="📸 INSTAGRAM / FACEBOOK CAPTION" accent="amber">
+            <TerminalCard title={tc(lang, "card.instagram_caption")} accent="amber">
               <pre className="text-xs text-content-primary whitespace-pre-wrap font-mono leading-relaxed p-3 border border-border-dim bg-void max-h-[400px] overflow-y-auto">
                 {kit.instagram}
               </pre>
@@ -689,7 +689,7 @@ export default function TheActPage() {
 
           {/* Email */}
           {activeTab === "email" && (
-            <TerminalCard title="✉ EMAIL TO REPRESENTATIVE" accent="green" glow>
+            <TerminalCard title={tc(lang, "card.email_rep")} accent="green" glow>
               <div className="mb-3">
                 <div className="flex items-center justify-between gap-2 mb-1">
                   <span className="text-[10px] text-content-dim uppercase">Subject</span>
@@ -757,7 +757,7 @@ export default function TheActPage() {
           )}
         </>
       ) : (
-        <TerminalCard title="AWAITING INPUT" accent="amber">
+        <TerminalCard title={tc(lang, "card.awaiting_input")} accent="amber">
           <div className="text-sm text-content-dim text-center py-6">
             ▒ Select a country or SDG equation above to generate your campaign kit. ▒
           </div>

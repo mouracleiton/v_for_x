@@ -236,7 +236,7 @@ export default function TheApiPage() {
       </TerminalCard>
 
       {/* Live query */}
-      <TerminalCard title="LIVE QUERY // FETCH ANY COUNTRY" className="mb-6">
+      <TerminalCard title={tc(lang, "card.live_query")} className="mb-6">
         <div className="flex items-center gap-3 mb-3">
           <code className="text-xs text-content-dim font-mono">
             GET /api/v1/countries/
@@ -266,7 +266,7 @@ export default function TheApiPage() {
       </TerminalCard>
 
       {/* Code samples */}
-      <TerminalCard title="CODE SAMPLES // USE THE DATA" accent="green" className="mb-6">
+      <TerminalCard title={tc(lang, "card.code_samples")} accent="green" className="mb-6">
         <div className="flex gap-2 mb-3">
           {(Object.keys(CODE_SAMPLES) as Array<keyof typeof CODE_SAMPLES>).map((lang) => (
             <button
@@ -288,7 +288,7 @@ export default function TheApiPage() {
       </TerminalCard>
 
       {/* Data schema overview */}
-      <TerminalCard title="DATA SCHEMA // 23 DIMENSIONS" className="mb-6">
+      <TerminalCard title={tc(lang, "card.data_schema")} className="mb-6">
         <p className="text-xs text-content-dim mb-3">
           // Each country record has these nested objects. Full TypeScript definitions in lib/types.ts.
         </p>
@@ -323,7 +323,7 @@ export default function TheApiPage() {
       </TerminalCard>
 
       {/* License */}
-      <TerminalCard title="LICENSE // NO RIGHTS RESERVED" accent="green">
+      <TerminalCard title={tc(lang, "card.license")} accent="green">
         <div className="text-xs text-content-secondary space-y-2">
           <p>
             All data is released under <span className="text-terminal-green font-bold">CC0 (Creative Commons Zero)</span> —

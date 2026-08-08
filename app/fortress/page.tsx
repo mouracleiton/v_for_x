@@ -103,7 +103,7 @@ npx serve out/ -l 8080
       </TerminalCard>
 
       {/* Decentralized hosting */}
-      <TerminalCard title="DECENTRALIZED HOSTING" className="mb-6">
+      <TerminalCard title={tc(lang, "card.decentralized_hosting")} className="mb-6">
         <div className="space-y-4">
           <div>
             <div className="text-xs font-bold text-blood-bright mb-2">IPFS</div>
@@ -156,7 +156,7 @@ sudo cat /var/lib/tor/v-for-x/hostname`}</pre>
       </TerminalCard>
 
       {/* Anti-censorship */}
-      <TerminalCard title="ANTI-CENSORSHIP TOOLKIT" accent="amber" className="mb-6">
+      <TerminalCard title={tc(lang, "card.anti_censorship")} accent="amber" className="mb-6">
         <div className="space-y-3 text-xs">
           <div>
             <span className="text-blood-bright font-bold">DOMAIN ROTATION:</span>
@@ -187,7 +187,7 @@ sudo cat /var/lib/tor/v-for-x/hostname`}</pre>
       </TerminalCard>
 
       {/* Build from source */}
-      <TerminalCard title="BUILD FROM SOURCE — VERIFY INTEGRITY">
+      <TerminalCard title={tc(lang, "card.build_source")}>
         <pre className="text-xs text-terminal-green bg-void border border-border-dim p-3 overflow-x-auto">{`# Requirements: Node.js 18+, npm
 git clone https://github.com/mouracleiton/v_for_vigilance
 cd v_for_vigilance/v-for-x

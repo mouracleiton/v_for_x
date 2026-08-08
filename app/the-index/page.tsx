@@ -381,7 +381,7 @@ function ComparisonMode() {
 
   return (
     <div className="space-y-6">
-      <TerminalCard title="SELECT COUNTRIES (MAX 4)" accent="green">
+      <TerminalCard title={tc(lang, "card.select_countries")} accent="green">
         <p className="text-xs text-content-secondary mb-3">
           // pin up to 4 countries for side-by-side comparison across {COMPARE_METRICS.length} metrics.
         </p>
@@ -423,7 +423,7 @@ function ComparisonMode() {
       </TerminalCard>
 
       {countries.length >= 2 && (
-        <TerminalCard title="CRISIS PROFILE RADAR — DOMAIN VULNERABILITY" accent="blood" glow>
+        <TerminalCard title={tc(lang, "card.crisis_radar")} accent="blood" glow>
           <p className="text-xs text-content-secondary mb-3">
             // one polygon per country — the shape of the crisis. each axis is a domain
             normalized to 0-100 where 100 = maximum vulnerability. bigger area = worse off.
@@ -563,11 +563,12 @@ function ComparisonMode() {
    ═══════════════════════════════════════════════════════════════ */
 
 function RegionalRollups() {
+  const { lang } = useStore();
   const regions = useMemo(() => aggregateByRegion(data.countries), []);
 
   return (
     <div className="space-y-4">
-      <TerminalCard title="REGIONAL AGGREGATION — POPULATION-WEIGHTED" accent="amber" glow>
+      <TerminalCard title={tc(lang, "card.regional_aggregation")} accent="amber" glow>
         <p className="text-xs text-content-secondary mb-4">
           // every metric below is weighted by population across all countries in the region.
           ranked worst-first by undernourishment.

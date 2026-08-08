@@ -218,7 +218,7 @@ export default function TrilhaPage() {
       </div>
 
       {/* Create entry */}
-      <TerminalCard title="CREATE LEDGER ENTRY" accent="green" className="mb-6">
+      <TerminalCard title={tc(lang, "card.create_ledger")} accent="green" className="mb-6">
         <p className="text-xs text-content-secondary mb-4">
           Log a resource transfer. Entries are stored locally in your browser (IndexedDB) and persist across sessions.
         </p>
@@ -366,7 +366,7 @@ export default function TrilhaPage() {
 
       {/* Chain verification panel */}
       {ledger.length > 0 && (
-        <TerminalCard title="CHAIN INTEGRITY — TAMPER-EVIDENT HASH VERIFICATION" accent="amber" className="mb-6">
+        <TerminalCard title={tc(lang, "card.chain_integrity")} accent="amber" className="mb-6">
           <div className="flex items-center gap-3 mb-3">
             <button
               onClick={verifyLedgerChain}
@@ -503,7 +503,7 @@ export default function TrilhaPage() {
       </div>
 
       {/* Priority routing */}
-      <TerminalCard title="PRIORITY ROUTING — HIGHEST-NEED ZONES" accent="amber" className="mb-6">
+      <TerminalCard title={tc(lang, "card.priority_routing")} accent="amber" className="mb-6">
         <p className="text-xs text-content-secondary mb-3">
           These zones have the highest measured need. Route resources here for maximum impact.
         </p>

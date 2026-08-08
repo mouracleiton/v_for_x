@@ -253,7 +253,7 @@ export default function TheChoicePage() {
       </div>
 
       {/* Country ranking */}
-      <TerminalCard title="THE RANKING // MORAL CALCULUS PER COUNTRY" className="mb-6">
+      <TerminalCard title={tc(lang, "card.ranking_moral")} className="mb-6">
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>

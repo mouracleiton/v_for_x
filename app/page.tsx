@@ -298,7 +298,7 @@ export default function HomePage() {
       </TerminalCard>
 
       {/* The Number */}
-      <TerminalCard title="THE NUMBER" className="mb-6">
+      <TerminalCard title={tc(lang, "card.the_number")} className="mb-6">
         <div className="space-y-3">
           {rotatingNumbers.map((n, i) => (
             <div
@@ -321,7 +321,7 @@ export default function HomePage() {
       <SdgRotatingCounter />
 
       {/* Top 3 Crises */}
-      <TerminalCard title="TODAY'S 3 WORST CRISES" className="mb-6" glow>
+      <TerminalCard title={tc(lang, "card.worst_crises")} className="mb-6" glow>
         <div className="space-y-3">
           {topCrises.map((c, i) => {
             const country = data.countries.find((x) => x.iso3 === c.iso3);
@@ -370,7 +370,7 @@ export default function HomePage() {
       </TerminalCard>
 
       {/* Shareable Ammunition */}
-      <TerminalCard title="SHAREABLE AMMUNITION" className="mb-6">
+      <TerminalCard title={tc(lang, "card.shareable_ammo")} className="mb-6">
         <p className="text-xs text-content-dim mb-3">
           // viral data points with source attribution — one click to copy
         </p>

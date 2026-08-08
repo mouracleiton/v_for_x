@@ -167,7 +167,7 @@ export default function TheLedgerPage() {
           </TerminalCard>
 
           {/* The allocation breakdown */}
-          <TerminalCard title="WHERE THE $93B GOES // RECOMMENDED ALLOCATION" accent="green" className="mb-6">
+          <TerminalCard title={tc(lang, "card.where_93b")} accent="green" className="mb-6">
             <div className="space-y-2">
               {data.financing.allocation.map((item) => (
                 <div key={item.name} className="flex items-center gap-3">
@@ -264,7 +264,7 @@ export default function TheLedgerPage() {
 
       {/* ═══ PHASES TAB ═══ */}
       {tab === "phases" && (
-        <TerminalCard title="THE 10-YEAR ROADMAP // END HUNGER BY 2034" accent="green" className="mb-6">
+        <TerminalCard title={tc(lang, "card.roadmap_10yr")} accent="green" className="mb-6">
           <p className="text-xs text-content-dim mb-4">
             // The Ambitious scenario ($93B/yr) has 3 phases. Each has clear targets.
             This is not a wish — it&apos;s a plan with milestones.

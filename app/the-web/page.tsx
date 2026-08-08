@@ -484,7 +484,7 @@ export default function TeiaPage() {
       {identity && (
         <>
           {/* P2P Connection Manager */}
-          <TerminalCard title="P2P LINK — MANUAL SIGNALING (NO SERVER)" accent="amber" className="mb-6">
+          <TerminalCard title={tc(lang, "card.p2p_signaling")} accent="amber" className="mb-6">
             <div className="flex items-center gap-2 mb-4">
               <StatusPill color={peerStatusColor as "green" | "blood" | "dim" | "amber"}>
                 {peerStatus.toUpperCase()}

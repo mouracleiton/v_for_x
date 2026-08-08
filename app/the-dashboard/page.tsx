@@ -205,7 +205,7 @@ export default function TheDashboardPage() {
       </TerminalCard>
 
       {/* Extreme contrasts */}
-      <TerminalCard title="EXTREME CONTRASTS // THE INEQUALITY OF EXISTENCE" accent="blood" className="mb-6">
+      <TerminalCard title={tc(lang, "card.extreme_contrasts")} accent="blood" className="mb-6">
         <p className="text-xs text-content-dim mb-4">
           // The same species, the same planet. These gaps are not natural — they are engineered.
         </p>
@@ -295,7 +295,7 @@ export default function TheDashboardPage() {
       </div>
 
       {/* Cost to fix */}
-      <TerminalCard title="THE COST // AFFORDABILITY" accent="green" className="mb-6">
+      <TerminalCard title={tc(lang, "card.the_cost")} accent="green" className="mb-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="p-3 border border-terminal-green/30 bg-terminal-green/5">
             <div className="text-[10px] text-content-dim uppercase">END HUNGER</div>
@@ -321,7 +321,7 @@ export default function TheDashboardPage() {
       </TerminalCard>
 
       {/* Quick links */}
-      <TerminalCard title="EXPLORE THE DATA" className="mb-6">
+      <TerminalCard title={tc(lang, "card.explore_data")} className="mb-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
           {[
             { href: "/sorrow-map/", label: "MAP" },

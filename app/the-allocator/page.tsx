@@ -179,7 +179,7 @@ export default function AllocatorPage() {
       </TerminalCard>
 
       {/* Allocation sliders */}
-      <TerminalCard title="ALLOCATE THE BUDGET" accent="amber" className="mb-6">
+      <TerminalCard title={tc(lang, "card.allocate_budget")} accent="amber" className="mb-6">
         <div className="space-y-5">
           {BUDGET_ITEMS.map((item) => {
             const allocated = allocations[item.id] ?? 0;
@@ -250,7 +250,7 @@ export default function AllocatorPage() {
       </TerminalCard>
 
       {/* Visualization */}
-      <TerminalCard title="FUNDING BREAKDOWN" accent="green" className="mb-6">
+      <TerminalCard title={tc(lang, "card.funding_breakdown")} accent="green" className="mb-6">
         <div style={{ width: "100%", height: 300 }}>
           <ResponsiveContainer>
             <BarChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 10 }}>

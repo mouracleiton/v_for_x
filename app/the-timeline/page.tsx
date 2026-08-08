@@ -208,7 +208,7 @@ export default function TheTimelinePage() {
 
       {/* HUNGER TRAJECTORY TAB */}
       {tab === "hunger" && (
-        <TerminalCard title="HUNGER OVER 10 YEARS // MILLIONS UNDERNOURISHED" accent="amber" className="mb-6">
+        <TerminalCard title={tc(lang, "card.hunger_10yr")} accent="amber" className="mb-6">
           <div style={{ width: "100%", height: 380 }}>
             <ResponsiveContainer>
               <AreaChart data={hungerChartData} margin={{ top: 10, right: 30, bottom: 20, left: 10 }}>
@@ -243,7 +243,7 @@ export default function TheTimelinePage() {
 
       {/* DEATHS AVOIDED TAB */}
       {tab === "deaths" && (
-        <TerminalCard title="LIVES SAVED // CUMULATIVE DEATHS AVOIDED" accent="green" className="mb-6">
+        <TerminalCard title={tc(lang, "card.lives_saved")} accent="green" className="mb-6">
           <div style={{ width: "100%", height: 380 }}>
             <ResponsiveContainer>
               <LineChart data={deathsChartData} margin={{ top: 10, right: 30, bottom: 20, left: 10 }}>
@@ -284,7 +284,7 @@ export default function TheTimelinePage() {
 
       {/* REGIONAL IMPACT TAB */}
       {tab === "regions" && (
-        <TerminalCard title="REGIONAL IMPACT // WHO GETS FED" accent="amber" className="mb-6">
+        <TerminalCard title={tc(lang, "card.regional_impact")} accent="amber" className="mb-6">
           <div className="flex items-center gap-2 mb-4">
             <span className="text-[10px] text-content-dim uppercase tracking-widest">SCENARIO:</span>
             {SCENARIO_META.filter((m) => m.key !== "bau").map((m) => (
@@ -335,7 +335,7 @@ export default function TheTimelinePage() {
 
       {/* INTERVENTION ROI TAB */}
       {tab === "interventions" && (
-        <TerminalCard title="INTERVENTION ROI // WHERE EVERY DOLLAR GOES" accent="green" className="mb-6">
+        <TerminalCard title={tc(lang, "card.intervention_roi")} accent="green" className="mb-6">
           <p className="text-xs text-content-dim mb-3">
             // The Ambitious scenario ($93B/yr) allocates across 6 evidence-based interventions.
             ROI = return on investment multiplier per dollar.
@@ -415,7 +415,7 @@ export default function TheTimelinePage() {
       )}
 
       {/* Year scrubber */}
-      <TerminalCard title="TIMELINE SCRUBBER // EXPLORE ANY YEAR" accent="amber" className="mb-6">
+      <TerminalCard title={tc(lang, "card.timeline_scrubber")} accent="amber" className="mb-6">
         <div className="flex items-center gap-4 mb-4">
           <span className="text-[10px] text-content-dim">2025</span>
           <input

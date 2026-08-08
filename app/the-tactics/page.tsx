@@ -200,7 +200,7 @@ export default function TheTacticsPage() {
       </TerminalCard>
 
       {/* Scatter plot: Casualties vs Success */}
-      <TerminalCard title="CASUALTIES vs SUCCESS // THE MORAL CALCULUS" accent="amber" className="mb-6">
+      <TerminalCard title={tc(lang, "card.casualties_success")} accent="amber" className="mb-6">
         <p className="text-xs text-content-dim mb-3">
           // Each dot is a tactic. X-axis: human cost (left = zero casualties, right = catastrophic).
           Y-axis: success probability. The ideal quadrant is bottom-left (high success, zero cost).

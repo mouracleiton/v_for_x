@@ -117,7 +117,9 @@ function CollapsibleSection({
    STRUCTURAL BLOCKERS PANEL
    ═══════════════════════════════════════════════════════════════ */
 
+function _getLang() { return useStore().lang; }
 function StructuralBlockers({ country }: { country: CountryData }) {
+  const { lang } = useStore();
   const blockers = useMemo(() => {
     const result: { name: string; active: boolean; detail: string }[] = [];
 
@@ -173,7 +175,7 @@ function StructuralBlockers({ country }: { country: CountryData }) {
   }, [country]);
 
   return (
-    <TerminalCard title="STRUCTURAL BLOCKERS" accent="amber">
+    <TerminalCard title={tc(lang, "card.structural_blockers")} accent="amber">
       <div className="space-y-2">
         {blockers.map((b) => (
           <div
@@ -199,6 +201,7 @@ function StructuralBlockers({ country }: { country: CountryData }) {
    ═══════════════════════════════════════════════════════════════ */
 
 function CrossLinks({ country }: { country: CountryData }) {
+  const { lang } = useStore();
   const iso3 = country.iso3;
   const links = [
     countryToEquation(iso3),
@@ -213,7 +216,7 @@ function CrossLinks({ country }: { country: CountryData }) {
   ];
 
   return (
-    <TerminalCard title="CROSS-BRANCH LINKS" accent="green">
+    <TerminalCard title={tc(lang, "card.cross_branch")} accent="green">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
         {links.map((link) => (
           <Link
@@ -330,7 +333,7 @@ function ProofOfMiseryForm({ iso3 }: { iso3: string }) {
   }, [fileHash]);
 
   return (
-    <TerminalCard title="PROOF OF MISERY // SUBMISSION" accent="blood" glow>
+    <TerminalCard title={tc(lang, "card.proof_misery")} accent="blood" glow>
       <div className="mb-3 p-2 border border-blood-dim bg-blood/5">
         <div className="flex items-center gap-2 mb-1">
           <StatusPill color="blood">{tc(lang, "status.unverified")}</StatusPill>
@@ -1003,7 +1006,7 @@ export default function CountryDetail({ params }: PageProps) {
         {/* RIGHT — sidebar */}
         <div className="space-y-4">
           {/* Key indicators summary */}
-          <TerminalCard title="KEY INDICATORS" accent="blood" glow>
+          <TerminalCard title={tc(lang, "card.key_indicators")} accent="blood" glow>
             <div className="space-y-2">
               {c.hunger.undernourishment_pct !== null && (
                 <div className="flex justify-between text-xs">

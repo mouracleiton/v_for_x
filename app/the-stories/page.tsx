@@ -327,7 +327,7 @@ export default function StoriesPage() {
       </TerminalCard>
 
       {/* ═══ CRISIS TIMELINES ═══ */}
-      <TerminalCard title="CRISIS TIMELINES — HOW WE GOT HERE" accent="blood" glow>
+      <TerminalCard title={tc(lang, "card.crisis_timelines")} accent="blood" glow>
         <p className="text-xs text-content-secondary mb-4">
           // curated timelines for the world's worst humanitarian crises. these aren't
           data points — they're a pattern of escalation, neglect, and recurrence.
