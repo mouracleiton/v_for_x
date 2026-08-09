@@ -3,6 +3,8 @@
 import { useState, useMemo } from "react";
 import { useStore } from "@/stores/useStore";
 import { tc } from "@/lib/i18n-content";
+import type { Lang } from "@/lib/i18n";
+import { td } from "@/lib/dossiers-i18n";
 import Link from "next/link";
 import dossiersData from "@/data/dossier-seed.json";
 import TerminalCard from "@/components/ui/TerminalCard";
@@ -39,15 +41,15 @@ interface Dossier {
 
 const dossiers = dossiersData as Dossier[];
 
-const authorityBadge = (type?: string): { label: string; color: "blood" | "amber" | "green" | "dim" } => {
+const authorityBadge = (type: string | undefined, lang: Lang): { label: string; color: "blood" | "amber" | "green" | "dim" } => {
   switch (type) {
-    case "icc_arrest_warrant": return { label: "ICC WARRANT", color: "blood" };
-    case "icj_proceedings": return { label: "ICJ CASE", color: "amber" };
+    case "icc_arrest_warrant": return { label: tc(lang, "authbadge.icc"), color: "blood" };
+    case "icj_proceedings": return { label: tc(lang, "authbadge.icj"), color: "amber" };
     case "un_investigation":
-    case "un_sanctions": return { label: "UN FINDING", color: "blood" };
-    case "sanctions": return { label: "SANCTIONED", color: "amber" };
-    case "community_submitted": return { label: "COMMUNITY", color: "dim" };
-    default: return { label: "COMMUNITY", color: "dim" };
+    case "un_sanctions": return { label: tc(lang, "authbadge.un"), color: "blood" };
+    case "sanctions": return { label: tc(lang, "authbadge.sanctions"), color: "amber" };
+    case "community_submitted": return { label: tc(lang, "authbadge.community"), color: "dim" };
+    default: return { label: tc(lang, "authbadge.community"), color: "dim" };
   }
 };
 
@@ -71,11 +73,11 @@ const severityColor = (sev: string): "blood" | "amber" | "dim" => {
 };
 
 const categoryLabels: Record<string, string> = {
-  war_crime: "WAR CRIME",
-  human_rights_violation: "HUMAN RIGHTS VIOLATION",
-  corruption: "CORRUPTION",
-  economic_exploitation: "ECONOMIC EXPLOITATION",
-  environmental_destruction: "ENVIRONMENTAL DESTRUCTION",
+  war_crime: "dcat.war_crime",
+  human_rights_violation: "dcat.human_rights_violation",
+  corruption: "dcat.corruption",
+  economic_exploitation: "dcat.economic_exploitation",
+  environmental_destruction: "dcat.environmental_destruction",
 };
 
 export default function RegistroPage() {
@@ -195,7 +197,7 @@ export default function RegistroPage() {
                     : "border-border-dim text-content-dim hover:text-content-secondary"
                 }`}
               >
-                {s.replace(/_/g, " ")}
+                {s === "ALL" ? tc(lang, "search.all") : tc(lang, `dstat.${s.toLowerCase()}`)}
               </button>
             ))}
           </div>
@@ -213,7 +215,7 @@ export default function RegistroPage() {
                     : "border-border-dim text-content-dim hover:text-content-secondary"
                 }`}
               >
-                {s}
+                {s === "ALL" ? tc(lang, "search.all") : tc(lang, `dsev.${s}`)}
               </button>
             ))}
           </div>
@@ -233,22 +235,22 @@ export default function RegistroPage() {
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
                   <span className="text-xs text-content-dim">{d.id}</span>
                   <StatusPill color={statusColor(d.status)}>
-                    {d.status.replace(/_/g, " ")}
+                    {tc(lang, `dstat.${d.status.toLowerCase()}`)}
                   </StatusPill>
                   <StatusPill color={severityColor(d.severity)}>
-                    {d.severity.toUpperCase()}
+                    {tc(lang, `dsev.${d.severity}`)}
                   </StatusPill>
                   {d.source_provenance && (() => {
-                    const badge = authorityBadge(d.source_provenance.authority_type);
+                    const badge = authorityBadge(d.source_provenance.authority_type, lang);
                     return <StatusPill color={badge.color}>{badge.label}</StatusPill>;
                   })()}
                 </div>
-                <h3 className="text-sm font-bold text-content-primary">{d.subject}</h3>
-                <p className="text-xs text-content-secondary mt-1 line-clamp-2">{d.accusation}</p>
+                <h3 className="text-sm font-bold text-content-primary">{td(d.id, lang).subject}</h3>
+                <p className="text-xs text-content-secondary mt-1 line-clamp-2">{td(d.id, lang).accusation}</p>
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-3 text-xs text-content-dim mt-2">
-              <span>▸ {categoryLabels[d.category] || d.category}</span>
+              <span>▸ {tc(lang, categoryLabels[d.category] || d.category)}</span>
               <span>▸ {tc(lang, "registry.evidence")}: {d.evidence_quality_score}{tc(lang, "registry.pts")}</span>
               <span>▸ {tc(lang, "registry.validations")}: {d.peer_validations}/{d.required_validations}</span>
               {d.source_provenance?.case_number && (

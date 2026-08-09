@@ -8,6 +8,7 @@ import dossiersData from "@/data/dossier-seed.json";
 import type { WorldBackbone } from "@/lib/types";
 import { sound } from "@/lib/sound";
 import { tc } from "@/lib/i18n-content";
+import { td } from "@/lib/dossiers-i18n";
 import { t } from "@/lib/i18n";
 import { useStore } from "@/stores/useStore";
 
@@ -162,8 +163,8 @@ export default function GlobalSearch() {
     for (const dos of dossiers) {
       results.push({
         type: "dossier",
-        label: dos.subject,
-        sublabel: `${dos.id} · ${dos.category} · ${dos.severity}`,
+        label: td(dos.id, lang).subject,
+        sublabel: `${dos.id} · ${tc(lang, `dcat.${dos.category}`)} · ${tc(lang, `dsev.${dos.severity}`)}`,
         href: `/registry/${dos.id}/`,
         score: 0,
       });

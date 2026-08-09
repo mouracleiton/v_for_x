@@ -11,6 +11,8 @@ import TerminalCard from "@/components/ui/TerminalCard";
 import StatusPill from "@/components/ui/StatusPill";
 import { sound } from "@/lib/sound";
 import { calculateVulnerability, scoreColor } from "@/lib/vulnerability";
+import { ts as tsI18n } from "@/lib/stories-i18n";
+import { tle } from "@/lib/timelines-i18n";
 
 const data = backbone as WorldBackbone;
 
@@ -209,42 +211,49 @@ export default function StoriesPage() {
         {!story ? (
           <>
             <p className="text-xs text-content-secondary mb-4">
-              // each story walks you through the data as a narrative — from the gap,
-              to the worst-affected, to the blueprint, to the equation, to action.
+              {tc(lang, "story.modes_intro")}
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {STORIES.map((s) => (
+              {STORIES.map((s) => {
+                const si = tsI18n(s.id, lang);
+                return (
                 <button
                   key={s.id}
                   onClick={() => { setActiveStory(s.id); setStepIdx(0); sound.select(); }}
                   className="terminal-card p-4 hover:border-blood transition-colors text-left"
                 >
                   <div className="text-2xl mb-2">{s.icon}</div>
-                  <div className="text-sm font-bold text-content-primary">{s.title}</div>
+                  <div className="text-sm font-bold text-content-primary">{si.title}</div>
                   <div className="text-[10px] text-content-dim mt-1">
-                    {s.duration} · {s.steps.length} steps
+                    {si.duration} · {si.steps.length} {tc(lang, "story.steps_count")}
                   </div>
-                  <div className="text-[10px] text-blood-bright mt-2">▶ {tc(lang, "stories.modes")}</div>
+                  <div className="text-[10px] text-blood-bright mt-2">{tc(lang, "story.start_btn")}</div>
                 </button>
-              ))}
+                );
+              })}
             </div>
           </>
         ) : (
           /* Active story viewer */
           <div>
             {/* Story header */}
+            {(() => {
+              const si = tsI18n(story.id, lang);
+              return (
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <span className="text-xl">{story.icon}</span>
-                <span className="text-sm font-bold text-blood-bright">{story.title}</span>
+                <span className="text-sm font-bold text-blood-bright">{si.title}</span>
               </div>
               <button
                 onClick={() => { setActiveStory(null); sound.select(); }}
                 className="text-xs text-content-dim hover:text-blood-bright"
               >
-                ✕ EXIT
+                {tc(lang, "story.exit_btn")}
               </button>
             </div>
+            );
+            })()}
 
             {/* Progress bar */}
             <div className="flex gap-1 mb-4">
@@ -263,13 +272,15 @@ export default function StoriesPage() {
             {/* Current step */}
             {(() => {
               const step = story.steps[stepIdx];
+              const si = tsI18n(story.id, lang);
+              const stepT = si.steps[stepIdx];
               return (
                 <div className="border border-border-dim bg-void p-4">
                   <div className="text-[10px] text-content-dim uppercase tracking-widest mb-2">
-                    Step {stepIdx + 1} / {story.steps.length} — {step.title}
+                    {tc(lang, "story.step_label")} {stepIdx + 1} / {story.steps.length} — {stepT?.title ?? step.title}
                   </div>
                   <p className="text-sm text-content-primary leading-relaxed mb-3">
-                    {step.text}
+                    {stepT?.text ?? step.text}
                   </p>
                   {step.data && (
                     <div className="border-l-2 pl-3 mb-3" style={{ borderColor: step.data.color ?? "var(--color-blood)" }}>
@@ -277,7 +288,7 @@ export default function StoriesPage() {
                         {step.data.value}
                       </div>
                       <div className="text-[10px] text-content-secondary uppercase">
-                        {step.data.label}
+                        {stepT?.dataLabel ?? step.data.label}
                       </div>
                     </div>
                   )}
@@ -286,7 +297,7 @@ export default function StoriesPage() {
                       href={step.link.href}
                       className="inline-block text-xs px-3 py-1.5 border border-blood text-blood-bright hover:bg-blood hover:text-void transition-colors uppercase tracking-widest"
                     >
-                      {step.link.label}
+                      {stepT?.linkLabel ?? step.link.label}
                     </Link>
                   )}
                 </div>
@@ -300,7 +311,7 @@ export default function StoriesPage() {
                 disabled={stepIdx === 0}
                 className="text-xs px-3 py-1.5 border border-border-dim text-content-secondary hover:border-blood hover:text-blood-bright disabled:opacity-30 disabled:cursor-not-allowed"
               >
-                ◀ PREVIOUS
+                {tc(lang, "story.previous_btn")}
               </button>
               <span className="text-[10px] text-content-dim self-center">
                 {stepIdx + 1} / {story.steps.length}
@@ -310,14 +321,14 @@ export default function StoriesPage() {
                   onClick={() => { setStepIdx(stepIdx + 1); sound.select(); }}
                   className="text-xs px-3 py-1.5 border border-blood text-blood-bright hover:bg-blood hover:text-void transition-colors"
                 >
-                  NEXT ▶
+                  {tc(lang, "story.next_btn")}
                 </button>
               ) : (
                 <button
                   onClick={() => { setActiveStory(null); sound.success(); }}
                   className="text-xs px-3 py-1.5 border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void transition-colors"
                 >
-                  ✓ FINISH
+                  {tc(lang, "story.finish_btn")}
                 </button>
               )}
             </div>
@@ -328,8 +339,7 @@ export default function StoriesPage() {
       {/* ═══ CRISIS TIMELINES ═══ */}
       <TerminalCard title={tc(lang, "card.crisis_timelines")} accent="blood" glow>
         <p className="text-xs text-content-secondary mb-4">
-          // curated timelines for the world's worst humanitarian crises. these aren't
-          data points — they're a pattern of escalation, neglect, and recurrence.
+          {tc(lang, "story.timelines_intro")}
         </p>
 
         {/* Country selector */}
@@ -377,7 +387,7 @@ export default function StoriesPage() {
                       <div className="text-lg font-bold" style={{ color: scoreColor(vuln.composite) }}>
                         {vuln.composite.toFixed(0)}
                       </div>
-                      <div className="text-[9px] text-content-dim uppercase">VFX Score</div>
+                      <div className="text-[9px] text-content-dim uppercase">{tc(lang, "story.vfx_score")}</div>
                     </div>
                   );
                 })()}
@@ -405,10 +415,10 @@ export default function StoriesPage() {
                         {entry.year}
                       </span>
                       <StatusPill color={entry.severity === "critical" ? "blood" : entry.severity === "high" ? "amber" : "dim"}>
-                        {entry.severity.toUpperCase()}
+                        {tc(lang, `dsev.${entry.severity}`)}
                       </StatusPill>
                     </div>
-                    <p className="text-xs text-content-secondary">{entry.event}</p>
+                    <p className="text-xs text-content-secondary">{tle(timeline.iso3, i, lang)}</p>
                   </div>
                 );
               })}
@@ -419,7 +429,7 @@ export default function StoriesPage() {
               href={`/sorrow-map/${timeline.iso3.toLowerCase()}/`}
               className="block text-center text-xs py-2 mt-4 border border-blood-dim text-blood-bright hover:bg-blood hover:text-void transition-all uppercase tracking-widest"
             >
-              → FULL COUNTRY DOSSIER
+              {tc(lang, "story.full_dossier_btn")}
             </Link>
           </div>
         )}
