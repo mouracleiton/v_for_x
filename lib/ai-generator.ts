@@ -64,6 +64,11 @@ const LANG_NAMES: Record<string, string> = {
   es: "Spanish",
   fr: "French",
   ar: "Arabic",
+  zh: "Chinese (Simplified)",
+  ja: "Japanese",
+  ko: "Korean",
+  hi: "Hindi",
+  ru: "Russian",
 };
 
 const PLATFORM_STYLES: Record<string, { name: string; maxLen: number; instructions: string }> = {

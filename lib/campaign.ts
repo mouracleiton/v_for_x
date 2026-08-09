@@ -13,7 +13,7 @@
  */
 
 import type { CountryData, SdgEquation, WorldBackbone } from "./types";
-import { detectLang, PHRASES, type CampaignLang } from "./campaign-i18n";
+import { detectLang, PHRASES, type CampaignLang, needTemplate, fillTemplate } from "./campaign-i18n";
 
 export interface CampaignTweet {
   text: string;
@@ -61,8 +61,8 @@ interface MetricDef {
   direction: "bad_high" | "bad_low";
   category: string;
   emoji: string;
-  headline: (val: number) => string;
-  context: (val: number, pop: number) => string;
+  /** How to compute popV for context template: "pct" = pop*v/100, "inv_pct" = pop*(100-v)/100, "none" = no popV */
+  popVCalc: "pct" | "inv_pct" | "none";
 }
 
 const POP_MOON = 211; // Brazil pop for comparison reference
@@ -71,170 +71,142 @@ const METRICS: MetricDef[] = [
   {
     path: "hunger.undernourishment_pct", threshold: 5, direction: "bad_high",
     category: "HUNGER", emoji: "🍽️",
-    headline: (v) => `${v.toFixed(0)}% of the population is undernourished`,
-    context: (v, pop) => `That's ${(pop * v / 100).toFixed(1)} million people who don't have enough to eat — every single day.`,
+    popVCalc: "pct",
   },
   {
     path: "hunger.child_stunting_pct", threshold: 20, direction: "bad_high",
     category: "CHILD HEALTH", emoji: "🧒",
-    headline: (v) => `${v.toFixed(0)}% of children are stunted — permanently damaged by malnutrition`,
-    context: (v, pop) => `These children will never reach their full physical or cognitive potential. This is irreversible.`,
+    popVCalc: "pct",
   },
   {
     path: "hunger.child_wasting_pct", threshold: 5, direction: "bad_high",
     category: "CHILD HEALTH", emoji: "🧒",
-    headline: (v) => `${v.toFixed(0)}% of children suffer from acute malnutrition (wasting)`,
-    context: (v, pop) => `These children are dying right now. Wasting means their bodies are consuming themselves to stay alive.`,
+    popVCalc: "pct",
   },
   {
     path: "hunger.famine_risk_1to5", threshold: 3, direction: "bad_high",
     category: "FAMINE", emoji: "💀",
-    headline: (v) => `Famine risk: ${v.toFixed(0)}/5 — catastrophe is imminent`,
-    context: () => `This is the highest level of food emergency. People are already dying. International response is needed NOW.`,
+    popVCalc: "none",
   },
   {
     path: "hunger.food_insecurity_mod_severe_pct", threshold: 25, direction: "bad_high",
     category: "FOOD SECURITY", emoji: "饥饿",
-    headline: (v) => `${v.toFixed(0)}% of the population faces moderate or severe food insecurity`,
-    context: (v, pop) => `${(pop * v / 100).toFixed(1)} million people don't know where their next meal is coming from.`,
+    popVCalc: "pct",
   },
   {
     path: "food_security.severe_food_insecurity_m", threshold: 3, direction: "bad_high",
     category: "FOOD SECURITY", emoji: "🍽️",
-    headline: (v) => `${v.toFixed(1)} million people in severe food insecurity`,
-    context: () => `These people have run out of food. They are skipping meals for days. Children are the most affected.`,
+    popVCalc: "none",
   },
   {
     path: "conflict.intensity_1to5", threshold: 3, direction: "bad_high",
     category: "CONFLICT", emoji: "⚔️",
-    headline: (v) => `Active armed conflict — intensity level ${v.toFixed(0)}/5`,
-    context: () => `War blocks food, medicine, and aid from reaching civilians. You cannot end hunger in a war zone without peace.`,
+    popVCalc: "none",
   },
   {
     path: "conflict.displacement_m", threshold: 0.5, direction: "bad_high",
     category: "DISPLACEMENT", emoji: "🏃",
-    headline: (v) => `${v.toFixed(1)} million people displaced by conflict`,
-    context: () => `These families left everything behind. They now live in camps, with no income, no land, no future — dependent on aid that is being cut.`,
+    popVCalc: "none",
   },
   {
     path: "migration.forcibly_displaced", threshold: 1_000_000, direction: "bad_high",
     category: "DISPLACEMENT", emoji: "🏠",
-    headline: (v) => `${(v / 1_000_000).toFixed(1)} million people forcibly displaced`,
-    context: () => `Refugees, asylum seekers, and internally displaced. The largest displacement crisis most people have never heard of.`,
+    popVCalc: "none",
   },
   {
     path: "health.child_mortality_under5_per1k", threshold: 25, direction: "bad_high",
     category: "CHILD SURVIVAL", emoji: "👶",
-    headline: (v) => `${v.toFixed(1)} out of every 1,000 children die before age 5`,
-    context: () => `In Norway it's 2.2. In Japan it's 1.9. This gap is not natural — it's a policy choice.`,
+    popVCalc: "none",
   },
   {
     path: "health.maternal_mortality_per100k", threshold: 200, direction: "bad_high",
     category: "MATERNAL HEALTH", emoji: "🤰",
-    headline: (v) => `${v.toFixed(0)} mothers die per 100,000 births`,
-    context: () => `Most of these deaths are preventable with basic healthcare that costs less than a single missile.`,
+    popVCalc: "none",
   },
   {
     path: "health.doctors_per_1000", threshold: 4.45, direction: "bad_low",
     category: "HEALTHCARE", emoji: "⚕️",
-    headline: (v) => `Only ${v.toFixed(1)} doctors per 1,000 people (WHO minimum: 4.45)`,
-    context: () => `When people get sick, there's often no one to help. This is why preventable diseases become death sentences.`,
+    popVCalc: "none",
   },
   {
     path: "health.life_expectancy", threshold: 65, direction: "bad_low",
     category: "LIFE EXPECTANCY", emoji: "⏳",
-    headline: (v) => `Average life expectancy: ${v.toFixed(0)} years`,
-    context: () => `People here die 15-20 years earlier than they should. Not from fate — from a system that chose not to invest in them.`,
+    popVCalc: "none",
   },
   {
     path: "education.literacy_rate_pct", threshold: 75, direction: "bad_low",
     category: "EDUCATION", emoji: "📚",
-    headline: (v) => `Only ${v.toFixed(0)}% of adults can read and write`,
-    context: (v, pop) => `${(pop * (100 - v) / 100).toFixed(1)} million adults are illiterate. Education is the escape hatch — and it's been closed.`,
+    popVCalc: "inv_pct",
   },
   {
     path: "water_sanitation.basic_access_pct", threshold: 80, direction: "bad_low",
     category: "WATER", emoji: "💧",
-    headline: (v) => `Only ${v.toFixed(0)}% of the population has basic drinking water access`,
-    context: (v, pop) => `${(pop * (100 - v) / 100).toFixed(1)} million people drink unsafe water every day. Children die from diarrhea — a disease of poverty.`,
+    popVCalc: "inv_pct",
   },
   {
     path: "water_sanitation.safe_sanitation_pct", threshold: 35, direction: "bad_low",
     category: "SANITATION", emoji: "🚽",
-    headline: (v) => `Only ${v.toFixed(0)}% has safely managed sanitation`,
-    context: () => `Without toilets and wastewater treatment, diseases spread. This is a 19th-century problem in the 21st century.`,
+    popVCalc: "none",
   },
   {
     path: "poverty.headcount_365_pct", threshold: 15, direction: "bad_high",
     category: "EXTREME POVERTY", emoji: "💸",
-    headline: (v) => `${v.toFixed(0)}% of the population lives on less than $3.65/day`,
-    context: (v, pop) => `${(pop * v / 100).toFixed(1)} million people in extreme poverty. The global cost to fix this is less than what the world spends on weapons in a month.`,
+    popVCalc: "pct",
   },
   {
     path: "security.homicide_rate_per100k", threshold: 10, direction: "bad_high",
     category: "VIOLENCE", emoji: "🔫",
-    headline: (v) => `${v.toFixed(1)} homicides per 100,000 people`,
-    context: () => `That's higher than many active war zones. Violence is a public health crisis that goes untreated.`,
+    popVCalc: "none",
   },
   {
     path: "governance.corruption_perceptions_index", threshold: 40, direction: "bad_low",
     category: "CORRUPTION", emoji: "🤝",
-    headline: (v) => `Corruption Perception Index: ${v.toFixed(0)}/100 (100 = clean)`,
-    context: () => `Aid money, tax revenue, natural resource wealth — it disappears into private pockets instead of public services.`,
+    popVCalc: "none",
   },
   {
     path: "governance.electoral_democracy_index", threshold: 0.3, direction: "bad_low",
     category: "DEMOCRACY", emoji: "🗳️",
-    headline: (v) => `Democracy Index: ${v.toFixed(2)} (0 = authoritarian, 1 = full democracy)`,
-    context: () => `Without democratic accountability, there is no pressure to fix any of these problems. The people cannot vote for change.`,
+    popVCalc: "none",
   },
   {
     path: "energy.no_access_electricity_m", threshold: 2, direction: "bad_high",
     category: "ENERGY", emoji: "⚡",
-    headline: (v) => `${v.toFixed(1)} million people have NO electricity`,
-    context: () => `No light to study by. No refrigeration for vaccines. No pump for clean water. Electricity is the foundation of everything.`,
+    popVCalc: "none",
   },
   {
     path: "employment.unemployment_pct", threshold: 15, direction: "bad_high",
     category: "EMPLOYMENT", emoji: "🏭",
-    headline: (v) => `${v.toFixed(0)}% unemployment`,
-    context: () => `No jobs means no income, no food security, no future. Youth unemployment drives migration and unrest.`,
+    popVCalc: "none",
   },
   {
     path: "employment.youth_unemployment_pct", threshold: 25, direction: "bad_high",
     category: "YOUTH", emoji: "青年的",
-    headline: (v) => `${v.toFixed(0)}% youth unemployment`,
-    context: () => `When young people have no future, they migrate, riot, or join armed groups. This is a security issue disguised as an economic one.`,
+    popVCalc: "none",
   },
   {
     path: "inequality.gini", threshold: 45, direction: "bad_high",
     category: "INEQUALITY", emoji: "⚖️",
-    headline: (v) => `Gini coefficient: ${v.toFixed(0)} (100 = maximum inequality)`,
-    context: () => `The gap between rich and poor is extreme. Wealth concentrates at the top while millions lack food, water, and healthcare.`,
+    popVCalc: "none",
   },
   {
     path: "environment.air_pollution_pm25_ugm3", threshold: 25, direction: "bad_high",
     category: "ENVIRONMENT", emoji: "🏭",
-    headline: (v) => `Air pollution: ${v.toFixed(0)} µg/m³ PM2.5 (WHO limit: 15)`,
-    context: () => `People are breathing toxic air. This causes heart disease, lung cancer, and cognitive damage in children — silently, every day.`,
+    popVCalc: "none",
   },
   {
     path: "health.hiv_prevalence_pct", threshold: 3, direction: "bad_high",
     category: "PUBLIC HEALTH", emoji: "🦠",
-    headline: (v) => `HIV prevalence: ${v.toFixed(1)}% of the adult population`,
-    context: () => `A preventable, treatable disease that still kills because of stigma, lack of testing, and drug shortages.`,
+    popVCalc: "none",
   },
   {
     path: "health.tuberculosis_per100k", threshold: 200, direction: "bad_high",
     category: "PUBLIC HEALTH", emoji: "🦠",
-    headline: (v) => `${v.toFixed(0)} TB cases per 100,000 people`,
-    context: () => `Tuberculosis is curable for a few dollars. People die because the health system doesn't reach them in time.`,
+    popVCalc: "none",
   },
   {
     path: "justice.prison_overcrowding_pct", threshold: 100, direction: "bad_high",
     category: "JUSTICE", emoji: "🔒",
-    headline: (v) => `Prison overcrowding: ${v.toFixed(0)}% of capacity`,
-    context: () => `Cells built for 4 hold 12. Disease, violence, and death are routine. Pre-trial detainees — innocent until proven guilty — suffer most.`,
+    popVCalc: "none",
   },
 ];
 
@@ -250,7 +222,8 @@ function getVal(country: CountryData, path: string): number | null {
 }
 
 /** Analyze a country and return its most urgent needs, sorted by severity */
-export function analyzeNeeds(country: CountryData): NeedAnalysis[] {
+export function analyzeNeeds(country: CountryData, lang?: CampaignLang): NeedAnalysis[] {
+  const cl = lang ?? "en";
   const pop = country.demographics.population / 1_000_000;
   const needs: NeedAnalysis[] = [];
 
@@ -271,6 +244,19 @@ export function analyzeNeeds(country: CountryData): NeedAnalysis[] {
 
     if (!isCrisis) continue;
 
+    // Compute popV based on metric type
+    let popV: number | undefined;
+    if (m.popVCalc === "pct") {
+      popV = pop * val / 100;
+    } else if (m.popVCalc === "inv_pct") {
+      popV = pop * (100 - val) / 100;
+    }
+    // For "none", popV stays undefined
+
+    const tpl = needTemplate(m.path, cl);
+    const headline = fillTemplate(tpl.headline, val, popV);
+    const context = fillTemplate(tpl.context, val, popV);
+
     needs.push({
       id: m.path.split(".").pop() ?? m.path,
       category: m.category,
@@ -279,8 +265,8 @@ export function analyzeNeeds(country: CountryData): NeedAnalysis[] {
       threshold: m.threshold,
       direction: m.direction,
       emoji: m.emoji,
-      headline: m.headline(val),
-      context: m.context(val, pop),
+      headline,
+      context,
       comparison: "",
     });
   }
@@ -299,7 +285,7 @@ export function generateCountryCampaign(
   const P = PHRASES[lang] ?? PHRASES.en;
   const name = country.name_en;
   const pop = country.demographics.population / 1_000_000;
-  const needs = analyzeNeeds(country);
+  const needs = analyzeNeeds(country, lang);
   const topNeeds = needs.slice(0, 5);
 
   // Military vs health framing
@@ -320,7 +306,7 @@ export function generateCountryCampaign(
     const worst = topNeeds[0];
     hookText = P.threadHook(name, worst.headline, worst.context);
   } else {
-    hookText = P.threadHook(name, lang === "pt" ? "Não aparece nos dados de crise" : lang === "es" ? "No aparece en los datos de crisis" : lang === "fr" ? "N'apparaît pas dans les données de crise" : lang === "ar" ? "لا يظهر في بيانات الأزمة" : "Doesn't appear in crisis data", lang === "pt" ? "Mas não significa que não há nada a consertar." : lang === "es" ? "Pero no significa que no haya nada que arreglar." : lang === "fr" ? "Mais ça ne veut rien dire." : lang === "ar" ? "لكن هذا لا يعني أنه لا يوجد شيء لإصلاحه." : "But that doesn't mean there's nothing to fix.");
+    hookText = P.threadHook(name, P.noCrisisHeadline, P.noCrisisContext);
   }
   tweets.push({ text: hookText, charCount: hookText.length, type: "hook", icon: "🧵" });
 
@@ -355,12 +341,12 @@ export function generateCountryCampaign(
 
   // ── WHATSAPP ──
   const whatsapp = topNeeds.length > 0
-    ? `*${P.whatsappIntro(name)}*\n\n${topNeeds[0].headline}.\n${topNeeds[0].context}\n\n${lang === "pt" ? "O mundo gasta" : lang === "es" ? "El mundo gasta" : lang === "fr" ? "Le monde dépense" : lang === "ar" ? "العالم ينفق" : "The world spends"} $${globalMilitaryT}T/${lang === "pt" ? "ano" : lang === "es" ? "año" : lang === "fr" ? "an" : lang === "ar" ? "سنة" : "yr"} ${lang === "pt" ? "em armas" : lang === "es" ? "en armas" : lang === "fr" ? "en armes" : lang === "ar" ? "على الأسلحة" : "on weapons"}. ${lang === "pt" ? "Acabar com a fome" : lang === "es" ? "Terminar el hambre" : lang === "fr" ? "Mettre fin à la faim" : lang === "ar" ? "إنهاء الجوع" : "Ending hunger"} = $${hungerCost}B = 14 ${lang === "pt" ? "dias" : lang === "es" ? "días" : lang === "fr" ? "jours" : lang === "ar" ? "يوم" : "days"}.\n\n${P.whatsappCTA}\n\nmouracleiton.github.io/v_for_x`
+    ? `*${P.whatsappIntro(name)}*\n\n${topNeeds[0].headline}.\n${topNeeds[0].context}\n\n${P.worldSpends} $${globalMilitaryT}T/${P.yearUnit} ${P.onWeapons}. ${P.endingHunger} = $${hungerCost}B = 14 ${P.daysUnit}.\n\n${P.whatsappCTA}\n\nmouracleiton.github.io/v_for_x`
     : `${name} data briefing: mouracleiton.github.io/v_for_x`;
 
   // ── INSTAGRAM ──
   const igNeeds = topNeeds.slice(0, 3).map((n) => `${n.emoji} ${n.headline}`).join("\n");
-  const instagram = `${name} 📍\n\n${igNeeds}\n\n${P.globalContext}\n\n$${hungerCost}B/${lang === "pt" ? "ano" : lang === "es" ? "año" : lang === "fr" ? "an" : lang === "ar" ? "سنة" : "yr"} = 14 ${lang === "pt" ? "dias de gasto militar" : lang === "es" ? "días de gasto militar" : lang === "fr" ? "jours de dépense militaire" : lang === "ar" ? "يوم من الإنفاق العسكري" : "days of military spending"}.\n\n${P.instagramTags(name)}`;
+  const instagram = `${name} 📍\n\n${igNeeds}\n\n${P.globalContext}\n\n$${hungerCost}B/${P.yearUnit} = 14 ${P.daysMilitarySpending}.\n\n${P.instagramTags(name)}`;
 
   // ── EMAIL ──
   const emailBody = `Dear [Representative Name],

@@ -189,7 +189,7 @@ export default function TheActPage() {
     }
   };
 
-  const needs = useMemo(() => country ? analyzeNeeds(country) : [], [country]);
+  const needs = useMemo(() => country ? analyzeNeeds(country, campaignLang) : [], [country, campaignLang]);
   const vuln = useMemo(() => country ? calculateVulnerability(country) : null, [country]);
 
   return (
