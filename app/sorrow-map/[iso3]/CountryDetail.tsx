@@ -447,53 +447,54 @@ function HungerSection({ c }: { c: CountryData }) {
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
         {h.undernourishment_pct !== null && (
-          <DataBar value={h.undernourishment_pct} max={60} label="Undernourishment" unit="%" />
+          <DataBar value={h.undernourishment_pct} max={60} label={tc(lang, "detail.undernourishment")} unit="%" />
         )}
         {h.child_stunting_pct !== null && (
-          <DataBar value={h.child_stunting_pct} max={50} label="Child Stunting" unit="%" />
+          <DataBar value={h.child_stunting_pct} max={50} label={tc(lang, "detail.child_stunting")} unit="%" />
         )}
         {h.child_wasting_pct !== null && (
-          <DataBar value={h.child_wasting_pct} max={25} label="Child Wasting" unit="%" />
+          <DataBar value={h.child_wasting_pct} max={25} label={tc(lang, "detail.child_wasting")} unit="%" />
         )}
         {h.food_insecurity_mod_severe_pct !== null && (
-          <DataBar value={h.food_insecurity_mod_severe_pct} max={90} label="Mod/Severe FI" unit="%" />
+          <DataBar value={h.food_insecurity_mod_severe_pct} max={90} label={tc(lang, "detail.mod_sev_fi")} unit="%" />
         )}
       </div>
-      <DataRow label="Acute FI Population" value={formatVal(h.pop_acute_fi_m, "M", formatNumber)} />
-      <DataRow label="Prevalence (Acute)" value={formatVal(h.prevalence_pct, "%")} />
-      <DataRow label="Children SAM" value={formatVal(h.children_sam_m, "M", formatNumber)} />
+      <DataRow label={tc(lang, "detail.acute_fi_pop")} value={formatVal(h.pop_acute_fi_m, "M", formatNumber)} />
+      <DataRow label={tc(lang, "detail.prevalence_acute")} value={formatVal(h.prevalence_pct, "%")} />
+      <DataRow label={tc(lang, "detail.children_sam")} value={formatVal(h.children_sam_m, "M", formatNumber)} />
       <DataRow
         label="IPC Phase 5 (Famine)"
         value={h.ipc_phase5 ? tc(lang, "status.confirmed") : tc(lang, "label.no")}
       />
-      <DataRow label="Famine Risk" value={formatVal(h.famine_risk_1to5, "/5")} />
+      <DataRow label={tc(lang, "detail.famine_risk")} value={formatVal(h.famine_risk_1to5, "/5")} />
       <DataRow label="WFP Classification" value={h.wfp_class ? wfpClassLabel(h.wfp_class) : "—"} />
-      <DataRow label="Child Overweight" value={formatVal(h.child_overweight_pct, "%")} />
-      <DataRow label="Anemia Prevalence" value={formatVal(h.anemia_prevalence_pct, "%")} />
-      <DataRow label="Undernourishment" value={formatVal(h.undernourishment_pct, "%")} />
-      <DataRow label="Child Stunting" value={formatVal(h.child_stunting_pct, "%")} />
-      <DataRow label="Child Wasting" value={formatVal(h.child_wasting_pct, "%")} />
+      <DataRow label={tc(lang, "detail.child_overweight")} value={formatVal(h.child_overweight_pct, "%")} />
+      <DataRow label={tc(lang, "detail.anemia")} value={formatVal(h.anemia_prevalence_pct, "%")} />
+      <DataRow label={tc(lang, "detail.undernourishment")} value={formatVal(h.undernourishment_pct, "%")} />
+      <DataRow label={tc(lang, "detail.child_stunting")} value={formatVal(h.child_stunting_pct, "%")} />
+      <DataRow label={tc(lang, "detail.child_wasting")} value={formatVal(h.child_wasting_pct, "%")} />
     </>
   );
 }
 
 function ConflictSection({ c }: { c: CountryData }) {
+  const { lang } = useStore();
   const cf = c.conflict;
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-        <DataBar value={cf.intensity_1to5} max={5} label="Conflict Intensity" unit="/5" />
-        <DataBar value={cf.access_blocked_1to5} max={5} label="Access Blocked" unit="/5" />
+        <DataBar value={cf.intensity_1to5} max={5} label={tc(lang, "detail.conflict_intensity")} unit="/5" />
+        <DataBar value={cf.access_blocked_1to5} max={5} label={tc(lang, "detail.access_blocked")} unit="/5" />
       </div>
-      <DataRow label="Intensity" value={`${cf.intensity_1to5}/5`} />
-      <DataRow label="Displacement" value={formatVal(cf.displacement_m, "M")} />
-      <DataRow label="Access Blocked" value={`${cf.access_blocked_1to5}/5`} />
-      <DataRow label="Battle Deaths (Total)" value={formatNumber(cf.battle_deaths_total)} />
-      <DataRow label="Deaths (Year -4)" value={formatNumber(cf.deaths_1)} />
-      <DataRow label="Deaths (Year -3)" value={formatNumber(cf.deaths_2)} />
-      <DataRow label="Deaths (Year -2)" value={formatNumber(cf.deaths_3)} />
-      <DataRow label="Deaths (Year -1)" value={formatNumber(cf.deaths_4)} />
-      <DataRow label="Deaths (Current)" value={formatNumber(cf.deaths_5)} />
+      <DataRow label={tc(lang, "detail.intensity")} value={`${cf.intensity_1to5}/5`} />
+      <DataRow label={tc(lang, "detail.displacement")} value={formatVal(cf.displacement_m, "M")} />
+      <DataRow label={tc(lang, "detail.access_blocked")} value={`${cf.access_blocked_1to5}/5`} />
+      <DataRow label={tc(lang, "detail.battle_deaths_total")} value={formatNumber(cf.battle_deaths_total)} />
+      <DataRow label={tc(lang, "detail.deaths_year_n").replace("{n}", "Year -4")} value={formatNumber(cf.deaths_1)} />
+      <DataRow label={tc(lang, "detail.deaths_year_n").replace("{n}", "Year -3")} value={formatNumber(cf.deaths_2)} />
+      <DataRow label={tc(lang, "detail.deaths_year_n").replace("{n}", "Year -2")} value={formatNumber(cf.deaths_3)} />
+      <DataRow label={tc(lang, "detail.deaths_year_n").replace("{n}", "Year -1")} value={formatNumber(cf.deaths_4)} />
+      <DataRow label={tc(lang, "detail.deaths_year_n").replace("{n}", "Current")} value={formatNumber(cf.deaths_5)} />
     </>
   );
 }
@@ -646,17 +647,17 @@ export default function CountryDetail({ params }: PageProps) {
         <div className="space-y-4">
           {/* Overview */}
           <CollapsibleSection title={tc(lang, "section.overview")} defaultOpen accent="blood">
-            <DataRow label="Name (EN)" value={c.name_en} />
-            <DataRow label="Name (PT)" value={c.name_pt} />
+            <DataRow label={tc(lang, "detail.name_en")} value={c.name_en} />
+            <DataRow label={tc(lang, "detail.name_pt")} value={c.name_pt} />
             <DataRow label="ISO3" value={c.iso3} />
             <DataRow label="ISO2" value={c.iso2} />
             <DataRow label="UN M49" value={c.un_m49} />
-            <DataRow label="Region" value={c.region} />
-            <DataRow label="Subregion" value={c.subregion} />
+            <DataRow label={tc(lang, "detail.region")} value={c.region} />
+            <DataRow label={tc(lang, "detail.subregion")} value={c.subregion} />
             <DataRow label="UN Member" value={c.is_un_member ? "Yes" : "No"} />
-            <DataRow label="Population" value={`${formatNumber(c.demographics.population)} (${c.demographics.population_year})`} />
+            <DataRow label={tc(lang, "detail.population")} value={`${formatNumber(c.demographics.population)} (${c.demographics.population_year})`} />
             <DataRow label={tc(lang, "label.is_hotspot")} value={c.is_hotspot ? tc(lang, "label.yes") : tc(lang, "label.no")} />
-            <DataRow label="Hotspot Score" value={formatVal(c.hotspot_score)} />
+            <DataRow label={tc(lang, "detail.hotspot_score")} value={formatVal(c.hotspot_score)} />
           </CollapsibleSection>
 
           {/* Hunger */}
@@ -672,7 +673,7 @@ export default function CountryDetail({ params }: PageProps) {
           {/* Economy */}
           <CollapsibleSection title={tc(lang, "section.economy")} accent="amber">
             <GenericSection
-              title="Economy"
+              title={tc(lang, "section.economy")}
               entries={[
                 { label: "GDP", value: formatMoney(c.economy.gdp_usd) },
                 { label: "GDP Per Capita", value: formatMoney(c.economy.gdp_per_capita_usd) },
@@ -687,7 +688,7 @@ export default function CountryDetail({ params }: PageProps) {
           {/* Health */}
           <CollapsibleSection title={tc(lang, "section.health")} accent="blood">
             <GenericSection
-              title="Health"
+              title={tc(lang, "section.health")}
               entries={[
                 { label: "Life Expectancy", value: formatVal(c.health.life_expectancy, " yrs") },
                 { label: "Life Expectancy Year", value: c.health.life_expectancy_year },
@@ -724,7 +725,7 @@ export default function CountryDetail({ params }: PageProps) {
           {/* Military */}
           <CollapsibleSection title={tc(lang, "section.military")} accent="amber">
             <GenericSection
-              title="Military"
+              title={tc(lang, "section.military")}
               entries={[
                 { label: "Expenditure", value: formatMoney(c.military.expenditure_usd) },
                 { label: "% GDP", value: formatVal(c.military.pct_gdp, "%") },
@@ -736,7 +737,7 @@ export default function CountryDetail({ params }: PageProps) {
           {/* Climate */}
           <CollapsibleSection title={tc(lang, "section.climate_emissions")} accent="green">
             <GenericSection
-              title="Climate"
+              title={tc(lang, "section.climate")}
               entries={[
                 { label: "CO₂ Emissions", value: formatVal(c.climate.co2_mt, " Mt") },
                 { label: "CO₂ Per Capita", value: formatVal(c.climate.co2_per_capita_t, " t") },
@@ -749,7 +750,7 @@ export default function CountryDetail({ params }: PageProps) {
           {/* Inequality */}
           <CollapsibleSection title={tc(lang, "section.inequality")} accent="amber">
             <GenericSection
-              title="Inequality"
+              title={tc(lang, "section.inequality")}
               entries={[
                 { label: "Gini", value: formatVal(c.inequality.gini) },
                 { label: "Year", value: c.inequality.gini_year ?? c.inequality.year },
@@ -763,7 +764,7 @@ export default function CountryDetail({ params }: PageProps) {
           {/* Water & Sanitation */}
           <CollapsibleSection title={tc(lang, "section.water_sanitation")} accent="green">
             <GenericSection
-              title="Water"
+              title={tc(lang, "section.water")}
               entries={[
                 { label: "Basic Water Access", value: formatVal(c.water_sanitation.basic_access_pct, "%") },
                 { label: "Basic Sanitation", value: formatVal(c.water_sanitation.basic_sanitation_pct, "%") },
@@ -780,7 +781,7 @@ export default function CountryDetail({ params }: PageProps) {
           {/* Education */}
           <CollapsibleSection title={tc(lang, "section.education")} accent="green">
             <GenericSection
-              title="Education"
+              title={tc(lang, "section.education")}
               entries={[
                 { label: "Literacy Rate", value: formatVal(c.education.literacy_rate_pct, "%") },
                 { label: "Primary Enrollment", value: formatVal(c.education.primary_enrollment_pct, "%") },
@@ -797,7 +798,7 @@ export default function CountryDetail({ params }: PageProps) {
           {/* Connectivity */}
           <CollapsibleSection title={tc(lang, "section.connectivity")} accent="green">
             <GenericSection
-              title="Connectivity"
+              title={tc(lang, "section.connectivity")}
               entries={[
                 { label: "Internet Users", value: formatVal(c.connectivity.internet_users_pct, "%") },
                 { label: "Broadband /100", value: formatVal(c.connectivity.broadband_per100) },
@@ -812,7 +813,7 @@ export default function CountryDetail({ params }: PageProps) {
           {/* Migration */}
           <CollapsibleSection title={tc(lang, "section.migration")} accent="amber">
             <GenericSection
-              title="Migration"
+              title={tc(lang, "section.migration")}
               entries={[
                 { label: "Refugees (Origin)", value: formatNumber(c.migration.refugees_origin) },
                 { label: "Refugees (Hosted)", value: formatNumber(c.migration.refugees_hosted) },
@@ -829,7 +830,7 @@ export default function CountryDetail({ params }: PageProps) {
           {/* Environment */}
           <CollapsibleSection title={tc(lang, "section.environment")} accent="green">
             <GenericSection
-              title="Environment"
+              title={tc(lang, "section.environment")}
               entries={[
                 { label: "Forest Area", value: formatVal(c.environment.forest_area_pct, "%") },
                 { label: "Forest Area (km²)", value: formatNumber(c.environment.forest_area_km2) },
@@ -843,7 +844,7 @@ export default function CountryDetail({ params }: PageProps) {
           {/* Gender */}
           <CollapsibleSection title={tc(lang, "section.gender")} accent="amber">
             <GenericSection
-              title="Gender"
+              title={tc(lang, "section.gender")}
               entries={[
                 { label: "Female Labor Force", value: formatVal(c.gender.female_labor_force_pct, "%") },
                 { label: "Women in Parliament", value: formatVal(c.gender.women_parliament_pct, "%") },
@@ -858,7 +859,7 @@ export default function CountryDetail({ params }: PageProps) {
           {/* Governance */}
           <CollapsibleSection title={tc(lang, "section.governance")} accent="blood">
             <GenericSection
-              title="Governance"
+              title={tc(lang, "section.governance")}
               entries={[
                 { label: "Electoral Democracy Index", value: formatVal(c.governance.electoral_democracy_index) },
                 { label: "Democracy Year", value: c.governance.democracy_year },
@@ -877,7 +878,7 @@ export default function CountryDetail({ params }: PageProps) {
           {/* Security */}
           <CollapsibleSection title={tc(lang, "section.security")} accent="blood">
             <GenericSection
-              title="Security"
+              title={tc(lang, "section.security")}
               entries={[
                 { label: "Homicide Rate", value: formatVal(c.security.homicide_rate_per100k, " /100k") },
                 { label: "Homicide (Male)", value: formatVal(c.security.homicide_male_per100k, " /100k") },
@@ -892,7 +893,7 @@ export default function CountryDetail({ params }: PageProps) {
           {/* Poverty */}
           <CollapsibleSection title={tc(lang, "section.poverty")} accent="blood">
             <GenericSection
-              title="Poverty"
+              title={tc(lang, "section.poverty")}
               entries={[
                 { label: "Headcount ($3.65/day)", value: formatVal(c.poverty.headcount_365_pct, "%") },
                 { label: "Headcount ($6.85/day)", value: formatVal(c.poverty.headcount_685_pct, "%") },
@@ -906,7 +907,7 @@ export default function CountryDetail({ params }: PageProps) {
           {/* Employment */}
           <CollapsibleSection title={tc(lang, "section.employment")} accent="amber">
             <GenericSection
-              title="Employment"
+              title={tc(lang, "section.employment")}
               entries={[
                 { label: "Unemployment", value: formatVal(c.employment.unemployment_pct, "%") },
                 { label: "Youth Unemployment", value: formatVal(c.employment.youth_unemployment_pct, "%") },
@@ -934,7 +935,7 @@ export default function CountryDetail({ params }: PageProps) {
           {c.energy && (c.energy.renewable_electric_pct !== null || c.energy.renewable_matrix_pct !== null) && (
             <CollapsibleSection title={tc(lang, "section.energy_matrix")} accent="green">
               <GenericSection
-                title="Energy"
+                title={tc(lang, "section.energy")}
                 entries={[
                   { label: "Renewable Matrix", value: formatVal(c.energy.renewable_matrix_pct, "%") },
                   { label: "Renewable Electric", value: formatVal(c.energy.renewable_electric_pct, "%") },
@@ -955,7 +956,7 @@ export default function CountryDetail({ params }: PageProps) {
           {c.justice && c.justice.prison_population !== null && (
             <CollapsibleSection title={tc(lang, "section.justice_incarceration")} accent="amber">
               <GenericSection
-                title="Justice"
+                title={tc(lang, "section.justice")}
                 entries={[
                   { label: "Prison Population", value: formatNumber(c.justice.prison_population) },
                   { label: "Prison Rate /100k", value: formatVal(c.justice.prison_rate_per_100k) },
@@ -973,7 +974,7 @@ export default function CountryDetail({ params }: PageProps) {
           {c.taxation && c.taxation.tax_burden_pct_gdp !== null && (
             <CollapsibleSection title={tc(lang, "section.taxation")} accent="amber">
               <GenericSection
-                title="Taxation"
+                title={tc(lang, "section.taxation")}
                 entries={[
                   { label: "Tax Burden % GDP", value: formatVal(c.taxation.tax_burden_pct_gdp, "%") },
                   { label: "Consumption Tax %", value: formatVal(c.taxation.consumption_tax_pct, "%") },
@@ -990,7 +991,7 @@ export default function CountryDetail({ params }: PageProps) {
           {c.food_security && c.food_security.severe_food_insecurity_m !== null && (
             <CollapsibleSection title={tc(lang, "section.food_security_deep")} accent="blood">
               <GenericSection
-                title="Food Security"
+                title={tc(lang, "section.food_security")}
                 entries={[
                   { label: "Severe FI (M)", value: formatVal(c.food_security.severe_food_insecurity_m, "M") },
                   { label: "Total FI (M)", value: formatVal(c.food_security.total_food_insecurity_m, "M") },
@@ -1011,20 +1012,20 @@ export default function CountryDetail({ params }: PageProps) {
             <div className="space-y-2">
               {c.hunger.undernourishment_pct !== null && (
                 <div className="flex justify-between text-xs">
-                  <span className="text-content-secondary">Undernourishment</span>
+                  <span className="text-content-secondary">{tc(lang, "detail.undernourishment")}</span>
                   <span className="text-blood-bright font-bold">
                     {formatPct(c.hunger.undernourishment_pct)}
                   </span>
                 </div>
               )}
               <div className="flex justify-between text-xs">
-                <span className="text-content-secondary">Conflict</span>
+                <span className="text-content-secondary">{tc(lang, "detail.intensity")}</span>
                 <span className="text-blood-bright font-bold">
                   {c.conflict.intensity_1to5}/5
                 </span>
               </div>
               <div className="flex justify-between text-xs">
-                <span className="text-content-secondary">Life Expectancy</span>
+                <span className="text-content-secondary">{tc(lang, "detail.life_expectancy")}</span>
                 <span className="text-content-primary">
                   {formatVal(c.health.life_expectancy, " yrs")}
                 </span>
@@ -1039,7 +1040,7 @@ export default function CountryDetail({ params }: PageProps) {
               )}
               {c.poverty.headcount_365_pct !== null && (
                 <div className="flex justify-between text-xs">
-                  <span className="text-content-secondary">Poverty ($3.65)</span>
+                  <span className="text-content-secondary">{tc(lang, "detail.poverty_365")}</span>
                   <span className="text-blood-bright font-bold">
                     {formatPct(c.poverty.headcount_365_pct)}
                   </span>

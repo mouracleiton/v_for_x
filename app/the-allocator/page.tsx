@@ -263,14 +263,14 @@ export default function AllocatorPage() {
                 formatter={(value, name) => {
                   const v = Number(value);
                   if (name === "allocated") return [`$${formatNumber(v)}B`, "Allocated"];
-                  return [`$${formatNumber(v)}B`, "Full cost"];
+                  return [`$${formatNumber(v)}B`, tc(lang, "common.full_cost")];
                 }}
                 labelFormatter={(label) => {
                   const item = chartData.find((d) => d.name === label);
                   return item ? `${label} — ${item.label}` : label;
                 }}
               />
-              <Bar dataKey="full" fill="#222" name="Full cost" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="full" fill="#222" name={tc(lang, "common.full_cost")} radius={[2, 2, 0, 0]} />
               <Bar dataKey="allocated" name="allocated" radius={[2, 2, 0, 0]}>
                 {chartData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />

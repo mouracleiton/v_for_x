@@ -111,7 +111,7 @@ export default function DossierContent({
         </h1>
         {d.source_provenance && (
           <div className="text-xs text-content-dim mt-2">
-            <span className="text-content-secondary">Source: </span>
+            <span className="text-content-secondary">{tc(lang, "dossier.source_prefix")} </span>
             <span className="text-blood-bright">{authorityLabel(d.source_provenance.authority_type)}</span>
             {d.source_provenance.case_number && (
               <span> · Case: {d.source_provenance.case_number}</span>
@@ -143,7 +143,7 @@ export default function DossierContent({
           <DataBar
             value={d.evidence_quality_score}
             max={12}
-            label="Evidence quality score"
+            label={tc(lang, "dossier.evidence_score")}
             unit="/12"
           />
         </div>
@@ -219,22 +219,22 @@ export default function DossierContent({
         <TerminalCard title={tc(lang, "card.source_provenance")} accent="amber" className="mb-6">
           <div className="space-y-2 text-xs">
             <div className="flex justify-between">
-              <span className="text-content-dim">Designating authority:</span>
+              <span className="text-content-dim">{tc(lang, "dossier.designating_auth")}</span>
               <span className="text-content-primary font-bold">{d.source_provenance.authority}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-content-dim">Authority type:</span>
+              <span className="text-content-dim">{tc(lang, "dossier.auth_type")}</span>
               <span className="text-blood-bright">{authorityLabel(d.source_provenance.authority_type)}</span>
             </div>
             {d.source_provenance.case_number && (
               <div className="flex justify-between">
-                <span className="text-content-dim">Case / listing number:</span>
+                <span className="text-content-dim">{tc(lang, "dossier.case_number")}</span>
                 <span className="text-content-primary font-mono">{d.source_provenance.case_number}</span>
               </div>
             )}
             {d.source_provenance.source_url && (
               <div className="flex justify-between">
-                <span className="text-content-dim">Source URL:</span>
+                <span className="text-content-dim">{tc(lang, "dossier.source_url")}</span>
                 <a
                   href={d.source_provenance.source_url}
                   target="_blank"
@@ -247,7 +247,7 @@ export default function DossierContent({
             )}
             {d.source_provenance.auto_populated && (
               <div className="flex justify-between">
-                <span className="text-content-dim">Pipeline:</span>
+                <span className="text-content-dim">{tc(lang, "dossier.pipeline")}</span>
                 <span className="text-terminal-green">auto-populated from OpenSanctions</span>
               </div>
             )}
@@ -274,7 +274,7 @@ export default function DossierContent({
           <div className="border border-border-dim bg-void p-3">
             <div className="flex items-center gap-2 mb-2">
               <StatusPill color="blood">ICC</StatusPill>
-              <span className="text-xs font-bold text-content-primary">International Criminal Court — Communication</span>
+              <span className="text-xs font-bold text-content-primary">{tc(lang, "dossier.icc_comm")}</span>
             </div>
             <p className="text-[10px] text-content-dim mb-2">
               Submit a communication under Article 15 of the Rome Statute. The ICC Prosecutor can receive information from any source.
@@ -336,7 +336,7 @@ export default function DossierContent({
           <div className="border border-terminal-green bg-terminal-green/5 p-3">
             <div className="flex items-center gap-2 mb-2">
               <StatusPill color="green">PUBLIC</StatusPill>
-              <span className="text-xs font-bold text-content-primary">Share & Campaign</span>
+              <span className="text-xs font-bold text-content-primary">{tc(lang, "dossier.share_campaign")}</span>
             </div>
             <p className="text-[10px] text-content-dim mb-2">
               Surface this case publicly. Generate a campaign kit or share the dossier link.
@@ -370,9 +370,9 @@ export default function DossierContent({
       {/* Version history */}
       <TerminalCard title={tc(lang, "card.version_history")}>
         <div className="text-xs text-content-secondary space-y-1">
-          <div>Created: {d.created_at}</div>
-          <div>Last updated: {d.updated_at}</div>
-          <div>Current version: v{d.version}</div>
+          <div>{tc(lang, "dossier.created")} {d.created_at}</div>
+          <div>{tc(lang, "dossier.last_updated")} {d.updated_at}</div>
+          <div>{tc(lang, "dossier.current_version")}{d.version}</div>
         </div>
       </TerminalCard>
     </div>

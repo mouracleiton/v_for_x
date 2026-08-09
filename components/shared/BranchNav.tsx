@@ -6,6 +6,7 @@ import { useStore } from "@/stores/useStore";
 import { branchLinks } from "@/lib/crosslinks";
 import { sound } from "@/lib/sound";
 import { LANGS, t, SECTION_DESC, getStoredLang } from "@/lib/i18n";
+import { tc } from "@/lib/i18n-content";
 import SoundToggle from "@/components/ui/SoundToggle";
 import { useEffect, useRef, useState } from "react";
 
@@ -166,7 +167,7 @@ export default function BranchNav() {
             <button
               onClick={() => setNavOpen(!navOpen)}
               className="flex flex-col gap-1 px-3 py-2 border border-border-dim text-content-secondary active:bg-panel transition-colors"
-              aria-label="Toggle navigation menu"
+              aria-label={tc(lang, "nav.toggle_menu")}
               aria-expanded={navOpen}
             >
               <span className="block w-4 h-px bg-current" />
@@ -205,7 +206,7 @@ export default function BranchNav() {
           <button
             onClick={() => setNavOpen(false)}
             className="px-3 py-1 text-xs text-content-secondary border border-border-dim active:bg-panel"
-            aria-label="Close navigation"
+            aria-label={tc(lang, "nav.close_nav")}
           >
             [ ✕ CLOSE ]
           </button>

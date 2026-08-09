@@ -2,6 +2,8 @@
 
 import { useState, useCallback } from "react";
 import Link from "next/link";
+import { useStore } from "@/stores/useStore";
+import { tc } from "@/lib/i18n-content";
 import backbone from "@/data/world_backbone.json";
 import type { WorldBackbone } from "@/lib/types";
 import TerminalCard from "@/components/ui/TerminalCard";
@@ -17,6 +19,7 @@ export default function DiffEngine() {
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "worse" | "better">("all");
   const [minSeverity, setMinSeverity] = useState<"all" | "notable" | "critical">("all");
+  const { lang } = useStore();
 
   const handleFile = useCallback(async (file: File) => {
     setLoading(true);

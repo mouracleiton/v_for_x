@@ -213,7 +213,7 @@ export default function TheTacticsPage() {
                 type="number"
                 dataKey="casualtyScore"
                 domain={[0, 10]}
-                name="Human Cost"
+                name={tc(lang, "tactics.human_cost")}
                 tick={{ fill: "#888", fontSize: 10 }}
                 label={{ value: "HUMAN COST →", position: "bottom", fill: "#666", fontSize: 10, offset: 10 }}
                 ticks={[0, 2, 5, 8, 10]}
@@ -234,7 +234,7 @@ export default function TheTacticsPage() {
                 cursor={{ strokeDasharray: "3 3", stroke: "#444" }}
                 contentStyle={{ background: "var(--color-abyss)", border: "1px solid #444", fontSize: "11px" }}
                 formatter={(value, name) => {
-                  if (name === "Human Cost") {
+                  if (name === tc(lang, "tactics.human_cost")) {
                     const v = Number(value);
                     return [v <= 1 ? "None/Low" : v <= 3 ? "Low" : v <= 5 ? "Moderate" : v <= 8 ? "High" : "Catastrophic", name];
                   }
@@ -287,7 +287,7 @@ export default function TheTacticsPage() {
             <span className="inline-block w-3 h-3 rounded-full" style={{ backgroundColor: "#990000", border: "1px solid var(--color-blood)" }} />
             TIER B (high cost / variable)
           </div>
-          <span className="text-content-dim">Bubble size = speed of impact</span>
+          <span className="text-content-dim">{tc(lang, "tactics.bubble_speed")}</span>
         </div>
       </TerminalCard>
 
@@ -409,11 +409,11 @@ export default function TheTacticsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="p-3 border border-terminal-green/30 bg-terminal-green/5">
               <div className="text-terminal-green font-bold mb-1">{tc(lang, "tactics.works")}</div>
-              <p>Humanitarian corridors, nonviolent resistance, sanctions, documentation, induced defection, negotiation. Low casualties, proven success.</p>
+              <p>{tc(lang, "tactics.tier_s_desc")}. Low casualties, proven success.</p>
             </div>
             <div className="p-3 border border-blood/30 bg-blood/5">
               <div className="text-blood-bright font-bold mb-1">{tc(lang, "tactics.doesnt_work")}</div>
-              <p>Bombing, invasion, armed insurgency. High civilian death, low success rate, creates the next crisis. Every war proves this.</p>
+              <p>{tc(lang, "tactics.tier_b_desc")}. Every war proves this.</p>
             </div>
           </div>
           <p className="text-content-dim mt-3">

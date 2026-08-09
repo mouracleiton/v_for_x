@@ -4,6 +4,8 @@ import "leaflet/dist/leaflet.css";
 import { MapContainer, TileLayer, Polyline, CircleMarker, Tooltip as LeafletTooltip } from "react-leaflet";
 import { formatNumber } from "@/lib/format";
 import { flowWidth, flowColor, type FlowEdge, type FlowNode } from "@/lib/flows";
+import { useStore } from "@/stores/useStore";
+import { tc } from "@/lib/i18n-content";
 
 export interface FlowMapProps {
   nodes: FlowNode[];
@@ -55,6 +57,7 @@ export default function FlowMap({
   maxNodeValue,
   maxHostValue,
 }: FlowMapProps) {
+  const { lang } = useStore();
   return (
     <MapContainer
       center={[20, 0]}
@@ -122,10 +125,10 @@ export default function FlowMap({
             <LeafletTooltip>
               <div className="text-xs">
                 <div className="font-bold">{n.name} ({n.iso3})</div>
-                <div>Origin: {formatNumber(n.refugeesOrigin)} refugees</div>
-                {n.forciblyDisplaced > 0 && <div>Displaced: {formatNumber(n.forciblyDisplaced)}</div>}
+                <div>{tc(lang, "flow.origin")} {formatNumber(n.refugeesOrigin)} {tc(lang, "flow.refugees")}</div>
+                {n.forciblyDisplaced > 0 && <div>{tc(lang, "flow.displaced")} {formatNumber(n.forciblyDisplaced)}</div>}
                 {n.idpsDisaster > 0 && <div>IDPs: {formatNumber(n.idpsDisaster)}</div>}
-                <div className="text-content-dim mt-1">Click to trace flows</div>
+                <div className="text-content-dim mt-1">{tc(lang, "flow.click_trace")}</div>
               </div>
             </LeafletTooltip>
           </CircleMarker>
@@ -153,7 +156,7 @@ export default function FlowMap({
             <LeafletTooltip>
               <div className="text-xs">
                 <div className="font-bold">{n.name} ({n.iso3})</div>
-                <div>Hosting: {formatNumber(n.refugeesHosted)} refugees</div>
+                <div>{tc(lang, "flow.hosting")} {formatNumber(n.refugeesHosted)} {tc(lang, "flow.refugees")}</div>
               </div>
             </LeafletTooltip>
           </CircleMarker>

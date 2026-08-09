@@ -134,8 +134,8 @@ export default function MascaraPage() {
         <div className="space-y-3">
           <div className="flex items-center justify-between p-2 terminal-card">
             <div>
-              <span className="text-xs text-content-primary">Claim: "I am in a hunger-affected country"</span>
-              <div className="text-[10px] text-content-dim">Set: {HOTSPOT_ISO3S.length} WFP hotspot countries. Prove membership without revealing which one.</div>
+              <span className="text-xs text-content-primary">{tc(lang, "mask.claim_label")}</span>
+              <div className="text-[10px] text-content-dim">{tc(lang, "mask.set_label")}</div>
             </div>
             <StatusPill color="green">ACTIVE</StatusPill>
           </div>
@@ -178,7 +178,7 @@ export default function MascaraPage() {
                 <StatusPill color={zkVerified ? "green" : "blood"}>
                   {zkVerified ? "✓ PROOF VERIFIED" : "✗ PROOF FAILED"}
                 </StatusPill>
-                <span className="text-[10px] text-content-dim">Verifier learns: "prover is in the set". Verifier does NOT learn: which country.</span>
+                <span className="text-[10px] text-content-dim">{tc(lang, "mask.verifier_learns")}</span>
               </div>
               <div className="text-[10px] font-mono space-y-1">
                 <div><span className="text-content-dim">claim:</span> <span className="text-terminal-green">{zkProof.claim}</span></div>
@@ -348,17 +348,17 @@ export default function MascaraPage() {
 
         {expandedSection === "opsec" && (
           <div className="mt-3 p-3 border border-border-dim text-xs text-content-secondary space-y-2">
-            <p>▸ <span className="text-content-primary">Rule 1: Compartmentalize.</span> Different identities for different activities. Never mix your activist identity with your personal one.</p>
-            <p>▸ <span className="text-content-primary">Rule 2: Assume breach.</span> Plan for what happens when — not if — one of your devices is compromised.</p>
-            <p>▸ <span className="text-content-primary">Rule 3: Least privilege.</span> Access only what you need. Share only what you must. Know only what is necessary.</p>
-            <p>▸ <span className="text-content-primary">Rule 4: Patterns kill.</span> Predictable schedules, routes, and communication patterns are the #1 way activists are identified.</p>
-            <p>▸ <span className="text-content-primary">Rule 5: Trust is earned slowly, lost quickly.</span> Verify identities through multiple independent channels.</p>
+            <p>▸ <span className="text-content-primary">{tc(lang, "mask.rule1_title")}</span> {tc(lang, "mask.rule1_desc")}</p>
+            <p>▸ <span className="text-content-primary">{tc(lang, "mask.rule2_title")}</span> {tc(lang, "mask.rule2_desc")}</p>
+            <p>▸ <span className="text-content-primary">{tc(lang, "mask.rule3_title")}</span> {tc(lang, "mask.rule3_desc")}</p>
+            <p>▸ <span className="text-content-primary">{tc(lang, "mask.rule4_title")}</span> {tc(lang, "mask.rule4_desc")}</p>
+            <p>▸ <span className="text-content-primary">{tc(lang, "mask.rule5_title")}</span> {tc(lang, "mask.rule5_desc")}</p>
           </div>
         )}
 
         {expandedSection === "browser" && (
           <div className="mt-3 p-3 border border-border-dim text-xs text-content-secondary space-y-2">
-            <p>▸ Use <span className="text-content-primary">Tor Browser</span> for anonymous web access. It's designed to minimize fingerprinting.</p>
+            <p>▸ Use <span className="text-content-primary">{tc(lang, "mask.tor_browser")}</span> for anonymous web access. It's designed to minimize fingerprinting.</p>
             <p>{tc(lang, "mask.opsec_content7")}</p>
             <p>{tc(lang, "mask.opsec_content8")}</p>
             <p>{tc(lang, "mask.opsec_content9")}</p>
@@ -368,39 +368,39 @@ export default function MascaraPage() {
 
         {expandedSection === "metadata" && (
           <div className="mt-3 p-3 border border-border-dim text-xs text-content-secondary space-y-2">
-            <p>▸ <span className="text-content-primary">Photos:</span> Every image contains EXIF data — GPS coordinates, device info, timestamp. Strip it: exiftool -all= photo.jpg</p>
-            <p>▸ <span className="text-content-primary">Documents:</span> PDFs, Word files contain author names and revision history. Export to plain text or sanitize with mat2.</p>
-            <p>▸ <span className="text-content-primary">Communications:</span> Who you talk to, when, and how often is metadata. Even encrypted messages reveal patterns.</p>
-            <p>▸ <span className="text-content-primary">Solution:</span> Vary timing. Use dead drops for sensitive exchanges. Compartmentalize contacts.</p>
+            <p>▸ <span className="text-content-primary">{tc(lang, "mask.photos")}</span> {tc(lang, "mask.photos_desc")}</p>
+            <p>▸ <span className="text-content-primary">{tc(lang, "mask.documents")}</span> PDFs, Word files contain author names and revision history. Export to plain text or sanitize with mat2.</p>
+            <p>▸ <span className="text-content-primary">{tc(lang, "mask.comms")}</span> {tc(lang, "mask.comms_desc")}</p>
+            <p>▸ <span className="text-content-primary">{tc(lang, "mask.solution")}</span> {tc(lang, "mask.solution_desc")}</p>
           </div>
         )}
 
         {expandedSection === "physical" && (
           <div className="mt-3 p-3 border border-border-dim text-xs text-content-secondary space-y-2">
-            <p>▸ <span className="text-content-primary">Device encryption:</span> Full-disk encryption (LUKS, FileVault, BitLocker). Strong passphrase. No biometrics for legal protection.</p>
-            <p>▸ <span className="text-content-primary">Screen locks:</span> Auto-lock after 2 minutes. Complex passphrase, not PIN.</p>
-            <p>▸ <span className="text-content-primary">Physical searches:</span> If detained, you cannot be compelled to remember a passphrase in most jurisdictions. Biometrics can be forced.</p>
-            <p>▸ <span className="text-content-primary">Duress codes:</span> See above. Set them up before you need them. Practice using them.</p>
-            <p>▸ <span className="text-content-primary">Hidden volumes:</span> Veracrypt hidden volumes give plausible deniability — a decoy OS/filesystem inside the encrypted container.</p>
+            <p>▸ <span className="text-content-primary">{tc(lang, "mask.device_encryption")}</span> {tc(lang, "mask.device_enc_desc")}</p>
+            <p>▸ <span className="text-content-primary">{tc(lang, "mask.screen_locks")}</span> {tc(lang, "mask.screen_lock_desc")}</p>
+            <p>▸ <span className="text-content-primary">{tc(lang, "mask.physical_search")}</span> If detained, you cannot be compelled to remember a passphrase in most jurisdictions. Biometrics can be forced.</p>
+            <p>▸ <span className="text-content-primary">{tc(lang, "mask.duress_codes")}</span> {tc(lang, "mask.duress_desc")}</p>
+            <p>▸ <span className="text-content-primary">{tc(lang, "mask.hidden_volumes")}</span> {tc(lang, "mask.hidden_vol_desc")}</p>
           </div>
         )}
 
         {expandedSection === "comms" && (
           <div className="mt-3 p-3 border border-border-dim text-xs text-content-secondary space-y-2">
-            <p>▸ <span className="text-content-primary">Compartmentalize:</span> Separate channels for separate operations. Never mix operational comms with social.</p>
-            <p>▸ <span className="text-content-primary">Code words:</span> Pre-agreed innocuous phrases that signal status. "Is mom feeling better?" = "The drop was successful."</p>
-            <p>▸ <span className="text-content-primary">Dead drops:</span> See A Teia → Dead Drops. Asynchronous, no real-time contact required.</p>
-            <p>▸ <span className="text-content-primary">Burn after reading:</span> Assume every message is permanent. Act accordingly.</p>
+            <p>▸ <span className="text-content-primary">{tc(lang, "mask.compartmentalize")}</span> {tc(lang, "mask.compart_desc")}</p>
+            <p>▸ <span className="text-content-primary">{tc(lang, "mask.code_words")}</span> {tc(lang, "mask.code_words_desc")}</p>
+            <p>▸ <span className="text-content-primary">{tc(lang, "mask.dead_drops")}</span> {tc(lang, "mask.dead_drops_desc")}</p>
+            <p>▸ <span className="text-content-primary">{tc(lang, "mask.burn_reading")}</span> {tc(lang, "mask.burn_desc")}</p>
           </div>
         )}
 
         {expandedSection === "social" && (
           <div className="mt-3 p-3 border border-border-dim text-xs text-content-secondary space-y-2">
             <p>{tc(lang, "mask.opsec_content24")}</p>
-            <p>▸ <span className="text-content-primary">Verify identity:</span> Use pre-shared passwords or challenge-response. Never trust an unsolicited contact.</p>
-            <p>▸ <span className="text-content-primary">Phishing:</span> Check URLs character by character. Bookmark critical sites. Never click links in messages.</p>
-            <p>▸ <span className="text-content-primary">Pretext calls:</span> "I'm from IT, I need your password" — never share credentials. Verify through independent channels.</p>
-            <p>▸ <span className="text-content-primary">Tailgating:</span> Don't hold secured doors. Challenge unfamiliar faces in restricted areas.</p>
+            <p>▸ <span className="text-content-primary">{tc(lang, "mask.verify_identity")}</span> {tc(lang, "mask.verify_desc")}</p>
+            <p>▸ <span className="text-content-primary">{tc(lang, "mask.phishing")}</span> {tc(lang, "mask.phishing_desc")}</p>
+            <p>▸ <span className="text-content-primary">{tc(lang, "mask.pretext_calls")}</span> "I'm from IT, I need your password" — never share credentials. Verify through independent channels.</p>
+            <p>▸ <span className="text-content-primary">{tc(lang, "mask.tailgating")}</span> {tc(lang, "mask.tailgating_desc")}</p>
           </div>
         )}
       </TerminalCard>

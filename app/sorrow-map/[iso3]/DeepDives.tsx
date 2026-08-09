@@ -184,7 +184,7 @@ export function MigrationDeepDive({
             </>
           )}
           {!derived.isOriginCountry && !derived.isHostCountry && (
-            <>Displacement footprint is relatively limited.</>
+            <>{tc(lang, "dd.displacement_limited")}</>
           )}
           {derived.forcedPctOfPop !== null && derived.forcedPctOfPop > 5 && (
             <>
@@ -196,7 +196,7 @@ export function MigrationDeepDive({
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
           <MiniStat
-            label="Forcibly Displaced"
+            label={tc(lang, "dd.forcibly_displaced")}
             value={formatNumber(m.forcibly_displaced)}
             sub={
               derived.forcedPctOfPop !== null
@@ -206,19 +206,19 @@ export function MigrationDeepDive({
             accent={derived.forcedPctOfPop !== null && derived.forcedPctOfPop > 10 ? "blood" : "amber"}
           />
           <MiniStat
-            label="Refugees (Origin)"
+            label={tc(lang, "dd.refugees_origin")}
             value={formatNumber(m.refugees_origin)}
             sub="Citizens abroad"
             accent="blood"
           />
           <MiniStat
-            label="Refugees (Hosted)"
+            label={tc(lang, "dd.refugees_hosted")}
             value={formatNumber(m.refugees_hosted)}
             sub="Sheltered here"
             accent="green"
           />
           <MiniStat
-            label="Net Migration"
+            label={tc(lang, "dd.net_migration")}
             value={formatNumber(m.net_migration)}
             sub={
               derived.netMigPer1k !== null
@@ -238,13 +238,13 @@ export function MigrationDeepDive({
           <DataBar
             value={Math.abs(m.refugees_origin ?? 0)}
             max={Math.max(Math.abs(m.refugees_origin ?? 0), Math.abs(m.refugees_hosted ?? 0), 100000)}
-            label="Refugee Outflow"
+            label={tc(lang, "dd.refugee_outflow")}
           />
         </div>
 
         {/* Direction indicator */}
         <div className="flex items-center gap-2 p-2 border border-border-dim bg-void/50">
-          <span className="text-[9px] text-content-dim uppercase">Flow direction:</span>
+          <span className="text-[9px] text-content-dim uppercase">{tc(lang, "dd.flow_direction")}</span>
           {(m.net_migration ?? 0) < 0 ? (
             <span className="text-blood-bright text-xs font-bold">◀ OUTFLOW (people leaving)</span>
           ) : (m.net_migration ?? 0) > 0 ? (
@@ -368,13 +368,13 @@ export function GovernanceDeepDive({ country }: { country: CountryData }) {
             </>
           )}
           {derived.cpiTier === "moderate" && (
-            <>Governance is functional but with room for improvement (CPI {g.corruption_perceptions_index}/100).</>
+            <>{tc(lang, "dd.gov_functional")} (CPI {g.corruption_perceptions_index}/100).</>
           )}
           {derived.cpiTier === "clean" && (
-            <>Strong governance framework (CPI {g.corruption_perceptions_index}/100) — low diversion risk.</>
+            <>{tc(lang, "dd.gov_strong")} (CPI {g.corruption_perceptions_index}/100) — {tc(lang, "dd.gov_low_diversion")}.</>
           )}
           {derived.cpiTier === "unknown" && (
-            <>Insufficient governance data for this country.</>
+            <>{tc(lang, "dd.gov_insufficient")}</>
           )}
         </InsightBanner>
 
@@ -405,7 +405,7 @@ export function GovernanceDeepDive({ country }: { country: CountryData }) {
                 ? "border-terminal-green bg-terminal-green/5"
                 : "border-border-dim bg-void/50"
           }`}>
-            <div className="text-[9px] text-content-dim uppercase">Regime Type</div>
+            <div className="text-[9px] text-content-dim uppercase">{tc(lang, "dd.regime_type")}</div>
             <div className={`text-xs font-bold mt-1 ${
               derived.demoTier === "autocracy"
                 ? "text-blood-bright"
@@ -418,7 +418,7 @@ export function GovernanceDeepDive({ country }: { country: CountryData }) {
             </div>
           </div>
           <div className="border border-border-dim bg-void/50 p-2 text-center">
-            <div className="text-[9px] text-content-dim uppercase">Pol. Corruption</div>
+            <div className="text-[9px] text-content-dim uppercase">{tc(lang, "dd.pol_corruption")}</div>
             <div className={`text-xs font-bold mt-1 ${
               derived.polCorrPct !== null && derived.polCorrPct > 60
                 ? "text-blood-bright"
@@ -443,7 +443,7 @@ export function GovernanceDeepDive({ country }: { country: CountryData }) {
           <DataBar
             value={g.electoral_democracy_index ?? 0}
             max={1}
-            label="Democracy Index"
+            label={tc(lang, "dd.democracy_index")}
             inverse
           />
         </div>
@@ -525,7 +525,7 @@ export function ClimateHungerDeepDive({ country }: { country: CountryData }) {
         <InsightBanner severity={severity}>
           {derived.isClimateVictim && (
             <>
-              <strong className="text-blood-bright">Climate injustice pattern detected.</strong> This country emits minimal CO₂ ({cl.co2_per_capita_t}t/capita) yet suffers {hunger.undernourishment_pct}% undernourishment — it bears climate consequences without contributing to the cause.
+              <strong className="text-blood-bright">{tc(lang, "dd.climate_injustice")}</strong> This country emits minimal CO₂ ({cl.co2_per_capita_t}t/capita) yet suffers {hunger.undernourishment_pct}% undernourishment — it bears climate consequences without contributing to the cause.
             </>
           )}
           {derived.isPolluterHungry && (
@@ -566,13 +566,13 @@ export function ClimateHungerDeepDive({ country }: { country: CountryData }) {
         {/* Climate justice matrix indicator */}
         <div className="grid grid-cols-2 gap-3 text-center">
           <div className={`border p-2 ${derived.isLowEmitter ? "border-terminal-green bg-terminal-green/5" : "border-border-dim bg-void/50"}`}>
-            <div className="text-[9px] text-content-dim uppercase">Emissions Role</div>
+            <div className="text-[9px] text-content-dim uppercase">{tc(lang, "dd.emissions_role")}</div>
             <div className={`text-xs font-bold mt-1 ${derived.isLowEmitter ? "text-terminal-green" : derived.isHighEmitter ? "text-warning-amber" : "text-content-primary"}`}>
               {derived.isHighEmitter ? "POLLUTER" : derived.isLowEmitter ? "VICTIM" : "MODERATE"}
             </div>
           </div>
           <div className={`border p-2 ${hunger.undernourishment_pct !== null && hunger.undernourishment_pct > 10 ? "border-blood bg-blood/5" : "border-border-dim bg-void/50"}`}>
-            <div className="text-[9px] text-content-dim uppercase">Hunger Status</div>
+            <div className="text-[9px] text-content-dim uppercase">{tc(lang, "dd.hunger_status")}</div>
             <div className={`text-xs font-bold mt-1 ${hunger.undernourishment_pct !== null && hunger.undernourishment_pct > 10 ? "text-blood-bright" : "text-terminal-green"}`}>
               {hunger.undernourishment_pct !== null && hunger.undernourishment_pct > 10 ? "CRISIS" : "MANAGEABLE"}
             </div>
@@ -588,7 +588,7 @@ export function ClimateHungerDeepDive({ country }: { country: CountryData }) {
               : "border-border-dim bg-void/50"
         }`}>
           <div className="flex justify-between items-center">
-            <span className="text-[9px] text-content-dim uppercase">Air Pollution (PM2.5)</span>
+            <span className="text-[9px] text-content-dim uppercase">{tc(lang, "dd.air_pollution")}</span>
             <span className={`text-xs font-bold ${
               derived.pm25Severity === "extreme" || derived.pm25Severity === "high"
                 ? "text-blood-bright"
@@ -683,7 +683,7 @@ export function MilitaryHealthDeepDive({ country }: { country: CountryData }) {
           ) : (
             <>
               Military expenditure data {mil.expenditure_usd === null ? "unavailable" : "limited"} for this country.
-              {mil.pct_gdp !== null && <> Military spending is {mil.pct_gdp.toFixed(1)}% of GDP.</>}
+              {mil.pct_gdp !== null && <> {tc(lang, "dd.mil_gdp_pct")} {mil.pct_gdp.toFixed(1)}% of GDP.</>}
             </>
           )}
         </InsightBanner>
@@ -692,7 +692,7 @@ export function MilitaryHealthDeepDive({ country }: { country: CountryData }) {
         <div className="space-y-3">
           <div>
             <div className="flex justify-between text-[10px] mb-1">
-              <span className="text-content-dim uppercase">Military Spending</span>
+              <span className="text-content-dim uppercase">{tc(lang, "dd.military_spending")}</span>
               <span className="text-warning-amber font-bold">
                 {formatMoney(mil.expenditure_usd)}
                 {mil.pct_gdp !== null && ` (${mil.pct_gdp.toFixed(1)}% GDP)`}
@@ -710,7 +710,7 @@ export function MilitaryHealthDeepDive({ country }: { country: CountryData }) {
           </div>
           <div>
             <div className="flex justify-between text-[10px] mb-1">
-              <span className="text-content-dim uppercase">Health Spending</span>
+              <span className="text-content-dim uppercase">{tc(lang, "dd.health_spending")}</span>
               <span className="text-terminal-green font-bold">
                 {derived.healthUsd !== null
                   ? formatMoney(derived.healthUsd)
@@ -732,13 +732,13 @@ export function MilitaryHealthDeepDive({ country }: { country: CountryData }) {
 
         <div className="grid grid-cols-2 gap-2">
           <MiniStat
-            label="Mil / Health Ratio"
+            label={tc(lang, "dd.mil_health_ratio")}
             value={derived.milToHealthRatio !== null ? derived.milToHealthRatio.toFixed(2) + "×" : "N/A"}
             sub={derived.gunsOverButter ? "Military > Health" : "Health > Military"}
             accent={derived.gunsOverButter ? "blood" : "green"}
           />
           <MiniStat
-            label="Military Per Capita"
+            label={tc(lang, "dd.military_per_capita")}
             value={derived.perCapitaMil !== null ? "$" + derived.perCapitaMil.toFixed(0) : "N/A"}
             sub="Per citizen"
             accent="amber"
@@ -849,7 +849,7 @@ export function GenderDeepDive({ country }: { country: CountryData }) {
             </>
           )}
           {derived.gapToParity !== null && derived.gapToParity > 5 && (
-            <> Gap to 50% parity: {derived.gapToParity.toFixed(0)} percentage points.</>
+            <> {tc(lang, "dd.gap_to_parity")} {derived.gapToParity.toFixed(0)} percentage points.</>
           )}
         </InsightBanner>
 
@@ -861,7 +861,7 @@ export function GenderDeepDive({ country }: { country: CountryData }) {
                 ? "border-terminal-green bg-terminal-green/5"
                 : "border-border-dim bg-void/50"
           }`}>
-            <div className="text-[9px] text-content-dim uppercase">Parliament</div>
+            <div className="text-[9px] text-content-dim uppercase">{tc(lang, "dd.parliament")}</div>
             <div className="text-lg font-bold mt-1 text-content-primary">
               {g.women_parliament_pct !== null ? g.women_parliament_pct.toFixed(1) + "%" : "—"}
             </div>
@@ -880,7 +880,7 @@ export function GenderDeepDive({ country }: { country: CountryData }) {
                 ? "border-terminal-green bg-terminal-green/5"
                 : "border-border-dim bg-void/50"
           }`}>
-            <div className="text-[9px] text-content-dim uppercase">Labor Force</div>
+            <div className="text-[9px] text-content-dim uppercase">{tc(lang, "dd.labor_force")}</div>
             <div className="text-lg font-bold mt-1 text-content-primary">
               {g.female_labor_force_pct !== null ? g.female_labor_force_pct.toFixed(1) + "%" : "—"}
             </div>
@@ -900,7 +900,7 @@ export function GenderDeepDive({ country }: { country: CountryData }) {
             <DataBar
               value={g.women_parliament_pct}
               max={50}
-              label="Women in Parliament"
+              label={tc(lang, "dd.women_parliament")}
               unit="%"
               inverse
             />
@@ -909,7 +909,7 @@ export function GenderDeepDive({ country }: { country: CountryData }) {
             <DataBar
               value={g.female_labor_force_pct}
               max={50}
-              label="Female Labor Force"
+              label={tc(lang, "dd.female_labor")}
               unit="%"
               inverse
             />

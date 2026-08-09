@@ -107,7 +107,7 @@ export default function TheBriefingPage() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search any of 200 countries..."
+            placeholder={tc(lang, "common.search_200")}
             className="w-full bg-void border border-border-dim text-content-primary text-sm px-3 py-2 focus:border-blood focus:outline-none"
           />
           {filteredCountries.length > 0 && (
@@ -146,7 +146,7 @@ export default function TheBriefingPage() {
               </div>
             </div>
             <div className="text-right">
-              <div className="text-[10px] text-content-dim uppercase tracking-widest">Vulnerability Score</div>
+              <div className="text-[10px] text-content-dim uppercase tracking-widest">{tc(lang, "common.vulnerability_score")}</div>
               <div className="text-5xl font-bold" style={{ color: scoreColor(vuln.composite) }}>
                 {vuln.composite.toFixed(0)}
               </div>
