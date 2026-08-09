@@ -122,7 +122,7 @@ function fmt(n: number | null): string {
 }
 
 /** Colors for up to 4 radar polygons — high contrast on dark background */
-const RADAR_COLORS = ["#cc0000", "#00ddff", "#00ff41", "#ffaa00"];
+const RADAR_COLORS = ["var(--color-blood)", "#00ddff", "var(--color-terminal-green)", "var(--color-warning-amber)"];
 
 export default function TheIndexPage() {
   const { lang } = useStore();
@@ -462,8 +462,8 @@ function ComparisonMode() {
                 />
                 <Tooltip
                   contentStyle={{
-                    background: "var(--color-abyss, #0a0a0a)",
-                    border: "1px solid var(--color-blood, #cc0000)",
+                    background: "var(--color-abyss, var(--color-abyss))",
+                    border: "1px solid var(--color-blood, var(--color-blood))",
                     borderRadius: 0,
                     fontSize: 11,
                   }}

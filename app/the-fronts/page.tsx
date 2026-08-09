@@ -116,10 +116,10 @@ export default function TheFrontsPage() {
   }, [regions]);
 
   const regionColors: Record<string, string> = {
-    Africa: "#cc0000",
+    Africa: "var(--color-blood)",
     Asia: "#ff6600",
     Americas: "#00ddff",
-    Europe: "#00ff41",
+    Europe: "var(--color-terminal-green)",
     Oceania: "#aa44ff",
   };
 
@@ -226,13 +226,13 @@ export default function TheFrontsPage() {
                 <Radar
                   name={region.name}
                   dataKey="score"
-                  stroke={regionColors[region.name] ?? "#e10600"}
-                  fill={regionColors[region.name] ?? "#e10600"}
+                  stroke={regionColors[region.name] ?? "var(--color-blood-bright)"}
+                  fill={regionColors[region.name] ?? "var(--color-blood-bright)"}
                   fillOpacity={0.15}
                   strokeWidth={2}
                 />
                 <Tooltip
-                  contentStyle={{ background: "#0a0a0a", border: "1px solid #444", fontSize: "11px" }}
+                  contentStyle={{ background: "var(--color-abyss)", border: "1px solid #444", fontSize: "11px" }}
                 />
               </RadarChart>
             </ResponsiveContainer>
@@ -303,7 +303,7 @@ export default function TheFrontsPage() {
                         {c.hunger.undernourishment_pct !== null ? `${c.hunger.undernourishment_pct.toFixed(1)}%` : "—"}
                       </td>
                       <td className="p-2 text-right">
-                        <span style={{ color: c.conflict.intensity_1to5 >= 3 ? "#e10600" : "#666" }}>
+                        <span style={{ color: c.conflict.intensity_1to5 >= 3 ? "var(--color-blood-bright)" : "#666" }}>
                           {c.conflict.intensity_1to5}/5
                         </span>
                       </td>
@@ -347,7 +347,7 @@ export default function TheFrontsPage() {
                 />
               ))}
               <Tooltip
-                contentStyle={{ background: "#0a0a0a", border: "1px solid #444", fontSize: "11px" }}
+                contentStyle={{ background: "var(--color-abyss)", border: "1px solid #444", fontSize: "11px" }}
               />
             </RadarChart>
           </ResponsiveContainer>

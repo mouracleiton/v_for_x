@@ -19,7 +19,7 @@ export default function SoundToggle() {
         if (!soundEnabled) sound.copy();
       }}
       className="text-xs px-2 py-1 border border-border-dim hover:border-blood transition-colors"
-      style={{ color: soundEnabled ? "#00ff41" : "#444" }}
+      style={{ color: soundEnabled ? "var(--color-terminal-green)" : "#444" }}
       aria-label={soundEnabled ? tc(lang, "ui.sound_disable") : tc(lang, "ui.sound_enable")}
     >
       {soundEnabled ? `[ ${tc(lang, "ui.snd_on")} ]` : `[ ${tc(lang, "ui.snd_off")} ]`}

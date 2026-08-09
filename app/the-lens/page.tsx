@@ -163,11 +163,11 @@ function pearsonR(pairs: { x: number; y: number }[]): number {
 
 function interpretR(r: number): { text: string; color: string } {
   const abs = Math.abs(r);
-  if (abs >= 0.7) return { text: r > 0 ? "STRONG POSITIVE CORRELATION" : "STRONG NEGATIVE CORRELATION", color: "#e10600" };
-  if (abs >= 0.5) return { text: r > 0 ? "MODERATE POSITIVE CORRELATION" : "MODERATE NEGATIVE CORRELATION", color: "#ffaa00" };
-  if (abs >= 0.3) return { text: r > 0 ? "WEAK POSITIVE CORRELATION" : "WEAK NEGATIVE CORRELATION", color: "#ffaa00" };
-  if (abs >= 0.1) return { text: r > 0 ? "NEGLIGIBLE POSITIVE CORRELATION" : "NEGLIGIBLE NEGATIVE CORRELATION", color: "#888888" };
-  return { text: "NO CORRELATION", color: "#888888" };
+  if (abs >= 0.7) return { text: r > 0 ? "STRONG POSITIVE CORRELATION" : "STRONG NEGATIVE CORRELATION", color: "var(--color-blood-bright)" };
+  if (abs >= 0.5) return { text: r > 0 ? "MODERATE POSITIVE CORRELATION" : "MODERATE NEGATIVE CORRELATION", color: "var(--color-warning-amber)" };
+  if (abs >= 0.3) return { text: r > 0 ? "WEAK POSITIVE CORRELATION" : "WEAK NEGATIVE CORRELATION", color: "var(--color-warning-amber)" };
+  if (abs >= 0.1) return { text: r > 0 ? "NEGLIGIBLE POSITIVE CORRELATION" : "NEGLIGIBLE NEGATIVE CORRELATION", color: "var(--color-content-secondary)" };
+  return { text: "NO CORRELATION", color: "var(--color-content-secondary)" };
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -186,12 +186,12 @@ function ScatterTooltip({ active, payload, xMetric, yMetric }: {
     <div
       className="border p-2 text-xs"
       style={{
-        backgroundColor: "#0a0a0a",
-        borderColor: p.isHotspot ? "#e10600" : "#444",
+        backgroundColor: "var(--color-abyss)",
+        borderColor: p.isHotspot ? "var(--color-blood-bright)" : "#444",
         color: "#ccc",
       }}
     >
-      <div className="font-bold" style={{ color: p.isHotspot ? "#e10600" : "#00ff41" }}>
+      <div className="font-bold" style={{ color: p.isHotspot ? "var(--color-blood-bright)" : "var(--color-terminal-green)" }}>
         {p.name} <span className="text-content-dim">[{p.iso3}]</span>
       </div>
       <div className="mt-1" style={{ color: "#888" }}>
@@ -201,7 +201,7 @@ function ScatterTooltip({ active, payload, xMetric, yMetric }: {
         {yMetric.label}: <span style={{ color: "#ccc" }}>{p.y.toFixed(2)}{yMetric.unit}</span>
       </div>
       {p.isHotspot && (
-        <div className="mt-1" style={{ color: "#e10600", fontSize: "9px" }}>⚠ HOTSPOT</div>
+        <div className="mt-1" style={{ color: "var(--color-blood-bright)", fontSize: "9px" }}>⚠ HOTSPOT</div>
       )}
     </div>
   );
@@ -219,7 +219,7 @@ function renderHotspotPoint(props: { cx?: number; cy?: number }) {
       cx={cx}
       cy={cy}
       r={4}
-      fill="#e10600"
+      fill="var(--color-blood-bright)"
       stroke="#ff3333"
       strokeWidth={1}
       opacity={0.85}
@@ -236,7 +236,7 @@ function renderNormalPoint(props: { cx?: number; cy?: number }) {
       cy={cy}
       r={3}
       fill="#00aa33"
-      stroke="#00ff41"
+      stroke="var(--color-terminal-green)"
       strokeWidth={0.5}
       opacity={0.6}
     />
@@ -324,7 +324,7 @@ export default function TheLensPage() {
   );
 
   /* ── Radar chart data for comparison overlay ── */
-  const radarColors = ["#e10600", "#00ff41", "#00ddff", "#ffaa00", "#aa44ff"];
+  const radarColors = ["var(--color-blood-bright)", "var(--color-terminal-green)", "#00ddff", "var(--color-warning-amber)", "#aa44ff"];
 
   const radarData = useMemo(() => {
     return DOMAIN_WEIGHTS.map((dw) => {
@@ -499,7 +499,7 @@ export default function TheLensPage() {
         <div className="border border-border-dim bg-abyss p-2 h-[320px] sm:h-[400px] md:h-[480px]">
           <ResponsiveContainer width="100%" height="100%">
             <ScatterChart margin={{ top: 20, right: 30, bottom: 50, left: 20 }}>
-              <CartesianGrid stroke="#1a1a1a" strokeDasharray="2 4" />
+              <CartesianGrid stroke="var(--color-border-dim)" strokeDasharray="2 4" />
               <XAxis
                 type="number"
                 dataKey="x"
@@ -547,7 +547,7 @@ export default function TheLensPage() {
               <Scatter
                 name="Hotspots"
                 data={hotspotsData}
-                fill="#e10600"
+                fill="var(--color-blood-bright)"
                 shape={renderHotspotPoint}
               />
             </ScatterChart>
@@ -559,14 +559,14 @@ export default function TheLensPage() {
           <div className="flex items-center gap-2">
             <span
               className="inline-block w-3 h-3"
-              style={{ backgroundColor: "#e10600", border: "1px solid #ff3333" }}
+              style={{ backgroundColor: "var(--color-blood-bright)", border: "1px solid #ff3333" }}
             />
             {tc(lang, "lens.hotspot_countries")} ({hotspotsData.length})
           </div>
           <div className="flex items-center gap-2">
             <span
               className="inline-block w-3 h-3"
-              style={{ backgroundColor: "#00aa33", border: "1px solid #00ff41" }}
+              style={{ backgroundColor: "#00aa33", border: "1px solid var(--color-terminal-green)" }}
             />
             {tc(lang, "lens.standard_countries")} ({normalData.length})
           </div>
@@ -615,8 +615,8 @@ export default function TheLensPage() {
                 className="inline-flex items-center gap-1.5 text-xs px-2 py-1 border"
                 style={{
                   backgroundColor: c.is_hotspot ? "#1a0000" : "#001a00",
-                  borderColor: c.is_hotspot ? "#cc0000" : "#00aa33",
-                  color: c.is_hotspot ? "#e10600" : "#00ff41",
+                  borderColor: c.is_hotspot ? "var(--color-blood)" : "#00aa33",
+                  color: c.is_hotspot ? "var(--color-blood-bright)" : "var(--color-terminal-green)",
                 }}
               >
                 <span className="font-bold">{c.iso3}</span>
@@ -702,7 +702,7 @@ export default function TheLensPage() {
                       >
                         <div
                           className="font-bold"
-                          style={{ color: c.is_hotspot ? "#e10600" : "#00ff41" }}
+                          style={{ color: c.is_hotspot ? "var(--color-blood-bright)" : "var(--color-terminal-green)" }}
                         >
                           {c.iso3}
                         </div>
@@ -753,9 +753,9 @@ export default function TheLensPage() {
                                 className="font-bold"
                                 style={{
                                   color: isBest
-                                    ? "#00ff41"
+                                    ? "var(--color-terminal-green)"
                                     : isWorst
-                                      ? "#e10600"
+                                      ? "var(--color-blood-bright)"
                                       : "#ccc",
                                 }}
                               >
@@ -780,14 +780,14 @@ export default function TheLensPage() {
           <div className="flex items-center gap-2">
             <span
               className="inline-block w-3 h-3 border"
-              style={{ backgroundColor: "rgba(0,255,65,0.08)", borderColor: "#00ff41" }}
+              style={{ backgroundColor: "rgba(0,255,65,0.08)", borderColor: "var(--color-terminal-green)" }}
             />
             <span className="text-terminal-green">{tc(lang, "lens.best_value")}</span>
           </div>
           <div className="flex items-center gap-2">
             <span
               className="inline-block w-3 h-3 border"
-              style={{ backgroundColor: "rgba(225,6,0,0.08)", borderColor: "#e10600" }}
+              style={{ backgroundColor: "rgba(225,6,0,0.08)", borderColor: "var(--color-blood-bright)" }}
             />
             <span className="text-blood-bright">{tc(lang, "lens.worst_value")}</span>
           </div>
@@ -828,7 +828,7 @@ export default function TheLensPage() {
                     <Legend wrapperStyle={{ fontSize: "10px", paddingTop: "8px" }} />
                     <Tooltip
                       contentStyle={{
-                        background: "#0a0a0a",
+                        background: "var(--color-abyss)",
                         border: "1px solid #444",
                         fontSize: "11px",
                       }}

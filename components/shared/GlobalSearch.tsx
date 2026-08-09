@@ -30,9 +30,9 @@ interface SearchResult {
 }
 
 const TYPE_META: Record<ResultType, { labelKey: string; color: string; icon: string }> = {
-  country: { labelKey: "search.type_country", color: "#e10600", icon: "🌍" },
-  blueprint: { labelKey: "search.type_blueprint", color: "#00ff41", icon: "📋" },
-  dossier: { labelKey: "search.type_dossier", color: "#ffaa00", icon: "⚖" },
+  country: { labelKey: "search.type_country", color: "var(--color-blood-bright)", icon: "🌍" },
+  blueprint: { labelKey: "search.type_blueprint", color: "var(--color-terminal-green)", icon: "📋" },
+  dossier: { labelKey: "search.type_dossier", color: "var(--color-warning-amber)", icon: "⚖" },
   equation: { labelKey: "search.type_equation", color: "#00ddff", icon: "∑" },
   page: { labelKey: "search.type_page", color: "#aa44ff", icon: "▸" },
 };

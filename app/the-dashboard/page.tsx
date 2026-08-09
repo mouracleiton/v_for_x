@@ -194,12 +194,12 @@ export default function TheDashboardPage() {
       <TerminalCard title={tc(lang, "dashboard.global_indicators")} accent="amber" className="mb-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Indicator label={tc(lang, "dash.world_pop")} value={formatNumber(globalStats.totalPop / 1e6)} unit="M" color="#999" />
-          <Indicator label={tc(lang, "dash.undernourished")} value={`${globalStats.totalUndernourished}`} unit="M" color="#cc0000" sub="1 in 11 humans" />
+          <Indicator label={tc(lang, "dash.undernourished")} value={`${globalStats.totalUndernourished}`} unit="M" color="var(--color-blood)" sub="1 in 11 humans" />
           <Indicator label={tc(lang, "dash.forcibly_displaced")} value={formatNumber(globalStats.totalDisplaced)} unit="" color="#ff6600" sub="UNHCR" />
-          <Indicator label={tc(lang, "dash.no_electricity")} value={formatNumber(globalStats.totalNoElectricity)} unit="M" color="#ffaa00" sub="IEA" />
+          <Indicator label={tc(lang, "dash.no_electricity")} value={formatNumber(globalStats.totalNoElectricity)} unit="M" color="var(--color-warning-amber)" sub="IEA" />
           <Indicator label={tc(lang, "dash.illiterate")} value={formatNumber(globalStats.totalIlliterate / 1e6)} unit="M" color="#aa44ff" sub="UNESCO" />
-          <Indicator label={tc(lang, "dash.below_who")} value={`${globalStats.totalBelowWhoMin}`} unit="/200" color="#e10600" sub="need 4.45/1000" />
-          <Indicator label={tc(lang, "dash.military_spending")} value={`$${(globalStats.totalMilitary / 1e9).toFixed(0)}`} unit="B/yr" color="#cc0000" sub="SIPRI" />
+          <Indicator label={tc(lang, "dash.below_who")} value={`${globalStats.totalBelowWhoMin}`} unit="/200" color="var(--color-blood-bright)" sub="need 4.45/1000" />
+          <Indicator label={tc(lang, "dash.military_spending")} value={`$${(globalStats.totalMilitary / 1e9).toFixed(0)}`} unit="B/yr" color="var(--color-blood)" sub="SIPRI" />
           <Indicator label={tc(lang, "dash.hunger_hotspots")} value={`${data.hotspots.all.length}`} unit="" color="#ff0000" sub="WFP" />
         </div>
       </TerminalCard>

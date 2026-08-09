@@ -1,57 +1,69 @@
 @import "tailwindcss";
 
 /* ═══════════════════════════════════════════════════════════
-   V FOR X — CYBERPUNK TERMINAL DESIGN SYSTEM
+   V FOR X — COMMAND CENTER DESIGN SYSTEM
+   High-intelligence interface for coordinated action.
+   Deep navy · steel cyan · refined alert crimson · glass panels
    ═══════════════════════════════════════════════════════════ */
 
 @theme {
-  --color-void: #000000;
-  --color-abyss: #0a0a0a;
-  --color-panel: #111111;
-  --color-panel-hi: #161616;
-  --color-border-dim: #1a1a1a;
-  --color-border-bright: #2a2a2a;
+  /* ── Base surfaces — deep navy instead of pure black ── */
+  --color-void: #060b14;
+  --color-abyss: #0a1220;
+  --color-panel: #0f1a2e;
+  --color-panel-hi: #142238;
+  --color-border-dim: #1a2a44;
+  --color-border-bright: #2a4264;
 
-  --color-blood: #cc0000;
-  --color-blood-bright: #e10600;
-  --color-blood-dim: #660000;
-  --color-terminal-green: #00ff41;
-  --color-warning-amber: #ffaa00;
+  /* ── Alerts — refined crimson, less neon ── */
+  --color-blood: #c42b3e;
+  --color-blood-bright: #e23856;
+  --color-blood-dim: #5a1828;
 
-  --color-content-primary: #e0e0e0;
-  --color-content-secondary: #888888;
-  --color-content-dim: #444444;
+  /* ── Intelligence cyan — replaces neon green ── */
+  --color-terminal-green: #22d3a6;
+
+  /* ── Warning amber — slightly warmer ── */
+  --color-warning-amber: #f0a93b;
+
+  /* ── Command accent — steel blue for links/primary actions ── */
+  --color-command: #5b9cf6;
+  --color-command-bright: #7db5ff;
+  --color-command-dim: #2a4d7a;
+
+  /* ── Content — cleaner, higher contrast on navy ── */
+  --color-content-primary: #dfe7f5;
+  --color-content-secondary: #8da3c4;
+  --color-content-dim: #4a5d7a;
 
   --font-mono: "JetBrains Mono", "Fira Code", "SF Mono", "Cascadia Code",
     "Menlo", "Consolas", monospace;
+  --font-sans: "Inter", "Segoe UI", "Helvetica Neue", system-ui, sans-serif;
 }
 
 /* ── Base ─────────────────────────────────────────────────── */
 
+/* Remove the zero-radius override — allow subtle rounding */
 * {
-  border-radius: 0 !important;
+  border-radius: 0;
 }
 
 html {
-  background: #000;
+  background: var(--color-void);
   scroll-behavior: smooth;
-  /* Prevent text size adjust on orientation change */
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }
 
 body {
-  background: #000000;
-  color: #e0e0e0;
+  background: var(--color-void);
+  color: var(--color-content-primary);
   font-family: var(--font-mono);
   font-size: 14px;
-  line-height: 1.6;
+  line-height: 1.65;
   overflow-x: hidden;
-  /* Prevent rubber-band scroll on iOS */
   overscroll-behavior-y: none;
-  /* Disable tap highlight */
   -webkit-tap-highlight-color: transparent;
-  /* Optimize touch scrolling */
   -webkit-overflow-scrolling: touch;
 }
 
@@ -63,94 +75,67 @@ input,
 select,
 textarea,
 [role="button"] {
-  /* Minimum 44px tap target per Apple HIG / Material guidelines */
   min-height: 36px;
   touch-action: manipulation;
 }
 
-/* Re-allow smaller heights for inline tags/pills */
 button.inline-pill,
 a.inline-pill,
 .inline-pill {
   min-height: 0;
 }
 
-/* Safe-area-aware padding utility */
-.safe-pt {
-  padding-top: env(safe-area-inset-top);
-}
-.safe-pb {
-  padding-bottom: env(safe-area-inset-bottom);
-}
-.safe-pl {
-  padding-left: env(safe-area-inset-left);
-}
-.safe-pr {
-  padding-right: env(safe-area-inset-right);
-}
+.safe-pt { padding-top: env(safe-area-inset-top); }
+.safe-pb { padding-bottom: env(safe-area-inset-bottom); }
+.safe-pl { padding-left: env(safe-area-inset-left); }
+.safe-pr { padding-right: env(safe-area-inset-right); }
 
-/* dvh fallback — uses 100vh if dvh unsupported */
-.min-h-dvh {
-  min-height: 100vh;
-  min-height: 100dvh;
-}
-.h-dvh {
-  height: 100vh;
-  height: 100dvh;
-}
+.min-h-dvh { min-height: 100vh; min-height: 100dvh; }
+.h-dvh { height: 100vh; height: 100dvh; }
 
-/* ── Scanline Overlay ─────────────────────────────────────── */
+/* ── Scanline Overlay — subtle data-grid feel ────────────── */
 
 .scanlines::before {
   content: "";
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  top: 0; left: 0; width: 100%; height: 100%;
   background: repeating-linear-gradient(
     0deg,
     rgba(0, 0, 0, 0) 0px,
     rgba(0, 0, 0, 0) 2px,
-    rgba(0, 0, 0, 0.15) 3px,
-    rgba(0, 0, 0, 0.15) 3px
+    rgba(15, 26, 46, 0.08) 3px,
+    rgba(15, 26, 46, 0.08) 3px
   );
   pointer-events: none;
   z-index: 9998;
 }
 
-/* ── CRT Vignette ─────────────────────────────────────────── */
+/* ── CRT Vignette — subtle depth ─────────────────────────── */
 
 .crt-vignette::after {
   content: "";
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  top: 0; left: 0; width: 100%; height: 100%;
   background: radial-gradient(
     ellipse at center,
-    transparent 50%,
-    rgba(0, 0, 0, 0.35) 100%
+    transparent 55%,
+    rgba(6, 11, 20, 0.4) 100%
   );
   pointer-events: none;
   z-index: 9997;
 }
 
-/* ── Film Grain ───────────────────────────────────────────── */
+/* ── Film Grain — barely perceptible texture ─────────────── */
 
 .grain::before {
   content: "";
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  top: 0; left: 0; width: 100%; height: 100%;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
-  opacity: 0.02;
+  opacity: 0.012;
   pointer-events: none;
   z-index: 9996;
-  animation: grain-shift 0.5s steps(4) infinite;
+  animation: grain-shift 0.8s steps(4) infinite;
 }
 
 @keyframes grain-shift {
@@ -161,21 +146,19 @@ a.inline-pill,
   100% { transform: translate(2px, -1px); }
 }
 
-/* ── Flicker ──────────────────────────────────────────────── */
+/* ── Flicker — minimal, institutional ────────────────────── */
 
 .flicker {
-  animation: flicker 8s infinite;
+  animation: flicker 12s infinite;
 }
 
 @keyframes flicker {
-  0%, 96%, 100% { opacity: 1; }
-  97% { opacity: 0.85; }
-  98% { opacity: 1; }
-  98.5% { opacity: 0.9; }
+  0%, 97%, 100% { opacity: 1; }
+  98% { opacity: 0.92; }
   99% { opacity: 1; }
 }
 
-/* ── Glitch Text ──────────────────────────────────────────── */
+/* ── Glitch Text — refined intel-style distortion ────────── */
 
 .glitch {
   position: relative;
@@ -186,23 +169,20 @@ a.inline-pill,
 .glitch::after {
   content: attr(data-text);
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  top: 0; left: 0; width: 100%; height: 100%;
   opacity: 0;
 }
 
 .glitch:hover::before {
-  opacity: 0.8;
-  color: #00ff41;
+  opacity: 0.6;
+  color: var(--color-terminal-green);
   animation: glitch-x 0.3s linear;
   clip-path: polygon(0 20%, 100% 20%, 100% 50%, 0 50%);
 }
 
 .glitch:hover::after {
-  opacity: 0.8;
-  color: #cc0000;
+  opacity: 0.6;
+  color: var(--color-command);
   animation: glitch-y 0.3s linear;
   clip-path: polygon(0 60%, 100% 60%, 100% 100%, 0 100%);
 }
@@ -228,9 +208,9 @@ a.inline-pill,
 /* ── Blinking Cursor ──────────────────────────────────────── */
 
 .cursor-blink::after {
-  content: "█";
+  content: "▊";
   animation: blink 1s step-start infinite;
-  color: var(--color-blood-bright);
+  color: var(--color-command-bright);
 }
 
 @keyframes blink {
@@ -242,7 +222,7 @@ a.inline-pill,
 .typewriter {
   overflow: hidden;
   white-space: nowrap;
-  border-right: 2px solid var(--color-blood-bright);
+  border-right: 2px solid var(--color-command-bright);
   animation: typing 2s steps(40, end), blink-caret 0.75s step-start infinite;
 }
 
@@ -255,92 +235,99 @@ a.inline-pill,
   50% { border-color: transparent; }
 }
 
-/* ── Pulse Glow ───────────────────────────────────────────── */
+/* ── Pulse Glow — refined intelligence pulse ─────────────── */
 
 .pulse-blood {
-  animation: pulse-blood 2s ease-in-out infinite;
+  animation: pulse-blood 3s ease-in-out infinite;
 }
 
 @keyframes pulse-blood {
-  0%, 100% { box-shadow: 0 0 5px rgba(204, 0, 0, 0.3); }
-  50% { box-shadow: 0 0 20px rgba(204, 0, 0, 0.6); }
+  0%, 100% { box-shadow: 0 0 4px rgba(196, 43, 62, 0.2); }
+  50% { box-shadow: 0 0 14px rgba(196, 43, 62, 0.4); }
 }
 
-/* ── Text Glow ────────────────────────────────────────────── */
+/* ── Text Glow — subtle, professional ────────────────────── */
 
 .glow-blood {
-  text-shadow: 0 0 10px rgba(204, 0, 0, 0.5);
+  text-shadow: 0 0 8px rgba(196, 43, 62, 0.35);
 }
 
 .glow-green {
-  text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+  text-shadow: 0 0 8px rgba(34, 211, 166, 0.35);
 }
 
-/* ── Terminal Card ────────────────────────────────────────── */
+/* ── Glass Card — replaces terminal-card with glassmorphism ── */
 
 .terminal-card {
-  background: var(--color-abyss);
+  background: rgba(15, 26, 46, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid var(--color-border-dim);
-  transition: border-color 0.2s, box-shadow 0.2s;
+  border-radius: 6px;
+  transition: border-color 0.25s, box-shadow 0.25s;
 }
 
 .terminal-card:hover {
-  border-color: var(--color-blood-dim);
-  box-shadow: 0 0 15px rgba(204, 0, 0, 0.1);
+  border-color: var(--color-command-dim);
+  box-shadow: 0 0 12px rgba(91, 156, 246, 0.08), 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
-/* ── Scrollbar ────────────────────────────────────────────── */
+/* ── Scrollbar — slim navy ───────────────────────────────── */
 
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #000;
+  background: var(--color-void);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #2a2a2a;
+  background: var(--color-border-bright);
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #660000;
+  background: var(--color-command-dim);
 }
 
 /* ── Links ────────────────────────────────────────────────── */
 
 a {
-  color: #e0e0e0;
+  color: var(--color-content-primary);
   text-decoration: none;
   transition: color 0.15s;
 }
 
 a:hover {
-  color: #e10600;
+  color: var(--color-command-bright);
 }
 
-/* ── Leaflet Dark Override ────────────────────────────────── */
+/* ── Leaflet Dark Override — command center map style ─────── */
 
 .leaflet-container {
-  background: #050505 !important;
+  background: #080e18 !important;
   font-family: var(--font-mono) !important;
 }
 
 .leaflet-popup-content-wrapper {
-  background: #0a0a0a !important;
-  color: #e0e0e0 !important;
-  border: 1px solid #cc0000 !important;
+  background: var(--color-abyss) !important;
+  color: var(--color-content-primary) !important;
+  border: 1px solid var(--color-border-bright) !important;
+  border-radius: 6px !important;
+  backdrop-filter: blur(8px);
 }
 
 .leaflet-popup-tip {
-  background: #cc0000 !important;
+  background: var(--color-border-bright) !important;
 }
 
 .leaflet-control-zoom a {
-  background: #0a0a0a !important;
-  color: #cc0000 !important;
-  border: 1px solid #1a1a1a !important;
+  background: var(--color-abyss) !important;
+  color: var(--color-command) !important;
+  border: 1px solid var(--color-border-dim) !important;
+  border-radius: 4px !important;
 }
 
 .leaflet-control-attribution {
@@ -350,9 +337,7 @@ a:hover {
 /* ── Reduced Motion ───────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
@@ -373,7 +358,7 @@ a:hover {
 
 @media (max-width: 768px) {
   .scanlines::before {
-    opacity: 0.2;
+    opacity: 0.15;
   }
 
   .grain::before {
@@ -384,12 +369,10 @@ a:hover {
     font-size: 13px;
   }
 
-  /* Reduce padding on mobile for content containers */
   .terminal-card {
     padding: 0.75rem !important;
   }
 
-  /* Make tables scroll smoothly on touch */
   .overflow-x-auto {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
@@ -401,19 +384,17 @@ a:hover {
     font-size: 12px;
   }
 
-  /* Even tighter on small phones */
   .terminal-card {
     padding: 0.625rem !important;
   }
 
-  /* Hide decorative ASCII art that overflows on narrow screens */
   pre[data-ascii-hero] {
     font-size: 6px !important;
     line-height: 1.1;
   }
 }
 
-/* ── Desktop: restore terminal-card padding ────────────────── */
+/* ── Desktop: restore card padding ────────────────────────── */
 
 @media (min-width: 769px) {
   .terminal-card {
@@ -421,7 +402,7 @@ a:hover {
   }
 }
 
-/* ── Print mode (Protocol X) ──────────────────────────────── */
+/* ── Print mode ──────────────────────────────────────────── */
 
 @media print {
   body {
@@ -439,7 +420,6 @@ a:hover {
     display: none !important;
   }
 
-  /* PDF brief: hide nav, expand content, remove dark theme */
   nav,
   .flicker {
     display: none !important;
@@ -450,16 +430,15 @@ a:hover {
     padding: 0 !important;
   }
 
-  /* Make terminal cards print-friendly */
   .terminal-card {
     border: 1px solid #ccc !important;
     background: white !important;
     color: black !important;
     page-break-inside: avoid;
     margin-bottom: 8px !important;
+    backdrop-filter: none !important;
   }
 
-  /* Preserve color-coded content */
   [class*="text-blood"],
   [class*="text-warning"],
   [class*="text-terminal-green"] {
@@ -467,12 +446,10 @@ a:hover {
     font-weight: bold !important;
   }
 
-  /* Collapsible sections: expand all for printing */
   .print-expand {
     display: block !important;
   }
 
-  /* Printable briefing — keep stats visible in print */
   .print-briefing {
     color: black !important;
   }
@@ -481,10 +458,10 @@ a:hover {
     color: #222 !important;
   }
   .print-briefing .text-blood-bright {
-    color: #cc0000 !important;
+    color: #c42b3e !important;
   }
   .print-briefing .text-terminal-green {
-    color: #006600 !important;
+    color: #006666 !important;
   }
 }
 
@@ -501,22 +478,23 @@ a:hover {
   appearance: none;
   width: 16px;
   height: 16px;
-  background: #0a0a0a;
-  border: 2px solid #e10600;
+  background: var(--color-abyss);
+  border: 2px solid var(--color-command);
+  border-radius: 3px;
   cursor: pointer;
   transition: transform 0.1s;
 }
 
 .allocator-slider::-webkit-slider-thumb:hover {
   transform: scale(1.3);
-  box-shadow: 0 0 8px rgba(225, 6, 0, 0.6);
+  box-shadow: 0 0 8px rgba(91, 156, 246, 0.4);
 }
 
 .allocator-slider::-moz-range-thumb {
   width: 14px;
   height: 14px;
-  background: #0a0a0a;
-  border: 2px solid #e10600;
+  background: var(--color-abyss);
+  border: 2px solid var(--color-command);
   cursor: pointer;
-  border-radius: 0;
+  border-radius: 3px;
 }

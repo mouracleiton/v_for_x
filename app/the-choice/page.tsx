@@ -155,7 +155,7 @@ export default function TheChoicePage() {
         <div style={{ width: "100%", height: 420 }}>
           <ResponsiveContainer>
             <ScatterChart margin={{ top: 20, right: 30, bottom: 50, left: 20 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-dim)" />
               <XAxis
                 type="number"
                 dataKey="x"
@@ -178,7 +178,7 @@ export default function TheChoicePage() {
               />
               <Tooltip
                 cursor={{ strokeDasharray: "3 3", stroke: "#444" }}
-                contentStyle={{ background: "#0a0a0a", border: "1px solid #444", fontSize: "11px" }}
+                contentStyle={{ background: "var(--color-abyss)", border: "1px solid #444", fontSize: "11px" }}
                 formatter={(value, name) => [`$${formatNumber(Number(value))}B`, name === "x" ? "Health" : "Military"]}
                 labelFormatter={() => ""}
               />
@@ -186,8 +186,8 @@ export default function TheChoicePage() {
                 {scatterData.map((entry, i) => (
                   <Cell
                     key={i}
-                    fill={entry.isOffender ? "#cc0000" : "#006633"}
-                    stroke={entry.isOffender ? "#ff3333" : "#00ff41"}
+                    fill={entry.isOffender ? "var(--color-blood)" : "#006633"}
+                    stroke={entry.isOffender ? "#ff3333" : "var(--color-terminal-green)"}
                     strokeWidth={hoveredIso3 === entry.iso3 ? 2 : 0.5}
                     opacity={hoveredIso3 === null || hoveredIso3 === entry.iso3 ? 0.85 : 0.3}
                   />
@@ -198,11 +198,11 @@ export default function TheChoicePage() {
         </div>
         <div className="flex items-center gap-6 mt-2 text-[10px] text-content-secondary">
           <div className="flex items-center gap-2">
-            <span className="inline-block w-3 h-3 rounded-full" style={{ backgroundColor: "#990000", border: "1px solid #cc0000" }} />
+            <span className="inline-block w-3 h-3 rounded-full" style={{ backgroundColor: "#990000", border: "1px solid var(--color-blood)" }} />
             MILITARY &gt; HEALTH ({offenders.length})
           </div>
           <div className="flex items-center gap-2">
-            <span className="inline-block w-3 h-3 rounded-full" style={{ backgroundColor: "#006633", border: "1px solid #00ff41" }} />
+            <span className="inline-block w-3 h-3 rounded-full" style={{ backgroundColor: "#006633", border: "1px solid var(--color-terminal-green)" }} />
             HEALTH &gt; MILITARY
           </div>
         </div>
@@ -302,7 +302,7 @@ export default function TheChoicePage() {
                   </td>
                   <td className="p-2 text-center">
                     {e.undernourishedM > 0.05 ? (
-                      <span className="font-bold" style={{ color: e.daysLocalMilitary < 1 ? "#00ff41" : "#ffaa00" }}>
+                      <span className="font-bold" style={{ color: e.daysLocalMilitary < 1 ? "var(--color-terminal-green)" : "var(--color-warning-amber)" }}>
                         {e.daysLocalMilitary < 1
                           ? `${(e.daysLocalMilitary * 24).toFixed(1)} HOURS`
                           : `${e.daysLocalMilitary.toFixed(1)} DAYS`}

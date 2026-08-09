@@ -31,11 +31,12 @@ export interface ChoroplethMapProps {
  * ratio 0 = darkest, ratio 1 = brightest.
  */
 function severityFillColor(ratio: number): string {
-  if (ratio < 0.2) return "#2a0808";
-  if (ratio < 0.4) return "#550000";
-  if (ratio < 0.6) return "#880000";
-  if (ratio < 0.8) return "#bb0000";
-  return "#ff1a1a";
+  // Command center severity scale: dim navy → amber → crimson
+  if (ratio < 0.2) return "#1a2a44";
+  if (ratio < 0.4) return "#3d3520";
+  if (ratio < 0.6) return "#7a4a1a";
+  if (ratio < 0.8) return "#9a3030";
+  return "#c42b3e";
 }
 
 export default function ChoroplethMap({
@@ -50,7 +51,7 @@ export default function ChoroplethMap({
 
   const style = useMemo(() => {
     return (feature: MapFeature | undefined): PathOptions => {
-      if (!feature) return { fillColor: "#1a1a1a", fillOpacity: 0.6 };
+      if (!feature) return { fillColor: "var(--color-border-dim)", fillOpacity: 0.6 };
       const props = feature.properties;
       const raw = props[dimension];
       const value = typeof raw === "number" ? raw : null;
@@ -65,7 +66,7 @@ export default function ChoroplethMap({
         fillColor: severityFillColor(ratio),
         weight: isHotspot ? 1.5 : 0.5,
         opacity: 1,
-        color: isHotspot ? "#ff0000" : "#333333",
+        color: isHotspot ? "var(--color-blood-bright)" : "var(--color-border-bright)",
         fillOpacity: value === null ? 0.25 : 0.55 + ratio * 0.35,
         dashArray: isHotspot ? "3" : undefined,
       };
@@ -83,9 +84,9 @@ export default function ChoroplethMap({
 
       layer.bindTooltip(
         `<div style="font-family: monospace; font-size: 11px;">
-          <strong style="color:#e10600;">${props.name_en}</strong> (${props.iso3})${hotspotTag}
-          <br/><span style="color:#888;">${dimension}:</span>
-          <span style="color:#e0e0e0;"> ${valueStr}</span>
+          <strong style="color:var(--color-blood-bright);">${props.name_en}</strong> (${props.iso3})${hotspotTag}
+          <br/><span style="color:var(--color-content-secondary);">${dimension}:</span>
+          <span style="color:var(--color-content-primary);"> ${valueStr}</span>
         </div>`,
         { sticky: true, className: "vfx-tooltip", direction: "top" }
       );
@@ -95,7 +96,7 @@ export default function ChoroplethMap({
         mouseover: (e: L.LeafletMouseEvent) => {
           e.target.setStyle({
             weight: 2.5,
-            color: "#00ff41",
+            color: "var(--color-terminal-green)",
             fillOpacity: 0.85,
           });
         },
@@ -117,7 +118,7 @@ export default function ChoroplethMap({
       maxZoom={7}
       scrollWheelZoom={true}
       worldCopyJump={true}
-      style={{ height: "100%", width: "100%", background: "#050505" }}
+      style={{ height: "100%", width: "100%", background: "#080e18" }}
       maxBounds={[
         [-85, -200],
         [85, 200],

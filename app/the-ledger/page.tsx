@@ -279,14 +279,14 @@ export default function TheLedgerPage() {
               const startYear = phase.period.includes("2025") ? 2025 : phase.period.includes("2028") ? 2028 : 2031;
               const endYear = phase.period.includes("2027") ? 2027 : phase.period.includes("2030") ? 2030 : 2034;
               const yearSpan = endYear - startYear;
-              const colors = ["#ffaa00", "#00ff41", "#00ddff"];
+              const colors = ["var(--color-warning-amber)", "var(--color-terminal-green)", "#00ddff"];
 
               return (
                 <div key={phase.phase} className="relative pl-12 pb-8">
                   {/* Timeline dot */}
                   <div
                     className="absolute left-2 top-1 w-5 h-5 rounded-full border-2 z-10"
-                    style={{ borderColor: colors[phase.phase - 1], backgroundColor: "#0a0a0a" }}
+                    style={{ borderColor: colors[phase.phase - 1], backgroundColor: "var(--color-abyss)" }}
                   >
                     <span className="absolute inset-0 flex items-center justify-center text-[9px] font-bold" style={{ color: colors[phase.phase - 1] }}>
                       {phase.phase}

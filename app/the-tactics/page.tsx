@@ -97,9 +97,9 @@ const TACTIC_SUMMARIES: Record<number, string> = {
 };
 
 const TIER_COLOR: Record<string, string> = {
-  S: "#00ff41",
-  A: "#ffaa00",
-  B: "#cc0000",
+  S: "var(--color-terminal-green)",
+  A: "var(--color-warning-amber)",
+  B: "var(--color-blood)",
 };
 
 const CATEGORY_LABEL: Record<string, string> = {
@@ -208,7 +208,7 @@ export default function TheTacticsPage() {
         <div style={{ width: "100%", height: 400 }}>
           <ResponsiveContainer>
             <ScatterChart margin={{ top: 20, right: 30, bottom: 40, left: 20 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-dim)" />
               <XAxis
                 type="number"
                 dataKey="casualtyScore"
@@ -232,7 +232,7 @@ export default function TheTacticsPage() {
               <ReferenceLine y={5} stroke="#444" strokeDasharray="2 2" />
               <Tooltip
                 cursor={{ strokeDasharray: "3 3", stroke: "#444" }}
-                contentStyle={{ background: "#0a0a0a", border: "1px solid #444", fontSize: "11px" }}
+                contentStyle={{ background: "var(--color-abyss)", border: "1px solid #444", fontSize: "11px" }}
                 formatter={(value, name) => {
                   if (name === "Human Cost") {
                     const v = Number(value);
@@ -241,32 +241,32 @@ export default function TheTacticsPage() {
                   return [String(value), name];
                 }}
               />
-              <Scatter name="Tier S" data={scatterData.S} fill="#00ff41">
+              <Scatter name="Tier S" data={scatterData.S} fill="var(--color-terminal-green)">
                 {scatterData.S.map((t) => (
                   <Cell
                     key={t.id}
-                    fill={hoveredId === t.id ? "#00ff41" : "#00aa33"}
-                    stroke={hoveredId === t.id ? "#fff" : "#00ff41"}
+                    fill={hoveredId === t.id ? "var(--color-terminal-green)" : "#00aa33"}
+                    stroke={hoveredId === t.id ? "#fff" : "var(--color-terminal-green)"}
                     strokeWidth={hoveredId === t.id ? 2 : 0.5}
                   />
                 ))}
               </Scatter>
-              <Scatter name="Tier A" data={scatterData.A} fill="#ffaa00">
+              <Scatter name="Tier A" data={scatterData.A} fill="var(--color-warning-amber)">
                 {scatterData.A.map((t) => (
                   <Cell
                     key={t.id}
-                    fill={hoveredId === t.id ? "#ffaa00" : "#aa7700"}
-                    stroke={hoveredId === t.id ? "#fff" : "#ffaa00"}
+                    fill={hoveredId === t.id ? "var(--color-warning-amber)" : "#aa7700"}
+                    stroke={hoveredId === t.id ? "#fff" : "var(--color-warning-amber)"}
                     strokeWidth={hoveredId === t.id ? 2 : 0.5}
                   />
                 ))}
               </Scatter>
-              <Scatter name="Tier B" data={scatterData.B} fill="#cc0000">
+              <Scatter name="Tier B" data={scatterData.B} fill="var(--color-blood)">
                 {scatterData.B.map((t) => (
                   <Cell
                     key={t.id}
                     fill={hoveredId === t.id ? "#ff0000" : "#990000"}
-                    stroke={hoveredId === t.id ? "#fff" : "#cc0000"}
+                    stroke={hoveredId === t.id ? "#fff" : "var(--color-blood)"}
                     strokeWidth={hoveredId === t.id ? 2 : 0.5}
                   />
                 ))}
@@ -276,15 +276,15 @@ export default function TheTacticsPage() {
         </div>
         <div className="flex items-center gap-6 mt-3 text-[10px] text-content-secondary flex-wrap">
           <div className="flex items-center gap-2">
-            <span className="inline-block w-3 h-3 rounded-full" style={{ backgroundColor: "#00aa33", border: "1px solid #00ff41" }} />
+            <span className="inline-block w-3 h-3 rounded-full" style={{ backgroundColor: "#00aa33", border: "1px solid var(--color-terminal-green)" }} />
             TIER S (recommended)
           </div>
           <div className="flex items-center gap-2">
-            <span className="inline-block w-3 h-3 rounded-full" style={{ backgroundColor: "#aa7700", border: "1px solid #ffaa00" }} />
+            <span className="inline-block w-3 h-3 rounded-full" style={{ backgroundColor: "#aa7700", border: "1px solid var(--color-warning-amber)" }} />
             TIER A (effective)
           </div>
           <div className="flex items-center gap-2">
-            <span className="inline-block w-3 h-3 rounded-full" style={{ backgroundColor: "#990000", border: "1px solid #cc0000" }} />
+            <span className="inline-block w-3 h-3 rounded-full" style={{ backgroundColor: "#990000", border: "1px solid var(--color-blood)" }} />
             TIER B (high cost / variable)
           </div>
           <span className="text-content-dim">Bubble size = speed of impact</span>
@@ -372,7 +372,7 @@ export default function TheTacticsPage() {
                 <div className="text-[9px] text-content-dim uppercase">CASUALTIES</div>
                 <div
                   className="text-sm font-bold"
-                  style={{ color: t.casualtyScore <= 1 ? "#00ff41" : t.casualtyScore <= 3 ? "#ffaa00" : "#cc0000" }}
+                  style={{ color: t.casualtyScore <= 1 ? "var(--color-terminal-green)" : t.casualtyScore <= 3 ? "var(--color-warning-amber)" : "var(--color-blood)" }}
                 >
                   {t.casualties}
                 </div>

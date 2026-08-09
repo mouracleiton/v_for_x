@@ -30,15 +30,15 @@ import {
 const data = backbone as WorldBackbone;
 
 const SCENARIO_META = [
-  { key: "bau", label: "BAU", budget: 0, desc: "Status quo", color: "#444444" },
-  { key: "minimo", label: "MÍNIMO", budget: 15, desc: "$15B/yr", color: "#660000" },
-  { key: "moderado", label: "MODERADO", budget: 40, desc: "$40B/yr", color: "#ffaa00" },
-  { key: "ambicioso", label: "AMBICIOSO", budget: 93, desc: "$93B/yr", color: "#00ff41" },
+  { key: "bau", label: "BAU", budget: 0, desc: "Status quo", color: "var(--color-content-dim)" },
+  { key: "minimo", label: "MÍNIMO", budget: 15, desc: "$15B/yr", color: "var(--color-blood-dim)" },
+  { key: "moderado", label: "MODERADO", budget: 40, desc: "$40B/yr", color: "var(--color-warning-amber)" },
+  { key: "ambicioso", label: "AMBICIOSO", budget: 93, desc: "$93B/yr", color: "var(--color-terminal-green)" },
   { key: "maximo", label: "MÁXIMO", budget: 150, desc: "$150B/yr", color: "#00ddff" },
 ] as const;
 
 const INTERVENTION_COLORS = [
-  "#e10600", "#ffaa00", "#00ff41", "#00ddff", "#aa44ff", "#ff6600",
+  "var(--color-blood-bright)", "var(--color-warning-amber)", "var(--color-terminal-green)", "#00ddff", "#aa44ff", "#ff6600",
 ];
 
 type Tab = "hunger" | "deaths" | "regions" | "interventions";
@@ -141,7 +141,7 @@ export default function TheTimelinePage() {
   }, []);
 
   const chartTooltipStyle = {
-    background: "#0a0a0a",
+    background: "var(--color-abyss)",
     border: "1px solid #444",
     fontSize: "11px",
   };
@@ -211,11 +211,11 @@ export default function TheTimelinePage() {
           <div style={{ width: "100%", height: 380 }}>
             <ResponsiveContainer>
               <AreaChart data={hungerChartData} margin={{ top: 10, right: 30, bottom: 20, left: 10 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-dim)" />
                 <XAxis dataKey="year" tick={{ fill: "#888", fontSize: 10 }} />
                 <YAxis tick={{ fill: "#888", fontSize: 10 }} label={{ value: "M people", angle: -90, position: "insideLeft", fill: "#666", fontSize: 10 }} />
                 <Tooltip contentStyle={chartTooltipStyle} />
-                <ReferenceLine y={19} stroke="#00ff41" strokeDasharray="3 3" label={{ value: "SDG2 target (19M)", fill: "#00ff41", fontSize: 9 }} />
+                <ReferenceLine y={19} stroke="var(--color-terminal-green)" strokeDasharray="3 3" label={{ value: "SDG2 target (19M)", fill: "var(--color-terminal-green)", fontSize: 9 }} />
                 {SCENARIO_META.filter((m) => selectedScenarios.has(m.key)).map((m) => (
                   <Area
                     key={m.key}
@@ -245,7 +245,7 @@ export default function TheTimelinePage() {
           <div style={{ width: "100%", height: 380 }}>
             <ResponsiveContainer>
               <LineChart data={deathsChartData} margin={{ top: 10, right: 30, bottom: 20, left: 10 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-dim)" />
                 <XAxis dataKey="year" tick={{ fill: "#888", fontSize: 10 }} />
                 <YAxis
                   tick={{ fill: "#888", fontSize: 10 }}
@@ -301,11 +301,11 @@ export default function TheTimelinePage() {
                 data={regionalData.regions.map((r) => ({ region: r.region, start: r.start, end: r.end }))}
                 margin={{ top: 10, right: 10, bottom: 20, left: 10 }}
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-dim)" />
                 <XAxis dataKey="region" tick={{ fill: "#888", fontSize: 10 }} />
                 <YAxis tick={{ fill: "#888", fontSize: 10 }} label={{ value: "M hungry", angle: -90, position: "insideLeft", fill: "#666", fontSize: 10 }} />
                 <Tooltip contentStyle={chartTooltipStyle} formatter={(v) => [`${formatNumber(Number(v))}M`, ""]} />
-                <Bar dataKey="start" name="2025" fill="#cc0000" radius={[2, 2, 0, 0]} />
+                <Bar dataKey="start" name="2025" fill="var(--color-blood)" radius={[2, 2, 0, 0]} />
                 <Bar dataKey="end" name="2034" fill="#006633" radius={[2, 2, 0, 0]} />
                 <Legend wrapperStyle={{ fontSize: "10px" }} />
               </BarChart>
@@ -344,7 +344,7 @@ export default function TheTimelinePage() {
                 layout="vertical"
                 margin={{ top: 10, right: 30, bottom: 20, left: 120 }}
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-dim)" />
                 <XAxis type="number" tick={{ fill: "#888", fontSize: 10 }} label={{ value: "Budget ($B/yr)", position: "bottom", fill: "#666", fontSize: 10, offset: 5 }} />
                 <YAxis type="category" dataKey="name" tick={{ fill: "#ccc", fontSize: 9 }} width={120} />
                 <Tooltip
@@ -391,8 +391,8 @@ export default function TheTimelinePage() {
                       <span
                         className="font-bold px-2 py-0.5 border"
                         style={{
-                          borderColor: iv.roi >= 10 ? "#00ff41" : iv.roi >= 5 ? "#ffaa00" : "#cc0000",
-                          color: iv.roi >= 10 ? "#00ff41" : iv.roi >= 5 ? "#ffaa00" : "#cc0000",
+                          borderColor: iv.roi >= 10 ? "var(--color-terminal-green)" : iv.roi >= 5 ? "var(--color-warning-amber)" : "var(--color-blood)",
+                          color: iv.roi >= 10 ? "var(--color-terminal-green)" : iv.roi >= 5 ? "var(--color-warning-amber)" : "var(--color-blood)",
                         }}
                       >
                         {iv.roi}× {tc(lang, "timeline.roi_word")}
@@ -422,7 +422,7 @@ export default function TheTimelinePage() {
             onChange={(e) => { setScrubYear(parseInt(e.target.value)); sound.select(); }}
             className="flex-1 h-2 appearance-none cursor-pointer allocator-slider"
             style={{
-              background: `linear-gradient(to right, #e10600 0%, #ffaa00 50%, #00ff41 100%)`,
+              background: `linear-gradient(to right, var(--color-blood-bright) 0%, var(--color-warning-amber) 50%, var(--color-terminal-green) 100%)`,
             }}
           />
           <span className="text-[10px] text-content-dim">2034</span>
@@ -438,7 +438,7 @@ export default function TheTimelinePage() {
                 <span className="text-xs font-bold" style={{ color: s.color }}>{s.label}</span>
                 {s.sdg2 && <StatusPill color="green">{tc(lang, "timeline.sdg2_met")}</StatusPill>}
               </div>
-              <div className="text-2xl font-bold" style={{ color: s.hunger < 20 ? "#00ff41" : s.hunger < 200 ? "#ffaa00" : "#cc0000" }}>
+              <div className="text-2xl font-bold" style={{ color: s.hunger < 20 ? "var(--color-terminal-green)" : s.hunger < 200 ? "var(--color-warning-amber)" : "var(--color-blood)" }}>
                 {formatNumber(s.hunger)}M
               </div>
               <div className="text-[10px] text-content-dim">{tc(lang, "timeline.undernourished_in")} {scrubYear}</div>

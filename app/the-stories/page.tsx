@@ -88,7 +88,7 @@ const STORIES: Story[] = [
       {
         title: "The Number",
         text: "667 million people are undernourished right now. That's 1 in 11 humans on Earth. Every single one of them is preventable.",
-        data: { value: "667M", label: "undernourished in 2024", color: "#cc0000" },
+        data: { value: "667M", label: "undernourished in 2024", color: "var(--color-blood)" },
       },
       {
         title: "The Worst Crises",
@@ -98,7 +98,7 @@ const STORIES: Story[] = [
       {
         title: "The Cost",
         text: "$93 billion per year. Not $93 trillion. Not even $930 billion. $93B. That's 0.9% of world military spending. 14 days.",
-        data: { value: "$93B", label: "= 14 days of military spending", color: "#00ff41" },
+        data: { value: "$93B", label: "= 14 days of military spending", color: "var(--color-terminal-green)" },
       },
       {
         title: "The ROI",
@@ -142,7 +142,7 @@ const STORIES: Story[] = [
       {
         title: "The Combined Fix",
         text: "$422B/year buys safe water + healthcare + electricity + education for every human alive. That's 64 days of military spending. 17.5%. The question isn't whether we can afford it.",
-        data: { value: "$422B", label: "= 64 days of military spending", color: "#00ff41" },
+        data: { value: "$422B", label: "= 64 days of military spending", color: "var(--color-terminal-green)" },
         link: { href: "/the-act/", label: "→ Take action" },
       },
     ],
@@ -272,8 +272,8 @@ export default function StoriesPage() {
                     {step.text}
                   </p>
                   {step.data && (
-                    <div className="border-l-2 pl-3 mb-3" style={{ borderColor: step.data.color ?? "#cc0000" }}>
-                      <div className="text-2xl font-bold" style={{ color: step.data.color ?? "#cc0000" }}>
+                    <div className="border-l-2 pl-3 mb-3" style={{ borderColor: step.data.color ?? "var(--color-blood)" }}>
+                      <div className="text-2xl font-bold" style={{ color: step.data.color ?? "var(--color-blood)" }}>
                         {step.data.value}
                       </div>
                       <div className="text-[10px] text-content-secondary uppercase">

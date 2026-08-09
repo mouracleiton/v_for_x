@@ -74,10 +74,10 @@ const SUCCESS_MAP: Record<string, string> = {
 };
 
 const scenarioColors: Record<string, string> = {
-  bau: "#444444",
-  minimo: "#660000",
-  moderado: "#ffaa00",
-  ambicioso: "#00ff41",
+  bau: "var(--color-content-dim)",
+  minimo: "var(--color-blood-dim)",
+  moderado: "var(--color-warning-amber)",
+  ambicioso: "var(--color-terminal-green)",
   maximo: "#00ddff",
 };
 
@@ -96,14 +96,14 @@ function buildComparisonData(years: number[], scenarios: Record<string, Scenario
 /* Tooltip styling for recharts */
 const chartTooltipStyle = {
   contentStyle: {
-    background: "#0a0a0a",
-    border: "1px solid #cc0000",
+    background: "var(--color-abyss)",
+    border: "1px solid var(--color-blood)",
     borderRadius: 0,
     fontSize: "11px",
     fontFamily: "JetBrains Mono, monospace",
   },
-  labelStyle: { color: "#e10600", fontWeight: "bold" },
-  itemStyle: { color: "#e0e0e0" },
+  labelStyle: { color: "var(--color-blood-bright)", fontWeight: "bold" },
+  itemStyle: { color: "var(--color-content-primary)" },
 };
 
 export default function EquationPage() {
@@ -238,7 +238,7 @@ export default function EquationPage() {
         <div className="space-y-1">
           <div className="flex justify-between text-xs text-content-dim mb-2">
             <span>{tc(lang, "eq.hunger_projection")}</span>
-            <span style={{ color: targetLine < 100 ? "#00ff41" : "#cc0000" }}>
+            <span style={{ color: targetLine < 100 ? "var(--color-terminal-green)" : "var(--color-blood)" }}>
               {tc(lang, "eq.sdg2_threshold")}
             </span>
           </div>
@@ -251,7 +251,7 @@ export default function EquationPage() {
                 <span
                   className="font-bold"
                   style={{
-                    color: isBelowThreshold ? "#00ff41" : "#cc0000",
+                    color: isBelowThreshold ? "var(--color-terminal-green)" : "var(--color-blood)",
                   }}
                 >
                   {"█".repeat(barLen)}
@@ -262,7 +262,7 @@ export default function EquationPage() {
                 <span
                   className="w-16 text-right"
                   style={{
-                    color: isBelowThreshold ? "#00ff41" : "#cc0000",
+                    color: isBelowThreshold ? "var(--color-terminal-green)" : "var(--color-blood)",
                   }}
                 >
                   {d.hunger.toFixed(0)}M
@@ -310,12 +310,12 @@ export default function EquationPage() {
         <div className="border border-border-dim bg-void p-2 h-[280px] sm:h-[360px]">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={comparisonData} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-dim)" />
               <XAxis dataKey="year" stroke="#444" tick={{ fill: "#888", fontSize: 10 }} />
               <YAxis stroke="#444" tick={{ fill: "#888", fontSize: 10 }} label={{ value: tc(lang, "eq.m_people_hungry"), angle: -90, position: "insideLeft", fill: "#666", fontSize: 10 }} />
               <Tooltip {...chartTooltipStyle} />
               <Legend wrapperStyle={{ fontSize: "10px", fontFamily: "monospace" }} />
-              <ReferenceLine y={sdgThreshold} stroke="#00ff41" strokeDasharray="5 5" label={{ value: `${tc(lang, "eq.sdg2_label")} ${sdgThreshold}M`, fill: "#00ff41", fontSize: 9, position: "right" }} />
+              <ReferenceLine y={sdgThreshold} stroke="var(--color-terminal-green)" strokeDasharray="5 5" label={{ value: `${tc(lang, "eq.sdg2_label")} ${sdgThreshold}M`, fill: "var(--color-terminal-green)", fontSize: 9, position: "right" }} />
               <Line type="monotone" dataKey="bau" name={tc(lang, "eq.bau")} stroke={scenarioColors.bau} strokeWidth={2} dot={{ r: 2 }} />
               <Line type="monotone" dataKey="minimo" name={`${tc(lang, "eq.scenario_min")} ($15B)`} stroke={scenarioColors.minimo} strokeWidth={2} dot={{ r: 2 }} />
               <Line type="monotone" dataKey="moderado" name={`${tc(lang, "eq.scenario_mod")} ($40B)`} stroke={scenarioColors.moderado} strokeWidth={2} dot={{ r: 2 }} />
@@ -359,14 +359,14 @@ export default function EquationPage() {
         <div className="border border-border-dim bg-void p-2 h-[220px] sm:h-[280px]">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={regionData} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-dim)" />
               <XAxis dataKey="year" stroke="#444" tick={{ fill: "#888", fontSize: 10 }} />
               <YAxis stroke="#444" tick={{ fill: "#888", fontSize: 10 }} />
               <Tooltip {...chartTooltipStyle} />
               <Legend wrapperStyle={{ fontSize: "10px", fontFamily: "monospace" }} />
-              <Area type="monotone" dataKey="Africa" stackId="1" stroke="#e10600" fill="#660000" fillOpacity={0.7} />
-              <Area type="monotone" dataKey="Asia" stackId="1" stroke="#ffaa00" fill="#332200" fillOpacity={0.7} />
-              <Area type="monotone" dataKey="Latin America" stackId="1" stroke="#00ff41" fill="#003300" fillOpacity={0.7} />
+              <Area type="monotone" dataKey="Africa" stackId="1" stroke="var(--color-blood-bright)" fill="var(--color-blood-dim)" fillOpacity={0.7} />
+              <Area type="monotone" dataKey="Asia" stackId="1" stroke="var(--color-warning-amber)" fill="#332200" fillOpacity={0.7} />
+              <Area type="monotone" dataKey="Latin America" stackId="1" stroke="var(--color-terminal-green)" fill="#003300" fillOpacity={0.7} />
               <Area type="monotone" dataKey="Oceania" stackId="1" stroke="#00ddff" fill="#002233" fillOpacity={0.7} />
             </AreaChart>
           </ResponsiveContainer>
@@ -663,10 +663,10 @@ export default function EquationPage() {
                       style={{
                         color:
                           t.success.includes("Alta") || t.success === "53%"
-                            ? "#00ff41"
+                            ? "var(--color-terminal-green)"
                             : t.success.includes("Media") || t.success === "26%"
-                              ? "#ffaa00"
-                              : "#cc0000",
+                              ? "var(--color-warning-amber)"
+                              : "var(--color-blood)",
                       }}
                     >
                       {SUCCESS_MAP[t.success] ? tc(lang, SUCCESS_MAP[t.success]) : t.success}
@@ -681,9 +681,9 @@ export default function EquationPage() {
           </table>
         </div>
         <div className="mt-3 flex gap-4 text-xs">
-          <span style={{ color: "#00ff41" }}>■ S: {tc(lang, "eq.tier_s_desc")}</span>
-          <span style={{ color: "#ffaa00" }}>■ A: {tc(lang, "eq.tier_a_desc")}</span>
-          <span style={{ color: "#cc0000" }}>■ B: {tc(lang, "eq.tier_b_desc")}</span>
+          <span style={{ color: "var(--color-terminal-green)" }}>■ S: {tc(lang, "eq.tier_s_desc")}</span>
+          <span style={{ color: "var(--color-warning-amber)" }}>■ A: {tc(lang, "eq.tier_a_desc")}</span>
+          <span style={{ color: "var(--color-blood)" }}>■ B: {tc(lang, "eq.tier_b_desc")}</span>
         </div>
       </TerminalCard>
 
@@ -754,9 +754,9 @@ export default function EquationPage() {
  */
 const sdgTabMeta: Record<string, { label: string; color: string; sdg: string }> = {
   sdg6_water:   { label: "WATER",   color: "#00ddff", sdg: "SDG 6" },
-  sdg3_health:  { label: "HEALTH",  color: "#e10600", sdg: "SDG 3" },
-  sdg7_energy:  { label: "ENERGY",  color: "#ffaa00", sdg: "SDG 7" },
-  sdg4_education: { label: "EDUCATION", color: "#00ff41", sdg: "SDG 4" },
+  sdg3_health:  { label: "HEALTH",  color: "var(--color-blood-bright)", sdg: "SDG 3" },
+  sdg7_energy:  { label: "ENERGY",  color: "var(--color-warning-amber)", sdg: "SDG 7" },
+  sdg4_education: { label: "EDUCATION", color: "var(--color-terminal-green)", sdg: "SDG 4" },
   sdg13_climate: { label: "CLIMATE", color: "#cc6600", sdg: "SDG 13" },
   sdg10_inequality: { label: "INEQUALITY", color: "#aa44ff", sdg: "SDG 10" },
 };

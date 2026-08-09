@@ -46,7 +46,7 @@ const sdgCounterItems: {
     bigValue: "$35B",
     labelKey: "sdg.energy_label",
     comparisonKey: "sdg.energy_comparison",
-    color: "#ffaa00",
+    color: "var(--color-warning-amber)",
     moralKey: "sdg.energy_moral",
   },
   {
@@ -64,7 +64,7 @@ const sdgCounterItems: {
     bigValue: "$176B",
     labelKey: "sdg.health_label",
     comparisonKey: "sdg.health_comparison",
-    color: "#e10600",
+    color: "var(--color-blood-bright)",
     moralKey: "sdg.health_moral",
   },
   {
@@ -73,7 +73,7 @@ const sdgCounterItems: {
     bigValue: "$97B",
     labelKey: "sdg.education_label",
     comparisonKey: "sdg.education_comparison",
-    color: "#00ff41",
+    color: "var(--color-terminal-green)",
     moralKey: "sdg.education_moral",
   },
   {

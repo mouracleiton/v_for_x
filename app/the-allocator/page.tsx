@@ -259,7 +259,7 @@ export default function AllocatorPage() {
               <YAxis tick={{ fill: "#999", fontSize: 10 }} label={{ value: "$B/year", angle: -90, position: "insideLeft", fill: "#666", fontSize: 10 }} />
               <Tooltip
                 cursor={{ fill: "rgba(255,255,255,0.03)" }}
-                contentStyle={{ background: "#0a0a0a", border: "1px solid #444", fontSize: "11px" }}
+                contentStyle={{ background: "var(--color-abyss)", border: "1px solid #444", fontSize: "11px" }}
                 formatter={(value, name) => {
                   const v = Number(value);
                   if (name === "allocated") return [`$${formatNumber(v)}B`, "Allocated"];
@@ -281,7 +281,7 @@ export default function AllocatorPage() {
         </div>
         <div className="flex items-center gap-6 mt-2 text-[10px] text-content-secondary">
           <div className="flex items-center gap-2">
-            <span className="inline-block w-3 h-3 bg-[#222] border border-border-dim" />
+            <span className="inline-block w-3 h-3 bg-panel border border-border-dim" />
             FULL COST
           </div>
           <div className="flex items-center gap-2">
@@ -311,7 +311,7 @@ export default function AllocatorPage() {
               <p>
                 For context: the F-35 program cost <span className="text-content-primary">$1.7T over its lifetime</span>. {" "}
                 Your allocation could fund it for {" "}
-                <span className="font-bold" style={{ color: result.totalAllocatedB > 1700 ? "#00ff41" : "#e10600" }}>
+                <span className="font-bold" style={{ color: result.totalAllocatedB > 1700 ? "var(--color-terminal-green)" : "var(--color-blood-bright)" }}>
                   {result.totalAllocatedB > 0 ? `${(1700 / result.totalAllocatedB).toFixed(1)}x over` : "infinity"}
                 </span>.
               </p>

@@ -18,10 +18,10 @@ export function generateEmbedSnippet(opts: {
 }): string {
   const { text, source, url } = opts;
   const escaped = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-  return `<blockquote style="background:#0a0a0a;border-left:3px solid #cc0000;padding:16px;margin:16px 0;font-family:monospace;color:#e0e0e0;font-size:14px;border-radius:0;">
+  return `<blockquote style="background:var(--color-abyss);border-left:3px solid var(--color-blood);padding:16px;margin:16px 0;font-family:monospace;color:var(--color-content-primary);font-size:14px;border-radius:0;">
   <p style="margin:0 0 8px 0;">${escaped}</p>
   ${source ? `<cite style="color:#666;font-size:11px;">Source: ${source}</cite><br>` : ""}
-  <a href="${url || "https://mouracleiton.github.io/v_for_x/"}" style="color:#cc0000;font-size:11px;text-decoration:none;">▶ V FOR X — v-for-x</a>
+  <a href="${url || "https://mouracleiton.github.io/v_for_x/"}" style="color:var(--color-blood);font-size:11px;text-decoration:none;">▶ V FOR X — v-for-x</a>
 </blockquote>`;
 }
 

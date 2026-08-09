@@ -10,10 +10,10 @@ export default function StatusPill({
   color = "dim",
 }: StatusPillProps) {
   const colorMap = {
-    blood: { bg: "#1a0000", border: "#cc0000", text: "#e10600" },
-    green: { bg: "#001a00", border: "#00ff41", text: "#00ff41" },
-    amber: { bg: "#1a1100", border: "#ffaa00", text: "#ffaa00" },
-    dim: { bg: "#111111", border: "#333333", text: "#888888" },
+    blood: { bg: "#1a0000", border: "var(--color-blood)", text: "var(--color-blood-bright)" },
+    green: { bg: "#001a00", border: "var(--color-terminal-green)", text: "var(--color-terminal-green)" },
+    amber: { bg: "#1a1100", border: "var(--color-warning-amber)", text: "var(--color-warning-amber)" },
+    dim: { bg: "var(--color-panel)", border: "#333333", text: "var(--color-content-secondary)" },
   };
 
   const c = colorMap[color];

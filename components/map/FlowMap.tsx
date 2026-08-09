@@ -61,7 +61,7 @@ export default function FlowMap({
       zoom={2}
       minZoom={2}
       maxZoom={6}
-      style={{ width: "100%", height: "100%", background: "#0a0a0a" }}
+      style={{ width: "100%", height: "100%", background: "var(--color-abyss)" }}
       worldCopyJump
       attributionControl={false}
     >
@@ -108,8 +108,8 @@ export default function FlowMap({
             center={pos}
             radius={radius}
             pathOptions={{
-              color: "#ff0000",
-              fillColor: "#cc0000",
+              color: "var(--color-blood-bright)",
+              fillColor: "var(--color-blood)",
               fillOpacity: 0.7,
               weight: 1,
             }}
@@ -143,8 +143,8 @@ export default function FlowMap({
             center={pos}
             radius={radius}
             pathOptions={{
-              color: "#00ff41",
-              fillColor: "#006633",
+              color: "var(--color-terminal-green)",
+              fillColor: "var(--color-terminal-green)",
               fillOpacity: 0.6,
               weight: 1,
               dashArray: "3",

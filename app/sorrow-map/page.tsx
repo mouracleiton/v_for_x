@@ -371,7 +371,7 @@ export default function MapaDaDorPage() {
               HOTSPOT COUNTRY (pulsing border)
             </div>
             <div className="flex items-center gap-2">
-              <span className="inline-block w-3 h-0.5 bg-[#333]" />
+              <span className="inline-block w-3 h-0.5 bg-border-dim" />
               STANDARD BORDER
             </div>
             <div className="text-[9px] mt-2">

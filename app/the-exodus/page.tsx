@@ -170,7 +170,7 @@ export default function TheExodusPage() {
         </div>
 
         {/* Leaflet Map (client-only) */}
-        <div className="border border-border-dim" style={{ height: "500px", background: "#0a0a0a" }}>
+        <div className="border border-border-dim" style={{ height: "500px", background: "var(--color-abyss)" }}>
           <FlowMap
             nodes={nodes}
             edges={visibleEdges}
@@ -200,7 +200,7 @@ export default function TheExodusPage() {
         {/* Legend */}
         <div className="flex flex-wrap items-center gap-4 mt-3 text-[10px] text-content-secondary">
           <div className="flex items-center gap-2">
-            <span className="inline-block w-3 h-3 rounded-full border border-blood" style={{ backgroundColor: "#cc0000", opacity: 0.7 }} />
+            <span className="inline-block w-3 h-3 rounded-full border border-blood" style={{ backgroundColor: "var(--color-blood)", opacity: 0.7 }} />
             {tc(lang, "common.origin_country")}
           </div>
           <div className="flex items-center gap-2">

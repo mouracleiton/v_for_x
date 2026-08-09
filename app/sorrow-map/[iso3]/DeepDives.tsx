@@ -1019,7 +1019,7 @@ function buildSdgRows(country: CountryData): SdgRow[] {
     key: "sdg3_health",
     sdg: "SDG 3",
     title: "Healthcare Access",
-    color: "#e10600",
+    color: "var(--color-blood-bright)",
     icon: "⚕",
     countryValue: docs ?? null,
     countryDisplay:
@@ -1060,7 +1060,7 @@ function buildSdgRows(country: CountryData): SdgRow[] {
     key: "sdg7_energy",
     sdg: "SDG 7",
     title: "Energy Access",
-    color: "#ffaa00",
+    color: "var(--color-warning-amber)",
     icon: "⚡",
     countryValue: energyVal,
     countryDisplay:
@@ -1098,7 +1098,7 @@ function buildSdgRows(country: CountryData): SdgRow[] {
     key: "sdg4_education",
     sdg: "SDG 4",
     title: "Education",
-    color: "#00ff41",
+    color: "var(--color-terminal-green)",
     icon: "📚",
     countryValue: eduVal,
     countryDisplay:

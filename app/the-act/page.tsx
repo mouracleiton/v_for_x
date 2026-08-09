@@ -23,9 +23,9 @@ const data = backbone as WorldBackbone;
 
 const sdgTabMeta: Record<string, { label: string; color: string }> = {
   sdg6_water: { label: "WATER", color: "#00ddff" },
-  sdg3_health: { label: "HEALTH", color: "#e10600" },
-  sdg7_energy: { label: "ENERGY", color: "#ffaa00" },
-  sdg4_education: { label: "EDUCATION", color: "#00ff41" },
+  sdg3_health: { label: "HEALTH", color: "var(--color-blood-bright)" },
+  sdg7_energy: { label: "ENERGY", color: "var(--color-warning-amber)" },
+  sdg4_education: { label: "EDUCATION", color: "var(--color-terminal-green)" },
   sdg13_climate: { label: "CLIMATE", color: "#cc6600" },
   sdg10_inequality: { label: "INEQUALITY", color: "#aa44ff" },
 };
@@ -610,7 +610,7 @@ export default function TheActPage() {
                       <span className="text-[10px] text-content-dim uppercase tracking-widest">
                         {i + 1}/{kit.tweets.length}
                         <span className="ml-2 text-[9px]" style={{
-                          color: tweet.type === "hook" ? "#e10600" : tweet.type === "solution" ? "#00ff41" : tweet.type === "demand" ? "#ffaa00" : "#888"
+                          color: tweet.type === "hook" ? "var(--color-blood-bright)" : tweet.type === "solution" ? "var(--color-terminal-green)" : tweet.type === "demand" ? "var(--color-warning-amber)" : "#888"
                         }}>
                           {tweet.type.toUpperCase()}
                         </span>

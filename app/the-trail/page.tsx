@@ -337,7 +337,7 @@ export default function TrilhaPage() {
                         onClick={() => e.id && cycleStatus(e.id, e.status)}
                         className="text-xs cursor-pointer hover:underline"
                         style={{
-                          color: e.status === "VERIFIED" ? "#00ff41" : e.status === "IN_TRANSIT" ? "#ffaa00" : "#cc0000",
+                          color: e.status === "VERIFIED" ? "var(--color-terminal-green)" : e.status === "IN_TRANSIT" ? "var(--color-warning-amber)" : "var(--color-blood)",
                         }}
                       >
                         {e.status}

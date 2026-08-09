@@ -300,7 +300,7 @@ export default function TheBriefingPage() {
               </div>
               <div>
                 <div className="text-xs text-content-dim">RATIO</div>
-                <div className="text-xl font-bold" style={{ color: milHealthRatio > 1 ? "#cc0000" : "#00ff41" }}>
+                <div className="text-xl font-bold" style={{ color: milHealthRatio > 1 ? "var(--color-blood)" : "var(--color-terminal-green)" }}>
                   {milHealthRatio.toFixed(2)}×
                 </div>
                 <div className="text-[10px] text-content-dim">

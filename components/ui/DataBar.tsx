@@ -32,17 +32,17 @@ export default function DataBar({
   const pct = Math.max(0, Math.min(100, (value / max) * 100));
   const barColor = inverse
     ? pct > 66
-      ? "#00ff41"
+      ? "var(--color-terminal-green)"
       : pct > 33
-        ? "#ffaa00"
-        : "#cc0000"
+        ? "var(--color-warning-amber)"
+        : "var(--color-blood)"
     : pct > 80
       ? "#ff0000"
       : pct > 60
-        ? "#cc0000"
+        ? "var(--color-blood)"
         : pct > 40
           ? "#990000"
-          : "#660000";
+          : "var(--color-blood-dim)";
 
   return (
     <div className="w-full">

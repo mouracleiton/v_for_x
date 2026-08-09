@@ -149,11 +149,11 @@ export default function TheMatrixPage() {
   }, [selectedCountry]);
 
   function completenessColor(pct: number): string {
-    if (pct >= 90) return "#00ff41";
+    if (pct >= 90) return "var(--color-terminal-green)";
     if (pct >= 70) return "#88cc00";
-    if (pct >= 50) return "#ffaa00";
+    if (pct >= 50) return "var(--color-warning-amber)";
     if (pct >= 30) return "#ff6600";
-    return "#cc0000";
+    return "var(--color-blood)";
   }
 
   return (
