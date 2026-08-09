@@ -157,6 +157,31 @@ export const PAGE_META: Record<string, PageMeta> = {
     description: "One screen. The entire world's crisis. Live counters, 8 global indicators, extreme contrasts (Monaco earns 1028× Burundi), cost-to-fix breakdown.",
     path: "/the-dashboard/",
   },
+  "/the-submit/": {
+    title: "The Submit — Anonymous Dossier Submission",
+    description: "Submit corruption and human rights reports anonymously. Client-side encryption, ECDSA signing, zero data leaves your device. Become a whistleblower safely.",
+    path: "/the-submit/",
+  },
+  "/the-network/": {
+    title: "The Network — Anonymous Action Circles",
+    description: "Connect with activists without compromising anonymity. Action circles, public pledges, self-destructing dead drops. No registration, no tracking.",
+    path: "/the-network/",
+  },
+  "/the-compare/": {
+    title: "The Compare — Side-by-Side Country Analysis",
+    description: "Compare 2-4 countries side by side. Vulnerability radar overlay, 19-dimension data table, key metric bar charts, auto-generated narrative, and crisis timeline comparison.",
+    path: "/the-compare/",
+  },
+  "/the-changelog/": {
+    title: "The Changelog — Data Evolution Tracker",
+    description: "Track every data update. Latest changes, version history, methodology, and a freshness report across all 19 dimensions. See exactly what moved and when.",
+    path: "/the-changelog/",
+  },
+  "/the-badges/": {
+    title: "The Badges — Knowledge & Action Tracker",
+    description: "Track your exploration of 200 countries, earn badges, climb levels, and test your knowledge with the country quiz. Every visit deepens the argument.",
+    path: "/the-badges/",
+  },
 };
 
 /** Get metadata for a page path, falling back to site defaults */

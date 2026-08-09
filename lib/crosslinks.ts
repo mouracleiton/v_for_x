@@ -265,4 +265,9 @@ export const branchLinks = [
   { href: "/the-api/", label: "API", code: "23" },
   { href: "/the-ledger/", label: "LEDGER", code: "24" },
   { href: "/the-dashboard/", label: "DASHBOARD", code: "25" },
+  { href: "/the-submit/", label: "SUBMIT", code: "26" },
+  { href: "/the-network/", label: "NETWORK", code: "27" },
+  { href: "/the-compare/", label: "COMPARE", code: "28" },
+  { href: "/the-badges/", label: "BADGES", code: "29" },
+  { href: "/the-changelog/", label: "CHANGELOG", code: "30" },
 ] as const;

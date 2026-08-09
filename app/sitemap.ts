@@ -21,6 +21,8 @@ const STATIC_PATHS = [
   "/the-allocator/", "/the-exodus/", "/the-tactics/", "/the-matrix/",
   "/the-fronts/", "/the-choice/", "/the-briefing/", "/the-timeline/",
   "/the-api/", "/the-ledger/", "/the-dashboard/",
+  "/the-submit/", "/the-network/", "/the-compare/",
+  "/the-badges/", "/the-changelog/",
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

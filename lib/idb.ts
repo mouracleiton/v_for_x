@@ -7,7 +7,7 @@
 import { openDB, type IDBPDatabase } from "idb";
 
 const DB_NAME = "vfx-store";
-const DB_VERSION = 2;
+const DB_VERSION = 4;
 
 export interface LedgerEntry {
   id?: number;
@@ -55,7 +55,7 @@ export interface AlertRule {
 
 let dbPromise: Promise<IDBPDatabase> | null = null;
 
-function getDB(): Promise<IDBPDatabase> {
+export function getDB(): Promise<IDBPDatabase> {
   if (typeof window === "undefined") {
     return Promise.reject(new Error("IndexedDB not available on server"));
   }
@@ -74,6 +74,25 @@ function getDB(): Promise<IDBPDatabase> {
         }
         if (!db.objectStoreNames.contains("alert_rules")) {
           db.createObjectStore("alert_rules", { keyPath: "id", autoIncrement: true });
+        }
+        // ── v3+v4 stores: anonymous dossier submissions & community network ──
+        if (!db.objectStoreNames.contains("submissions")) {
+          db.createObjectStore("submissions", { keyPath: "id" });
+        }
+        if (!db.objectStoreNames.contains("corroboration")) {
+          const corrob = db.createObjectStore("corroboration", { keyPath: "id", autoIncrement: true });
+          corrob.createIndex("by-submission", "submissionId");
+        }
+        if (!db.objectStoreNames.contains("action_circles")) {
+          db.createObjectStore("action_circles", { keyPath: "id" });
+        }
+        if (!db.objectStoreNames.contains("pledges")) {
+          const pledgeStore = db.createObjectStore("pledges", { keyPath: "id" });
+          pledgeStore.createIndex("by-iso3", "iso3");
+        }
+        if (!db.objectStoreNames.contains("dead_drops")) {
+          const dropStore = db.createObjectStore("dead_drops", { keyPath: "id" });
+          dropStore.createIndex("by-circle", "circleId");
         }
       },
     });
