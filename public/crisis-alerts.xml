@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ═══════════════════════════════════════════════════════════════════════
+  V FOR X — Crisis Alerts (RSS 2.0)
+  ═══════════════════════════════════════════════════════════════════════
+  This is a static placeholder demonstrating the feed format.
+  The live feed is regenerated at build time from open data (CC0) by
+  lib/alert-feeds.ts → generateCrisisRSS(). Point your RSS reader,
+  Telegram/Signal bot, or aggregator at this URL.
+
+  Endpoint:  https://mouracleiton.github.io/v_for_x/crisis-alerts.xml
+  Source:    https://mouracleiton.github.io/v_for_x/the-alerts/
+  ═══════════════════════════════════════════════════════════════════════
+-->
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>V FOR X Crisis Alerts</title>
+    <link>https://mouracleiton.github.io/v_for_x/the-alerts/</link>
+    <description>Top 20 crisis countries ranked by composite vulnerability — famine, conflict, displacement, child mortality. Updated continuously from open data (CC0).</description>
+    <language>en</language>
+    <lastBuildDate>Sat, 09 Aug 2026 13:14:00 GMT</lastBuildDate>
+    <pubDate>Sat, 09 Aug 2026 13:14:00 GMT</pubDate>
+    <ttl>30</ttl>
+    <atom:link href="https://mouracleiton.github.io/v_for_x/crisis-alerts.xml" rel="self" type="application/rss+xml" />
+    <image>
+      <url>https://mouracleiton.github.io/v_for_x/og-default.png</url>
+      <title>V FOR X Crisis Alerts</title>
+      <link>https://mouracleiton.github.io/v_for_x/the-alerts/</link>
+    </image>
+
+    <item>
+      <title>Sudan — Famine / Acute Hunger [CRITICAL]</title>
+      <description>25.6M acutely food-insecure · 10M displaced · 5/5 conflict intensity</description>
+      <link>https://mouracleiton.github.io/v_for_x/sorrow-map/sdn/</link>
+      <guid isPermaLink="true">https://mouracleiton.github.io/v_for_x/sorrow-map/sdn/</guid>
+      <pubDate>Sat, 09 Aug 2026 13:14:00 GMT</pubDate>
+      <category>famine</category>
+    </item>
+
+    <item>
+      <title>State of Palestine — Armed Conflict [CRITICAL]</title>
+      <description>1.4M acutely food-insecure · 1.9M displaced · 5/5 conflict intensity · 5/5 famine risk</description>
+      <link>https://mouracleiton.github.io/v_for_x/sorrow-map/pse/</link>
+      <guid isPermaLink="true">https://mouracleiton.github.io/v_for_x/sorrow-map/pse/</guid>
+      <pubDate>Sat, 09 Aug 2026 13:14:00 GMT</pubDate>
+      <category>conflict</category>
+    </item>
+
+    <item>
+      <title>South Sudan — Famine / Acute Hunger [CRITICAL]</title>
+      <description>7.1M acutely food-insecure · 21% undernourished · 4M displaced · 5/5 famine risk</description>
+      <link>https://mouracleiton.github.io/v_for_x/sorrow-map/ssd/</link>
+      <guid isPermaLink="true">https://mouracleiton.github.io/v_for_x/sorrow-map/ssd/</guid>
+      <pubDate>Sat, 09 Aug 2026 13:14:00 GMT</pubDate>
+      <category>famine</category>
+    </item>
+
+    <item>
+      <title>Democratic Republic of the Congo — Famine / Acute Hunger [SEVERE]</title>
+      <description>23.4M acutely food-insecure · 37.3% undernourished · 7M displaced · 5/5 conflict intensity</description>
+      <link>https://mouracleiton.github.io/v_for_x/sorrow-map/cod/</link>
+      <guid isPermaLink="true">https://mouracleiton.github.io/v_for_x/sorrow-map/cod/</guid>
+      <pubDate>Sat, 09 Aug 2026 13:14:00 GMT</pubDate>
+      <category>famine</category>
+    </item>
+
+    <item>
+      <title>Yemen — Famine / Acute Hunger [SEVERE]</title>
+      <description>17.6M acutely food-insecure · 4.5M displaced · 4/5 conflict intensity · 4/5 famine risk</description>
+      <link>https://mouracleiton.github.io/v_for_x/sorrow-map/yem/</link>
+      <guid isPermaLink="true">https://mouracleiton.github.io/v_for_x/sorrow-map/yem/</guid>
+      <pubDate>Sat, 09 Aug 2026 13:14:00 GMT</pubDate>
+      <category>famine</category>
+    </item>
+
+  </channel>
+</rss>

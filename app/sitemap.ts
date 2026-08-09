@@ -22,7 +22,8 @@ const STATIC_PATHS = [
   "/the-fronts/", "/the-choice/", "/the-briefing/", "/the-timeline/",
   "/the-api/", "/the-ledger/", "/the-dashboard/",
   "/the-submit/", "/the-network/", "/the-compare/",
-  "/the-badges/", "/the-changelog/",
+  "/the-badges/", "/the-changelog/", "/the-press-kit/",
+  "/the-simulator/", "/the-alerts/", "/the-satellite/",
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

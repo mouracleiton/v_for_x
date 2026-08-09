@@ -167,6 +167,11 @@ export const PAGE_META: Record<string, PageMeta> = {
     description: "Connect with activists without compromising anonymity. Action circles, public pledges, self-destructing dead drops. No registration, no tracking.",
     path: "/the-network/",
   },
+  "/the-press-kit/": {
+    title: "The Press Kit — Citizen Journalist Toolkit",
+    description: "Strip EXIF metadata, redact faces, verify file integrity, notarize evidence on the blockchain. All client-side, all anonymous.",
+    path: "/the-press-kit/",
+  },
   "/the-compare/": {
     title: "The Compare — Side-by-Side Country Analysis",
     description: "Compare 2-4 countries side by side. Vulnerability radar overlay, 19-dimension data table, key metric bar charts, auto-generated narrative, and crisis timeline comparison.",
@@ -181,6 +186,21 @@ export const PAGE_META: Record<string, PageMeta> = {
     title: "The Badges — Knowledge & Action Tracker",
     description: "Track your exploration of 200 countries, earn badges, climb levels, and test your knowledge with the country quiz. Every visit deepens the argument.",
     path: "/the-badges/",
+  },
+  "/the-simulator/": {
+    title: "The Simulator — Scenario Impact Model",
+    description: "Pick any country. Redirect military spending into health, food, education and climate. Watch child mortality, hunger, life expectancy and GDP update live. Model the fix.",
+    path: "/the-simulator/",
+  },
+  "/the-alerts/": {
+    title: "The Alerts — Live Crisis Feed & Bot Dispatch",
+    description: "Live crisis counters, machine-readable RSS/Atom feeds, and Telegram/Signal bot dispatch for the top 20 crisis countries. Subscribe to famine, conflict, and displacement alerts.",
+    path: "/the-alerts/",
+  },
+  "/the-satellite/": {
+    title: "The Satellite — Open Imagery of Conflict & Destruction",
+    description: "Free, open satellite imagery makes destruction undeniable. Inspect documented conflict and crisis zones from orbit across monitored countries — the evidence regimes cannot censor.",
+    path: "/the-satellite/",
   },
 };
 
