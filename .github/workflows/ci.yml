@@ -26,7 +26,7 @@ jobs:
       - name: Type check
         run: npx tsc --noEmit
 
-      - name: Run tests
+      - name: Run tests (unit + component + axe-core)
         run: npm test
         env:
           CI: true
@@ -35,3 +35,27 @@ jobs:
         run: npm run build
         env:
           NODE_ENV: production
+
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build (no basePath for Lighthouse)
+        run: npx next build
+        env:
+          NODE_ENV: production
+          LHCI: "true"
+
+      - name: Run Lighthouse CI
+        run: npx @lhci/cli autorun
+        env:
+          CHROME_PATH: $(which google-chrome || which chromium-browser || which chrome)

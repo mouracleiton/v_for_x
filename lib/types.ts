@@ -313,6 +313,7 @@ export interface WorldBackbone {
     title: string;
     description: string;
     created: string;
+    last_updated?: string;
     standard: string;
     sources: string[];
     total_countries: number;

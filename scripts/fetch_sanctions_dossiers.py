@@ -24,6 +24,7 @@ import sys
 import time
 import urllib.request
 from datetime import datetime, timezone
+from pathlib import Path
 
 # ─── Configuration ───────────────────────────────────────────────────────────
 
@@ -280,11 +281,18 @@ def fetch_sanctions_dossiers(limit: int = 50) -> list[dict]:
         headers={"User-Agent": "VForX/1.0 (sanctions-research)"},
     )
 
+    try:
+        resp = urllib.request.urlopen(req, timeout=30)
+    except Exception as exc:
+        print(f"✗ Failed to fetch OpenSanctions data: {exc}")
+        print("  Skipping sanctions fetch — using existing dossiers if any.")
+        return []
+
     dossiers = []
     counter = 0
     seen_ids = set()
 
-    with urllib.request.urlopen(req, timeout=30) as resp:
+    with resp:
         for line in resp:
             if len(dossiers) >= limit:
                 break
@@ -312,7 +320,7 @@ def fetch_sanctions_dossiers(limit: int = 50) -> list[dict]:
 
 def main():
     limit = 50
-    output_path = "data/auto_dossiers.json"
+    output_path = str(Path(__file__).resolve().parent.parent / "data" / "auto_dossiers.json")
 
     args = sys.argv[1:]
     if "--limit" in args:

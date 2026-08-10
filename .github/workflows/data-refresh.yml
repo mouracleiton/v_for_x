@@ -40,6 +40,35 @@ jobs:
         run: python3 scripts/update_data.py
         continue-on-error: true
 
+      - name: Generate data freshness report
+        run: |
+          python3 -c "
+          import json
+          from datetime import datetime
+          d = json.load(open('data/world_backbone.json'))
+          meta = d['metadata']
+          today = datetime.utcnow().strftime('%Y-%m-%d')
+          print(f'## Data Freshness Report ({today})')
+          print()
+          print(f'- **last_updated:** {meta.get(\"last_updated\", meta.get(\"created\", \"unknown\"))}')
+          print(f'- **countries:** {meta.get(\"total_countries\", \"?\")}')
+          print(f'- **sources:** {len(meta.get(\"sources\", []))}')
+          print()
+          # Sample year fields across dimensions
+          c = d['countries'][0]
+          year_fields = []
+          for dim in ['economy', 'health', 'education', 'environment', 'water_sanitation', 'connectivity']:
+              if dim in c:
+                  yf = next((k for k in c[dim] if 'year' in k.lower()), None)
+                  if yf:
+                      year_fields.append(f'{dim}: {c[dim][yf]}')
+          if year_fields:
+              print('**Data vintages (sample country):**')
+              for yf in year_fields:
+                  print(f'  - {yf}')
+          " > freshness_report.md
+          cat freshness_report.md
+
       - name: Rebuild static API endpoints
         run: |
           npm run build
@@ -54,6 +83,7 @@ jobs:
             echo "changed=false" >> $GITHUB_OUTPUT
           else
             echo "changed=true" >> $GITHUB_OUTPUT
+            echo "files_changed=$(git diff --cached --name-only | wc -l)" >> $GITHUB_OUTPUT
           fi
 
       - name: Create Pull Request with updated data
@@ -66,12 +96,16 @@ jobs:
           body: |
             ## Automated Data Refresh
 
-            This PR was created by the scheduled data refresh workflow.
+            $(cat freshness_report.md)
 
-            **What changed:**
+            **Pipeline steps:**
             - Snapshot of previous data saved
-            - Data update pipeline executed
+            - World Bank Open Data API (9 indicators, ~1600 field updates)
+            - OpenSanctions adjudicated dossiers
+            - EJAtlas environmental conflicts
             - Static API endpoints rebuilt
+
+            **Files changed:** ${{ steps.changes.outputs.files_changed }}
 
             Review the diff carefully before merging.
           branch: data/refresh-$(date -u +%Y-%m-%d)
