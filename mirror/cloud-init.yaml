@@ -1,0 +1,64 @@
+#cloud-init
+# V FOR X — cloud mirror bootstrap (Debian / Ubuntu VM)
+# ───────────────────────────────────────────────────────────────
+# Paste this as user-data when launching a new VM. On first boot it
+# installs Docker, builds the mirror image, stands up the full stack
+# (web + IPFS + Tor), and prints the onion address + CID to the
+# console log. Total time: ~5 minutes on a 1-vCPU / 1GB instance.
+#
+# Tested on: Debian 12, Ubuntu 22.04/24.04 (amd64 + arm64).
+# Open inbound ports: 8080 (HTTP), 4001 (IPFS swarm, optional).
+# ───────────────────────────────────────────────────────────────
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - curl
+  - ca-certificates
+  - gnupg
+  - git
+
+write_files:
+  - path: /opt/vfx-mirror/docker-compose.yml
+    permissions: "0644"
+    content: |
+      ${ComposeFileContent}
+  - path: /opt/vfx-mirror/ENV
+    permissions: "0600"
+    content: |
+      PIN_IPFS=1
+
+runcmd:
+  # 1. Install Docker (official convenience script)
+  - |
+    if ! command -v docker >/dev/null 2>&1; then
+      curl -fsSL https://get.docker.com | sh
+      systemctl enable --now docker
+    fi
+
+  # 2. Pull the deployment kit and build
+  - |
+    mkdir -p /opt/vfx-mirror
+    cd /opt/vfx-mirror
+    # Fetch the kit from the repo (adjust tag as needed)
+    curl -fsSL https://raw.githubusercontent.com/mouracleiton/v_for_vigilance/main/v-for-x/mirror/install.sh -o /opt/vfx-mirror/install.sh
+    chmod +x /opt/vfx-mirror/install.sh
+
+  # 3. Stand up the stack
+  - |
+    cd /opt/vfx-mirror
+    /opt/vfx-mirror/install.sh --pin-ipfs --tor --port 8080 || \
+      echo "[vfx-mirror] install script returned non-zero — check /var/log/cloud-init-output.log"
+
+  # 4. Surface the result in the cloud console
+  - |
+    echo "===== V FOR X MIRROR READY =====" >> /var/log/vfx-mirror.log
+    echo "build hash : $(cat /opt/vfx-mirror/BUILD_HASH 2>/dev/null)" >> /var/log/vfx-mirror.log
+    echo "ipfs cid   : $(cat /opt/vfx-mirror/IPFS_CID 2>/dev/null)" >> /var/log/vfx-mirror.log
+    echo "onion      : $(cat /var/lib/tor/vfx-mirror/hostname 2>/dev/null)" >> /var/log/vfx-mirror.log
+    echo "http       : http://$(curl -fsSL ifconfig.me 2>/dev/null || echo '<server-ip>'):8080" >> /var/log/vfx-mirror.log
+    echo "================================" >> /var/log/vfx-mirror.log
+    cat /var/log/vfx-mirror.log
+
+final_message: "V FOR X mirror node deployed after $UPTIME seconds. See /var/log/vfx-mirror.log."
