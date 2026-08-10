@@ -523,6 +523,7 @@ const DIRECTORY_CLUSTERS: DirectoryClusterDef[] = [
       { href: "/the-cipher/", code: "50", navKey: "nav.the-cipher", branchKey: "branch.cipher" },
       { href: "/the-canary/", code: "51", navKey: "nav.the-canary", branchKey: "branch.canary" },
       { href: "/the-press-kit/", code: "52", navKey: "nav.the-press-kit", branchKey: "branch.press_kit" },
+      { href: "/the-forensics/", code: "59", navKey: "nav.the-forensics", branchKey: "branch.forensics" },
       { href: "/the-web/", code: "05", navKey: "nav.the-web", branchKey: "branch.web" },
       { href: "/the-relay/", code: "53", navKey: "nav.the-relay", branchKey: "branch.relay" },
       { href: "/the-quorum/", code: "54", navKey: "nav.the-quorum", branchKey: "branch.quorum" },
