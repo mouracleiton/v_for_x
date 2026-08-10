@@ -14,6 +14,7 @@ import StatusPill from "@/components/ui/StatusPill";
 import { wfpClassColor, wfpClassLabel, wfpClassLabelLocalized, formatNumber } from "@/lib/format";
 import type { WorldBackbone } from "@/lib/types";
 import type { Lang } from "@/lib/i18n";
+import { getEjatlasSummary } from "@/lib/ejatlas";
 
 const data = backbone as WorldBackbone;
 
@@ -351,6 +352,9 @@ export default function HomePage() {
         </div>
       </TerminalCard>
 
+      {/* Environmental Justice Front (EJAtlas) */}
+      <EnvironmentalJusticeStrip />
+
       {/* Branch Portals */}
       {/* ═══ SECTION DIRECTORY — CLUSTERED ═══ */}
       <h2 className="text-sm uppercase tracking-widest text-content-secondary mb-4">
@@ -467,5 +471,66 @@ export default function HomePage() {
         </div>
       </footer>
     </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ENVIRONMENTAL JUSTICE FRONT
+   Compact stat strip from EJAtlas data
+   ═══════════════════════════════════════════════════════════════ */
+function EnvironmentalJusticeStrip() {
+  const { lang } = useStore();
+  const eja = useMemo(() => getEjatlasSummary(), []);
+  const stopped = eja.summary.by_status.find((s) => s.name === "stopped")?.count ?? 0;
+  const topCountries = useMemo(
+    () => Object.entries(eja.country_summaries)
+      .sort((a, b) => b[1].total - a[1].total)
+      .slice(0, 6),
+    [eja]
+  );
+
+  return (
+    <TerminalCard title="ENVIRONMENTAL JUSTICE FRONT" accent="green" className="mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+        <div>
+          <div className="text-[10px] text-content-dim uppercase tracking-widest">Conflicts Mapped</div>
+          <div className="text-2xl text-blood-bright font-bold">{formatNumber(eja.metadata.total_conflicts)}</div>
+        </div>
+        <div>
+          <div className="text-[10px] text-content-dim uppercase tracking-widest">Companies Named</div>
+          <div className="text-2xl text-warning-amber font-bold">{formatNumber(eja.metadata.total_companies)}</div>
+        </div>
+        <div>
+          <div className="text-[10px] text-content-dim uppercase tracking-widest">Projects Stopped</div>
+          <div className="text-2xl text-terminal-green font-bold">{formatNumber(stopped)}</div>
+        </div>
+        <div>
+          <div className="text-[10px] text-content-dim uppercase tracking-widest">Countries</div>
+          <div className="text-2xl text-content-primary font-bold">{eja.metadata.total_countries}</div>
+        </div>
+      </div>
+      <div className="flex flex-wrap gap-1 mb-2">
+        {topCountries.map(([iso3, d]) => {
+          const c = data.countries.find((co) => co.iso3 === iso3);
+          return (
+            <Link
+              key={iso3}
+              href={`/sorrow-map/${iso3.toLowerCase()}/`}
+              className="text-[10px] px-2 py-0.5 border border-border-dim text-content-secondary hover:border-blood hover:text-blood-bright transition-colors"
+            >
+              {c?.name_en ?? iso3} <span className="text-blood-bright">{d.total}</span>
+            </Link>
+          );
+        })}
+      </div>
+      <div className="text-[10px] text-content-dim pt-2 border-t border-border-dim">
+        Source:{" "}
+        <a href="https://ejatlas.org" target="_blank" rel="noopener noreferrer" className="text-terminal-green hover:underline">
+          EJAtlas
+        </a>{" "}
+        (ICTA-UAB) · CC BY-NC-SA 3.0 ·{" "}
+        <Link href="/the-fronts/" className="text-blood-bright hover:underline">Explore all →</Link>
+      </div>
+    </TerminalCard>
   );
 }

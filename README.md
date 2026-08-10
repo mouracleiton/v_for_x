@@ -57,6 +57,8 @@ The platform is powered by a unified data spine covering **200 countries × 19 d
 | `countries_en.json` | 46 KB | Canonical country list (ISO 3166-1 + UN M49) |
 | `blueprints.json` | 17 KB | 12 Protocol X seed blueprints |
 | `dossier-seed.json` | 5 KB | 5 example Registry dossiers |
+| `ejatlas-summary.json` | 549 KB | 3,838 environmental conflicts × 156 countries (summary + top conflicts per country) |
+| `ejatlas-conflicts.json` | 5.3 MB | Full EJAtlas conflict records (all fields) |
 
 ### 19 Dimensions
 
@@ -85,6 +87,7 @@ Demographics · Economy · Health · Human Development · Hunger · Conflict · 
 7. CGIAR
 8. SIPRI
 9. Laborde et al. (2021, Food Policy)
+10. EJAtlas — Global Atlas of Environmental Justice (ejatlas.org / ICTA-UAB) — 3,838 socio-environmental conflicts across 156 countries (CC BY-NC-SA 3.0)
 
 ---
 

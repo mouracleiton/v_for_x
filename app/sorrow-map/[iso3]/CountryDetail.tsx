@@ -34,6 +34,7 @@ import {
   MilitaryHealthDeepDive,
   GenderDeepDive,
   SdgScorecardDeepDive,
+  EnvironmentalConflictsDeepDive,
 } from "./DeepDives";
 
 const data = backbone as WorldBackbone;
@@ -928,6 +929,8 @@ export default function CountryDetail({ params }: PageProps) {
           <ClimateHungerDeepDive country={c} />
           <MilitaryHealthDeepDive country={c} />
           <GenderDeepDive country={c} />
+
+          <EnvironmentalConflictsDeepDive country={c} />
 
           {/* ═══ ENRICHED DIMENSIONS (OpenRepublic integration) ═══ */}
           {/* These only show when data is present for this country */}
