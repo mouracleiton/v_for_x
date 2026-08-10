@@ -375,6 +375,13 @@ export const PAGE_META: Record<string, PageMeta> = {
     path: "/the-resistance/",
   },
 
+  "/the-war-room/": {
+    title: "The War Room — Live Conflict Intelligence (ISW)",
+    description:
+      "Live open-source war assessments from the Institute for the Study of War. 6 active conflict theaters — Russia-Ukraine, Middle East/Iran, China-Taiwan, the adversary entente, cognitive warfare, and the future of war. Daily updates, key developments, featured reports.",
+    path: "/the-war-room/",
+  },
+
   "/the-sentinel/": {
     title: "The Sentinel — Real-time Repression Map",
     description:

@@ -1,0 +1,810 @@
+{
+  "last_synced": "2026-08-10",
+  "sources": [
+    {
+      "id": "isw",
+      "name": "Institute for the Study of War",
+      "short_name": "ISW",
+      "url": "https://understandingwar.org/",
+      "tagline": "Reliable research, analysis, and innovative technology to enhance national security.",
+      "description": "ISW is a non-partisan, non-profit, public policy research organization advancing an informed understanding of military affairs through reliable research, trusted analysis, and innovative education. ISW produces daily open-source intelligence assessments of ongoing conflicts.",
+      "type": "research_institute",
+      "license_note": "Data summarized from public ISW reports. Full reports and maps at understandingwar.org.",
+      "stats": {
+        "global_media_mentions": 74000,
+        "social_media_followers": 1200000,
+        "social_media_impressions": 390000000,
+        "website_pageviews": 42000000,
+        "custom_maps_produced": 5300,
+        "daily_weekly_updates": 858
+      }
+    },
+    {
+      "id": "acled",
+      "name": "Armed Conflict Location & Event Data Project",
+      "short_name": "ACLED",
+      "url": "https://acleddata.com/",
+      "tagline": "The highest-quality and most widely used near-real-time source on political violence and protest data worldwide.",
+      "description": "ACLED is an independent, impartial conflict monitor providing real-time data and analysis on political violence and protest in all countries and territories across the world. Coverage spans 190+ countries with event-level data going back to 1997 for Africa.",
+      "type": "conflict_database",
+      "license_note": "ACLED data is licensed. Summarized statistics presented under fair use. Full data at acleddata.com.",
+      "stats": {
+        "global_conflict_events_yearly": 204605,
+        "estimated_deaths_yearly": 240000,
+        "countries_covered": 190,
+        "regions_covered": 6,
+        "data_since_year": 1997
+      }
+    },
+    {
+      "id": "liveuamap",
+      "name": "Live Universal Awareness Map",
+      "short_name": "LiveUAMap",
+      "url": "https://liveuamap.com/",
+      "tagline": "Leading independent global news and information site dedicated to factual reporting of conflicts, human rights issues, protests, terrorism, and more.",
+      "description": "LiveUAMap is a geolocated editorial aggregation platform displaying relevant events in near-real-time on interactive maps. Created in February 2014 by Ukrainian software engineers, it expanded from monitoring the Russo-Ukrainian War to covering 60+ regional and thematic maps globally. Used by the UN, MSF, The Guardian, and ACLED.",
+      "type": "live_event_map",
+      "license_note": "Event data via LiveUAMap API (GeoJSON). Free tier covers primary regions; Pro/Enterprise for full archive.",
+      "stats": {
+        "regions_tracked": 60,
+        "thematic_maps": 25,
+        "languages_supported": 5,
+        "founded_year": 2014
+      }
+    },
+    {
+      "id": "war-radar",
+      "name": "WAR-RADAR",
+      "short_name": "WarRadar",
+      "url": "https://war-radar.com/",
+      "tagline": "Real-time global war and armed conflict monitor powered by AI analysis of news articles.",
+      "description": "WAR-RADAR ingests from 15 RSS feeds, NewsAPI, and GDELT, filtering through 60+ conflict keywords. AI (GPT-4o-mini) extracts and geolocates conflict zones, classifying them into 7 conflict types and 4 severity tiers. Aims for 15-30 distinct conflict zones per scan.",
+      "type": "ai_conflict_monitor",
+      "license_note": "Open-source project. Data at war-radar.com.",
+      "stats": {
+        "rss_feeds": 15,
+        "newsapi_queries": 8,
+        "conflict_keywords": 60,
+        "target_zones_per_scan": 25
+      }
+    },
+    {
+      "id": "warwatch",
+      "name": "WAR WATCH — World Assessment and Tracking of Civilian Harm",
+      "short_name": "WarWatch",
+      "url": "https://warwatch.ch/",
+      "tagline": "Tracking and assessing armed conflicts and civilian harm under international humanitarian law.",
+      "description": "Operated by the Geneva Academy of International Humanitarian Law and Human Rights. Launched December 2025, integrating the RULAC project (active since 2007) and IHL in Focus (2023). Provides legal classification of armed conflicts and IHL compliance assessment of civilian harm. Funded by EU ECHO and Swiss SDC.",
+      "type": "legal_monitor",
+      "license_note": "Public platform. Data at warwatch.ch.",
+      "stats": {
+        "armed_conflicts_tracked": 112,
+        "international_armed_conflicts": 34,
+        "military_occupations": 9,
+        "non_international_armed_conflicts": 78,
+        "countries_with_ihl_analysis": 22
+      }
+    },
+    {
+      "id": "war-monitor",
+      "name": "War Monitor",
+      "short_name": "WarMonitor",
+      "url": "https://war-monitor.com/",
+      "tagline": "Real-time global conflict intelligence platform with AI-powered event classification.",
+      "description": "War Monitor ingests breaking news from BBC World, Al Jazeera, Reuters, and Telegram OSINT channels, geolocates events on a 3D globe, and uses AI to classify and severity-score events (1-10). Features conflict thread grouping and daily intel briefings.",
+      "type": "ai_conflict_monitor",
+      "license_note": "Platform at war-monitor.com.",
+      "stats": {
+        "active_conflict_zones": 20,
+        "country_trackers": 15,
+        "region_trackers": 5,
+        "event_categories": 7,
+        "severity_scale_max": 10
+      }
+    },
+    {
+      "id": "war-direct",
+      "name": "War.Direct",
+      "short_name": "WarDirect",
+      "url": "https://war.direct/",
+      "tagline": "Non-commercial OSINT aggregation platform tracking the US/Israel vs Iran & Axis of Resistance conflict since Day 1.",
+      "description": "Co-built by Rishi Khiani and Claude (Anthropic), War.Direct tracks the US/Israel vs. Iran conflict that began Feb 28, 2026. Features a 12-section war report card with verified casualties, military scoreboard, war crimes documentation, coalitions, and global ripple effects. Has informed 2,000,000+ people.",
+      "type": "osint_aggregator",
+      "license_note": "Non-commercial, open-source intelligence. Data at war.direct.",
+      "stats": {
+        "people_informed": 2000000,
+        "conflict_day": 164,
+        "report_card_sections": 12,
+        "live_tv_channels": 25
+      }
+    },
+    {
+      "id": "telegram-archive",
+      "name": "Telegram Archive of the War",
+      "short_name": "Telegram Archive",
+      "url": "https://telegram.lvivcenter.org/telegram-archive-of-the-war.html",
+      "tagline": "Emergency archiving of Telegram channels and chats documenting Russia's full-scale invasion of Ukraine.",
+      "description": "Initiated by the Center for Urban History (Lviv, Ukraine) and coordinated by Taras Nazaruk. Archive of 2,711 Telegram items (1,048 channels, 1,651 chats, 12 chatbots) totaling 27.8 TB. Covers February 24, 2022 to June 2023. Documents Ukrainian society during wartime including propaganda, volunteer coordination, personal diaries, and information warfare.",
+      "type": "historical_archive",
+      "license_note": "Non-commercial research only. Access requires researcher agreement. Data at telegram.lvivcenter.org.",
+      "stats": {
+        "total_items_archived": 2711,
+        "channels": 1048,
+        "chats": 1651,
+        "chatbots": 12,
+        "data_volume_tb": 27.8,
+        "regions_covered": 25
+      }
+    }
+  ],
+  "theaters": [
+    {
+      "id": "russia-ukraine",
+      "name": "Russia & Ukraine",
+      "code": "RU-UA",
+      "severity": "critical",
+      "status": "active_high_intensity",
+      "overview_path": "/analysis/russia-ukraine/",
+      "regions": ["Russia", "Ukraine", "Africa"],
+      "iso3_links": ["RUS", "UKR"],
+      "start_year": 2022,
+      "summary": "Full-scale Russian invasion of Ukraine entered a new phase. Ukraine launched an intermediate-range strike campaign alongside new mechanized attacks. Civilian casualties reached their highest level since 2022. Russia continues to expand its footprint in Africa through proxy forces.",
+      "has_map": true,
+      "sources_tracking": ["isw", "acled", "liveuamap", "war-radar", "war-monitor", "telegram-archive"],
+      "acled_stats": {
+        "weekly_events": 1980,
+        "weekly_change_pct": 3,
+        "civilian_targeting_events": 221,
+        "civilians_killed_weekly": 90,
+        "air_drone_strikes": 1171,
+        "shelling_events": 261,
+        "armed_clashes": 531,
+        "infrastructure_attacks": 243,
+        "infrastructure_breakdown": {
+          "education": 21,
+          "healthcare": 14,
+          "energy": 39,
+          "residential": 209
+        },
+        "drone_strikes_moscow_city": 237,
+        "drone_strikes_moscow_region": 85
+      },
+      "war_monitor_stats": {
+        "civilian_casualties_un": 30000,
+        "killed_donbas_pre_invasion": 14000,
+        "idp_millions": 6.5,
+        "refugees_millions": 6.3,
+        "energy_capacity_destroyed_pct": 50,
+        "frontline_km": 1200,
+        "afu_personnel": 800000,
+        "western_aid_total_b": 200,
+        "frozen_russian_reserves_b": 300,
+        "sanctions_against_russia": 16000
+      },
+      "telegram_archive_stats": {
+        "items_archived": 2711,
+        "data_volume_tb": 27.8,
+        "date_range_start": "2022-02-24",
+        "date_range_end": "2023-06-12"
+      },
+      "latest_report": {
+        "title": "Russian Offensive Campaign Assessment, August 9, 2026",
+        "date": "2026-08-09",
+        "url": "https://understandingwar.org/research/russia-ukraine/russian-offensive-campaign-assessment-august-9-2026/"
+      },
+      "key_developments": [
+        { "date": "2026-08-09", "text": "Daily Russian Offensive Campaign Assessment published with frontline updates.", "tag": "frontline" },
+        { "date": "2026-08-04", "text": "ISW analyst discusses Ukraine's battlefield momentum in Atlantic Council media appearance.", "tag": "analysis" },
+        { "date": "2026-07-30", "text": "ISW briefs Helsinki Commission on Russia's exploitation and engagement in Africa.", "tag": "africa" },
+        { "date": "2026-07-26", "text": "CNN reports highest civilian casualties since 2022 as bombardment intensifies.", "tag": "casualties" }
+      ],
+      "featured_reports": [
+        {
+          "title": "Ukraine's Intermediate-Range Strike Campaign and New Mechanized Attacks Herald the Start of a New Phase of the War",
+          "url": "https://understandingwar.org/research/russia-ukraine/ukraines-intermediate-range-strike-campaign-and-new-mechanized-attacks-herald-the-start-of-a-new-phase-of-the-war/",
+          "type": "special_report"
+        }
+      ]
+    },
+    {
+      "id": "us-israel-iran",
+      "name": "US/Israel vs Iran & Axis of Resistance",
+      "code": "IR-WAR",
+      "severity": "critical",
+      "status": "active_high_intensity",
+      "overview_path": "https://war.direct/",
+      "regions": ["Iran", "Israel", "Lebanon", "Iraq", "Syria", "Jordan", "Gulf States", "Strait of Hormuz", "Yemen"],
+      "iso3_links": ["IRN", "ISR", "LBN", "IRQ", "SYR", "JOR", "ARE", "SAU", "KWT", "BHR", "OMN", "QAT", "YEM"],
+      "start_year": 2026,
+      "summary": "Full-scale conflict between US/Israel and Iran & the Axis of Resistance since February 28, 2026 (Day 164). Includes airstrikes on Iran, Hezbollah ground war in Lebanon, Strait of Hormuz naval blockade, Gulf state strikes, and militia attacks on US bases. A collapsed ceasefire (Apr 7 - Jul 9) reignited full-scale war.",
+      "has_map": true,
+      "sources_tracking": ["isw", "acled", "liveuamap", "war-direct", "war-radar", "war-monitor"],
+      "acled_stats": {
+        "us_israel_strikes_on_iran_total": 3578,
+        "iranian_strikes_total": 2035
+      },
+      "war_direct_scoreboard": {
+        "total_killed": 8100,
+        "total_wounded": 47000,
+        "total_displaced_m": 4.2,
+        "total_affected_m": 10,
+        "casualties_by_country": [
+          { "country": "Iran", "killed": 3636, "wounded": 26500, "displaced_m": 3.2, "civilians_killed": 1701, "military_killed": 1221 },
+          { "country": "Lebanon", "killed": 4300, "wounded": 12200, "displaced_m": 1.0, "children_killed": 165 },
+          { "country": "Israel", "killed": 40, "wounded": 7453, "civilians_killed": 27, "military_killed": 13 },
+          { "country": "US Military", "killed": 15, "wounded": 415 },
+          { "country": "Iraq", "killed": 118 },
+          { "country": "Gulf States", "killed": 28 }
+        ],
+        "us_israel_military": {
+          "targets_struck": 13000,
+          "verified_strikes": 943,
+          "bombs_dropped": 18000,
+          "iranian_warships_sunk": 155,
+          "senior_leaders_killed": 45,
+          "iran_missile_launchers_destroyed_pct": 60,
+          "bridges_severed": 8,
+          "war_cost_b": 45
+        },
+        "iran_axis_military": {
+          "strikes_on_israel_gulf": 826,
+          "missiles_fired": 1800,
+          "us_aircraft_downed": 2,
+          "oil_price_increase_pct": 53,
+          "hormuz_traffic_reduction_pct": 90
+        },
+        "aircraft_losses": [
+          { "type": "F-15E Strike Eagle", "detail": "Shot down over western Iran — first US combat air loss in 20 years", "side": "US" },
+          { "type": "A-10 Thunderbolt II", "detail": "Shot down over Strait of Hormuz", "side": "US" },
+          { "type": "3x F-15E", "detail": "Destroyed by Kuwaiti friendly fire (Mar 2)", "side": "US" },
+          { "type": "Multiple MQ-9 Reaper drones", "detail": "Lost during operations", "side": "US" }
+        ],
+        "key_figures_eliminated": [
+          { "name": "Ali Khamenei", "role": "Supreme Leader", "date": "2026-02-28" },
+          { "name": "Ali Shamkhani", "role": "Top Defense Official", "date": "2026-02-28" },
+          { "name": "IRGC Commander-in-Chief", "role": "Military", "date": "2026-02-28" },
+          { "name": "Defence Minister", "role": "Government", "date": "2026-02-28" },
+          { "name": "Naim Qassem", "role": "Hezbollah Secretary-General", "date": "2026-04-09" }
+        ]
+      },
+      "global_impact": {
+        "oil_price_before": 72,
+        "oil_price_after": 110,
+        "hormuz_traffic_before_mbpd": 20,
+        "hormuz_traffic_reduction_pct": 90,
+        "qatar_lng_exports": "Force majeure — zero exports",
+        "iraq_oil_before_mbpd": 4.3,
+        "iraq_oil_after_mbpd": 1.2,
+        "ships_stranded": 2000,
+        "iran_internet_blackout_days": 37,
+        "iran_internet_connectivity_pct": 4,
+        "people_facing_hunger_m": 45,
+        "global_fertilizer_via_hormuz_pct": 30
+      },
+      "ceasefire_timeline": [
+        { "date": "2026-04-07", "event": "Ceasefire accepted" },
+        { "date": "2026-04-09", "event": "Israel launches Operation Eternal Darkness on Lebanon — 100+ targets" },
+        { "date": "2026-04-16", "event": "Israel-Hezbollah truce" },
+        { "date": "2026-06-17", "event": "US-Iran presidents sign MOU to end war within 60 days" },
+        { "date": "2026-07-08", "event": "Trump declares MOU over; reimposes oil sanctions; US strikes Tehran" },
+        { "date": "2026-07-09", "event": "Iran retaliates on Jordan, Bahrain, Kuwait, Qatar — war is back" }
+      ],
+      "latest_report": {
+        "title": "Iran Update Special Report, August 9, 2026",
+        "date": "2026-08-09",
+        "url": "https://understandingwar.org/research/middle-east/iran-update-special-report-august-9-2026/"
+      },
+      "key_developments": [
+        { "date": "2026-08-09", "text": "Daily Iran Update special report published covering regional activity.", "tag": "frontline" },
+        { "date": "2026-08-03", "text": "Washington Post reports infrastructure strikes battering Iran's economy.", "tag": "economic" },
+        { "date": "2026-08-01", "text": "Hezbollah's increasing use of FPV drones identified as requiring Israeli overmatch.", "tag": "hezbollah" },
+        { "date": "2026-07-09", "text": "Ceasefire collapses — Iran retaliates across the Gulf. War is back.", "tag": "escalation" },
+        { "date": "2026-07-08", "text": "Trump declares MOU over; reimposes oil sanctions; US strikes Tehran.", "tag": "diplomatic" }
+      ],
+      "featured_reports": [
+        {
+          "title": "Hezbollah's Pivot to FPV Drones Requires Israeli Overmatch",
+          "url": "https://understandingwar.org/research/middle-east/hezbollahs-pivot-to-fpv-drones-requires-israeli-overmatch/",
+          "type": "special_report"
+        }
+      ]
+    },
+    {
+      "id": "china-taiwan",
+      "name": "China & Taiwan",
+      "code": "CN-TW",
+      "severity": "high",
+      "status": "active_brinkmanship",
+      "overview_path": "/analysis/china-taiwan/",
+      "regions": ["China", "Taiwan", "North Korea", "South China Sea"],
+      "iso3_links": ["CHN", "TWN", "PRK"],
+      "start_year": 2024,
+      "summary": "Ongoing strategic competition in the Taiwan Strait and broader Indo-Pacific. North Korea's constitutional amendments cement the regime's strategic posture. ISW tracks Chinese coercion, North Korean provocations, and alliance dynamics across East Asia.",
+      "has_map": true,
+      "sources_tracking": ["isw", "acled", "liveuamap", "war-radar", "war-monitor"],
+      "latest_report": {
+        "title": "China & Taiwan Update, August 7, 2026",
+        "date": "2026-08-07",
+        "url": "https://understandingwar.org/research/china-taiwan/china-taiwan-update-august-7-2026/"
+      },
+      "key_developments": [
+        { "date": "2026-08-07", "text": "Latest China & Taiwan Update published tracking cross-strait activity.", "tag": "frontline" },
+        { "date": "2026-07-20", "text": "North Korea's constitutional amendments cement the regime's strategic posture.", "tag": "dprk" }
+      ],
+      "featured_reports": [
+        {
+          "title": "North Korea's Constitutional Amendments Cement the Regime's Strategic Posture",
+          "url": "https://understandingwar.org/research/china-taiwan/north-koreas-constitutional-amendments-cement-the-regimes-strategic-posture/",
+          "type": "special_report"
+        }
+      ]
+    },
+    {
+      "id": "adversary-entente",
+      "name": "Adversary Entente Task Force",
+      "code": "AXIS",
+      "severity": "high",
+      "status": "active",
+      "overview_path": "/analysis/adversary-entente-task-force",
+      "regions": ["Russia", "China", "Iran", "North Korea", "Venezuela"],
+      "iso3_links": ["RUS", "CHN", "IRN", "PRK", "VEN"],
+      "start_year": 2024,
+      "summary": "Dedicated task force tracking the deepening alignment of the axis of adversaries — Russia, China, Iran, and North Korea. Analysis covers strategic coordination, sanctions evasion, arms transfers, and each actor's calculations as the bloc confronts the US-led order.",
+      "has_map": true,
+      "sources_tracking": ["isw", "acled", "war-direct", "war-radar"],
+      "latest_report": {
+        "title": "Russia's Non-Response to US Actions in Venezuela Reveal a Kremlin Balancing Act",
+        "date": "2026-07-28",
+        "url": "https://understandingwar.org/research/adversary-entente/russias-non-response-to-us-actions-in-venezuela-reveal-a-kremlin-balancing-act/"
+      },
+      "key_developments": [
+        { "date": "2026-07-28", "text": "Russia's non-response to US actions in Venezuela reveals a Kremlin balancing act between partners.", "tag": "venezuela" }
+      ],
+      "featured_reports": []
+    },
+    {
+      "id": "cognitive-warfare",
+      "name": "Cognitive Warfare",
+      "code": "COGWAR",
+      "severity": "high",
+      "status": "active",
+      "overview_path": "/analysis/cognitive-warfare/",
+      "regions": ["Global", "Russia", "Europe", "United States"],
+      "iso3_links": ["RUS"],
+      "start_year": 2024,
+      "summary": "Tracking information operations, propaganda, and media manipulation — primarily Kremlin-linked. The Kremlin's expanding media conglomerate spreads across multiple platforms and languages, laundering narratives through co-opted outlets and influence networks.",
+      "has_map": false,
+      "sources_tracking": ["isw"],
+      "latest_report": {
+        "title": "The Kremlin's Expanding Media Conglomerate 2026",
+        "date": "2026-06-15",
+        "url": "https://understandingwar.org/research/cognitive-warfare/the-kremlins-expanding-media-conglomerate/"
+      },
+      "key_developments": [
+        { "date": "2026-06-15", "text": "Major report maps the Kremlin's expanding media conglomerate and influence networks.", "tag": "propaganda" }
+      ],
+      "featured_reports": []
+    },
+    {
+      "id": "future-war",
+      "name": "Contemporary & Future War",
+      "code": "FUTWAR",
+      "severity": "moderate",
+      "status": "active",
+      "overview_path": "/analysis/future-of-war/",
+      "regions": ["Global", "Ukraine", "United States"],
+      "iso3_links": ["UKR"],
+      "start_year": 2024,
+      "summary": "Emerging military technology and strategic studies. Lessons from Ukraine's drone and mechanized warfare are reshaping doctrine. ISW analyzes how battlefield innovations — FPV drones, intermediate-range strikes, electronic warfare — define the future of conflict.",
+      "has_map": true,
+      "sources_tracking": ["isw", "acled"],
+      "latest_report": {
+        "title": "Ukraine's Intermediate-Range Strike Campaign and New Mechanized Attacks Herald the Start of a New Phase of the War",
+        "date": "2026-08-01",
+        "url": "https://understandingwar.org/research/russia-ukraine/ukraines-intermediate-range-strike-campaign-and-new-mechanized-attacks-herald-the-start-of-a-new-phase-of-the-war/"
+      },
+      "key_developments": [
+        { "date": "2026-08-01", "text": "New phase of the war marked by Ukraine's intermediate-range strike campaign and mechanized attacks.", "tag": "doctrine" }
+      ],
+      "featured_reports": []
+    },
+    {
+      "id": "sudan",
+      "name": "Sudan Civil War",
+      "code": "SDN",
+      "severity": "critical",
+      "status": "active_high_intensity",
+      "overview_path": "",
+      "regions": ["Sudan", "Darfur", "Horn of Africa"],
+      "iso3_links": ["SDN"],
+      "start_year": 2023,
+      "summary": "War between the Sudanese Armed Forces (SAF) and Rapid Support Forces (RSF) since April 2023. At least 59,000 killed. One of the world's deadliest active conflicts with mass displacement, ethnic violence in Darfur, and famine conditions.",
+      "has_map": true,
+      "sources_tracking": ["acled", "liveuamap", "war-radar", "war-monitor", "warwatch"],
+      "acled_stats": {
+        "killed_since_april_2023": 59000,
+        "acled_rank": 3
+      },
+      "latest_report": {
+        "title": "Sudan — ACLED Conflict Monitor",
+        "date": "2026-08-09",
+        "url": "https://acleddata.com/"
+      },
+      "key_developments": [
+        { "date": "2026-08-09", "text": "Sudan remains the 2nd most deadly conflict in the world per ACLED data.", "tag": "casualties" },
+        { "date": "2026-04-15", "text": "Three-year anniversary of the RSF-SAF conflict. Famine conditions spread.", "tag": "famine" }
+      ],
+      "featured_reports": []
+    },
+    {
+      "id": "myanmar",
+      "name": "Myanmar Civil War",
+      "code": "MMR",
+      "severity": "critical",
+      "status": "active_high_intensity",
+      "overview_path": "",
+      "regions": ["Myanmar", "Southeast Asia"],
+      "iso3_links": ["MMR"],
+      "start_year": 2021,
+      "summary": "Following the 2021 military coup, Myanmar collapsed into a fragmented civil war with 1,200+ distinct armed groups. Over 100,000 killed since the coup. The most fragmented conflict in the world per ACLED.",
+      "has_map": true,
+      "sources_tracking": ["acled", "liveuamap", "war-radar", "war-monitor", "warwatch"],
+      "acled_stats": {
+        "killed_since_2021_coup": 100000,
+        "distinct_armed_groups": 1200
+      },
+      "latest_report": {
+        "title": "Myanmar — ACLED Conflict Monitor",
+        "date": "2026-08-07",
+        "url": "https://acleddata.com/"
+      },
+      "key_developments": [
+        { "date": "2026-08-07", "text": "1,200+ distinct armed groups make Myanmar the world's most fragmented conflict.", "tag": "fragmentation" }
+      ],
+      "featured_reports": []
+    },
+    {
+      "id": "gaza-palestine",
+      "name": "Gaza & Palestine",
+      "code": "PSE",
+      "severity": "critical",
+      "status": "active_high_intensity",
+      "overview_path": "",
+      "regions": ["Gaza", "West Bank", "Israel"],
+      "iso3_links": ["PSE", "ISR"],
+      "start_year": 2023,
+      "summary": "Israel-Gaza conflict with devastating civilian toll. Palestine contributes over 40% of all global conflict events recorded by ACLED (shared with Ukraine). Most geographically diffuse conflict with ~70% of Gaza/West Bank affected.",
+      "has_map": true,
+      "sources_tracking": ["acled", "liveuamap", "war-radar", "war-monitor", "warwatch", "isw"],
+      "acled_stats": {
+        "geographic_diffusion_pct": 70,
+        "share_of_global_conflict_events_pct": 40,
+        "acled_rank": 1
+      },
+      "latest_report": {
+        "title": "Gaza Conflict Monitor — ACLED",
+        "date": "2026-08-09",
+        "url": "https://acleddata.com/"
+      },
+      "key_developments": [
+        { "date": "2026-08-09", "text": "Palestine remains the most geographically diffuse conflict globally per ACLED.", "tag": "frontline" }
+      ],
+      "featured_reports": []
+    },
+    {
+      "id": "haiti",
+      "name": "Haiti Gang Crisis",
+      "code": "HTI",
+      "severity": "high",
+      "status": "active",
+      "overview_path": "",
+      "regions": ["Haiti", "Caribbean"],
+      "iso3_links": ["HTI"],
+      "start_year": 2024,
+      "summary": "Armed gangs control large portions of Port-au-Prince. Over 4,500 killed by political violence with near-doubling of fatalities. 50+ armed groups operate across the country.",
+      "has_map": true,
+      "sources_tracking": ["acled", "war-radar", "war-monitor", "warwatch"],
+      "acled_stats": {
+        "killed_by_political_violence": 4500,
+        "armed_groups": 50,
+        "civilian_targeting_events": 2500
+      },
+      "latest_report": {
+        "title": "Haiti — ACLED Conflict Index",
+        "date": "2026-08-01",
+        "url": "https://acleddata.com/"
+      },
+      "key_developments": [
+        { "date": "2026-08-01", "text": "Over 4,500 killed by political violence; fatalities nearly doubled.", "tag": "gangs" }
+      ],
+      "featured_reports": []
+    },
+    {
+      "id": "sahel",
+      "name": "Sahel Insurgency",
+      "code": "SAHEL",
+      "severity": "high",
+      "status": "active",
+      "overview_path": "",
+      "regions": ["Burkina Faso", "Mali", "Niger", "Chad", "Sahel"],
+      "iso3_links": ["BFA", "MLI", "NER", "TCD"],
+      "start_year": 2012,
+      "summary": "Jihadist insurgencies across the Sahel region. Military coups in Burkina Faso, Mali, and Niger. Russian/Wagner influence expanding. Mass displacement and civilian targeting.",
+      "has_map": true,
+      "sources_tracking": ["acled", "liveuamap", "war-radar", "war-monitor", "warwatch"],
+      "latest_report": {
+        "title": "Sahel — ACLED Regional Monitor",
+        "date": "2026-08-05",
+        "url": "https://acleddata.com/"
+      },
+      "key_developments": [
+        { "date": "2026-08-05", "text": "Sahel insurgency continues amid political instability and foreign fighter presence.", "tag": "insurgency" }
+      ],
+      "featured_reports": []
+    }
+  ],
+  "acled": {
+    "event_types": [
+      { "type": "Battles", "disorder_type": "Political violence", "sub_events": ["Armed clash", "Government regains territory", "Non-state actor overtakes territory"] },
+      { "type": "Explosions/Remote violence", "disorder_type": "Political violence", "sub_events": ["Chemical weapon", "Air/drone strike", "Suicide bomb", "Shelling/artillery/missile attack", "Remote explosive/landmine/IED", "Grenade"] },
+      { "type": "Violence against civilians", "disorder_type": "Political violence", "sub_events": ["Sexual violence", "Attack", "Abduction/forced disappearance"] },
+      { "type": "Riots", "disorder_type": "Political violence; Demonstrations", "sub_events": ["Violent demonstration", "Mob violence"] },
+      { "type": "Protests", "disorder_type": "Political violence; Demonstrations", "sub_events": ["Peaceful protest", "Protest with intervention", "Excessive force against protesters"] },
+      { "type": "Strategic Developments", "disorder_type": "Contextual", "sub_events": ["Agreement", "Arrests", "Change to group/activity", "Disrupted weapons use", "Headquarters or base established", "Looting/property destruction", "Non-violent transfer of territory"] }
+    ],
+    "conflict_categories": [
+      { "name": "Repression", "description": "Violence by state forces against civilians/protesters" },
+      { "name": "Insurgency", "description": "All events involving rebel groups" },
+      { "name": "Atrocities", "description": "Violence targeting civilians events with >=10 reported fatalities" },
+      { "name": "Terrorist activity", "description": "Non-state armed groups exceeding global baseline and involved in >=50 political violence events per year" },
+      { "name": "Foreign military engagement", "description": "Violent actions and strategic developments by state forces outside their own territory" }
+    ],
+    "actor_types": [
+      "State forces",
+      "Rebel groups",
+      "Political militias",
+      "Identity militias",
+      "Rioters",
+      "Protesters",
+      "Civilians",
+      "External/Other forces"
+    ],
+    "regions": ["Africa", "Asia-Pacific", "Europe and Central Asia", "Latin America and the Caribbean", "Middle East", "United States and Canada"],
+    "monitors": [
+      { "name": "ACLED Explorer", "frequency": "Weekly (Wednesday)" },
+      { "name": "CAST (Conflict Alert System)", "frequency": "Weekly (Wednesday)", "note": "Forecasts events 24 weeks ahead" },
+      { "name": "Ukraine Conflict Monitor", "frequency": "Weekly (Wednesday)" },
+      { "name": "Middle East Conflict Monitor", "frequency": "Weekly (Tuesday)" },
+      { "name": "Gaza Conflict Monitor", "frequency": "Weekly (Tuesday)" },
+      { "name": "Iran Crisis Live", "frequency": "Daily" },
+      { "name": "South China Sea Monitor", "frequency": "Twice weekly" },
+      { "name": "US Monitor", "frequency": "Weekly (Wednesday)" }
+    ],
+    "conflict_index_top": [
+      { "rank": 1, "country": "Palestine", "note": "Most geographically diffuse conflict (~70% of Gaza/West Bank affected); 3rd most deadly" },
+      { "rank": 2, "country": "Ukraine", "note": "Most deadly conflict in the world" },
+      { "rank": 3, "country": "Sudan", "note": "2nd most deadly; at least 59,000 killed since April 2023" },
+      { "rank": 4, "country": "Myanmar", "note": "Most fragmented conflict (1,200+ armed groups); >100,000 killed since 2021 coup" },
+      { "rank": 5, "country": "Mexico", "note": "Consistently high across all indicators" },
+      { "rank": 6, "country": "Syria", "note": "Deaths increased from ~6,000 to >9,000 fatalities in past 12 months" },
+      { "rank": 7, "country": "Ecuador", "note": "50+ armed groups, 2,500+ events targeting civilians" },
+      { "rank": 8, "country": "Haiti", "note": ">4,500 killed by political violence; near-doubling of fatalities" }
+    ]
+  },
+  "warwatch": {
+    "operator": "Geneva Academy of International Humanitarian Law and Human Rights",
+    "funded_by": ["EU Civil Protection and Humanitarian Aid Operations (ECHO)", "Swiss Agency for Development and Cooperation (SDC)"],
+    "launched": "2025-12",
+    "integrates": ["RULAC (active since 2007)", "IHL in Focus (launched 2023)"],
+    "classification_categories": [
+      { "code": "IAC", "name": "International Armed Conflict", "description": "Armed conflicts between two or more States; includes declared wars and military occupation" },
+      { "code": "OCC", "name": "Military Occupation", "description": "A specific subtype of IAC where a State's forces occupy foreign territory without valid consent" },
+      { "code": "NIAC", "name": "Non-International Armed Conflict", "description": "A State fighting organized armed group(s), or armed groups fighting each other" }
+    ],
+    "counts": {
+      "total_armed_conflicts": 112,
+      "international_armed_conflicts": 34,
+      "military_occupations": 9,
+      "non_international_armed_conflicts": 78,
+      "countries_with_ihl_analysis": 22
+    },
+    "ihl_themes": [
+      "Attacks on civilian objects",
+      "Attacks on civilians",
+      "Protection of people in enemy hands"
+    ],
+    "violation_categories": [
+      "Conduct of Hostilities",
+      "Means and Methods of Warfare",
+      "Starvation & Humanitarian Relief",
+      "Medical Care",
+      "Forced Displacement",
+      "Deprivation of Liberty",
+      "Torture & Cruel/Inhuman/Degrading Treatment",
+      "Conflict-Related Sexual & Gender-Based Violence",
+      "Specific Vulnerabilities"
+    ],
+    "reporting_periods": {
+      "classification": "1 July 2023 – 30 June 2025",
+      "ihl_compliance": "1 July 2024 – 30 June 2025",
+      "data_cutoff": "31 July 2025"
+    }
+  },
+  "liveuamap": {
+    "founded": "2014-02-18",
+    "founders": ["Rodion Rozhkovskiy", "Oleksandr Bilchenko"],
+    "operator": "Liveuamap LLC (United States)",
+    "used_by": ["United Nations", "Medecins Sans Frontieres", "The Guardian", "Neue Zurcher Zeitung", "ACLED"],
+    "regions_covered": 60,
+    "languages": ["English", "Spanish", "Ukrainian", "Russian", "Arabic"],
+    "data_format": "GeoJSON",
+    "event_categories": [
+      "Military actions / Armed conflict",
+      "Explosions / Blasts",
+      "Shelling",
+      "Drone / Robot attacks",
+      "Anti-air / SAM launches",
+      "Airstrikes",
+      "Protests / Demonstrations",
+      "Government decisions",
+      "Natural disasters",
+      "Terrorism",
+      "Weapons deployment",
+      "Cyber warfare",
+      "Human rights issues"
+    ],
+    "color_coding": {
+      "red": "One side of conflict (e.g., Russian/separatist forces)",
+      "blue": "Opposing side (e.g., Ukrainian forces)",
+      "other": "Neutral events, third parties, or different categories"
+    },
+    "verification": "At least 2 editors verify each event before publication",
+    "api_pricing": {
+      "pro": { "price_per_month": 150, "requests_per_day": 200 },
+      "enterprise": { "price_per_month": 1000, "requests_per_day": 1500 }
+    },
+    "key_conflict_maps": [
+      "Russo-Ukrainian War", "Syrian Civil War", "Yemeni Civil War", "Arab-Israeli Conflict",
+      "Iran tensions", "Afghanistan", "Sudan civil war", "Libya", "Iraq", "ISIS",
+      "Myanmar", "Venezuela", "Ethiopia", "D.R. Congo", "Sahel", "Somalia",
+      "Kashmir", "Korea tensions", "Hezbollah", "Colombia", "Nigeria",
+      "Drug wars", "Global terrorism", "Piracy", "Cyberwarfare"
+    ]
+  },
+  "war_radar": {
+    "conflict_types": [
+      "Armed Conflict",
+      "Civil War",
+      "Insurgency",
+      "Military Operation",
+      "Border Conflict",
+      "Ethnic Conflict",
+      "Genocide"
+    ],
+    "severity_levels": [
+      { "level": "Critical", "color": "#ef4444", "definition": "Active large-scale war with daily casualties" },
+      { "level": "High", "color": "#f97316", "definition": "Frequent armed clashes, regular combat" },
+      { "level": "Medium", "color": "#eab308", "definition": "Sporadic military engagements" },
+      { "level": "Low", "color": "#22c55e", "definition": "Low-intensity armed conflict, occasional skirmishes" }
+    ],
+    "data_sources": {
+      "rss_feeds": ["Al Jazeera", "BBC World", "BBC Middle East", "BBC Africa", "BBC Asia", "BBC Europe", "The Guardian World", "France24", "DW News", "The War Zone", "Crisis Group", "UN News Peace & Security", "Kyiv Independent", "Times of Israel", "Sudan Tribune"],
+      "newsapi_queries": 8,
+      "gdelt": "Free global events database, last 3 days, up to 50 records"
+    },
+    "targeted_regions": [
+      "Ukraine-Russia", "Gaza-Israel", "Lebanon-Hezbollah", "Syria-ISIS", "Iraq-PKK",
+      "Yemen-Houthi", "Sudan-RSF", "Darfur", "Ethiopia-Tigray", "Somalia-al-Shabaab",
+      "South Sudan", "DRC/Kivu (M23)", "CAR", "Burkina Faso", "Mali", "Niger",
+      "Chad", "Nigeria-Boko Haram", "Myanmar junta", "Rohingya", "Kashmir",
+      "Balochistan", "Afghanistan-Taliban", "Nagorno-Karabakh", "Libya",
+      "Mozambique-Cabo Delgado", "Cameroon-Anglophone"
+    ]
+  },
+  "war_monitor": {
+    "conflict_zones": [
+      "Ukraine", "Israel", "Palestine", "Russia", "Syria", "Sudan", "Myanmar",
+      "Yemen", "Iran", "Lebanon", "Taiwan", "North Korea", "Ethiopia", "Somalia", "DR Congo"
+    ],
+    "region_trackers": ["Middle East", "Eastern Europe", "Africa", "East Asia", "South Asia"],
+    "event_categories": [
+      "War & Armed Conflict",
+      "Terrorism",
+      "Cyber Attacks",
+      "Protests",
+      "Natural Disasters",
+      "Diplomacy",
+      "Economic Crises"
+    ],
+    "sources_ingested": ["BBC World", "Al Jazeera", "Reuters", "Telegram OSINT", "Arabic-language media", "Humanitarian agencies"],
+    "features": ["Live Threat Map (3D globe)", "AI Analysis", "Conflict Threads", "Daily Intel Briefing", "Multi-source Corroboration"]
+  },
+  "war_direct": {
+    "conflict_name": "US/Israel vs. Iran & the Axis of Resistance",
+    "conflict_start": "2026-02-28",
+    "conflict_day": 164,
+    "co_built_by": "Rishi Khiani and Claude (Anthropic)",
+    "people_informed": 2000000,
+    "coalitions": {
+      "us_israel_side": {
+        "members": ["USA (CENTCOM — Operation Epic Fury)", "Israel (Operation Roaring Lion)", "UK (bases for strikes, Cyprus airspace)"],
+        "host_nations": ["Saudi Arabia", "UAE", "Bahrain", "Kuwait", "Qatar"]
+      },
+      "hormuz_shipping_coalition": {
+        "nations_signed": 40,
+        "key_members": ["France", "Germany", "Italy", "Netherlands", "Japan", "Canada", "Australia"]
+      },
+      "iran_axis_side": {
+        "members": ["Hezbollah (Lebanon)", "Houthis (Yemen)", "Iraqi Militias (PMF)", "Russia (intel sharing + UN veto)", "China (UN veto + diplomacy)", "Syria", "North Korea (distancing)"]
+      },
+      "neutral": ["Pakistan (brokered ceasefire)", "Egypt", "Turkey", "Qatar", "Oman", "India"]
+    },
+    "report_card_sections": [
+      "The Scoreboard", "Human Cost", "Key Figures Eliminated", "War Crimes Watch",
+      "The Coalitions", "Military Losses", "Before & After", "Public Perception",
+      "The Ceasefire", "Your Verdict", "The Global Ripple", "Voices from the Battlefield"
+    ],
+    "features": [
+      "Live War Report Card", "3D Strike Globe", "Live TV (25+ channels)", "Battlespace Map",
+      "Flight Tracker (ADS-B)", "Naval Tracker", "AI Intelligence Brief", "Timeline Simulator",
+      "Emergency Helplines (12 countries)"
+    ],
+    "public_opinion_us": {
+      "support_war_pct": 38,
+      "oppose_war_pct": 55,
+      "want_quick_exit_pct": 66,
+      "worried_gas_prices_pct": 69,
+      "say_wrong_decision_pct": 59,
+      "republican_support_pct": 69,
+      "democrat_support_pct": 10
+    },
+    "data_sources": ["CENTCOM", "HRANA", "Pentagon", "Al Jazeera", "HRW", "Amnesty International", "UN", "Pew Research", "YouGov", "Ipsos", "IEA", "WFP", "Netblocks", "Reuters", "AP"]
+  },
+  "telegram_archive": {
+    "operator": "Center for Urban History (Lviv, Ukraine)",
+    "coordinator": "Taras Nazaruk",
+    "date_range": "2022-02-24 to 2023-06-12",
+    "status": "Documentation stopped (June 2023). Archive is a static historical record.",
+    "items_archived": 2711,
+    "channels": 1048,
+    "chats": 1651,
+    "chatbots": 12,
+    "data_volume_tb": 27.8,
+    "content_types": ["Text messages", "Voice messages", "Images", "Audio files", "Video files", "Other files"],
+    "geographic_coverage": [
+      "Cherkasy", "Chernihiv", "Chernivtsi", "Crimea", "Dnipropetrovsk", "Donetsk",
+      "Ivano-Frankivsk", "Kharkiv", "Kherson", "Khmelnytskyi", "Kropyvnytskyi", "Kyiv",
+      "Luhansk", "Lviv", "Mykolaiv", "Odesa", "Poltava", "Rivne", "Sumy", "Ternopil",
+      "Vinnytsia", "Volyn", "Zakarpattia", "Zaporizhia", "Zhytomyr"
+    ],
+    "thematic_datasets": [
+      { "name": "People and Infrastructure during the War", "channels": 63, "chats": 64, "topics": ["Infrastructure", "Urban and Local", "Occupied Territories", "Economy"] },
+      { "name": "Migrations of War", "topics": ["Border", "Refugees", "IDPs", "Economy", "Volunteer groups"] },
+      { "name": "Journalism and Media in Times of War", "collections": 13, "topics": ["Ukrainian media", "Russian media", "Occupation media", "Anonymous channels"] },
+      { "name": "Before the Invasion", "units": 240, "channels": 159, "chats": 81, "date": "Pre-2022-02-24" },
+      { "name": "War and Domestic Animals", "units": 173, "channels": 28, "chats": 145 },
+      { "name": "Shelling in Dnipro", "note": "Focused case study on January 14, 2023 mass shelling" }
+    ],
+    "partners": ["Center for Governance and Culture in Europe (University of St. Gallen)", "NEP4DISSENT", "Korber Stiftung", "Amazon Web Services", "Digital Methods Initiative (University of Amsterdam)"],
+    "access": "Non-commercial research only. Researchers must sign agreements."
+  },
+  "global_statistics": {
+    "active_conflicts_tracked_min": 112,
+    "acled_yearly_events": 204605,
+    "acled_estimated_deaths_yearly": 240000,
+    "acled_countries_covered": 190,
+    "liveuamap_regions": 60,
+    "warwatch_conflicts": 112,
+    "warwatch_iacs": 34,
+    "warwatch_niacs": 78,
+    "warwatch_occupations": 9,
+    "wardirect_total_killed": 8100,
+    "wardirect_total_wounded": 47000,
+    "wardirect_total_displaced_m": 4.2,
+    "wardirect_conflict_day": 164,
+    "telegram_archive_items": 2711,
+    "telegram_archive_tb": 27.8,
+    "isw_theaters": 6,
+    "sources_count": 8
+  }
+}
