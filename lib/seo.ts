@@ -388,12 +388,18 @@ export const PAGE_META: Record<string, PageMeta> = {
       "Map state and repressive forces during protests in real time. Drop anonymous incident markers (kettles, tear gas, mass arrests, snipers, military deployment, comms blackouts). Live heat zones, threat clustering, escape-vector routing. Local-first, anonymous, time-decaying — nothing leaves your device.",
     path: "/the-sentinel/",
   },
-
   "/the-forensics/": {
     title: "The Forensics — OSINT Image & Video Verification",
     description:
       "Verify before you publish. Drop an image for error-level analysis (tamper detection), EXIF timeline forensics, reverse-search launchers (TinEye/Yandex/Google), frame-by-frame video comparison, and shadow-angle geolocation. Pure client-side canvas work — nothing leaves your browser.",
     path: "/the-forensics/",
+  },
+
+  "/the-verdict/": {
+    title: "The Verdict — Structured Fact-Checking Engine",
+    description:
+      "Rapid-response misinformation counter. Take any regime or official claim, attach 3 SHA-256-verified sources, and render a structured verdict (true / false / misleading / mixed) with a confidence score. Distinct from The Tribunal (legal cases) and The Registry (dossiers).",
+    path: "/the-verdict/",
   },
 };
 
