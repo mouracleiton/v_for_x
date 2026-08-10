@@ -393,6 +393,12 @@ export const PAGE_META: Record<string, PageMeta> = {
       "Map state and repressive forces during protests in real time. Drop anonymous incident markers (kettles, tear gas, mass arrests, snipers, military deployment, comms blackouts). Live heat zones, threat clustering, escape-vector routing. Local-first, anonymous, time-decaying — nothing leaves your device.",
     path: "/the-sentinel/",
   },
+  "/the-embed/": {
+    title: "The Embed — Widget Builder",
+    description:
+      "Turn the strongest V FOR X visuals into drop-in iframe widgets: the Sorrow Map, Lives counter, SDG countdown, and country mini-briefs. Configure, preview, and copy embed code for any blog or news site. Virality through syndication.",
+    path: "/the-embed/",
+  },
 
   "/the-roster/": {
     title: "The Roster — Vetted Helper Directory",

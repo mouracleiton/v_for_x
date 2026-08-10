@@ -261,6 +261,13 @@ export default function ExportPanel({
             ▸ Paste into any blog, CMS, or presentation. Source:{" "}
             <span style={{ color: "var(--color-blood-bright)" }}>{SITE.url}</span>
           </div>
+          <a
+            href="/the-embed/"
+            className="inline-block mt-2 text-[9px] uppercase tracking-widest border border-border-dim px-2 py-1 transition-colors hover:border-blood hover:text-blood-bright no-underline"
+            style={{ color: "var(--color-content-secondary)" }}
+          >
+            ▶ Build an advanced widget →
+          </a>
         </div>
       )}
     </div>
