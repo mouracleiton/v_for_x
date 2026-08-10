@@ -11,6 +11,7 @@ import { useStore } from "@/stores/useStore";
 import { tc } from "@/lib/i18n-content";
 import type { Lang } from "@/lib/i18n";
 import { td } from "@/lib/dossiers-i18n";
+import BlindedReview from "./BlindedReview";
 
 interface Dossier {
   id: string;
@@ -200,6 +201,9 @@ export default function DossierContent({
           {tc(lang, "dossier.progress_confirmed")} ({validationPct.toFixed(0)}% {tc(lang, "dossier.of_threshold")})
         </div>
       </TerminalCard>
+
+      {/* Blinded peer review — commit/reveal corroboration */}
+      <BlindedReview dossierId={d.id} lang={lang} />
 
       {/* Right of response */}
       <TerminalCard title={tc(lang, "card.right_of_response")} accent="amber" className="mb-6">

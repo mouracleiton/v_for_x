@@ -39,7 +39,7 @@ The 9 branches form a connected loop:
 | 02 | `/equation` | **The Equation** | Scenario simulator ($0–$150B/yr), intervention ROI, financing mechanisms, 17 ranked conflict-zone tactics |
 | 03 | `/protocol-x` | **Protocol X** | 12 survival blueprints (water, food, power, comms, medical, security, organizing), context-aware filtering, checklist generator |
 | 04 | `/registry` | **The Registry** | Accountability dossiers with peer-validated evidence chain, 6 anti-witch-hunt safeguards |
-| 05 | `/the-web` | **The Web** | Anonymous P2P BBS chat (WebRTC stub), dead drops, ECDSA keypair identity |
+| 05 | `/the-web` | **The Web** | Anonymous P2P BBS chat (WebRTC), dead drops, ECDSA keypair identity — plus automated signaling relay (room codes, clipboard broadcast, hash links) |
 | 06 | `/the-trail` | **The Trail** | Transparent DAO ledger, resource routing, needs matching |
 | 07 | `/fortress` | **The Fortress** | Hydra nodes architecture, self-hosting (Docker/Pi/IPFS/Tor), anti-censorship toolkit |
 | 08 | `/the-mask` | **The Mask** | ZK identity stub, duress codes with decoy interface, 6-section OpSec guide, threat model |
@@ -242,6 +242,9 @@ v-for-x/
 - **Anonymous by design** — identity is a client-side ECDSA keypair, no registration
 - **Decentralized-ready** — static export can be mirrored on IPFS, Tor, or local mesh
 - **Stubs clearly marked** — every [STUB] feature has a visible badge and documented upgrade path
+- **Signed data manifest** — every build hashes its public data API files (205 entries, deterministic root); the Receipts page verifies any copy locally, so tampered mirrors are detectable with zero network trust
+- **Browser-to-browser signaling** — The Web pairs peers via VFXSIG tokens over clipboard/BroadcastChannel/hash links, no server in the path
+- **Extension alert ticker** — the V FOR X Compass add-on polls a tiny generated feed and raises badge/notifications only when the watchlist actually changes
 
 ---
 

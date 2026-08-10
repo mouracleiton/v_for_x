@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && python3 scripts/generate_api.py && python3 scripts/copy_headers.py",
+    "build": "next build && python3 scripts/generate_api.py && python3 scripts/generate_data_manifest.py && python3 scripts/copy_headers.py",
     "update-data": "python3 scripts/update_data.py",
     "update-data:dry": "python3 scripts/update_data.py --dry-run",
     "fetch-ejatlas": "python3 scripts/fetch_ejatlas.py",

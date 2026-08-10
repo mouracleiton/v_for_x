@@ -6,6 +6,19 @@ import TerminalCard from "@/components/ui/TerminalCard";
 import StatusPill from "@/components/ui/StatusPill";
 import { useStore } from "@/stores/useStore";
 import { sound } from "@/lib/sound";
+import {
+  decodeSignalToken,
+  encodeSignalToken,
+  buildSignalUrl,
+  parseHashSignal,
+  stripHashSignal,
+  generateRoomCode,
+  normalizeRoom,
+  startClipboardWatch,
+  openSignalBus,
+  broadcastSignal,
+  type SignalPayload,
+} from "@/lib/signal-relay";
 
 interface P2PMessage {
   id: string;
@@ -51,9 +64,18 @@ export default function TeiaPage() {
   const [connectionLog, setConnectionLog] = useState<string[]>([]);
   const [copiedOffer, setCopiedOffer] = useState(false);
 
+  // Auto-signaling state
+  const [room, setRoom] = useState("");
+  const [shareUrl, setShareUrl] = useState("");
+  const [clipWatching, setClipWatching] = useState(false);
+  const [roomActivity, setRoomActivity] = useState<string[]>([]);
+
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const dcRef = useRef<RTCDataChannel | null>(null);
   const keyPairRef = useRef<CryptoKeyPair | null>(null);
+  const sdpRef = useRef("");
+  const clipStopRef = useRef<(() => void) | null>(null);
+  const signalBusStopRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     if (!session) startSession();
@@ -209,20 +231,52 @@ export default function TeiaPage() {
       });
 
       const sdp = JSON.stringify(pc.localDescription);
+      sdpRef.current = sdp;
       setLocalSDP(sdp);
       log("Offer ready — copy and send to your peer");
       setPeerStatus("waiting");
+      return autoShareSignal("offer", sdp);
     } catch (err) {
       log(`ERROR: ${err}`);
       setPeerStatus("error");
+      return null;
     }
   };
 
-  const createAnswer = async () => {
-    if (!identity || !remoteSDP.trim()) return;
+  /** Auto-share a signal token via room broadcast + clipboard + share link. */
+  const autoShareSignal = async (kind: "offer" | "answer", sdp: string) => {
+    const r = normalizeRoom(room);
+    const token = encodeSignalToken({
+      kind,
+      sdp,
+      room: r || undefined,
+      from: identity?.handle,
+    });
+    if (r) {
+      broadcastSignal(token, r);
+      log(`AUTO BROADCAST: ${kind} sent to room ${r} tabs on this device`);
+      roomActivityPush(`⇄ broadcast ${kind} → room ${r}`);
+    }
+    try {
+      await navigator.clipboard?.writeText(token);
+      log("AUTO: signal token copied to clipboard");
+    } catch { /* clipboard may be unavailable — share link still works */ }
+    const url = buildSignalUrl(token);
+    setShareUrl(url);
+    roomActivityPush(`🔗 share link ready (${String(token.length)} chars)`);
+    return token;
+  };
+
+  const roomActivityPush = (line: string) => {
+    setRoomActivity((prev) => [...prev.slice(-6), `[${new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false })}] ${line}`]);
+  };
+
+  const createAnswer = async (sdpOverride = "") => {
+    const offerSdp = sdpOverride || sdpRef.current || remoteSDP;
+    if (!identity || !offerSdp.trim()) return null;
     try {
       setPeerStatus("creating");
-      log("Processing incoming offer, creating answer...");
+      log(sdpOverride ? "AUTO: processing incoming offer, creating answer..." : "Processing incoming offer, creating answer...");
 
       const pc = new RTCPeerConnection({
         iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
@@ -238,7 +292,7 @@ export default function TeiaPage() {
         log(`ICE state: ${pc.iceConnectionState}`);
       };
 
-      const offer = JSON.parse(remoteSDP);
+      const offer = JSON.parse(offerSdp);
       await pc.setRemoteDescription(offer);
 
       const answer = await pc.createAnswer();
@@ -257,21 +311,25 @@ export default function TeiaPage() {
       });
 
       const sdp = JSON.stringify(pc.localDescription);
+      sdpRef.current = sdp;
       setLocalSDP(sdp);
-      log("Answer ready — copy and send back to the initiator");
+      log(sdpOverride ? "AUTO: answer ready — returning to initiator" : "Answer ready — copy and send back to the initiator");
       setPeerStatus("waiting");
+      return autoShareSignal("answer", sdp);
     } catch (err) {
-      log(`ERROR: Invalid offer SDP. ${err}`);
+      log(`ERROR: ${sdpOverride ? "auto-offer" : "Invalid offer SDP"}. ${err}`);
       setPeerStatus("error");
+      return null;
     }
   };
 
-  const acceptAnswer = async () => {
-    if (!remoteSDP.trim() || !pcRef.current) return;
+  const acceptAnswer = async (sdpOverride = "") => {
+    const answerSdp = sdpOverride || remoteSDP;
+    if (!answerSdp.trim() || !pcRef.current) return;
     try {
       setPeerStatus("connecting");
-      log("Accepting answer SDP...");
-      const answer = JSON.parse(remoteSDP);
+      log(sdpOverride ? "AUTO: accepting answer SDP..." : "Accepting answer SDP...");
+      const answer = JSON.parse(answerSdp);
       await pcRef.current.setRemoteDescription(answer);
       log("Remote description set — waiting for connection");
     } catch (err) {
@@ -279,6 +337,90 @@ export default function TeiaPage() {
       setPeerStatus("error");
     }
   };
+
+  /** Apply an incoming signal token (from clipboard, share link, or room bus). */
+  const consumeSignal = useCallback(async (token: string) => {
+    let payload: SignalPayload;
+    try {
+      payload = decodeSignalToken(token);
+    } catch {
+      log("AUTO: ignored malformed signal token");
+      return;
+    }
+    if (payload.room && normalizeRoom(payload.room) !== normalizeRoom(room)) return;
+    setRemoteSDP(payload.sdp);
+    sdpRef.current = payload.sdp;
+    if (payload.kind === "offer") {
+      if (peerStatus === "connected" || peerStatus === "connecting") return;
+      log(`AUTO: offer received${payload.from ? ` from ${payload.from}` : ""} — creating answer`);
+      roomActivityPush(`⇄ offer received${payload.from ? ` from ${payload.from}` : ""}`);
+      await createAnswer(payload.sdp);
+    } else {
+      if (peerStatus === "connected") return;
+      log("AUTO: answer received — accepting");
+      roomActivityPush("⇄ answer received");
+      await acceptAnswer(payload.sdp);
+    }
+  }, [room, peerStatus, identity]);
+
+  // Same-device room bus: tabs on this browser auto-exchange signals.
+  useEffect(() => {
+    if (!identity || !normalizeRoom(room)) return;
+    const r = normalizeRoom(room);
+    log(`AUTO: listening for signals in room ${r}`);
+    roomActivityPush(`⇄ listening in room ${r}`);
+    signalBusStopRef.current = openSignalBus(r, (token) => {
+      void consumeSignal(token);
+    });
+    return () => {
+      signalBusStopRef.current?.();
+      signalBusStopRef.current = null;
+    };
+  }, [room, identity, consumeSignal]);
+
+  // Auto-consume a signal carried in the URL hash (#vfx-signal=...).
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const token = parseHashSignal(window.location.hash);
+    if (token) {
+      stripHashSignal(window.location.hash);
+      setRemoteSDP("");
+      log("AUTO: signal found in share link — applying");
+      void consumeSignal(token);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /** Toggle clipboard watching (must start from a user gesture). */
+  const toggleClipboardWatch = () => {
+    if (clipWatching) {
+      clipStopRef.current?.();
+      clipStopRef.current = null;
+      setClipWatching(false);
+      sound.select();
+      return;
+    }
+    clipStopRef.current = startClipboardWatch(
+      (token) => {
+        log("AUTO: token detected in clipboard — applying");
+        void consumeSignal(token);
+      },
+      () => {
+        setClipWatching(false);
+        log("AUTO: clipboard watch failed (permission denied)");
+      },
+    );
+    setClipWatching(true);
+    sound.success();
+  };
+
+  // Stop clipboard watch on unmount
+  useEffect(() => {
+    return () => {
+      clipStopRef.current?.();
+      signalBusStopRef.current?.();
+    };
+  }, []);
 
   const closeConnection = () => {
     if (dcRef.current) dcRef.current.close();
@@ -483,6 +625,97 @@ export default function TeiaPage() {
 
       {identity && (
         <>
+          {/* AUTO-SIGNALING RELAY */}
+          <TerminalCard title={tc(lang, "web.auto_signaling")} accent="green" className="mb-6">
+            <p className="text-xs text-content-secondary mb-4">
+              {tc(lang, "web.auto_desc")}
+            </p>
+
+            <div className="flex flex-wrap items-center gap-2 mb-4">
+              <div className="text-[10px] text-content-dim uppercase tracking-widest">
+                {tc(lang, "web.room")}
+              </div>
+              <input
+                type="text"
+                value={room}
+                onChange={(e) => setRoom(e.target.value.toUpperCase())}
+                placeholder={tc(lang, "web.room_ph")}
+                className="flex-1 min-w-40 bg-void border border-border-dim px-3 py-2 text-xs text-terminal-green font-mono focus:border-terminal-green focus:outline-none uppercase"
+              />
+              <button
+                onClick={() => {
+                  setRoom(generateRoomCode());
+                  sound.select();
+                }}
+                className="px-3 py-2 text-xs border border-border-dim text-content-secondary hover:border-terminal-green hover:text-terminal-green"
+              >
+                {tc(lang, "web.new_room")}
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+              <button
+                onClick={createOffer}
+                disabled={peerStatus === "connected"}
+                className="p-3 border border-terminal-green hover:bg-terminal-green/5 text-left disabled:opacity-30"
+              >
+                <div className="text-xs text-terminal-green font-bold">
+                  {tc(lang, "web.pair_btn")}
+                </div>
+                <div className="text-[10px] text-content-secondary mt-1">
+                  Creates an offer, broadcasts it to same-room tabs, copies the token to the clipboard, and builds a share link.
+                </div>
+              </button>
+              <button
+                onClick={toggleClipboardWatch}
+                className={`p-3 border text-left ${clipWatching ? "border-terminal-green bg-terminal-green/5" : "border-border-dim hover:border-terminal-green"}`}
+              >
+                <div className={`text-xs font-bold ${clipWatching ? "text-terminal-green" : "text-content-secondary"}`}>
+                  {clipWatching ? `● ${tc(lang, "web.watching_clipboard")}` : tc(lang, "web.watch_clipboard")}
+                </div>
+                <div className="text-[10px] text-content-secondary mt-1">
+                  {tc(lang, "web.auto_clipboard_warn")}
+                </div>
+              </button>
+            </div>
+
+            {shareUrl && (
+              <div className="mb-4 border border-terminal-green/30 bg-terminal-green/5 p-3">
+                <div className="text-[10px] text-terminal-green uppercase tracking-widest mb-1">
+                  {tc(lang, "web.share_link")}
+                </div>
+                <div className="text-[11px] text-terminal-green font-mono break-all mb-2">{shareUrl}</div>
+                <div className="text-[10px] text-content-dim">
+                  {tc(lang, "web.share_link_desc")}
+                </div>
+                <button
+                  onClick={() => {
+                    navigator.clipboard?.writeText(shareUrl);
+                    sound.select();
+                  }}
+                  className="mt-2 px-3 py-1 text-[10px] border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void"
+                >
+                  [ COPY LINK ]
+                </button>
+              </div>
+            )}
+
+            {roomActivity.length > 0 && (
+              <div className="border border-border-dim bg-void p-2 max-h-32 overflow-y-auto">
+                <div className="text-[9px] text-content-dim uppercase mb-1">
+                  {tc(lang, "web.room_activity")}
+                </div>
+                {roomActivity.map((l, i) => (
+                  <div key={i} className="text-[10px] text-content-secondary">{l}</div>
+                ))}
+              </div>
+            )}
+
+            <div className="text-[10px] text-content-dim mt-3">
+              ▸ Same-device tabs in the same room pair automatically. Cross-device: share the link or the copied VFXSIG1 token — it applies itself on arrival. No server, on any static mirror.
+            </div>
+          </TerminalCard>
+
           {/* P2P Connection Manager */}
           <TerminalCard title={tc(lang, "card.p2p_signaling")} accent="amber" className="mb-6">
             <div className="flex items-center gap-2 mb-4">
@@ -569,7 +802,7 @@ export default function TeiaPage() {
                 <div className="flex gap-2 mt-2">
                   {peerStatus === "connecting" && (
                     <button
-                      onClick={createAnswer}
+                      onClick={() => { void createAnswer(); }}
                       disabled={!remoteSDP.trim()}
                       className="px-3 py-1.5 text-xs border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void disabled:opacity-30 disabled:cursor-not-allowed"
                     >
@@ -578,7 +811,7 @@ export default function TeiaPage() {
                   )}
                   {peerStatus === "waiting" && pcRef.current?.localDescription?.type === "offer" && (
                     <button
-                      onClick={acceptAnswer}
+                      onClick={() => { void acceptAnswer(); }}
                       disabled={!remoteSDP.trim()}
                       className="px-3 py-1.5 text-xs border border-blood text-blood-bright hover:bg-blood hover:text-void disabled:opacity-30 disabled:cursor-not-allowed"
                     >

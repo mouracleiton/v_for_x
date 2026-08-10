@@ -145,6 +145,63 @@
     /* ignore */
   }
 
+  /* ── 4. Alert ticker display ───────────────────────────────── */
+  // Reads the state the background worker keeps in storage.local
+  // and renders the last-known alerts + badge-clearing.
+  const tickerList = $("#ticker-list");
+
+  function renderTicker(state) {
+    if (!tickerList) return;
+    const known = (state && state.known) || {};
+    const keys = Object.keys(known);
+    tickerList.innerHTML = "";
+    if (!keys.length) {
+      const el = document.createElement("div");
+      el.className = "hint";
+      el.textContent = "No feed state yet — background worker will poll soon.";
+      tickerList.appendChild(el);
+      return;
+    }
+    keys.forEach((iso3) => {
+      const row = document.createElement("div");
+      row.className = "ticker-row";
+      row.innerHTML =
+        `<span class="ticker-flag">${iso3}</span>` +
+        `<span class="ticker-title">${escapeHtml(known[iso3])}</span>`;
+      row.addEventListener("click", () => {
+        openTab(dossierUrl(iso3));
+        clearBadge();
+      });
+      tickerList.appendChild(row);
+    });
+    if (state.notice) {
+      const notice = document.createElement("div");
+      notice.className = "ticker-notice";
+      notice.textContent = `⚑ ${state.notice}`;
+      tickerList.appendChild(notice);
+    }
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, (c) => {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  function clearBadge() {
+    if (chrome.action && chrome.action.setBadgeText) {
+      chrome.action.setBadgeText({ text: "" });
+    }
+  }
+
+  try {
+    chrome.storage.local.get("vfxTicker", (res) => {
+      renderTicker(res && res.vfxTicker);
+    });
+  } catch (_) {
+    /* ignore */
+  }
+
   // Focus the search box for immediate keyboard use.
   searchInput.focus();
 })();

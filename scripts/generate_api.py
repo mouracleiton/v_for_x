@@ -96,7 +96,35 @@ def main():
         with open(api_dir / "hotspots.json", "w", encoding="utf-8") as f:
             json.dump(data["hotspots"], f, separators=(",", ":"))
 
+    # 6. Extension alert feed (polled by the Compass browser add-on;
+    #    plain JSON, no key, deliberately tiny so mirrors stay light).
+    ticks = []
+    for c in data.get("countries", []):
+        iso3 = c.get("iso3")
+        name = c.get("name_en") or iso3
+        famine = c.get("hunger", {}).get("famine_risk_1to5") or 0
+        conflict = c.get("conflict", {}).get("intensity_1to5") or 0
+        risk = max(famine, conflict)
+        if risk >= 4:
+            ticks.append({
+                "iso3": iso3,
+                "title": f"{name} · severity {risk}/5 · interactive watch",
+                "ts": metadata.get("created", ""),
+                "severity": risk,
+            })
+    ticks.sort(key=lambda t: -t["severity"])
+    feed_dir = api_dir / "feed"
+    feed_dir.mkdir(parents=True, exist_ok=True)
+    with open(feed_dir / "ext-ticks.json", "w", encoding="utf-8") as f:
+        json.dump({
+            "format": "vfx-ext-ticks-1",
+            "count": len(ticks),
+            "ts": metadata.get("created", ""),
+            "ticks": ticks,
+        }, f, separators=(",", ":"))
+
     print(f"✓ API generated: {len(countries_summary)} countries → {api_dir}")
+    print(f"✓ Extension feed: {len(ticks)} ticks → {feed_dir}")
 
 
 if __name__ == "__main__":
