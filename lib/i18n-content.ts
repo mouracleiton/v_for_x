@@ -2579,6 +2579,7 @@ export const CONTENT_T: Dict = {
   "branch.onion": { en: "Onion mirror guide", pt: "Guia de mirror onion", es: "Guía de mirror onion", fr: "Guide miroir onion", zh: "洋葱镜像指南", ja: "Onionミラーガイド", ko: "어니언 미러 가이드", hi: "ओनियन मिरर गाइड", ar: "دليل مرآة onion", ru: "Руководство по onion-зеркалу" },
   "branch.digest": { en: "Personalized crisis digest", pt: "Resumo personalizado de crises", es: "Resumen personalizado de crisis", fr: "Digest personnalisé de crises", zh: "个性化危机摘要", ja: "パーソナライズド危機ダイジェスト", ko: "맞춤형 위기 다이제스트", hi: "व्यक्तिगत संकट सारांश", ar: "ملخص أزمات مخصص", ru: "Персональный дайджест кризисов" },
   "branch.changelog": { en: "Data provenance log", pt: "Log de proveniência", es: "Registro de procedencia", fr: "Journal de provenance", zh: "数据来源日志", ja: "データ来歴ログ", ko: "데이터 출처 로그", hi: "डेटा उद्गम लॉग", ar: "سجل مصدر البيانات", ru: "Журнал происхождения данных" },
+  "branch.stepping_stone": { en: "Circumvention live-tester", pt: "Teste ao vivo de circunvenção", es: "Probador de evasión en vivo", fr: "Testeur de contournement en direct", zh: "规避实时测试器", ja: "回避ライブテスター", ko: "우회 라이브 테스터", hi: "परिष्करण लाइव-टेस्टर", ar: "مختبِر التحوّل المباشر", ru: "Живой тест обхода цензуры" },
   "branch.faces": { en: "Humanizing the data", pt: "Humanizando os dados", es: "Humanizando los datos", fr: "Humaniser les données", zh: "让数据有温度", ja: "データに人間を", ko: "데이터에 인간을", hi: "डेटा को मानवीय बनाना", ar: "إضفاء الطابع الإنساني على البيانات", ru: "Очеловечивание данных" },
 
   /* ═══════════════════════════════════════════════════════════════

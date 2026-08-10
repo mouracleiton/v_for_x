@@ -72,6 +72,11 @@ export const PAGE_META: Record<string, PageMeta> = {
     description: "Operational security guide: threat models, duress codes, ZK identity concepts, browser fingerprinting, metadata hygiene, physical security, social engineering defense.",
     path: "/the-mask/",
   },
+  "/the-stepping-stone/": {
+    title: "The Stepping Stone — Circumvention Live-Tester",
+    description: "Don't trust the docs — test the wire. Client-side tester that probes which transports work from YOUR connection (domain fronting, Snowflake bridges, MASQUE), measures latency and throughput, and recommends the best path right now.",
+    path: "/the-stepping-stone/",
+  },
   "/the-lens/": {
     title: "The Lens — Compare & Correlate",
     description: "Cross-dimension correlation explorer: 200 countries plotted on any two metrics with Pearson correlation. Side-by-side comparison table + vulnerability radar overlay.",
