@@ -64,6 +64,7 @@ const STATIC_PAGES = [
   { label: "The API", href: "/the-api/", desc: "Public data API docs" },
   { label: "The Ledger", href: "/the-ledger/", desc: "Financing and blockers" },
   { label: "The Dashboard", href: "/the-dashboard/", desc: "World crisis cockpit" },
+  { label: "The Vault", href: "/the-vault/", desc: "Open datasets catalog" },
 ];
 
 /** Simple fuzzy match — returns a score (0 = no match, higher = better) */
