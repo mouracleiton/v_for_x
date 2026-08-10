@@ -27,6 +27,17 @@ export default function FortalezaPage() {
         </p>
       </div>
 
+      {/* One-command deployment → The Mirror */}
+      <TerminalCard title={tc(lang, "card.anti_censorship")} accent="green" glow className="mb-6">
+        <p className="text-xs text-content-secondary mb-2">
+          Don&apos;t want to do this by hand? <span className="text-terminal-green">The Mirror</span> automates it —
+          one command pulls the latest static build, pins it to IPFS, and stands up a censorship-resistant node in
+          under five minutes. Docker, cloud-init, Raspberry Pi, and Tor paths included.
+        </p>
+        <pre className="text-xs text-terminal-green bg-void border border-border-dim p-3 overflow-x-auto mb-2">{`curl -fsSL https://vforx.org/mirror/install.sh | bash -s -- --tor --pin-ipfs`}</pre>
+        <a href="/the-mirror/" className="text-xs text-blood-bright underline">→ Open The Mirror — one-command deployment kit</a>
+      </TerminalCard>
+
       {/* Hydra Nodes */}
       <TerminalCard title={tc(lang, "fortress.hydra")} glow className="mb-6">
         <pre className="text-blood text-[8px] md:text-[10px] leading-tight mb-4" aria-hidden="true">{`
