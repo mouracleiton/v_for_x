@@ -32,3 +32,13 @@
 ## New Modules: lib/dag.ts, lib/zk.ts
 ## New CI Workflows: ci.yml, data-refresh.yml
 ## Stubs Eliminated: [STUB] ZK Identity → real hash-commitment proofs
+
+## Phase 4: Distributed Event Mapping ✅
+- [x] The Chronicle (/the-chronicle) — crowdsourced, verified incident map (distributed Ushahidi)
+  - lib/chronicle.ts: signed, hash-chained append-only event log (SHA-256 + ECDSA P-256)
+  - Chain integrity verification with tamper detection (verifyEvent / verifyChain)
+  - Community corroboration → tiered verification status (UNVERIFIED → SIGNED → CORROBORATED → VERIFIED)
+  - Leaflet incident map + timeline-bucket view + event feed + inspector
+  - Anonymous keypair identity, export/import for multi-device verification
+  - 44 new tests (lib/chronicle.ts); 594 tests total across 29 files
+## New Module: lib/chronicle.ts
