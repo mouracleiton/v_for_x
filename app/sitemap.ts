@@ -43,6 +43,7 @@ const STATIC_PATHS = [
   "/the-forensics/",
   "/the-nexus/",
   "/the-verdict/",
+  "/the-classifier/",
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

@@ -448,6 +448,13 @@ export const PAGE_META: Record<string, PageMeta> = {
       "Rapid-response misinformation counter. Take any regime or official claim, attach 3 SHA-256-verified sources, and render a structured verdict (true / false / misleading / mixed) with a confidence score. Distinct from The Tribunal (legal cases) and The Registry (dossiers).",
     path: "/the-verdict/",
   },
+
+  "/the-classifier/": {
+    title: "The Classifier — On-device Document Triage with Local ML",
+    description:
+      "Classify document type (contract, speech, leak, financial, legal, NGO report), extract entities (people, companies, amounts, locations), and flag risk — all offline with a small in-browser transformer model (WebGPU/WASM). No text leaves your device.",
+    path: "/the-classifier/",
+  },
 };
 
 /** Get metadata for a page path, falling back to site defaults */
