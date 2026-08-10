@@ -7,7 +7,7 @@
 import { openDB, type IDBPDatabase } from "idb";
 
 const DB_NAME = "vfx-store";
-const DB_VERSION = 4;
+const DB_VERSION = 5;
 
 export interface LedgerEntry {
   id?: number;
@@ -93,6 +93,12 @@ export function getDB(): Promise<IDBPDatabase> {
         if (!db.objectStoreNames.contains("dead_drops")) {
           const dropStore = db.createObjectStore("dead_drops", { keyPath: "id" });
           dropStore.createIndex("by-circle", "circleId");
+        }
+        // ── v5 store: on-device semantic index cache (The Oracle) ──
+        // Caches the computed 200-country + metric embedding vectors so the
+        // semantic index is rebuilt only when the model or data changes.
+        if (!db.objectStoreNames.contains("semantic_index")) {
+          db.createObjectStore("semantic_index", { keyPath: "cacheKey" });
         }
       },
     });
@@ -370,6 +376,48 @@ export async function signData(data: unknown): Promise<{ signature: string; hand
     return { signature: sigHex, handle: pubHex.slice(0, 16) };
   } catch {
     return null;
+  }
+}
+
+/* ═══ SEMANTIC INDEX CACHE ═══
+ * The on-device Oracle computes a vector embedding for every country's
+ * crisis profile and every metric — the semantic index over the 200×N data.
+ * That computation is expensive, so we persist the resulting vectors here,
+ * keyed by a signature of model + data version. A cache hit makes the
+ * semantic engine instantly ready on repeat visits.
+ */
+export interface SemanticIndexRecord {
+  cacheKey: string;
+  modelId: string;
+  dim: number;
+  builtAt: number;
+  metricVectors: number[][];
+  countryVectors: number[][];
+  metricStats: {
+    min: number;
+    max: number;
+    range: number;
+    present: boolean[];
+  }[];
+  metricIds: string[];
+  iso3s: string[];
+}
+
+export async function semanticIndexGet(cacheKey: string): Promise<SemanticIndexRecord | null> {
+  try {
+    const db = await getDB();
+    return (await db.get("semantic_index", cacheKey)) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export async function semanticIndexPut(record: SemanticIndexRecord): Promise<void> {
+  try {
+    const db = await getDB();
+    await db.put("semantic_index", record);
+  } catch {
+    /* ignore */
   }
 }
 
