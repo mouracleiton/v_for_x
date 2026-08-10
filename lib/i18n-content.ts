@@ -1713,6 +1713,94 @@ export const CONTENT_T: Dict = {
     en: "// Every slider you drag is a life you save or a missile you build.", pt: "// Cada controle que você arrasta é uma vida salva ou um míssil.", es: "// Cada control que arrastras es una vida salvada o un misil.", fr: "// Chaque curseur est une vie sauvée ou un missile construit.",
     zh: "// 你拖动的每个滑块，都是一条被拯救的生命或一枚被制造的导弹。", ja: "// 動かすスライダーは、救う命か造るミサイル。", ko: "// 움직이는 슬라이더는 구한 생명 또는 만든 미사일.", hi: "// हर स्लाइडर एक बचाई जान या बनाया गया मिसाइल है।", ar: "// كل شريط تسحبه حياة تنقذها أو صاروخ تصنعه.", ru: "// Каждый ползунок — спасённая жизнь или построенная ракета.",
   },
+  "subtitle.the_vault": {
+    en: "// Open data is the ammunition of accountability. Load up.", pt: "// Dados abertos são a munição da prestação de contas. Carregue.", es: "// Los datos abiertos son la munición de la rendición de cuentas. Carga.", fr: "// Les données ouvertes sont les munitions de la responsabilité. Chargez.",
+    zh: "// 开放数据是问责的弹药。装填。", ja: "// オープンデータは問責の弾薬だ。装填せよ。", ko: "// 공개 데이터는 책임의 탄약이다. 장전하라.", hi: "// खुला डेटा जवाबदेही का गोला-बारूद है। लोड करें।", ar: "// البيانات المفتوحة ذخيرة المساءلة. زُوّد.", ru: "// Открытые данные — боеприпасы подотчётности. Заряжай.",
+  },
+
+  /* ═══════════════════════════════════════════════════════════════
+   *  THE VAULT — public datasets catalog
+   * ═══════════════════════════════════════════════════════════════ */
+  "vault.tag": {
+    en: "// 35 — THE VAULT", pt: "// 35 — O COFRE", es: "// 35 — EL COFRE", fr: "// 35 — LE COFFRE",
+    zh: "// 35 — 金库", ja: "// 35 — 金庫", ko: "// 35 — 금고", hi: "// 35 — तिजोरी", ar: "// 35 — الخزنة", ru: "// 35 — ХРАНИЛИЩЕ",
+  },
+  "vault.title": {
+    en: "THE VAULT", pt: "O COFRE", es: "EL COFRE", fr: "LE COFFRE",
+    zh: "金库", ja: "金庫", ko: "금고", hi: "तिजोरी", ar: "الخزنة", ru: "ХРАНИЛИЩЕ",
+  },
+  "vault.subtitle": {
+    en: "A vetted registry of open datasets for exposing corruption, mapping conflict, and documenting human-rights abuse. Every source is free, country-keyed, and chosen for what it can prove.",
+    pt: "Um registro verificado de datasets abertos para expor corrupção, mapear conflitos e documentar abusos de direitos humanos. Cada fonte é gratuita, indexada por país e escolhida pelo que pode provar.",
+    es: "Un registro verificado de datasets abiertos para exponer corrupción, mapear conflictos y documentar abusos de derechos humanos. Cada fuente es gratuita, indexada por país y elegida por lo que puede probar.",
+    fr: "Un registre vérifié de jeux de données ouverts pour dénoncer la corruption, cartographier les conflits et documenter les violations des droits humains. Chaque source est gratuite, indexée par pays et choisie pour ce qu'elle peut prouver.",
+    zh: "经验证的开放数据集登记库，用于揭露腐败、绘制冲突地图、记录人权侵害。每个来源均免费、按国家索引，因其证据价值而被选入。",
+    ja: "腐敗の暴露、紛争の可視化、人権侵害の記録のための、精査されたオープンデータセット・レジストリ。各ソースは無料で、国別に索引化されている。",
+    ko: "부패 폭로, 분쟁 매핑, 인권 침해 기록을 위한 검증된 오픈 데이터셋 등록부. 모든 출처는 무료이며 국가별로 색인됩니다.",
+    hi: "भ्रष्टाचार उजागर करने, संघर्ष का मानचित्र बनाने और मानवाधिकारों के दुरुपयोग का दस्तावेजीकरण करने के लिए सत्यापित ओपन डेटासेट रजिस्टर।",
+    ar: "سجل مُدقَّق من مجموعات البيانات المفتوحة لكشف الفساد ورسم خرائط الصراع وتوثيق انتهاكات حقوق الإنسان.",
+    ru: "Проверенный реестр открытых наборов данных для разоблачения коррупции, картографирования конфликтов и фиксации нарушений прав человека.",
+  },
+  "vault.stat_datasets": {
+    en: "DATASETS", pt: "DATASETS", es: "DATASETS", fr: "JEUX DE DONNÉES",
+    zh: "数据集", ja: "データセット", ko: "데이터셋", hi: "डेटासेट", ar: "مجموعات البيانات", ru: "НАБОРЫ ДАННЫХ",
+  },
+  "vault.stat_categories": {
+    en: "CATEGORIES", pt: "CATEGORIAS", es: "CATEGORÍAS", fr: "CATÉGORIES",
+    zh: "分类", ja: "カテゴリー", ko: "카테고리", hi: "श्रेणियाँ", ar: "الفئات", ru: "КАТЕГОРИИ",
+  },
+  "vault.stat_critical": {
+    en: "CRITICAL", pt: "CRÍTICOS", es: "CRÍTICOS", fr: "CRITIQUES",
+    zh: "关键", ja: "重要", ko: "중요", hi: "गंभीर", ar: "حرجة", ru: "КРИТИЧНЫЕ",
+  },
+  "vault.stat_open": {
+    en: "OPEN", pt: "ABERTOS", es: "ABIERTOS", fr: "OUVERTS",
+    zh: "开放", ja: "オープン", ko: "오픈", hi: "खुले", ar: "مفتوحة", ru: "ОТКРЫТЫЕ",
+  },
+  "vault.search_placeholder": {
+    en: "Search datasets (conflict, sanctions, water, inequality…)", pt: "Buscar datasets (conflito, sanções, água, desigualdade…)", es: "Buscar datasets (conflicto, sanciones, agua, desigualdad…)", fr: "Rechercher (conflit, sanctions, eau, inégalité…)",
+    zh: "搜索数据集（冲突、制裁、水、不平等…）", ja: "データセットを検索（紛争、制裁、水、不平等…）", ko: "데이터셋 검색 (분쟁, 제재, 물, 불평등…)", hi: "डेटासेट खोजें (संघर्ष, प्रतिबंध, जल, असमानता…)", ar: "ابحث عن مجموعات البيانات (صراع، عقوبات، ماء، عدم مساواة…)", ru: "Поиск наборов данных (конфликт, санкции, вода, неравенство…)",
+  },
+  "vault.clear": { en: "CLEAR", pt: "LIMPAR", es: "LIMPIAR", fr: "EFFACER", zh: "清除", ja: "クリア", ko: "지우기", hi: "साफ़", ar: "مسح", ru: "ОЧИСТИТЬ" },
+  "vault.filter_all": { en: "ALL", pt: "TODOS", es: "TODOS", fr: "TOUS", zh: "全部", ja: "全て", ko: "전체", hi: "सभी", ar: "الكل", ru: "ВСЕ" },
+  "vault.filter_any_priority": { en: "ANY PRIORITY", pt: "QUALQUER PRIORIDADE", es: "CUALQUIER PRIORIDAD", fr: "TOUTE PRIORITÉ", zh: "任意优先级", ja: "すべての優先度", ko: "모든 우선순위", hi: "कोई भी प्राथमिकता", ar: "أي أولوية", ru: "ЛЮБОЙ ПРИОРИТЕТ" },
+  "vault.showing": {
+    en: "Showing {n} datasets", pt: "Mostrando {n} datasets", es: "Mostrando {n} datasets", fr: "Affichage de {n} jeux de données",
+    zh: "显示 {n} 个数据集", ja: "{n} 件のデータセット", ko: "{n}개 데이터셋 표시", hi: "{n} डेटासेट दिख रहे हैं", ar: "عرض {n} مجموعة بيانات", ru: "Показано {n} наборов",
+  },
+  "vault.query": { en: "query", pt: "busca", es: "búsqueda", fr: "requête", zh: "查询", ja: "クエリ", ko: "쿼리", hi: "क्वेरी", ar: "استعلام", ru: "запрос" },
+  "vault.no_results": { en: "NO MATCHES", pt: "SEM RESULTADOS", es: "SIN RESULTADOS", fr: "AUCUN RÉSULTAT", zh: "无匹配", ja: "該当なし", ko: "결과 없음", hi: "कोई मिलान नहीं", ar: "لا نتائج", ru: "НЕТ СОВПАДЕНИЙ" },
+  "vault.no_results_desc": {
+    en: "No datasets match your current filters. Try clearing the search or selecting a different category.",
+    pt: "Nenhum dataset corresponde aos filtros atuais. Tente limpar a busca ou selecionar outra categoria.",
+    es: "Ningún dataset coincide con los filtros actuales. Prueba limpiando la búsqueda o eligiendo otra categoría.",
+    fr: "Aucun jeu de données ne correspond aux filtres actuels. Effacez la recherche ou choisissez une autre catégorie.",
+    zh: "没有数据集匹配当前筛选条件。请尝试清除搜索或选择其他类别。",
+    ja: "現在のフィルターに一致するデータセットはありません。検索をクリアするか別のカテゴリーを選んでください。",
+    ko: "현재 필터와 일치하는 데이터셋이 없습니다. 검색을 지우거나 다른 카테고리를 선택하세요.",
+    hi: "कोई डेटासेट वर्तमान फ़िल्टर से मेल नहीं खाता। खोज साफ़ करें या दूसरी श्रेणी चुनें।",
+    ar: "لا تطابق أي مجموعة بيانات عوامل التصفية الحالية. امسح البحث أو اختر فئة أخرى.",
+    ru: "Ни один набор не соответствует текущим фильтрам. Очистите поиск или выберите другую категорию.",
+  },
+  "vault.meta_coverage": { en: "Coverage", pt: "Cobertura", es: "Cobertura", fr: "Couverture", zh: "覆盖", ja: "範囲", ko: "범위", hi: "कवरेज", ar: "التغطية", ru: "Охват" },
+  "vault.meta_format": { en: "Format", pt: "Formato", es: "Formato", fr: "Format", zh: "格式", ja: "形式", ko: "형식", hi: "प्रारूप", ar: "التنسيق", ru: "Формат" },
+  "vault.meta_license": { en: "License", pt: "Licença", es: "Licencia", fr: "Licence", zh: "许可", ja: "ライセンス", ko: "라이선스", hi: "लाइसेंस", ar: "الترخيص", ru: "Лицензия" },
+  "vault.meta_cadence": { en: "Updated", pt: "Atualização", es: "Actualización", fr: "Mise à jour", zh: "更新", ja: "更新", ko: "갱신", hi: "अपडेट", ar: "التحديث", ru: "Обновление" },
+  "vault.meta_dimension": { en: "Dimension", pt: "Dimensão", es: "Dimensión", fr: "Dimension", zh: "维度", ja: "ディメンション", ko: "차원", hi: "आयाम", ar: "البُعد", ru: "Измерение" },
+  "vault.access": { en: "ACCESS DATASET", pt: "ACESSAR DADOS", es: "ACCEDER A DATOS", fr: "ACCÉDER", zh: "访问数据", ja: "アクセス", ko: "접근", hi: "एक्सेस", ar: "الوصول", ru: "ОТКРЫТЬ" },
+  "vault.methodology_title": { en: "SELECTION CRITERIA", pt: "CRITÉRIOS DE SELEÇÃO", es: "CRITERIOS DE SELECCIÓN", fr: "CRITÈRES DE SÉLECTION", zh: "筛选标准", ja: "選定基準", ko: "선정 기준", hi: "चयन मानदंड", ar: "معايير الاختيار", ru: "КРИТЕРИИ ОТБОРА" },
+  "vault.methodology": {
+    en: "Every dataset in this vault was curated from the Awesome Public Datasets catalog and vetted against four criteria: (1) genuinely open and free to use, (2) country-keyed or globally comparable, (3) directly relevant to V FOR X's mission of exposing corruption, mapping conflict, and documenting human-rights abuse, and (4) bundleable into an offline static build. Priority tiers reflect how central each source is to the platform's core data spine.",
+    pt: "Cada dataset neste cofre foi curado do catálogo Awesome Public Datasets e verificado por quatro critérios: (1) genuinamente aberto e gratuito, (2) indexado por país ou comparável globalmente, (3) diretamente relevante para a missão do V FOR X, e (4) embutível num build estático offline.",
+    es: "Cada dataset de este cofre fue curado del catálogo Awesome Public Datasets y verificado con cuatro criterios: (1) abierto y gratuito, (2) indexado por país o comparable globalmente, (3) relevante para la misión de V FOR X, (4) empaquetable offline.",
+    fr: "Chaque jeu de données de ce coffre provient du catalogue Awesome Public Datasets et a été vérifié selon quatre critères : (1) ouvertement gratuit, (2) indexé par pays, (3) pertinent pour la mission, (4) utilisable hors ligne.",
+    zh: "本库中的每个数据集均精选自 Awesome Public Datasets 目录，并按四项标准审核：免费开放、按国家可比较、与平台使命直接相关、可离线打包。",
+    ja: "この金庫の各データセットは Awesome Public Datasets カタログから選定され、4つの基準で審査されました：オープン無料、国別比較可能、ミッションに直接関連、オフライン梱包可能。",
+    ko: "이 금고의 모든 데이터셋은 Awesome Public Datasets 카탈로그에서 엄선되었으며 네 가지 기준으로 검증되었습니다: 무료 개방, 국가별 비교 가능, 미션 직접 연관, 오프라인 번들 가능.",
+    hi: "इस तिजोरी का हर डेटासेट Awesome Public Datasets से चुना गया और चार मानदंडों पर जाँचा गया: मुफ्त खुला, देश-अनुक्रमित, मिशन-संबंधित, ऑफ़लाइन संभव।",
+    ar: "تم انتقاء كل مجموعة بيانات في هذه الخزنة من فهرس Awesome Public Datasets والتحقق منها وفق أربعة معايير: مفتوحة مجانً، مفهرسة حسب الدولة، ذات صلة بالمهمة، قابلة للتعبئة دون اتصال.",
+    ru: "Каждый набор в этом хранилище отобран из каталога Awesome Public Datasets и проверен по четырём критериям: открытость, страновая индексация, релевантность миссии, автономность.",
+  },
 
   /* ═══════════════════════════════════════════════════════════════
    *  EXTRA LABELS
