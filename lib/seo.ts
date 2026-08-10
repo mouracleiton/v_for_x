@@ -388,6 +388,13 @@ export const PAGE_META: Record<string, PageMeta> = {
       "Map state and repressive forces during protests in real time. Drop anonymous incident markers (kettles, tear gas, mass arrests, snipers, military deployment, comms blackouts). Live heat zones, threat clustering, escape-vector routing. Local-first, anonymous, time-decaying — nothing leaves your device.",
     path: "/the-sentinel/",
   },
+
+  "/the-roster/": {
+    title: "The Roster — Vetted Helper Directory",
+    description:
+      "A crisis-response yellow pages of vetted helpers — lawyers, doctors, journalists, digital-security trainers. Each entry is self-attested and peer-vouched with cryptographically signed credentials (ECDSA-P256). Signed JSON, client-side verification, no backend. Any copy of the site verifies the whole roster offline.",
+    path: "/the-roster/",
+  },
 };
 
 /** Get metadata for a page path, falling back to site defaults */
