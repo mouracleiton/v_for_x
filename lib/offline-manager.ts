@@ -280,38 +280,37 @@ export async function getQueuedActions(): Promise<QueuedAction[]> {
 }
 
 /**
- * Attempt to replay every queued action. Items whose fetch succeeds
- * (2xx) are removed; network failures are left in place for the next try.
+ * Process the local action queue.
+ *
+ * This is a static-export app with no backend server — there is no
+ * `/api/sync` endpoint to POST to. Instead, queued actions are drained
+ * locally: each is marked as `processed` and removed from the queue.
+ * When a real P2P transport (WebRTC gossip, mesh sync, etc.) is wired,
+ * this is the single integration point to dispatch queued actions to
+ * peers. For now it simply clears the backlog so the queue does not
+ * accumulate forever.
  */
-export async function processQueue(): Promise<void> {
+export async function processQueue(): Promise<number> {
   let items: QueuedAction[];
   try {
     const db = await getDB();
     items = (await db.getAll(QUEUE_STORE)) as QueuedAction[];
   } catch {
-    return;
+    return 0;
   }
 
+  let processed = 0;
   for (const item of items) {
     if (item.id === undefined) continue;
     try {
-      const res = await fetch(`${BASE_PATH}/api/sync`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: item.type, data: item.data }),
-      });
-      if (res.ok) {
-        try {
-          const db = await getDB();
-          await db.delete(QUEUE_STORE, item.id);
-        } catch {
-          /* ignore */
-        }
-      }
+      const db = await getDB();
+      await db.delete(QUEUE_STORE, item.id);
+      processed++;
     } catch {
-      // Still offline — keep the item queued.
+      // IndexedDB issue — leave the item for next attempt.
     }
   }
+  return processed;
 }
 
 /* ═══════════════════════════════════════════════════════════════

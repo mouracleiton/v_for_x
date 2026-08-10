@@ -40,6 +40,14 @@ jobs:
         run: python3 scripts/update_data.py
         continue-on-error: true
 
+      - name: Fetch governance indicators
+        run: python3 scripts/fetch_governance.py
+        continue-on-error: true
+
+      - name: Fetch Our World in Data datasets
+        run: python3 scripts/fetch_owid.py
+        continue-on-error: true
+
       - name: Generate data freshness report
         run: |
           python3 -c "

@@ -11,6 +11,7 @@ import { tc } from "@/lib/i18n-content";
 import { td } from "@/lib/dossiers-i18n";
 import { t } from "@/lib/i18n";
 import { useStore } from "@/stores/useStore";
+import { parseQuery, executeQuery } from "@/lib/oracle";
 
 const data = backbone as WorldBackbone;
 const blueprints = (Array.isArray(blueprintsData) ? blueprintsData : (blueprintsData as { blueprints: unknown[] }).blueprints) as {
@@ -20,7 +21,7 @@ const dossiers = dossiersData as {
   id: string; subject: string; category: string; severity: string;
 }[];
 
-type ResultType = "country" | "blueprint" | "dossier" | "equation" | "page";
+type ResultType = "country" | "blueprint" | "dossier" | "equation" | "page" | "query";
 
 interface SearchResult {
   type: ResultType;
@@ -36,6 +37,7 @@ const TYPE_META: Record<ResultType, { labelKey: string; color: string; icon: str
   dossier: { labelKey: "search.type_dossier", color: "var(--color-warning-amber)", icon: "⚖" },
   equation: { labelKey: "search.type_equation", color: "#00ddff", icon: "∑" },
   page: { labelKey: "search.type_page", color: "#aa44ff", icon: "▸" },
+  query: { labelKey: "search.type_query", color: "#00ff88", icon: "⟶" },
 };
 
 const STATIC_PAGES = [
@@ -104,6 +106,12 @@ const STATIC_PAGES = [
   { label: "The Chronicle", href: "/the-chronicle/", desc: "Signed, hash-chained incident map" },
   { label: "The Forensics", href: "/the-forensics/", desc: "OSINT image & video verification" },
   { label: "The Nexus", href: "/the-nexus/", desc: "Kleptocracy & dirty-money ownership graph" },
+  { label: "The Receipts", href: "/the-receipts/", desc: "Blockchain evidence timestamps" },
+  { label: "The Heatmap", href: "/the-heatmap/", desc: "Crowdsourced incident reporter" },
+  { label: "The Bridge", href: "/the-bridge/", desc: "Data import / export hub" },
+  { label: "The Classifier", href: "/the-classifier/", desc: "On-device document triage" },
+  { label: "The Radar", href: "/the-radar/", desc: "Corruption database" },
+  { label: "The World Data", href: "/the-world-data/", desc: "OWID data explorer" },
 ];
 
 /** Simple fuzzy match — returns a score (0 = no match, higher = better) */
@@ -249,9 +257,39 @@ export default function GlobalSearch() {
         return { ...r, score: s };
       })
       .filter((r) => r.score > 0)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 15);
-    return scored;
+      .sort((a, b) => b.score - a.score);
+
+    // Conceptual query layer: when the query looks like a data question
+    // (not a name lookup), try the keyword oracle for ranked country results.
+    const trimmed = query.trim();
+    const looksConceptual =
+      /\b(top|bottom|highest|lowest|most|least|countries|where|by|which|rank|compare)\b/i.test(
+        trimmed,
+      ) && trimmed.length > 4;
+
+    if (looksConceptual) {
+      const parsed = parseQuery(trimmed);
+      if (parsed) {
+        const oracleResults = executeQuery(parsed, data.countries).slice(0, 5);
+        for (const r of oracleResults) {
+          const valStr =
+            r.value != null && !Number.isNaN(r.value)
+              ? typeof r.value === "number"
+                ? r.value.toLocaleString(undefined, { maximumFractionDigits: 2 })
+                : String(r.value)
+              : "";
+          scored.push({
+            type: "query" as ResultType,
+            label: `${r.country.name_en} — ${valStr} ${parsed.metric.unit}`,
+            sublabel: `${parsed.interpretation}${r.rank ? ` · #${r.rank}` : ""}`,
+            href: `/sorrow-map/${r.country.iso3.toLowerCase()}/`,
+            score: 30,
+          });
+        }
+      }
+    }
+
+    return scored.slice(0, 15);
   }, [query, index]);
 
   // Group results by type for display

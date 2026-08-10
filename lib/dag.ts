@@ -27,6 +27,10 @@ export interface DagEntry {
   hash: string;
   /** SHA-256 hex of the previous entry in the chain (genesis = "0".repeat(64)) */
   prevHash: string;
+  /** Optional ECDSA P-256 signature (hex) over `hash`, proving authorship */
+  signature?: string;
+  /** Optional public key (hex) of the signer, for independent verification */
+  signerPubKey?: string;
 }
 
 export interface ChainVerification {
@@ -195,4 +199,88 @@ export function getLastHash(entries: DagEntry[]): string {
  */
 export function shortHash(hash: string): string {
   return hash.slice(0, 12);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ECDSA Signature Support
+   ═══════════════════════════════════════════════════════════════ */
+
+/**
+ * Sign a DAG entry's hash with an ECDSA P-256 private key.
+ *
+ * Returns a hex signature string that can be embedded in `entry.signature`.
+ * Anyone with the public key can verify the entry was authored by the
+ * key holder — making the ledger cryptographically attributable.
+ */
+export async function signDagEntry(
+  entry: DagEntry,
+  privateKey: CryptoKey,
+): Promise<string> {
+  const data = new TextEncoder().encode(entry.hash);
+  const sigBuf = await crypto.subtle.sign(
+    { name: "ECDSA", hash: "SHA-256" },
+    privateKey,
+    data,
+  );
+  return Array.from(new Uint8Array(sigBuf))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+/**
+ * Verify that a DAG entry's signature was produced by the holder of the
+ * matching private key. Returns false if the entry is unsigned.
+ */
+export async function verifyDagSignature(entry: DagEntry): Promise<boolean> {
+  if (!entry.signature || !entry.signerPubKey) return false;
+  try {
+    const pubKeyBytes = hexToBytes(entry.signerPubKey);
+    const cryptoKey = await crypto.subtle.importKey(
+      "raw",
+      pubKeyBytes,
+      { name: "ECDSA", namedCurve: "P-256" },
+      false,
+      ["verify"],
+    );
+    const data = new TextEncoder().encode(entry.hash);
+    const sigBytes = hexToBytes(entry.signature);
+    return crypto.subtle.verify(
+      { name: "ECDSA", hash: "SHA-256" },
+      cryptoKey,
+      sigBytes,
+      data,
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Generate an ECDSA P-256 keypair for signing DAG entries.
+ * Returns the CryptoKeyPair plus the raw public key in hex.
+ */
+export async function generateDagKeyPair(): Promise<{
+  keyPair: CryptoKeyPair;
+  publicKeyHex: string;
+}> {
+  const keyPair = await crypto.subtle.generateKey(
+    { name: "ECDSA", namedCurve: "P-256" },
+    true,
+    ["sign", "verify"],
+  );
+  const pubRaw = await crypto.subtle.exportKey("raw", keyPair.publicKey);
+  const publicKeyHex = Array.from(new Uint8Array(pubRaw))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+  return { keyPair, publicKeyHex };
+}
+
+/** Convert a hex string to a Uint8Array backed by a regular ArrayBuffer. */
+function hexToBytes(hex: string): Uint8Array<ArrayBuffer> {
+  const clean = hex.replace(/[^0-9a-fA-F]/g, "");
+  const out = new Uint8Array(new ArrayBuffer(clean.length / 2));
+  for (let i = 0; i < out.length; i++) {
+    out[i] = parseInt(clean.substr(i * 2, 2), 16);
+  }
+  return out;
 }

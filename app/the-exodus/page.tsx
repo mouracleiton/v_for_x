@@ -223,7 +223,7 @@ export default function TheExodusPage() {
 
       {/* Top origins table */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <TerminalCard title={`{tc(lang, "exodus.top_origins")} // ${selectedOrigin ? "FILTERED" : "WORLD"}`} accent="blood">
+        <TerminalCard title={`${tc(lang, "exodus.top_origins")} // ${selectedOrigin ? "FILTERED" : "WORLD"}`} accent="blood">
           {(selectedOrigin ? stats.topOrigins.filter((n) => n.iso3 === selectedOrigin) : stats.topOrigins.slice(0, 10)).map((n, i) => (
             <Link
               key={n.iso3}

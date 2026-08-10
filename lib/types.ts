@@ -139,6 +139,27 @@ export interface CountryData {
     cpi_year: number;
     political_corruption_index: number | null;
     political_corruption_year: number;
+    control_of_corruption?: number | null;
+    control_of_corruption_score?: number | null;
+    control_of_corruption_year?: number;
+    government_effectiveness?: number | null;
+    government_effectiveness_score?: number | null;
+    government_effectiveness_year?: number;
+    political_stability?: number | null;
+    political_stability_score?: number | null;
+    political_stability_year?: number;
+    regulatory_quality?: number | null;
+    regulatory_quality_score?: number | null;
+    regulatory_quality_year?: number;
+    rule_of_law?: number | null;
+    rule_of_law_score?: number | null;
+    rule_of_law_year?: number;
+    voice_and_accountability?: number | null;
+    voice_and_accountability_score?: number | null;
+    voice_and_accountability_year?: number;
+    wgi_composite?: number | null;
+    wgi_composite_year?: number;
+    corruption_risk?: "low" | "moderate" | "high" | "severe";
   };
   security: {
     homicide_rate_per100k: number | null;

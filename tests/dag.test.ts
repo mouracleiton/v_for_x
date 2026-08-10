@@ -7,6 +7,9 @@ import {
   getLastHash,
   shortHash,
   GENESIS_HASH,
+  signDagEntry,
+  verifyDagSignature,
+  generateDagKeyPair,
   type DagEntry,
 } from "../lib/dag";
 
@@ -216,5 +219,70 @@ describe("dag.ts", () => {
     it("should handle genesis hash", () => {
       expect(shortHash(GENESIS)).toBe("000000000000");
     });
+  });
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   ECDSA Signature tests
+   ═══════════════════════════════════════════════════════════════ */
+
+describe("DAG ECDSA signatures", () => {
+  it("generateDagKeyPair returns a valid keypair and hex public key", async () => {
+    const { keyPair, publicKeyHex } = await generateDagKeyPair();
+    expect(keyPair.privateKey).toBeDefined();
+    expect(keyPair.publicKey).toBeDefined();
+    // P-256 raw public key = 65 bytes (0x04 + 32 + 32) = 130 hex chars
+    expect(publicKeyHex).toMatch(/^[0-9a-f]{130}$/);
+  });
+
+  it("signDagEntry produces a hex signature", async () => {
+    const { keyPair } = await generateDagKeyPair();
+    const entry = await makeTestEntry();
+    const sig = await signDagEntry(entry, keyPair.privateKey);
+    expect(sig).toMatch(/^[0-9a-f]+$/);
+    expect(sig.length).toBeGreaterThan(0);
+  });
+
+  it("verifyDagSignature returns true for a validly signed entry", async () => {
+    const { keyPair, publicKeyHex } = await generateDagKeyPair();
+    const entry = await makeTestEntry();
+    entry.signature = await signDagEntry(entry, keyPair.privateKey);
+    entry.signerPubKey = publicKeyHex;
+    expect(await verifyDagSignature(entry)).toBe(true);
+  });
+
+  it("verifyDagSignature returns false for a tampered entry", async () => {
+    const { keyPair, publicKeyHex } = await generateDagKeyPair();
+    const entry = await makeTestEntry();
+    entry.signature = await signDagEntry(entry, keyPair.privateKey);
+    entry.signerPubKey = publicKeyHex;
+    // Tamper with the hash
+    entry.hash = "f".repeat(64);
+    expect(await verifyDagSignature(entry)).toBe(false);
+  });
+
+  it("verifyDagSignature returns false for unsigned entries", async () => {
+    const entry = await makeTestEntry();
+    expect(await verifyDagSignature(entry)).toBe(false);
+  });
+
+  it("verifyDagSignature returns false with wrong public key", async () => {
+    const { keyPair: signerPair, publicKeyHex } = await generateDagKeyPair();
+    const { keyPair: otherPair } = await generateDagKeyPair();
+    const entry = await makeTestEntry();
+    // Sign with one key, but claim a different public key
+    entry.signature = await signDagEntry(entry, signerPair.privateKey);
+    const otherPub = await generateDagKeyPair();
+    entry.signerPubKey = otherPub.publicKeyHex;
+    expect(await verifyDagSignature(entry)).toBe(false);
+  });
+
+  it("two different keypairs produce different signatures for the same entry", async () => {
+    const entry = await makeTestEntry();
+    const { keyPair: pairA } = await generateDagKeyPair();
+    const { keyPair: pairB } = await generateDagKeyPair();
+    const sigA = await signDagEntry(entry, pairA.privateKey);
+    const sigB = await signDagEntry(entry, pairB.privateKey);
+    expect(sigA).not.toBe(sigB);
   });
 });

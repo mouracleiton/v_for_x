@@ -35,6 +35,7 @@ import {
   anchorToDag,
   type NotarizationResult,
 } from "@/lib/blockchain-verify";
+import { type DagEntry, GENESIS_HASH } from "@/lib/dag";
 
 /* ═══════════════════════════════════════════════════════════════
    Shared helpers
@@ -844,6 +845,7 @@ function EvidenceNotarizer() {
   const [merkleRoot, setMerkleRoot] = useState("");
   const [dagAnchor, setDagAnchor] = useState("");
   const [busy, setBusy] = useState(false);
+  const dagHistory = useRef<DagEntry[]>([]);
 
   const hash = useMemo(
     () => (evidence.trim() ? generateEvidenceHash([evidence]) : ""),
@@ -857,7 +859,24 @@ function EvidenceNotarizer() {
     try {
       const merkle = createMerkleLeaf([hash]);
       setMerkleRoot(merkle.root);
-      setDagAnchor(anchorToDag(hash, []));
+      const anchorHash = anchorToDag(hash, dagHistory.current);
+      setDagAnchor(anchorHash);
+      dagHistory.current = [
+        ...dagHistory.current,
+        {
+          prevHash: dagHistory.current.length > 0
+            ? dagHistory.current[dagHistory.current.length - 1].hash
+            : GENESIS_HASH,
+          ts: Date.now(),
+          source: "evidence",
+          destination: hash,
+          amount: "1",
+          purpose: "evidence_anchor",
+          status: "VERIFIED",
+          signerHandle: "",
+          hash: anchorHash,
+        },
+      ];
       const res = await notarizeEvidence(hash);
       setResult(res);
     } catch {
