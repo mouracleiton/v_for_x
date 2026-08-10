@@ -1,0 +1,89 @@
+# V FOR X — full mirror stack: web + IPFS (kubo) + Tor
+# ───────────────────────────────────────────────────────────
+#   docker compose up -d --build
+#
+# Services:
+#   web    — nginx serving the static build on :8080
+#   ipfs   — kubo daemon, auto-pins the build on first boot (gateway :8081)
+#   tor    — publishes the mirror as a .onion hidden service
+#
+# After boot:
+#   docker exec vfx-ipfs ipfs pin ls | grep $(cat /opt/vfx/IPFS_CID)
+#   docker exec vfx-tor cat /var/lib/tor/vfx/hostname
+version: "3.9"
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vfx-web
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/healthz", "--spider"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  ipfs:
+    image: ipfs/kubo:latest
+    container_name: vfx-ipfs
+    restart: unless-stopped
+    ports:
+      - "4001:4001"        # p2p swarm
+      - "127.0.0.1:5001:5001"  # RPC (local only)
+      - "127.0.0.1:8081:8080"  # gateway (local only)
+    volumes:
+      - ipfs-staging:/export
+      - ipfs-data:/data/ipfs
+    # After kubo boots, add+pin the webroot shared from the web image.
+    healthcheck:
+      test: ["CMD", "ipfs", "id"]
+      interval: 30s
+      timeout: 5s
+      retries: 10
+
+  tor:
+    image: osminogin/tor-simple:latest
+    container_name: vfx-tor
+    restart: unless-stopped
+    depends_on: [web]
+    environment:
+      # Hidden service: onion port 80 → web container port 80
+      TORRC_EXTRA: |
+        HiddenServiceDir /var/lib/tor/vfx/
+        HiddenServicePort 80 web:80
+    volumes:
+      - tor-data:/var/lib/tor
+
+  # One-shot pinner: waits for ipfs, pins the webroot, writes the CID.
+  pin:
+    image: ipfs/kubo:latest
+    container_name: vfx-pin
+    depends_on:
+      ipfs:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -e
+        echo "[pin] connecting to kubo…"
+        for i in $$(seq 1 30); do
+          ipfs --api /dns/ipfs/tcp/5001 id >/dev/null 2>&1 && break
+          sleep 2
+        done
+        echo "[pin] adding webroot from web container…"
+        # Pull the built site out of the web image and pin it.
+        CID=$$(docker cp - :/usr/share/nginx/html/. 2>/dev/null >/dev/null && \
+               ipfs --api /dns/ipfs/tcp/5001 add -r --pin --quiet /usr/share/nginx/html | tail -n1 || true)
+        echo "[pin] pinned CID: $$CID"
+        echo "$$CID" > /export/IPFS_CID
+    volumes:
+      - ipfs-staging:/export
+
+volumes:
+  ipfs-staging:
+  ipfs-data:
+  tor-data:

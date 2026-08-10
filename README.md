@@ -149,6 +149,30 @@ The build produces 229 static HTML pages in `out/`. No server required. Deploy t
 
 ---
 
+## The Mirror — one-command deployment kit
+
+Fortress documents self-hosting; **The Mirror automates it.** A single command
+pulls the latest static build, pins it to IPFS, and stands up a censorship-
+resistant node in under five minutes.
+
+```bash
+# One command → a live mirror (clearnet, .onion, IPFS, Pi, USB)
+curl -fsSL https://vforx.org/mirror/install.sh | bash -s -- --tor --pin-ipfs
+```
+
+The kit (`/mirror/`) ships a Docker image, a `docker-compose` stack (web + kubo
+IPFS + Tor), a `cloud-init.yaml` for cloud VMs, a Raspberry Pi installer, and a
+build-manifest tool that produces a SHA-256 root hash bound to every badge.
+
+Each operator mints a signed **"I mirrored this" badge** (ECDSA P-256, fully
+client-side) that feeds a **distributed, serverless node list** — merge lists
+peer-to-peer via The Web or dead drops. There is no central registry.
+
+→ **[/the-mirror/](app/the-mirror/page.tsx)** — the in-app kit page + badge generator
+→ **[mirror/](mirror/)** — the deployment artifacts
+
+---
+
 ## Project Structure
 
 ```
