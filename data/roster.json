@@ -1,0 +1,556 @@
+{
+  "version": 1,
+  "generated": 1786380593568,
+  "label": "V FOR X — The Roster (seed directory)",
+  "helpers": [
+    {
+      "id": "ROSTER-001",
+      "version": 1,
+      "handle": "lex-mira",
+      "category": "lawyer",
+      "specialties": [
+        "asylum & refugee law",
+        "detention appeals",
+        "family reunification"
+      ],
+      "country": "DEU",
+      "region": "Berlin / remote",
+      "languages": [
+        "en",
+        "de",
+        "ar",
+        "fa"
+      ],
+      "availability": "available",
+      "contact": {
+        "email": "lex-mira@protonmail.com",
+        "signal": "@lex-mira.42",
+        "pgp": "0x9F2A7C1D"
+      },
+      "credentials": [
+        {
+          "claim": "Rechtsanwältin — Berlin Chamber of Lawyers #218744",
+          "evidence": "https://www.rechtsanwaltskammer-berlin.de/verify/218744",
+          "since": 2013
+        },
+        {
+          "claim": "UNHCR partner attorney (asylum roster)",
+          "since": 2017
+        }
+      ],
+      "vouches": [
+        {
+          "helperId": "ROSTER-001",
+          "byHandle": "doc-haddad",
+          "byPublicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEnmZz6+oKN8LYX5Z+hAtI5ZTIdhjVgEf/f7wSRPYNpjNkW9aOdk5cDMkccEJbUlmHdOH9j4xiQHY/oC6jfY4vpQ==",
+          "relationship": "Worked together on a cross-border medical evacuation",
+          "note": "I have worked directly with lex-mira and can vouch for their skill and integrity in this work.",
+          "ts": 1748899200000,
+          "signature": "OHQsN6Fve+Xa+74Hqnqjhd5F0Rb1bgPp8cr+o8vPLgdG7eZ0IxJGO/EZqQGHb6FrN4q7+G7iVowsIw7UhdLUzw=="
+        },
+        {
+          "helperId": "ROSTER-001",
+          "byHandle": "sec-tavares",
+          "byPublicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEPctd5fuGqzl9feRM0YJ1LTEreawmJuMnAzTb3PYKNgWj2ITNzOnd7DWjzUprJg6106K2igHv6OZy0t9Jz4znXQ==",
+          "relationship": "Paired on a digital-security training for at-risk journalists",
+          "note": "I have worked directly with lex-mira and can vouch for their skill and integrity in this work.",
+          "ts": 1749072000000,
+          "signature": "HR2UiAmhSlqG2FrcbRtBHaJgM4WLsKGY84Xud+pmKeUZn+LbuIqhPzg3iiV+KY2Zsk1r5eklThL8vl39tKFTEg=="
+        }
+      ],
+      "publicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE7QPqzLsoqPq0QxT+LDq/BWA4VQQGmAMndR1YHLKkT7ojXj+t/lMiNPhgcKIMUBbcqxOd0f1Q8jBBFgGvViA6hQ==",
+      "ts": 1748726400000,
+      "signature": "6+AXlT/87Tk36vPVX5uh7coM0j/MI8YR+axxC+0yTqIjqVWneWz3T4y4D0bjLR4FnFyu3m1t/WlAZwfUIXRpMA=="
+    },
+    {
+      "id": "ROSTER-002",
+      "version": 1,
+      "handle": "doc-haddad",
+      "category": "doctor",
+      "specialties": [
+        "war surgery",
+        "field triage",
+        "trauma stabilization"
+      ],
+      "country": "JOR",
+      "region": "Amman / cross-border",
+      "languages": [
+        "en",
+        "ar"
+      ],
+      "availability": "limited",
+      "contact": {
+        "signal": "@doc-haddad",
+        "email": "haddad.field@tutanota.com"
+      },
+      "credentials": [
+        {
+          "claim": "MD — Damascus University (2009); Jordan Medical Council",
+          "since": 2010
+        },
+        {
+          "claim": "MSF surgical roster (field deployable)",
+          "evidence": "MSF partner registry — ref MH-2291",
+          "since": 2016
+        }
+      ],
+      "vouches": [
+        {
+          "helperId": "ROSTER-002",
+          "byHandle": "scribe-okafor",
+          "byPublicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEuk0+aT6NDK3gMFKYqUr+6Gjhiw53D45+78tTdMGFyt5q1G7quUaLXeYLzr+CyJNq8BsXd+h7PGnF6d6K1I3Mjw==",
+          "relationship": "Paired on a digital-security training for at-risk journalists",
+          "note": "I have worked directly with doc-haddad and can vouch for their skill and integrity in this work.",
+          "ts": 1749072000000,
+          "signature": "gmt7uUVqkryzsz8dj0lanpuesuY18UOrAHFUISkQvAgYnsQD2SehwD51i0NwkHU5VgPCd/foGDal9uxCMZgyQw=="
+        },
+        {
+          "helperId": "ROSTER-002",
+          "byHandle": "lex-mira",
+          "byPublicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE7QPqzLsoqPq0QxT+LDq/BWA4VQQGmAMndR1YHLKkT7ojXj+t/lMiNPhgcKIMUBbcqxOd0f1Q8jBBFgGvViA6hQ==",
+          "relationship": "Worked together on a cross-border medical evacuation",
+          "note": "I have worked directly with doc-haddad and can vouch for their skill and integrity in this work.",
+          "ts": 1748899200000,
+          "signature": "niUB/FuV6QE/4UHggLaQ4PO4HPjth923XFLwu2uqOpkNPLcgdrEiwRjE4NxVzB4kYXyj1HHSW/HDnQi+zTSJGA=="
+        }
+      ],
+      "publicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEnmZz6+oKN8LYX5Z+hAtI5ZTIdhjVgEf/f7wSRPYNpjNkW9aOdk5cDMkccEJbUlmHdOH9j4xiQHY/oC6jfY4vpQ==",
+      "ts": 1748812800000,
+      "signature": "j+tJa3F4uinLgvKXvd4o3n3Ikj+6dQtynkHtlRNAyKm4lx3MAIWJAUI3oDuULggsncrqSrpzFAQ3uD04+8H+bQ=="
+    },
+    {
+      "id": "ROSTER-003",
+      "version": 1,
+      "handle": "scribe-okafor",
+      "category": "journalist",
+      "specialties": [
+        "conflict reporting",
+        "OSINT verification",
+        "source protection"
+      ],
+      "country": "NGA",
+      "region": "Lagos / West Africa",
+      "languages": [
+        "en",
+        "ha",
+        "fr"
+      ],
+      "availability": "available",
+      "contact": {
+        "email": "okafor.press@protonmail.com",
+        "pgp": "0x77AE12BD",
+        "website": "okafor-press.example"
+      },
+      "credentials": [
+        {
+          "claim": "Member — International Federation of Journalists (IFJ #NG-44120)",
+          "since": 2018
+        },
+        {
+          "claim": "BBC Academy OSINT verification certificate",
+          "since": 2021
+        }
+      ],
+      "vouches": [
+        {
+          "helperId": "ROSTER-003",
+          "byHandle": "vox-amari",
+          "byPublicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEd95IhNhTiRSLnFJM6/l6N5v8fy9kKGf3DbL6AwFmV+FSah4TXaFtEvMFt6VqXsXhOdcLq55ytyiqWI6C/RxNQw==",
+          "relationship": "Joint field deployment (power + water systems)",
+          "note": "I have worked directly with scribe-okafor and can vouch for their skill and integrity in this work.",
+          "ts": 1749331200000,
+          "signature": "UNKNiV50hRhzj86OIufbJuskcgUOQh1mWha2GxRTpVovBq+Db2XeFlIMxxorXm5NQdd5fOoFD9MnrsQYUhfc1Q=="
+        },
+        {
+          "helperId": "ROSTER-003",
+          "byHandle": "doc-haddad",
+          "byPublicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEnmZz6+oKN8LYX5Z+hAtI5ZTIdhjVgEf/f7wSRPYNpjNkW9aOdk5cDMkccEJbUlmHdOH9j4xiQHY/oC6jfY4vpQ==",
+          "relationship": "Paired on a digital-security training for at-risk journalists",
+          "note": "I have worked directly with scribe-okafor and can vouch for their skill and integrity in this work.",
+          "ts": 1749072000000,
+          "signature": "8e5/rM1qhZqJK9heEVdjt6a7xrOfWPrRP1Fbwm25M1cnCb115rCpqFhHEl1lsLHxOj24uJth1EaCWNVr/lkfHA=="
+        }
+      ],
+      "publicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEuk0+aT6NDK3gMFKYqUr+6Gjhiw53D45+78tTdMGFyt5q1G7quUaLXeYLzr+CyJNq8BsXd+h7PGnF6d6K1I3Mjw==",
+      "ts": 1748899200000,
+      "signature": "EA4KzZROandfbgGSQ1jTLkAOVN+pnG6ZYVJbvpD4HtLFULenTB22TuCTGmvA9WW/y5WyVBRihfpBWGvL6OqAGw=="
+    },
+    {
+      "id": "ROSTER-004",
+      "version": 1,
+      "handle": "sec-tavares",
+      "category": "digital_security",
+      "specialties": [
+        "threat modelling",
+        "device hardening",
+        "secure comms training"
+      ],
+      "country": "BRA",
+      "region": "São Paulo / Latin America",
+      "languages": [
+        "pt",
+        "en",
+        "es"
+      ],
+      "availability": "available",
+      "contact": {
+        "signal": "@sec-tavares",
+        "email": "tavares.sec@protonmail.com",
+        "website": "tavares-train.example"
+      },
+      "credentials": [
+        {
+          "claim": "Access Now Digital Security Helpline — certified trainer",
+          "since": 2019
+        },
+        {
+          "claim": "EFF Surveillance Self-Defense facilitator",
+          "since": 2020
+        }
+      ],
+      "vouches": [
+        {
+          "helperId": "ROSTER-004",
+          "byHandle": "lex-mira",
+          "byPublicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE7QPqzLsoqPq0QxT+LDq/BWA4VQQGmAMndR1YHLKkT7ojXj+t/lMiNPhgcKIMUBbcqxOd0f1Q8jBBFgGvViA6hQ==",
+          "relationship": "Paired on a digital-security training for at-risk journalists",
+          "note": "I have worked directly with sec-tavares and can vouch for their skill and integrity in this work.",
+          "ts": 1749072000000,
+          "signature": "yMJyvlRqEX9VyVUvx+rmbHc+YoALlq7t1fUpl4nbl+JyHIPRKGdfuHfhrDjKXxoWV98USE/KFUogjmf5/6vC6Q=="
+        },
+        {
+          "helperId": "ROSTER-004",
+          "byHandle": "anchor-li",
+          "byPublicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEBpG/ieKd9qnLlFsgCowExszXRNO/DXgtAQGgfInt2mLFYUecEm3crgRoz9f5qUrYuKqJYYkBmoqUaxD5xy/y8Q==",
+          "relationship": "Co-delivered legal-aid clinics for displaced families",
+          "note": "I have worked directly with sec-tavares and can vouch for their skill and integrity in this work.",
+          "ts": 1749504000000,
+          "signature": "MlVNIYfdEX7v/LmtFmI9xTZKRod5tKCuIGAfalWT+lsfpv+aDNyFVgSNjSfbJiJEBIN1dKBSbka09Ks2SSR6JQ=="
+        }
+      ],
+      "publicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEPctd5fuGqzl9feRM0YJ1LTEreawmJuMnAzTb3PYKNgWj2ITNzOnd7DWjzUprJg6106K2igHv6OZy0t9Jz4znXQ==",
+      "ts": 1748985600000,
+      "signature": "k8dGQCNEl1VFbmM6pQVQ15SmUGfVG3LEZMwqik4kisCUYPgx3bEYj6UHn4aXJU02bcR6P883Itggtj95UNdBjA=="
+    },
+    {
+      "id": "ROSTER-005",
+      "version": 1,
+      "handle": "vox-amari",
+      "category": "translator",
+      "specialties": [
+        "legal interpretation",
+        "medical interpretation",
+        "Tigrinya / Amharic"
+      ],
+      "country": "ETH",
+      "region": "Addis Ababa / remote",
+      "languages": [
+        "am",
+        "ti",
+        "en",
+        "ar"
+      ],
+      "availability": "limited",
+      "contact": {
+        "email": "amari.translate@protonmail.com",
+        "signal": "@vox-amari"
+      },
+      "credentials": [
+        {
+          "claim": "NAJIT-aligned court interpreter (EN↔AM/TI)",
+          "since": 2020
+        }
+      ],
+      "vouches": [
+        {
+          "helperId": "ROSTER-005",
+          "byHandle": "sec-tavares",
+          "byPublicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEPctd5fuGqzl9feRM0YJ1LTEreawmJuMnAzTb3PYKNgWj2ITNzOnd7DWjzUprJg6106K2igHv6OZy0t9Jz4znXQ==",
+          "relationship": "Coordinated an aid convoy through a contested corridor",
+          "note": "I have worked directly with vox-amari and can vouch for their skill and integrity in this work.",
+          "ts": 1749417600000,
+          "signature": "nGsGN3rxeYE9kMqA+bkLSZ581Ubt6yO64S4EBGoaFVceCFsU0EyowEsA2rcDX5bwNS44AaSFNe2QA/wZsfc8UQ=="
+        }
+      ],
+      "publicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEd95IhNhTiRSLnFJM6/l6N5v8fy9kKGf3DbL6AwFmV+FSah4TXaFtEvMFt6VqXsXhOdcLq55ytyiqWI6C/RxNQw==",
+      "ts": 1749072000000,
+      "signature": "XKOmDFuJdXuhIwGm9+Brz0U977TdhQPFe2Xza3tYz72ntGy9QZVVOg4v+Qfe/wra1DBuDrsJKXoEutW+xwiCag=="
+    },
+    {
+      "id": "ROSTER-006",
+      "version": 1,
+      "handle": "anchor-li",
+      "category": "counselor",
+      "specialties": [
+        "trauma-focused therapy",
+        "PTSD",
+        "survivor support"
+      ],
+      "country": "TWN",
+      "region": "Taipei / remote",
+      "languages": [
+        "zh",
+        "en"
+      ],
+      "availability": "available",
+      "contact": {
+        "email": "anchor.li@tutanota.com",
+        "signal": "@anchor-li"
+      },
+      "credentials": [
+        {
+          "claim": "Licensed clinical psychologist — Taiwan RCP #PS-0912",
+          "evidence": "https://rcp.ntpc.gov.tw/verify/PS-0912",
+          "since": 2014
+        },
+        {
+          "claim": "IFRC psychosocial support volunteer",
+          "since": 2019
+        }
+      ],
+      "vouches": [
+        {
+          "helperId": "ROSTER-006",
+          "byHandle": "sec-tavares",
+          "byPublicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEPctd5fuGqzl9feRM0YJ1LTEreawmJuMnAzTb3PYKNgWj2ITNzOnd7DWjzUprJg6106K2igHv6OZy0t9Jz4znXQ==",
+          "relationship": "Co-delivered legal-aid clinics for displaced families",
+          "note": "I have worked directly with anchor-li and can vouch for their skill and integrity in this work.",
+          "ts": 1749504000000,
+          "signature": "bjB+a6p/2xSKpabT7AhSDltcRLOvzUs6ZGsrJUzcn4sMVwz0SFJf7v38CJfqXBv1lwbytxAjp/TkAjMSEyicpg=="
+        },
+        {
+          "helperId": "ROSTER-006",
+          "byHandle": "route-ndiaye",
+          "byPublicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEFigEyUiJq772VN6XcO0EbxjpBx/vSwiNdq3yrwD5FEHXjUbMrSeWgHBlPb5m4TT7joHVuaAo5zKBy5XyGzUhtg==",
+          "relationship": "Shared an interpretation desk during asylum intake",
+          "note": "I have worked directly with anchor-li and can vouch for their skill and integrity in this work.",
+          "ts": 1749849600000,
+          "signature": "WcW/ov0Uo3utVxkcNj5uMWuYeqWasEkj5uVJjuLpEYvmy9KsodLY6APozXYRstoDFpmgnMU0dIyI0feP7CQbiA=="
+        }
+      ],
+      "publicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEBpG/ieKd9qnLlFsgCowExszXRNO/DXgtAQGgfInt2mLFYUecEm3crgRoz9f5qUrYuKqJYYkBmoqUaxD5xy/y8Q==",
+      "ts": 1749158400000,
+      "signature": "657txaIFbq2QGcZGJiBcfYES+bvLPyLWviItgNmPpMagcc6NCFG0PCz/U6qvy1WTZoyMKQw2NF/xZRO4859qrg=="
+    },
+    {
+      "id": "ROSTER-007",
+      "version": 1,
+      "handle": "wrench-koirala",
+      "category": "engineer",
+      "specialties": [
+        "solar microgrids",
+        "water purification",
+        "shelter retrofit"
+      ],
+      "country": "NPL",
+      "region": "Kathmandu / field deployable",
+      "languages": [
+        "ne",
+        "en",
+        "hi"
+      ],
+      "availability": "available",
+      "contact": {
+        "email": "koirala.build@protonmail.com",
+        "signal": "@wrench-k"
+      },
+      "credentials": [
+        {
+          "claim": "MS Civil Eng — Tribhuvan University; Nepal Engineers' Council #NEC-4471",
+          "since": 2012
+        },
+        {
+          "claim": "Rotary/Engineers Without Borders field deployments (×4)",
+          "evidence": "EWB-Nepal roster ref 2023-K4",
+          "since": 2017
+        }
+      ],
+      "vouches": [
+        {
+          "helperId": "ROSTER-007",
+          "byHandle": "doc-haddad",
+          "byPublicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEnmZz6+oKN8LYX5Z+hAtI5ZTIdhjVgEf/f7wSRPYNpjNkW9aOdk5cDMkccEJbUlmHdOH9j4xiQHY/oC6jfY4vpQ==",
+          "relationship": "Coordinated an aid convoy through a contested corridor",
+          "note": "I have worked directly with wrench-koirala and can vouch for their skill and integrity in this work.",
+          "ts": 1749417600000,
+          "signature": "HRnjoL9ffqnv85QPjxUFANZUpHMwqj1GB5RjaEBYrgFJqRHZJO0jmPmWhNZ+xngQoh+kH6tgJBLrbxD/yEVkHQ=="
+        },
+        {
+          "helperId": "ROSTER-007",
+          "byHandle": "route-ndiaye",
+          "byPublicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEFigEyUiJq772VN6XcO0EbxjpBx/vSwiNdq3yrwD5FEHXjUbMrSeWgHBlPb5m4TT7joHVuaAo5zKBy5XyGzUhtg==",
+          "relationship": "Co-facilitated a psychosocial support rotation",
+          "note": "I have worked directly with wrench-koirala and can vouch for their skill and integrity in this work.",
+          "ts": 1749936000000,
+          "signature": "YzCIrehrSYqujlcOVMaPlLe7RGOKV/3jPXMSKOfaZUwv+E1ZNgsU27pWd6rYC/6ZIez6KAqHi9sqluqg4oJ3DQ=="
+        }
+      ],
+      "publicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaiD0BO2nA2Cuzo+0+2GQoDS3Z4xiq/pPx4+TCowtLxbUG4NNOshfuKwfRdELcRpSr0P6ORbD+M/QyZ38MdDT7Q==",
+      "ts": 1749244800000,
+      "signature": "UuD6Jj1f8uLbzIm5yKjMy9ZlFVZBFp3Ic6bI/KzIDIz3o4GzTOi8L1D0Iz6Z6Vek5CpakfzFu59OEvBwsN/ESg=="
+    },
+    {
+      "id": "ROSTER-008",
+      "version": 1,
+      "handle": "route-ndiaye",
+      "category": "logistics",
+      "specialties": [
+        "humanitarian convoy routing",
+        "warehousing",
+        "customs/duty exemptions"
+      ],
+      "country": "SEN",
+      "region": "Dakar / Sahel",
+      "languages": [
+        "fr",
+        "wo",
+        "en"
+      ],
+      "availability": "limited",
+      "contact": {
+        "email": "ndiaye.route@protonmail.com",
+        "signal": "@route-ndiaye"
+      },
+      "credentials": [
+        {
+          "claim": "Certified — Logistics Cluster (WFP) field logistics track",
+          "since": 2020
+        },
+        {
+          "claim": "CILT associate member (Chartered Institute L&A) #SN-2210",
+          "since": 2021
+        }
+      ],
+      "vouches": [
+        {
+          "helperId": "ROSTER-008",
+          "byHandle": "scribe-okafor",
+          "byPublicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEuk0+aT6NDK3gMFKYqUr+6Gjhiw53D45+78tTdMGFyt5q1G7quUaLXeYLzr+CyJNq8BsXd+h7PGnF6d6K1I3Mjw==",
+          "relationship": "Worked together on a cross-border medical evacuation",
+          "note": "I have worked directly with route-ndiaye and can vouch for their skill and integrity in this work.",
+          "ts": 1749590400000,
+          "signature": "jOc7xCADB3eMVOl//IW0z2HSErQfQVDWRvCfW0MisDxnGUR00KRYzXubSZT9jS12UEH5jQ+OqqyI9n2G+VJtlQ=="
+        }
+      ],
+      "publicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEFigEyUiJq772VN6XcO0EbxjpBx/vSwiNdq3yrwD5FEHXjUbMrSeWgHBlPb5m4TT7joHVuaAo5zKBy5XyGzUhtg==",
+      "ts": 1749331200000,
+      "signature": "Po5E0ocDcuuTdlcIe/SixONozxo7mUuyEmefbxgfjMRFS6oLzA+AvHNjOuPktK1eQzEZLnHSWYwbJUt/0WvqCg=="
+    },
+    {
+      "id": "ROSTER-009",
+      "version": 1,
+      "handle": "lex-pereira",
+      "category": "lawyer",
+      "specialties": [
+        "digital rights",
+        "press freedom defense",
+        "SLAPP response"
+      ],
+      "country": "PRT",
+      "region": "Lisbon / remote",
+      "languages": [
+        "pt",
+        "en",
+        "es",
+        "fr"
+      ],
+      "availability": "available",
+      "contact": {
+        "email": "pereira.rights@protonmail.com",
+        "pgp": "0x4C3B9E0F",
+        "signal": "@lex-pereira"
+      },
+      "credentials": [
+        {
+          "claim": "Advogada — Ordem dos Advogados Portugueses #55821",
+          "evidence": "https://portal.oa.pt/verify/55821",
+          "since": 2015
+        },
+        {
+          "claim": "EFF cooperating attorney network",
+          "since": 2022
+        }
+      ],
+      "vouches": [
+        {
+          "helperId": "ROSTER-009",
+          "byHandle": "sec-tavares",
+          "byPublicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEPctd5fuGqzl9feRM0YJ1LTEreawmJuMnAzTb3PYKNgWj2ITNzOnd7DWjzUprJg6106K2igHv6OZy0t9Jz4znXQ==",
+          "relationship": "Paired on a digital-security training for at-risk journalists",
+          "note": "I have worked directly with lex-pereira and can vouch for their skill and integrity in this work.",
+          "ts": 1749763200000,
+          "signature": "WIVlI/ViLzltqAuy7nis+bVakKyZF9oEQmrGvLZYlOJ78n7KuqUS/j5rAVaDFuNU9x4hZKAd1le9TCq/9cqrEQ=="
+        },
+        {
+          "helperId": "ROSTER-009",
+          "byHandle": "anchor-li",
+          "byPublicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEBpG/ieKd9qnLlFsgCowExszXRNO/DXgtAQGgfInt2mLFYUecEm3crgRoz9f5qUrYuKqJYYkBmoqUaxD5xy/y8Q==",
+          "relationship": "Co-facilitated a psychosocial support rotation",
+          "note": "I have worked directly with lex-pereira and can vouch for their skill and integrity in this work.",
+          "ts": 1749936000000,
+          "signature": "lm+CANLuWqXxo2alAiFonp5/5HXIow19RwZ4t6RutgufuJHkwydEnIuDcFDiozJJMpF/bitCnjPV8DckSWFLFg=="
+        }
+      ],
+      "publicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAESrb995iVgVpWytAqLfqDRxWremkPzL8JZrZiDrHs62BMa5fjioaQcBYGFqtj+Hd1oyz2WYfqZyoGKnfsSy4lEQ==",
+      "ts": 1749417600000,
+      "signature": "eFoRtGgLCZ5vgSfnpwvG/rd7pNtDV7Uv5WTgmPEo2UfLsUWoFGVicl1fsq1lLlekpAbOK5dLepaLJ9lEj29HXQ=="
+    },
+    {
+      "id": "ROSTER-010",
+      "version": 1,
+      "handle": "doc-rivera",
+      "category": "doctor",
+      "specialties": [
+        "infectious disease",
+        "outbreak response",
+        "maternal health"
+      ],
+      "country": "COL",
+      "region": "Bogotá / field deployable",
+      "languages": [
+        "es",
+        "en",
+        "pt"
+      ],
+      "availability": "available",
+      "contact": {
+        "email": "rivera.md@tutanota.com",
+        "signal": "@doc-rivera"
+      },
+      "credentials": [
+        {
+          "claim": "MD — Universidad Nacional de Colombia; Reprobús specialist registry",
+          "since": 2011
+        },
+        {
+          "claim": "PAHO outbreak response roster",
+          "evidence": "PAHO partner ref COL-RV-08",
+          "since": 2018
+        }
+      ],
+      "vouches": [
+        {
+          "helperId": "ROSTER-010",
+          "byHandle": "wrench-koirala",
+          "byPublicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaiD0BO2nA2Cuzo+0+2GQoDS3Z4xiq/pPx4+TCowtLxbUG4NNOshfuKwfRdELcRpSr0P6ORbD+M/QyZ38MdDT7Q==",
+          "relationship": "Coordinated an aid convoy through a contested corridor",
+          "note": "I have worked directly with doc-rivera and can vouch for their skill and integrity in this work.",
+          "ts": 1750108800000,
+          "signature": "fD5lrt5my+Ke1ldMMd1/HG6bxvOgvjFl4r+NHvaHDGEK2WAjoiiFyDNH/uy80+KLrGi5m7lHEGdiOPHwAK2Stw=="
+        },
+        {
+          "helperId": "ROSTER-010",
+          "byHandle": "lex-pereira",
+          "byPublicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAESrb995iVgVpWytAqLfqDRxWremkPzL8JZrZiDrHs62BMa5fjioaQcBYGFqtj+Hd1oyz2WYfqZyoGKnfsSy4lEQ==",
+          "relationship": "Worked together on a cross-border medical evacuation",
+          "note": "I have worked directly with doc-rivera and can vouch for their skill and integrity in this work.",
+          "ts": 1750281600000,
+          "signature": "CMuA7iqQ29CXOzSo5ICsPrsIHTFIlQkRur+nfRz4NnA3Zab/QcrZL2qol8iAMIEA9kFtvVq3CW71fcCn5pcmQw=="
+        }
+      ],
+      "publicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEfPrRHNXO0GNqleL7HqIH5OyYDgRsoHLnSJWxf3hxh0IMnHybmtCGE5A9MH/aAkodupcLaAFf13hyiRIOP/0GEA==",
+      "ts": 1749504000000,
+      "signature": "rs21DWaGMMGSeusO89ihpVJRWphZHX00zx3E3c35RL+pH+V32ssZk8n3QoMPs1eI9GUOMw9lhA8wcVMn7JLCzg=="
+    }
+  ]
+}

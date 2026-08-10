@@ -389,6 +389,13 @@ export const PAGE_META: Record<string, PageMeta> = {
     path: "/the-sentinel/",
   },
 
+  "/the-roster/": {
+    title: "The Roster — Vetted Helper Directory",
+    description:
+      "A crisis-response yellow pages of vetted helpers — lawyers, doctors, journalists, digital-security trainers. Each entry is self-attested and peer-vouched with cryptographically signed credentials (ECDSA-P256). Signed JSON, client-side verification, no backend. Any copy of the site verifies the whole roster offline.",
+    path: "/the-roster/",
+  },
+
   "/the-mirror/": {
     title: "The Mirror — One-Command Deployment Kit",
     description:
