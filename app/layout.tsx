@@ -3,6 +3,7 @@ import "./globals.css";
 import BranchNav from "@/components/shared/BranchNav";
 import ServiceWorkerRegister from "@/components/shared/ServiceWorkerRegister";
 import GlobalSearch from "@/components/shared/GlobalSearch";
+import EasterEggPopup from "@/components/shared/EasterEggPopup";
 import { SITE } from "@/lib/seo";
 
 export const metadata: Metadata = {
@@ -88,6 +89,7 @@ export default function RootLayout({
           <main className="flex-1 min-w-0 max-w-full">{children}</main>
         </div>
         <GlobalSearch />
+        <EasterEggPopup />
       </body>
     </html>
   );
