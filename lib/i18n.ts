@@ -104,6 +104,7 @@ export const NAV_T: Record<Lang, Record<string, string>> = {
     "nav.the-resistance": "RESISTANCE",
     "nav.the-war-room": "WAR ROOM",
     "nav.the-sentinel": "SENTINEL",
+    "nav.the-pulse": "PULSE",
     // UI
     "ui.navigate": "Navigate",
     "ui.search": "Search",
