@@ -316,4 +316,6 @@ export const branchLinks = [
   { href: "/the-microscope/", label: "MICROSCOPE", code: "74" },
   { href: "/the-scoreboard/", label: "SCOREBOARD", code: "75" },
   { href: "/the-tipping-point/", label: "TIPPING POINT", code: "76" },
+  { href: "/the-docs/", label: "DOCS", code: "77" },
+  { href: "/the-mirror-ring/", label: "MIRROR RING", code: "78" },
 ] as const;

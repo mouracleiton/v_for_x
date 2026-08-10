@@ -31,9 +31,10 @@ const MAX_CACHE_BYTES = 50 * 1024 * 1024; // 50 MB budget
 const SECTIONS = [
   "equation", "fortress", "protocol-x", "registry", "sorrow-map",
   "the-act", "the-allocator", "the-api", "the-archive", "the-briefing",
-  "the-choice", "the-dashboard", "the-exodus", "the-fronts", "the-index",
-  "the-ledger", "the-lens", "the-mask", "the-matrix", "the-signal",
-  "the-stories", "the-tactics", "the-timeline", "the-trail", "the-web",
+  "the-choice", "the-dashboard", "the-docs", "the-exodus", "the-fronts",
+  "the-index", "the-ledger", "the-lens", "the-mask", "the-matrix",
+  "the-mirror-ring", "the-signal", "the-stories", "the-tactics",
+  "the-timeline", "the-trail", "the-web",
 ];
 
 const PRECACHE = [
@@ -147,7 +148,8 @@ function responseSize(res) {
   return 0; // unknown — refined below if needed
 }
 
-/** Store a response in the cache and record its byte size for budgeting. */
+/** Store a response in the cache and record its byte size for budgeting.
+    Returns the recorded byte size (0 if unknown). */
 async function putInCache(cache, request, response) {
   let size = responseSize(response);
   try {
@@ -161,11 +163,12 @@ async function putInCache(cache, request, response) {
       }
     }
   } catch (_) {
-    return;
+    return 0;
   }
   const url = typeof request === "string" ? request : request.url;
   await metaPut(url, size);
   await evictIfNeeded(cache);
+  return size;
 }
 
 async function evictIfNeeded(cache) {
@@ -437,7 +440,189 @@ self.addEventListener("message", (event) => {
     }
     return;
   }
+
+  if (type === "VFX_BUNDLE_START") {
+    const baseUrl = data.baseUrl || self.location.origin + self.location.pathname;
+    event.waitUntil?.(runOfflineBundle(baseUrl, event.source));
+    return;
+  }
+
+  if (type === "VFX_BUNDLE_STOP") {
+    bundleStopped = true;
+    if (event.source && "postMessage" in event.source) {
+      event.source.postMessage({ type: "VFX_BUNDLE_STOPPED" });
+    }
+    return;
+  }
+
+  if (type === "VFX_BUNDLE_STATUS") {
+    event.waitUntil?.(
+      (async () => {
+        const info = await bundleStatus();
+        if (event.source && "postMessage" in event.source) {
+          event.source.postMessage({ type: "VFX_BUNDLE_STATUS_RESP", ...info });
+        }
+      })()
+    );
+    return;
+  }
 });
+
+/* ═══════════════════════════════════════════════════════════════
+   OFFLINE BRIEFCASE — crawl + cache the whole static platform
+   ═══════════════════════════════════════════════════════════════ */
+
+const BUNDLE_MAX_PAGES = 400;
+const BUNDLE_SKIP = ["/embed/", "/print/"];
+let bundleRunning = false;
+let bundleStopped = false;
+
+/** Absolute same-origin URL from a relative/absolute href, or null. */
+function bundleNormalize(href, baseUrl) {
+  try {
+    const u = new URL(href, baseUrl);
+    if (u.origin !== self.location.origin) return null;
+    if (BUNDLE_SKIP.some((seg) => u.pathname.includes(seg))) return null;
+    // Static export: "/" == "/index.html"; normalize page URLs to trailing slash.
+    if (!u.pathname.includes(".")) {
+      if (!u.pathname.endsWith("/")) u.pathname += "/";
+    }
+    u.hash = "";
+    return u.href;
+  } catch (_) {
+    return null;
+  }
+}
+
+/** Extract same-origin href/src URLs from an HTML response body. */
+async function bundleExtractLinks(res) {
+  try {
+    const text = await res.clone().text();
+    const found = new Set();
+    const re = /\b(?:href|src)\s*=\s*["']([^"']+)["']/gi;
+    let m;
+    while ((m = re.exec(text)) !== null) {
+      const url = bundleNormalize(m[1], self.location.href);
+      if (url) found.add(url);
+    }
+    return [...found];
+  } catch (_) {
+    return [];
+  }
+}
+
+/** Fetch + cache one URL (records size for the budget), returns bytes. */
+async function bundleCacheUrl(cache, url) {
+  if (bundleStopped) return 0;
+  try {
+    const cached = await cache.match(url);
+    if (cached) return 0; // already bundled
+    const res = await fetch(url, { cache: "reload" });
+    if (!res || !res.ok) return 0;
+    const before = await putInCache(cache, url, res);
+    return before || 0;
+  } catch (_) {
+    return 0;
+  }
+}
+
+async function runOfflineBundle(baseUrl, source) {
+  if (bundleRunning) return;
+  bundleRunning = true;
+  bundleStopped = false;
+  const cache = await caches.open(CACHE_NAME);
+  const visited = new Set();
+  let bytes = 0;
+  const queue = [];
+  // Seed: the shell, every section, plus the offline manifest + worker.
+  for (const s of SECTIONS) {
+    const u = bundleNormalize(`./${s}/`, baseUrl);
+    if (u) queue.push(u);
+  }
+  for (const extra of ["./", "./manifest.json", "./sw.js"]) {
+    const u = bundleNormalize(extra, baseUrl);
+    if (u) queue.push(u);
+  }
+
+  let done = 0;
+  while (queue.length > 0 && !bundleStopped) {
+    if (done >= BUNDLE_MAX_PAGES) break;
+    const url = queue.shift();
+    if (!url || visited.has(url)) continue;
+    visited.add(url);
+    done += 1;
+
+    let isHtml = false;
+    try {
+      const cached = await cache.match(url);
+      if (cached) {
+        isHtml = cached.headers.get("content-type")?.includes("text/html") || url.endsWith("/");
+      } else {
+        const res = await fetch(url, { cache: "reload" });
+        if (res && res.ok) {
+          const saved = await putInCache(cache, url, res);
+          bytes += saved || 0;
+          isHtml = res.headers.get("content-type")?.includes("text/html") || url.endsWith("/");
+        }
+      }
+      if (isHtml) {
+        const res = await cache.match(url);
+        if (res) {
+          const links = await bundleExtractLinks(res);
+          for (const link of links) {
+            if (!visited.has(link)) queue.push(link);
+          }
+        }
+      }
+    } catch (_) {
+      /* skip failing URL */
+    }
+
+    if (done % 10 === 0 || queue.length === 0) {
+      try {
+        if (source && "postMessage" in source) {
+          source.postMessage({
+            type: "VFX_BUNDLE_PROGRESS",
+            done,
+            total: done + queue.length,
+            bytes,
+            stopped: bundleStopped,
+          });
+        }
+      } catch (_) {
+        /* client may be gone */
+      }
+    }
+  }
+
+  bundleRunning = false;
+  try {
+    if (source && "postMessage" in source) {
+      source.postMessage({
+        type: bundleStopped ? "VFX_BUNDLE_STOPPED" : "VFX_BUNDLE_DONE",
+        urls: visited.size,
+        bytes,
+        cacheName: CACHE_NAME,
+      });
+    }
+  } catch (_) {
+    /* ignore */
+  }
+}
+
+/** Estimated cached bytes + URL count for the current cache. */
+async function bundleStatus() {
+  try {
+    const cache = await caches.open(CACHE_NAME);
+    const keys = await cache.keys();
+    let bytes = 0;
+    const metas = await metaGetAll();
+    for (const m of metas) bytes += m.size || 0;
+    return { urlsCached: keys.length, bytes, cacheName: CACHE_NAME };
+  } catch (_) {
+    return { urlsCached: 0, bytes: 0, cacheName: CACHE_NAME };
+  }
+}
 
 /** Proactively cache every resource relevant to a single country. */
 async function cacheCountryPack(iso3, name) {

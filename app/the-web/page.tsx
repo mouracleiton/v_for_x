@@ -19,6 +19,29 @@ import {
   broadcastSignal,
   type SignalPayload,
 } from "@/lib/signal-relay";
+import {
+  FileReceiver,
+  buildDoneFrame,
+  buildInitFrame,
+  decryptDeadDropFile,
+  encryptChunk,
+  isFileControl,
+  prepareFileTransfer,
+  type FileMeta,
+} from "@/lib/file-transfer";
+import {
+  dequeueFor,
+  enqueue,
+  expireAll,
+  formatMeshMail,
+  forward,
+  markSeen,
+  newMeshId,
+  peerHash,
+  pendingFor,
+  seen,
+  type MeshMessage,
+} from "@/lib/mesh-store";
 
 interface P2PMessage {
   id: string;
@@ -45,6 +68,21 @@ interface DeadDrop {
   enc?: string;
   /** AES-GCM IV hex (12 bytes). */
   iv?: string;
+  /** File drops store encrypted chunks instead of a message. */
+  kind?: "file";
+  fileMeta?: { name: string; mime: string; size: number; sha256: string };
+  payloadChunksB64?: string[];
+  keyB64?: string;
+}
+
+interface ReceivedFile {
+  id: string;
+  name: string;
+  mime: string;
+  size: number;
+  sha256: string;
+  verified: boolean;
+  bytes: Uint8Array<ArrayBuffer>;
 }
 
 export default function TeiaPage() {
@@ -76,6 +114,56 @@ export default function TeiaPage() {
   const sdpRef = useRef("");
   const clipStopRef = useRef<(() => void) | null>(null);
   const signalBusStopRef = useRef<(() => void) | null>(null);
+
+  // File transfer state
+  const [sendFile, setSendFile] = useState<File | null>(null);
+  const [sendMeta, setSendMeta] = useState<FileMeta | null>(null);
+  const [sendProgress, setSendProgress] = useState({ sent: 0, total: 0 });
+  const [sending, setSending] = useState(false);
+  const [receivedFiles, setReceivedFiles] = useState<ReceivedFile[]>([]);
+  const receiverRef = useRef<FileReceiver | null>(null);
+  const fileBusyRef = useRef(false);
+
+  // Mesh store-and-forward state
+  const [meshTo, setMeshTo] = useState("");
+  const [meshBody, setMeshBody] = useState("");
+  const [meshPending, setMeshPending] = useState<MeshMessage[]>([]);
+  const [meshLog, setMeshLog] = useState<string[]>([]);
+  const [myPeerHash, setMyPeerHash] = useState("");
+  const peerHashRef = useRef("");
+  const meshLogRef = useRef<string[]>([]);
+
+  const pushMeshLog = useCallback((line: string) => {
+    meshLogRef.current = [line, ...meshLogRef.current].slice(0, 10);
+    setMeshLog(meshLogRef.current);
+  }, []);
+
+  // Derive my own mesh handle hash once an identity exists.
+  useEffect(() => {
+    if (!identity) return;
+    void peerHash(identity.handle).then((h) => {
+      peerHashRef.current = h;
+      setMyPeerHash(h);
+    });
+  }, [identity]);
+
+  // Refresh the mesh outbox view.
+  const refreshMeshPending = useCallback(async () => {
+    const h = peerHashRef.current;
+    if (!h) {
+      setMeshPending([]);
+      return;
+    }
+    const list = await pendingFor(h, Date.now());
+    setMeshPending(list);
+  }, []);
+
+  useEffect(() => {
+    if (!myPeerHash) return;
+    void refreshMeshPending();
+    const t = setInterval(() => void refreshMeshPending(), 5000);
+    return () => clearInterval(t);
+  }, [myPeerHash, refreshMeshPending]);
 
   useEffect(() => {
     if (!session) startSession();
@@ -141,20 +229,49 @@ export default function TeiaPage() {
      No server needed. Works on static export.
      ═══════════════════════════════════════════════════════════════ */
 
-  const setupDataChannel = useCallback((dc: RTCDataChannel) => {
+  const setupDataChannel = (dc: RTCDataChannel) => {
     dcRef.current = dc;
     dc.onopen = () => {
       log("DATA CHANNEL OPEN — P2P link established");
       setPeerStatus("connected");
       sound.success();
+      void meshOnPeerOpen();
     };
     dc.onclose = () => {
       log("DATA CHANNEL CLOSED — P2P link severed");
       setPeerStatus("idle");
     };
     dc.onmessage = async (e) => {
+      // FILE TRANSFER frames (VFXFILE1) — string controls + binary chunks.
+      if (typeof e.data === "string" && isFileControl(e.data)) {
+        handleFileControl(e.data);
+        return;
+      }
+      if (e.data instanceof ArrayBuffer || ArrayBuffer.isView(e.data)) {
+        const buf = e.data instanceof ArrayBuffer ? e.data : (e.data as ArrayBufferView).buffer;
+        handleFileBinary(buf as ArrayBuffer);
+        return;
+      }
       try {
-        const msg = JSON.parse(e.data) as P2PMessage;
+        const raw = JSON.parse(e.data) as P2PMessage & { kind?: string; msg?: MeshMessage; handle?: string; from?: string };
+        // MESH store-and-forward frames.
+        if (raw.kind === "mesh-hello" && raw.handle) {
+          const h = await peerHash(raw.handle);
+          log(`MESH: peer "${raw.handle}" joined — ${h}`);
+          if (!peerHashRef.current && identity) peerHashRef.current = await peerHash(identity.handle);
+          const queued = await dequeueFor(h, Date.now());
+          for (const m of queued) {
+            if (dcRef.current?.readyState === "open") dcRef.current.send(JSON.stringify({ kind: "mesh", msg: m }));
+          }
+          if (queued.length > 0) log(`MESH: flushed ${queued.length} queued message(s) to peer`);
+          void refreshMeshPending();
+          return;
+        }
+        if (raw.kind === "mesh" && raw.msg) {
+          void handleMeshMessage(raw.msg);
+          return;
+        }
+        const msg = raw as P2PMessage;
         // Verify ECDSA signature if present
         let verified = false;
         if (msg.sig && msg.pubKey) {
@@ -195,7 +312,7 @@ export default function TeiaPage() {
       log("DATA CHANNEL ERROR");
       setPeerStatus("error");
     };
-  }, [log]);
+  };
 
   const createOffer = async () => {
     if (!identity) return;
@@ -479,6 +596,203 @@ export default function TeiaPage() {
       sound.error();
     }
   };
+
+  /* ═══════════════════════════════════════════════════════════════
+     FILE TRANSFER (VFXFILE1 — chunked, AES-GCM encrypted)
+     ═══════════════════════════════════════════════════════════════ */
+  const handleFileControl = useCallback(
+    (line: string) => {
+      if (!isFileControl(line)) return;
+      if (fileBusyRef.current) return; // one transfer at a time
+      fileBusyRef.current = true;
+      const receiver = new FileReceiver();
+      receiverRef.current = receiver;
+      const ok = receiver.feedControl(line);
+      if (!ok) {
+        fileBusyRef.current = false;
+        return;
+      }
+      if (receiver.getState() === "init") {
+        log(`FILE: incoming transfer "${receiver.getMeta()?.name}" (${receiver.getMeta()?.size} bytes)`);
+      }
+    },
+    [log],
+  );
+
+  const handleFileBinary = useCallback((buf: ArrayBuffer) => {
+    const receiver = receiverRef.current;
+    if (!receiver || (receiver.getState() !== "init" && receiver.getState() !== "receiving")) return;
+    receiver.feedBinary(buf);
+    void receiver.whenComplete().then(() => {
+      const done = receiver.done();
+      fileBusyRef.current = false;
+      if (done) {
+        const rec: ReceivedFile = {
+          id: receiver.getMeta()?.id ?? Date.now().toString(),
+          name: done.meta.name,
+          mime: done.meta.mime,
+          size: done.meta.size,
+          sha256: done.meta.sha256,
+          verified: done.sha256Verified,
+          bytes: done.assembled,
+        };
+        setReceivedFiles((prev) => [...prev, rec]);
+        receiverRef.current = null;
+        if (done.sha256Verified) {
+          sound.success();
+          log(`FILE: "${done.meta.name}" received + sha256 VERIFIED`);
+        } else {
+          sound.error();
+          log(`FILE: "${done.meta.name}" FAILED integrity check — discarding`);
+        }
+      } else if (receiver.getState() === "error") {
+        sound.error();
+        log("FILE: transfer error (corrupt or aborted)");
+      }
+    });
+  }, [log]);
+
+  const sendFileTransfer = useCallback(async () => {
+    if (!sendFile) return;
+    if (!dcRef.current || dcRef.current.readyState !== "open") {
+      sound.error();
+      log("FILE: no live channel — pair first");
+      return;
+    }
+    setSending(true);
+    try {
+      const bytes = new Uint8Array(await sendFile.arrayBuffer());
+      const prep = await prepareFileTransfer(
+        { name: sendFile.name, mime: sendFile.type || "application/octet-stream", size: bytes.length },
+        bytes,
+      );
+      setSendMeta(prep.meta);
+      const dc = dcRef.current;
+      dc.send(buildInitFrame(prep.meta));
+      setSendProgress({ sent: 0, total: prep.chunks.length });
+      for (let i = 0; i < prep.chunks.length; i++) {
+        const enc = await encryptChunk(prep.chunks[i], prep.keyB64);
+        if (dc.readyState !== "open") break;
+        dc.send(enc.buffer as ArrayBuffer);
+        setSendProgress({ sent: i + 1, total: prep.chunks.length });
+      }
+      if (dc.readyState === "open") {
+        dc.send(buildDoneFrame(prep.meta));
+        sound.success();
+        log(`FILE: "${prep.meta.name}" sent (${prep.chunks.length} chunks, sha256 verified on arrival)`);
+      }
+    } catch (err) {
+      sound.error();
+      log(`FILE: send failed — ${(err as Error).message}`);
+    } finally {
+      setSending(false);
+    }
+  }, [sendFile, log]);
+
+  const plantFileDeadDrop = useCallback(
+    async (rec: ReceivedFile, lat: string, lng: string) => {
+      if (!identity) return;
+      try {
+        const prep = await prepareFileTransfer({ name: rec.name, mime: rec.mime, size: rec.size }, rec.bytes);
+        const encChunks: Uint8Array[] = [];
+        for (const c of prep.chunks) encChunks.push(await encryptChunk(c, prep.keyB64));
+        const drop: DeadDrop = {
+          id: prep.meta.id,
+          lat: lat || "0.0000",
+          lng: lng || "0.0000",
+          msg: `[FILE] ${rec.name}`,
+          ts: Date.now(),
+          author: identity.handle,
+          kind: "file",
+          fileMeta: { name: rec.name, mime: rec.mime, size: rec.size, sha256: rec.sha256 },
+          payloadChunksB64: encChunks.map(bytesToB64),
+          keyB64: prep.keyB64,
+        };
+        const updated = [...deadDrops, drop];
+        setDeadDrops(updated);
+        try { localStorage.setItem("vfx-dead-drops", JSON.stringify(updated)); } catch { /* ignore */ }
+        sound.success();
+        log(`FILE: "${rec.name}" planted as encrypted dead drop`);
+      } catch (err) {
+        sound.error();
+        log(`FILE: dead drop failed — ${(err as Error).message}`);
+      }
+    },
+    [identity, deadDrops, log],
+  );
+
+  /* ═══════════════════════════════════════════════════════════════
+     MESH STORE & FORWARD
+     ═══════════════════════════════════════════════════════════════ */
+  const sendMeshMail = useCallback(async () => {
+    const to = meshTo.trim();
+    const body = meshBody.trim();
+    if (!to || !body) return;
+    const msg: MeshMessage = {
+      id: newMeshId(),
+      from: peerHashRef.current || "anon",
+      to,
+      body,
+      kind: "chat",
+      createdAt: Date.now(),
+      ttlMs: 24 * 60 * 60 * 1000,
+      hops: 0,
+      via: [],
+    };
+    await enqueue(msg);
+    sound.select();
+    log(`MESH: mail for ${to.slice(0, 8)} queued — rides the mesh`);
+    setMeshBody("");
+    void refreshMeshPending();
+  }, [meshTo, meshBody, log, refreshMeshPending]);
+
+  const handleMeshMessage = useCallback(
+    async (msg: MeshMessage) => {
+      markSeen(msg.id);
+      if (msg.to === peerHashRef.current) {
+        pushMeshLog(`✉ delivered → ${msg.body}`);
+        sound.copy();
+        return;
+      }
+      if (msg.hops >= 5) {
+        pushMeshLog(`✕ ${msg.id.slice(0, 8)} died in the mesh (hop cap)`);
+        return;
+      }
+      await enqueue(msg);
+      const next = forward(msg, peerHashRef.current || "relay");
+      if (next && dcRef.current?.readyState === "open") {
+        dcRef.current.send(JSON.stringify({ kind: "mesh", msg: next }));
+        pushMeshLog(`⇄ re-forwarded (hop ${next.hops})`);
+      }
+      void refreshMeshPending();
+    },
+    [pushMeshLog, refreshMeshPending],
+  );
+
+  /** On channel open: handshake, then flush queued mail to the peer. */
+  const meshOnPeerOpen = useCallback(async () => {
+    if (!identity) return;
+    if (dcRef.current?.readyState !== "open") return;
+    try {
+      dcRef.current.send(JSON.stringify({ kind: "mesh-hello", handle: identity.handle, from: peerHashRef.current }));
+      const h = await peerHash(identity.handle);
+      const queued = await dequeueFor(h, Date.now());
+      for (const m of queued) {
+        if (dcRef.current?.readyState === "open") {
+          dcRef.current.send(JSON.stringify({ kind: "mesh", msg: m }));
+        }
+      }
+      if (queued.length > 0) log(`MESH: flushed ${queued.length} queued message(s) to peer`);
+      void refreshMeshPending();
+    } catch { /* ignore */ }
+  }, [identity, log, refreshMeshPending]);
+
+  const purgeMesh = useCallback(async () => {
+    const removed = await expireAll(Date.now());
+    sound.select();
+    log(`MESH: purged ${removed} expired message(s)`);
+    void refreshMeshPending();
+  }, [log, refreshMeshPending]);
 
   /* ═══════════════════════════════════════════════════════════════
      AES-GCM Dead Drop encryption (at-rest)
@@ -905,6 +1219,162 @@ export default function TeiaPage() {
             )}
           </TerminalCard>
 
+          {/* FILE TRANSFER */}
+          <TerminalCard title="FILE TRANSFER — VFXFILE1" accent="amber" className="mb-6">
+            <p className="text-xs text-content-secondary mb-3">
+              Send files through the live peer channel, chunked and AES-GCM encrypted. The
+              receiver verifies the SHA-256 fingerprint before offering a download.
+            </p>
+            <div className="flex flex-wrap items-center gap-2 mb-3">
+              <input
+                type="file"
+                onChange={(e) => {
+                  setSendFile(e.target.files?.[0] ?? null);
+                  sound.select();
+                }}
+                className="text-[10px] text-content-secondary file:mr-3 file:border file:border-border-dim file:bg-panel file:px-2 file:py-1 file:text-[10px] file:text-content-secondary file:uppercase file:tracking-wider"
+              />
+              <button
+                onClick={() => void sendFileTransfer()}
+                disabled={!sendFile || sending || peerStatus !== "connected"}
+                className="px-3 py-1.5 text-xs border border-blood text-blood-bright hover:bg-blood hover:text-void disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                {sending ? "SENDING…" : "SEND FILE"}
+              </button>
+              {sendMeta && (
+                <span className="text-[10px] text-content-dim">
+                  {sendMeta.name} · {sendMeta.size.toLocaleString()} B · {sendMeta.chunkCount} chunks
+                </span>
+              )}
+            </div>
+            {sending && (
+              <div className="mb-3">
+                <div className="h-1.5 bg-panel border border-border-dim">
+                  <div
+                    className="h-full bg-blood"
+                    style={{ width: `${sendProgress.total ? Math.round((sendProgress.sent / sendProgress.total) * 100) : 0}%` }}
+                  />
+                </div>
+                <div className="text-[10px] text-content-dim mt-1">
+                  chunk {sendProgress.sent} / {sendProgress.total}
+                </div>
+              </div>
+            )}
+            {peerStatus !== "connected" && (
+              <div className="text-[10px] text-warning-amber mb-3">
+                FILE TRANSFER REQUIRES A LIVE PEER CHANNEL — PAIR FIRST ABOVE.
+              </div>
+            )}
+            {receivedFiles.length > 0 && (
+              <div className="space-y-2">
+                <div className="text-[10px] text-content-dim uppercase tracking-widest">
+                  RECEIVED ({receivedFiles.length})
+                </div>
+                {receivedFiles.slice().reverse().map((rf) => (
+                  <div key={rf.id} className="border border-border-dim bg-void/50 p-2">
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                      <span className="text-[10px] text-blood-bright font-bold break-all">{rf.name}</span>
+                      <StatusPill color={rf.verified ? "green" : "blood"}>
+                        {rf.verified ? "SHA-256 OK" : "MISMATCH"}
+                      </StatusPill>
+                    </div>
+                    <div className="text-[10px] text-content-dim mt-1">
+                      {rf.size.toLocaleString()} B · {rf.sha256.slice(0, 16)}
+                    </div>
+                    {rf.verified && (
+                      <div className="flex gap-2 mt-2 flex-wrap">
+                        <button
+                          onClick={() => {
+                            const blob = new Blob([rf.bytes as BlobPart], { type: rf.mime || "application/octet-stream" });
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement("a");
+                            a.href = url;
+                            a.download = rf.name;
+                            a.click();
+                            URL.revokeObjectURL(url);
+                            sound.select();
+                          }}
+                          className="px-2 py-1 text-[10px] border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void"
+                        >
+                          DOWNLOAD
+                        </button>
+                        <button
+                          onClick={() => void plantFileDeadDrop(rf, deadDropLat, deadDropLng)}
+                          className="px-2 py-1 text-[10px] border border-warning-amber text-warning-amber hover:bg-warning-amber hover:text-void"
+                        >
+                          PLANT AS DEAD DROP
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="text-[10px] text-content-dim mt-3">
+              ▸ DTLS secures the channel; the per-file AES-GCM layer keeps files unreadable at
+              rest inside dead drops. The key travels once, with the transfer.
+            </div>
+          </TerminalCard>
+
+          {/* MESH OUTBOX */}
+          <TerminalCard title="MESH OUTBOX — STORE & FORWARD" accent="green" className="mb-6">
+            <p className="text-xs text-content-secondary mb-3">
+              Mail for an offline peer is parked here and rides the mesh: it moves only when peers
+              meet. Nothing is guaranteed — the mesh is best-effort by design.
+            </p>
+            <div className="flex flex-wrap gap-2 mb-2">
+              <input
+                value={meshTo}
+                onChange={(e) => setMeshTo(e.target.value)}
+                placeholder="to handle hash (8 hex)"
+                aria-label="Mesh recipient hash"
+                className="flex-1 min-w-36 bg-void border border-border-dim px-3 py-2 text-xs font-mono text-terminal-green focus:border-terminal-green focus:outline-none"
+              />
+              <input
+                value={meshBody}
+                onChange={(e) => setMeshBody(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && void sendMeshMail()}
+                placeholder="message body"
+                aria-label="Mesh message body"
+                className="flex-[2] min-w-48 bg-void border border-border-dim px-3 py-2 text-xs text-content-primary focus:border-terminal-green focus:outline-none"
+              />
+              <button
+                onClick={() => void sendMeshMail()}
+                disabled={!meshTo.trim() || !meshBody.trim()}
+                className="px-3 py-2 text-xs border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void disabled:opacity-30"
+              >
+                DEPOSIT
+              </button>
+              <button
+                onClick={() => void purgeMesh()}
+                className="px-3 py-2 text-xs border border-border-dim text-content-secondary hover:border-blood hover:text-blood"
+              >
+                PURGE EXPIRED
+              </button>
+            </div>
+            <div className="flex items-center gap-2 text-[10px] text-content-dim mb-2">
+              <StatusPill color={myPeerHash ? "green" : "dim"}>MY HASH {myPeerHash.slice(0, 8) || "…"}</StatusPill>
+              <span>UNDELIVERED: {meshPending.length}</span>
+            </div>
+            {meshPending.length > 0 && (
+              <div className="border border-border-dim bg-void p-2 max-h-32 overflow-y-auto mb-2">
+                {meshPending.slice().reverse().map((m) => (
+                  <div key={m.id} className="text-[10px] text-content-secondary">
+                    {formatMeshMail(m)} — {m.body.slice(0, 60)}
+                  </div>
+                ))}
+              </div>
+            )}
+            {meshLog.length > 0 && (
+              <div className="border border-border-dim bg-void p-2 max-h-24 overflow-y-auto">
+                <div className="text-[9px] text-content-dim uppercase mb-1">MESH LOG</div>
+                {meshLog.map((l, i) => (
+                  <div key={i} className="text-[10px] text-terminal-green">{l}</div>
+                ))}
+              </div>
+            )}
+          </TerminalCard>
+
           {/* Dead drops */}
           <TerminalCard title={tc(lang, "web.dead_drops")} accent="amber" className="mb-6">
             <p className="text-xs text-content-secondary mb-4">
@@ -965,7 +1435,11 @@ export default function TeiaPage() {
                     <div className="text-[10px] text-terminal-green mt-1">
                       {d.lat}, {d.lng}
                     </div>
-                    <DecryptedDrop drop={d} decrypt={decryptMsg} />
+                    {d.kind === "file" ? (
+                      <FileDropRow drop={d} />
+                    ) : (
+                      <DecryptedDrop drop={d} decrypt={decryptMsg} />
+                    )}
                   </div>
                 ))}
               </div>
@@ -994,4 +1468,85 @@ function DecryptedDrop({
     }
   }, [drop.enc, drop.iv, decrypt]);
   return <div className="text-xs text-content-primary mt-1">{text}</div>;
+}
+
+/* Renders a file dead drop with key-gated unlock + download. */
+function FileDropRow({ drop }: { drop: DeadDrop }) {
+  const [key, setKey] = useState("");
+  const [bytes, setBytes] = useState<Uint8Array | null>(null);
+  const [unlocking, setUnlocking] = useState(false);
+
+  const download = () => {
+    if (!bytes || !drop.fileMeta) return;
+    const blob = new Blob([bytes as BlobPart], { type: drop.fileMeta.mime || "application/octet-stream" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = drop.fileMeta.name;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const unlock = async () => {
+    if (!drop.payloadChunksB64 || !drop.keyB64) return;
+    setUnlocking(true);
+    try {
+      const rec = {
+        payloadChunksB64: drop.payloadChunksB64,
+        keyB64: drop.keyB64,
+      } as Parameters<typeof decryptDeadDropFile>[0];
+      const plain = await decryptDeadDropFile(rec);
+      setBytes(plain);
+      sound.success();
+    } catch {
+      sound.error();
+    } finally {
+      setUnlocking(false);
+    }
+  };
+
+  return (
+    <div className="mt-1 space-y-1">
+      <div className="flex items-center gap-2">
+        <StatusPill color={bytes ? "green" : "amber"}>{bytes ? "UNLOCKED" : "LOCKED"}</StatusPill>
+        <span className="text-[10px] text-content-dim">
+          {drop.fileMeta?.size.toLocaleString()} bytes · sha256 {drop.fileMeta?.sha256.slice(0, 12)}
+        </span>
+      </div>
+      {!bytes && (
+        <div className="flex gap-2">
+          <input
+            value={key}
+            onChange={(e) => setKey(e.target.value)}
+            placeholder="dead-drop key (base64)"
+            className="flex-1 min-w-0 bg-void border border-border-dim px-2 py-1 text-[10px] font-mono text-content-primary focus:border-terminal-green focus:outline-none"
+          />
+          <button
+            onClick={unlock}
+            disabled={unlocking}
+            className="px-2 py-1 text-[10px] border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void disabled:opacity-30"
+          >
+            {unlocking ? "…" : "UNLOCK"}
+          </button>
+        </div>
+      )}
+      {bytes && (
+        <button
+          onClick={download}
+          className="px-2 py-1 text-[10px] border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void"
+        >
+          DOWNLOAD {drop.fileMeta?.name}
+        </button>
+      )}
+    </div>
+  );
+}
+
+function bytesToB64(bytes: Uint8Array): string {
+  let binary = "";
+  const chunk = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunk) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+  }
+  return btoa(binary);
 }

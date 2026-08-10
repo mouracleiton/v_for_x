@@ -3,6 +3,7 @@ import { tc } from "@/lib/i18n-content";
 import { getMeta } from "@/lib/seo";
 import TerminalCard from "@/components/ui/TerminalCard";
 import StatusPill from "@/components/ui/StatusPill";
+import OfflineBriefcase from "./OfflineBriefcase";
 
 const meta = getMeta("/fortress/");
 
@@ -218,6 +219,9 @@ npm run build
           {tc(lang, "fortress.cc0_notice")}
         </p>
       </TerminalCard>
+
+      {/* Offline briefcase — crawl the platform into this device's cache */}
+      <OfflineBriefcase />
     </div>
   );
 }

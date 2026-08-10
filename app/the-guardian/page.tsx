@@ -10,6 +10,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import TerminalCard from "@/components/ui/TerminalCard";
+import StatusPill from "@/components/ui/StatusPill";
 import { sound } from "@/lib/sound";
 import {
   armGuardian,
@@ -46,9 +47,22 @@ import {
 } from "@/lib/guardian-packet";
 import { tc } from "@/lib/i18n-content";
 import { useStore } from "@/stores/useStore";
+import {
+  decideRelease,
+  nextDeadline,
+  msUntilRelease,
+  markReleased,
+  pruneReleases,
+  formatReleaseNotice,
+  loadReleases,
+  saveReleases,
+  type AutoReleaseRecord,
+} from "@/lib/deadman";
 
 const STORAGE_KEY = "vfx-guardian";
 const SIGNING_KEY_STORAGE = "vfx-guardian-signing-key";
+const DEADMAN_ARMED_KEY = "vfx-deadman-armed";
+const DEADMAN_KEEP_MS = 90 * 24 * 3_600_000;
 
 interface DraftContact {
   id: string;
@@ -109,6 +123,22 @@ export default function TheGuardianPage() {
   } | null>(null);
   const [inboxDecrypt, setInboxDecrypt] = useState("");
 
+  // Auto-release (dead man's switch)
+  const [deadmanArmed, setDeadmanArmed] = useState(false);
+  const [deadmanCountdown, setDeadmanCountdown] = useState<number | null>(null);
+  const [deadmanReleases, setDeadmanReleases] = useState<AutoReleaseRecord[]>([]);
+  const [deadmanLatest, setDeadmanLatest] = useState<AutoReleaseRecord | null>(null);
+  const [deadmanNotice, setDeadmanNotice] = useState<string | null>(null);
+  const [deadmanError, setDeadmanError] = useState("");
+  const [deadmanCopied, setDeadmanCopied] = useState(false);
+  const deadmanBusyRef = useRef(false);
+  const deadmanCtxRef = useRef<{
+    armed: boolean;
+    releases: AutoReleaseRecord[];
+    signingKey: GuardianSigningKey | null;
+  }>({ armed: false, releases: [], signingKey: null });
+  deadmanCtxRef.current = { armed: deadmanArmed, releases: deadmanReleases, signingKey };
+
   // Load
   useEffect(() => {
     try {
@@ -127,14 +157,102 @@ export default function TheGuardianPage() {
     setLoaded(true);
   }, []);
 
+  // AUTO-RELEASE: evaluate once per tick; when the switch fires, sign
+  // the release packet, record it, and broadcast it locally.
+  const runDeadmanTick = useCallback(async (rec: GuardianRecord) => {
+    const ctx = deadmanCtxRef.current;
+    if (!ctx.armed || deadmanBusyRef.current) return;
+    const now = Date.now();
+    setDeadmanCountdown(msUntilRelease(rec, now));
+    const decision = decideRelease(rec, {
+      now,
+      releases: ctx.releases,
+      panicOrDuress: rec.duressFlag || rec.panicTriggeredAt !== null,
+    });
+    if (decision !== "release") return;
+    deadmanBusyRef.current = true;
+    try {
+      let key = ctx.signingKey;
+      if (!key) {
+        try {
+          key = await createGuardianSigningKey();
+          setSigningKey(key);
+        } catch {
+          key = null;
+        }
+      }
+      if (!key) {
+        setDeadmanError("// WEB CRYPTO UNAVAILABLE — CANNOT SIGN AUTO-RELEASE");
+        sound.error();
+        return;
+      }
+      // location stays null: release packets never decrypt or persist it here
+      const packet = await buildReleasePacket(rec, key, null, now);
+      const token = encodeReleasePacket(packet);
+      const url = buildPacketUrl(token);
+      const release: AutoReleaseRecord = {
+        guardianId: rec.id,
+        deadline: nextDeadline(rec),
+        releasedAt: now,
+        packetToken: token,
+        packetUrl: url,
+        fingerprint: packetFingerprint(packet),
+        channel: "clipboard",
+      };
+      let channel: AutoReleaseRecord["channel"] = "clipboard";
+      try {
+        if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(url);
+        } else {
+          channel = "manual";
+        }
+      } catch {
+        channel = "manual";
+      }
+      try {
+        if (channel === "manual" && navigator.share) {
+          await navigator.share({
+            title: "🛡 V FOR X — Guardian release",
+            text: `Guardian release for ${rec.config.label} — verify or hand over:\n\n${url}`,
+          });
+          channel = "signal";
+        }
+      } catch { /* share cancelled or unavailable — stays fetchable in-card */ }
+      const withChannel: AutoReleaseRecord = { ...release, channel };
+      const pruned = pruneReleases(markReleased(ctx.releases, withChannel), DEADMAN_KEEP_MS, now);
+      setDeadmanReleases(pruned);
+      setDeadmanLatest(withChannel);
+      setDeadmanNotice(formatReleaseNotice(withChannel));
+      saveReleases(pruned);
+      sound.success();
+    } catch (e) {
+      setDeadmanError(`// AUTO-RELEASE FAILED: ${e instanceof Error ? e.message : "unknown error"}`);
+      sound.error();
+    } finally {
+      deadmanBusyRef.current = false;
+    }
+  }, []);
+
   // Tick status every second
   useEffect(() => {
     if (!record) return;
     const interval = setInterval(() => {
       setStatus(evaluateStatus(record));
+      void runDeadmanTick(record);
     }, 1000);
     return () => clearInterval(interval);
-  }, [record]);
+  }, [record, runDeadmanTick]);
+
+  // Auto-release: restore armed state + release ledger (pruned to 90 days)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      setDeadmanArmed(localStorage.getItem(DEADMAN_ARMED_KEY) === "1");
+      const releases = pruneReleases(loadReleases(), DEADMAN_KEEP_MS);
+      saveReleases(releases);
+      setDeadmanReleases(releases);
+    } catch { /* ignore */ }
+  }, []);
 
   // Persist
   useEffect(() => {
@@ -450,6 +568,29 @@ export default function TheGuardianPage() {
       sound.error();
     }
   }, [inboxResult, inboxDecrypt]);
+
+  // AUTO-RELEASE toggle: persist the armed flag; evaluate immediately on arming
+  const handleDeadmanToggle = useCallback(() => {
+    const next = !deadmanArmed;
+    setDeadmanArmed(next);
+    setDeadmanError("");
+    if (!next) {
+      setDeadmanCountdown(null);
+    } else if (record) {
+      // an armed switch should evaluate immediately, not on next tick
+      void runDeadmanTick(record);
+    }
+    try {
+      localStorage.setItem(DEADMAN_ARMED_KEY, next ? "1" : "0");
+    } catch { /* ignore */ }
+    sound.select();
+  }, [deadmanArmed, record, runDeadmanTick]);
+
+  const handleDeadmanCopy = useCallback((text: string) => {
+    handleCopy(text);
+    setDeadmanCopied(true);
+    setTimeout(() => setDeadmanCopied(false), 1500);
+  }, [handleCopy]);
 
   if (!loaded) return null;
 
@@ -833,6 +974,119 @@ export default function TheGuardianPage() {
 
             <p className="text-[10px] text-content-dim mt-3">
               {tc(lang, "guardian.packets_note")}
+            </p>
+          </TerminalCard>
+
+          {/* AUTO-RELEASE — DEAD MAN'S SWITCH */}
+          <TerminalCard title="AUTO-RELEASE — DEAD MAN'S SWITCH" accent="blood">
+            <div className="flex items-center justify-between mb-3">
+              <label className="flex items-center gap-2 select-none cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={deadmanArmed}
+                  onChange={handleDeadmanToggle}
+                  style={{ accentColor: "var(--color-blood)" }}
+                />
+                <span className="text-xs font-bold tracking-widest text-content-primary">
+                  {deadmanArmed ? "AUTO-RELEASE ENGAGED" : "AUTO-RELEASE DISARMED"}
+                </span>
+              </label>
+              <span
+                className="font-mono text-sm"
+                style={{
+                  color:
+                    deadmanCountdown != null && deadmanCountdown <= 0
+                      ? "var(--color-blood-bright)"
+                      : "var(--color-content-secondary)",
+                }}
+              >
+                {record && deadmanArmed
+                  ? deadmanCountdown != null
+                    ? `${deadmanCountdown <= 0 ? "OVERDUE " : "T-MINUS "}${formatDuration(deadmanCountdown)}`
+                    : "…"
+                  : "STANDBY"}
+              </span>
+            </div>
+            {deadmanError && (
+              <p className="text-blood-bright text-xs font-mono mb-2">{deadmanError}</p>
+            )}
+            {deadmanLatest && (
+              <div className="border border-terminal-green/40 bg-terminal-green/5 p-3 mb-3 space-y-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <StatusPill color="green">RELEASED</StatusPill>
+                  <span className="text-[10px] text-content-dim font-mono">
+                    fp {deadmanLatest.fingerprint} ·{" "}
+                    {new Date(deadmanLatest.releasedAt).toISOString().replace("T", " ").slice(0, 16)}
+                  </span>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  <button
+                    onClick={() => handleDeadmanCopy(deadmanLatest.packetToken)}
+                    className="px-3 py-1.5 text-[10px] border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void"
+                  >
+                    [ COPY TOKEN ]
+                  </button>
+                  <button
+                    onClick={() => handleDeadmanCopy(deadmanLatest.packetUrl)}
+                    className="px-3 py-1.5 text-[10px] border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void"
+                  >
+                    [ COPY URL ]
+                  </button>
+                </div>
+                <div className="text-[10px] text-content-dim font-mono break-all">
+                  {deadmanLatest.packetUrl}
+                </div>
+                <p className="text-[10px] text-content-secondary">
+                  Hand this to your trusted contacts; no server exists — this device was the courier.
+                </p>
+                {deadmanNotice && (
+                  <pre className="text-[10px] bg-abyss border border-border-dim p-2 whitespace-pre-wrap text-content-primary font-mono">
+                    {deadmanNotice}
+                  </pre>
+                )}
+                {deadmanCopied && (
+                  <p className="text-[10px] text-terminal-green">// COPIED TO CLIPBOARD</p>
+                )}
+              </div>
+            )}
+            {deadmanReleases.length > 0 && (
+              <div className="mb-3">
+                <div className="text-[10px] text-content-dim uppercase tracking-widest mb-1">
+                  RELEASE HISTORY
+                </div>
+                <div className="space-y-1">
+                  {deadmanReleases
+                    .slice()
+                    .sort((a, b) => b.releasedAt - a.releasedAt)
+                    .slice(0, 5)
+                    .map((r) => (
+                      <div
+                        key={`${r.guardianId}-${r.deadline}`}
+                        className="flex items-center justify-between gap-2 border border-border-dim bg-abyss px-2 py-1"
+                      >
+                        <span className="text-[10px] font-mono text-content-primary truncate">
+                          {r.fingerprint}
+                        </span>
+                        <span className="text-[10px] text-content-dim whitespace-nowrap">
+                          {new Date(r.deadline).toISOString().replace("T", " ").slice(0, 16)} ·{" "}
+                          {new Date(r.releasedAt).toISOString().replace("T", " ").slice(0, 16)}
+                        </span>
+                        <span className="text-[10px] uppercase text-blood-bright">{r.channel}</span>
+                        <button
+                          onClick={() => handleDeadmanCopy(r.packetUrl)}
+                          className="text-[10px] text-terminal-green hover:underline whitespace-nowrap"
+                        >
+                          [ COPY ]
+                        </button>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
+            <p className="text-[10px] text-content-dim">
+              No backend exists. This fires only while the device is on and this page is open —
+              it PREPARES the signed packet and broadcasts it locally (clipboard / share / on-screen).
+              The human courier still carries it the last mile. Duress or panic release immediately.
             </p>
           </TerminalCard>
 

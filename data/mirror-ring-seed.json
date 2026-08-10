@@ -1,0 +1,35 @@
+[
+  {
+    "host": "https://mouracleiton.github.io/v_for_x",
+    "transport": "clearnet",
+    "region": "US",
+    "note": "primary origin (GitHub Pages) — no signed claim on file, treat as unverified",
+    "claimedAt": "2025-11-01T00:00:00Z",
+    "fingerprint": null,
+    "verified": false
+  },
+  {
+    "host": "https://vforx.org",
+    "transport": "clearnet",
+    "note": "installer origin referenced by the one-command deployment kit — no signed claim on file, treat as unverified",
+    "claimedAt": "2025-11-01T00:00:00Z",
+    "fingerprint": null,
+    "verified": false
+  },
+  {
+    "host": "https://ipfs.io/ipfs/",
+    "transport": "ipfs",
+    "note": "public IPFS gateway — append a pinned build CID (https://ipfs.io/ipfs/<CID>) — no signed claim on file, treat as unverified",
+    "claimedAt": "2025-11-01T00:00:00Z",
+    "fingerprint": null,
+    "verified": false
+  },
+  {
+    "host": "USB sneakernet distribution media",
+    "transport": "usb",
+    "note": "offline copies exchanged by hand (see the USB path on The Mirror) — no signed claim on file, treat as unverified",
+    "claimedAt": "2025-11-01T00:00:00Z",
+    "fingerprint": null,
+    "verified": false
+  }
+]

@@ -43,7 +43,16 @@ import {
   type SemanticIndex,
   type SemanticSearchResult,
 } from "@/lib/semantic-oracle";
-import { isSemanticSupported, getEmbedder, detectBackend, type EmbedderBackend } from "@/lib/embeddings";
+import {
+  isSemanticSupported,
+  getEmbedder,
+  detectBackend,
+  resolveModel,
+  SEMANTIC_MODELS,
+  SEMANTIC_MODEL_ID,
+  type EmbedderBackend,
+  type SemanticModelInfo,
+} from "@/lib/embeddings";
 import { semanticIndexGet, semanticIndexPut } from "@/lib/idb";
 
 const data = backbone as WorldBackbone;
@@ -73,24 +82,46 @@ export default function TheOraclePage() {
   const [querying, setQuerying] = useState(false);
   const indexRef = useRef<SemanticIndex | null>(null);
   const embedRef = useRef<((t: string[]) => Promise<number[][]>) | null>(null);
+  const initInFlight = useRef(false);
+
+  // ── Embedding model (polyglot) ──
+  // Default = English (fast, 23MB). Persisted so repeat visitors keep
+  // their language choice; resolves through the registry, so an unknown
+  // stored id degrades to the default without throwing.
+  const [model, setModel] = useState<SemanticModelInfo>(() => {
+    try {
+      if (typeof window !== "undefined") {
+        const saved = window.localStorage.getItem("vfx-oracle-model");
+        if (saved) return resolveModel(saved);
+      }
+    } catch {
+      /* ignore */
+    }
+    return SEMANTIC_MODELS[0];
+  });
 
   const supported = isSemanticSupported();
   const semanticReady = engineState === "ready" && indexRef.current && embedRef.current;
 
+  // The multilingual model — its langs drive the language-hint line.
+  const multilingual = SEMANTIC_MODELS.find((m) => m.id !== SEMANTIC_MODEL_ID)!;
+
   /* ═══════════════════════════════════════════════════════════════
      Engine bootstrap — download model + build (or load) the index
      ═══════════════════════════════════════════════════════════════ */
-  const initEngine = useCallback(async () => {
-    if (!supported) return;
-    if (engineState === "loading" || engineState === "ready") return;
-    setEngineState("loading");
-    setError("");
-    try {
-      setProgress({ frac: 0.01, label: "Booting on-device inference…" });
-      const result = await getEmbedder((frac, label) =>
-        setProgress({ frac, label })
-      );
-      if (!result) throw new Error("Inference unavailable in this browser.");
+  const initEngine = useCallback(
+    async (target: SemanticModelInfo = model) => {
+      if (!supported || initInFlight.current) return;
+      initInFlight.current = true;
+      setEngineState("loading");
+      setError("");
+      try {
+        setProgress({ frac: 0.01, label: "Booting on-device inference…" });
+        const result = await getEmbedder((frac, label) =>
+          setProgress({ frac, label }),
+          target
+        );
+        if (!result) throw new Error("Inference unavailable in this browser.");
       const { embed, status } = result;
       embedRef.current = embed;
       setBackend(status.backend);
@@ -153,11 +184,42 @@ export default function TheOraclePage() {
     } catch (err) {
       setEngineState("error");
       setError(
-        `// SEMANTIC ENGINE FAILED: ${err instanceof Error ? err.message : "unknown error"}. Falling back to exact keyword matching.`
+        `// SEMANTIC ENGINE FAILED: ${err instanceof Error ? err.message : "unknown error"}. Falling back to exact keyword matching.` +
+          (target.id !== SEMANTIC_MODEL_ID
+            ? " // The multilingual model could not load in this browser — try the EN model."
+            : "")
       );
       sound.error();
+    } finally {
+      initInFlight.current = false;
     }
-  }, [supported, engineState]);
+  },
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  [supported, model]
+);
+
+  /** Switch embedding model: tear down the current embedder/index, then boot the new one. */
+  const switchModel = useCallback(
+    (m: SemanticModelInfo) => {
+      if (m.id === model.id || initInFlight.current) return;
+      embedRef.current = null;
+      indexRef.current = null;
+      setSemanticResult(null);
+      setResults([]);
+      setParsed(null);
+      setError("");
+      try {
+        window.localStorage.setItem("vfx-oracle-model", m.id);
+      } catch {
+        /* ignore */
+      }
+      setModel(m);
+      setEngineState("idle");
+      initEngine(m);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [model, initEngine]
+  );
 
   /* ═══════════════════════════════════════════════════════════════
      Query execution — routes between semantic and exact engines
@@ -314,9 +376,20 @@ export default function TheOraclePage() {
       >
         <div className="flex flex-wrap items-center gap-3">
           <StatusPill state={engineState} backend={backend} />
+          {engineState === "ready" && (
+            <span
+              className="inline-flex items-center gap-1.5 px-2 py-1 border text-[10px] font-bold tracking-widest"
+              style={{
+                borderColor: "var(--color-terminal-green)",
+                color: "var(--color-terminal-green)",
+              }}
+            >
+              INDEX READY — {model.label} ({model.dim}D)
+            </span>
+          )}
           {engineState === "idle" && (
             <button
-              onClick={initEngine}
+              onClick={() => initEngine(model)}
               className="px-4 py-1.5 border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-abyss transition-colors text-[10px] font-bold tracking-widest"
             >
               [ INITIALIZE ON-DEVICE MODEL ]
@@ -335,10 +408,18 @@ export default function TheOraclePage() {
           )}
           {engineState === "error" && (
             <button
-              onClick={initEngine}
+              onClick={() => initEngine(model)}
               className="px-3 py-1 border border-blood text-blood-bright hover:bg-blood hover:text-abyss transition-colors text-[10px] font-bold tracking-widest"
             >
               [ RETRY ]
+            </button>
+          )}
+          {engineState === "error" && model.id !== SEMANTIC_MODEL_ID && (
+            <button
+              onClick={() => switchModel(resolveModel(SEMANTIC_MODEL_ID))}
+              className="px-3 py-1 border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-abyss transition-colors text-[10px] font-bold tracking-widest"
+            >
+              [ TRY EN MODEL ]
             </button>
           )}
         </div>
@@ -363,6 +444,46 @@ export default function TheOraclePage() {
             : "// A ~23MB open-source model (all-MiniLM-L6-v2) runs locally via " +
               (supported ? (detectBackend() === "webgpu" ? "WebGPU" : "WASM") : "—") +
               ". It downloads once, then is cached forever. Your questions are embedded on-device and compared against a local vector index — nothing is ever transmitted. This is the platform's privacy keystone."}
+          {engineState !== "unsupported" && (
+            <div className="mt-2">
+              {
+                "// The multilingual model ships the same privacy guarantee — inference and indexing stay in this browser. It is larger (~4-500MB downloaded once, cached forever)."
+              }
+            </div>
+          )}
+        </div>
+
+        {/* Embedding model selector (polyglot) */}
+        <div className="mt-3 pt-3 border-t border-border-dim/40">
+          <div className="text-content-dim text-[10px] uppercase mb-1.5">
+            EMBEDDING MODEL
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {SEMANTIC_MODELS.map((m) => {
+              const active = m.id === model.id;
+              return (
+                <button
+                  key={m.id}
+                  onClick={() => switchModel(m)}
+                  disabled={engineState === "loading" || initInFlight.current}
+                  title={m.note}
+                  className={
+                    "px-3 py-1.5 border text-[10px] font-bold tracking-widest transition-colors disabled:opacity-40 " +
+                    (active
+                      ? "border-terminal-green text-terminal-green bg-terminal-green/10"
+                      : "border-border-dim text-content-secondary hover:border-terminal-green hover:text-terminal-green")
+                  }
+                >
+                  {m.label} · {m.sizeMB}MB · {m.dim}D
+                </button>
+              );
+            })}
+          </div>
+          <div className="text-content-dim text-[10px] mt-2 leading-relaxed">
+            {`Queries in: EN default • ${multilingual.langs
+              .map((l) => l.toUpperCase())
+              .join(" • ")} supported by the ML model`}
+          </div>
         </div>
       </TerminalCard>
 

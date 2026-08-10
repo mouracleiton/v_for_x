@@ -13,7 +13,7 @@ import { TIMELINE_PART2 } from "./timelines-i18n-part2";
 import { TIMELINE_PART3 } from "./timelines-i18n-part3";
 import { TIMELINE_PART4 } from "./timelines-i18n-part4";
 
-export const TIMELINE_I18N: Record<string, Record<Lang, string[]>> = {
+export const TIMELINE_I18N: Record<string, Partial<Record<Lang, string[]>>> = {
   ...TIMELINE_PART1,
   ...TIMELINE_PART2,
   ...TIMELINE_PART3,

@@ -9,7 +9,7 @@
 
 import type { Lang } from "./i18n";
 
-export const TIMELINE_PART3: Record<string, Record<Lang, string[]>> = {
+export const TIMELINE_PART3: Record<string, Partial<Record<Lang, string[]>>> = {
   MLI: {
     en: [
       "Tuareg rebellion in north. Military coup overthrows government. Ansar Dine and AQIM seize Timbuktu, Gao, Kidal.",

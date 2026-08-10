@@ -2,7 +2,7 @@
  * V FOR X — Hreflang & multilingual SEO helpers
  *
  * Generates hreflang alternate links, Open Graph locale alternates, and
- * canonical URLs for the 10 supported languages.
+ * canonical URLs for the 12 supported languages.
  *
  * NOTE ON ARCHITECTURE:
  * V FOR X is a static export with client-side i18n (localStorage). Every
@@ -30,6 +30,8 @@ const HREFLANG_MAP: Record<Lang, string> = {
   hi: "hi",
   ar: "ar-SA",
   ru: "ru",
+  fa: "fa",
+  ur: "ur",
 };
 
 /** Open Graph locale (underscore format) per language. */
@@ -44,6 +46,8 @@ const OG_LOCALE_MAP: Record<Lang, string> = {
   hi: "hi_IN",
   ar: "ar_SA",
   ru: "ru_RU",
+  fa: "fa_IR",
+  ur: "ur_PK",
 };
 
 /** Map a V FOR X language code to its hreflang format (e.g. `pt` → `pt-BR`). */

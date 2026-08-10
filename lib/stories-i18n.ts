@@ -21,7 +21,7 @@ export interface StoryI18n {
   steps: StoryStepI18n[];
 }
 
-export const STORY_I18N: Record<string, Record<Lang, StoryI18n>> = {
+export const STORY_I18N: Record<string, Partial<Record<Lang, StoryI18n>>> = {
   /* ═══════════════════════════════════════════════════════════════
    * WATER — The Water Crisis
    * ═══════════════════════════════════════════════════════════════ */

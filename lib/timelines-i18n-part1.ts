@@ -11,7 +11,7 @@
 
 import type { Lang } from "./i18n";
 
-export const TIMELINE_PART1: Record<string, Record<Lang, string[]>> = {
+export const TIMELINE_PART1: Record<string, Partial<Record<Lang, string[]>>> = {
   AFG: {
     en: [
       "US invasion following 9/11. Taliban government falls.",

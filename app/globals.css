@@ -498,3 +498,40 @@ a:hover {
   cursor: pointer;
   border-radius: 3px;
 }
+
+/* ═══ RTL — right-to-left languages (ar, fa, ur) ═══
+   The <html dir="rtl"> attribute is set at runtime by setLang().
+   These rules realign terminal text and keep numeric/data blocks LTR. */
+[dir="rtl"] body,
+[dir="rtl"] p,
+[dir="rtl"] li,
+[dir="rtl"] label,
+[dir="rtl"] h1,
+[dir="rtl"] h2,
+[dir="rtl"] h3,
+[dir="rtl"] h4,
+[dir="rtl"] .terminal-card,
+[dir="rtl"] .terminal-card * {
+  text-align: right;
+}
+
+[dir="rtl"] .terminal-card {
+  direction: rtl;
+}
+
+[dir="rtl"] input,
+[dir="rtl"] textarea {
+  text-align: right;
+  direction: rtl;
+}
+
+/* Keep data, code, and ASCII renderings LTR even inside RTL text. */
+[dir="rtl"] pre,
+[dir="rtl"] code,
+[dir="rtl"] .ascii,
+[dir="rtl"] .chart,
+[dir="rtl"] [data-ltr="true"] {
+  direction: ltr;
+  text-align: left;
+  unicode-bidi: isolate;
+}
