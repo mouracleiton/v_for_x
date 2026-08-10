@@ -388,6 +388,13 @@ export const PAGE_META: Record<string, PageMeta> = {
       "Map state and repressive forces during protests in real time. Drop anonymous incident markers (kettles, tear gas, mass arrests, snipers, military deployment, comms blackouts). Live heat zones, threat clustering, escape-vector routing. Local-first, anonymous, time-decaying — nothing leaves your device.",
     path: "/the-sentinel/",
   },
+
+  "/the-forensics/": {
+    title: "The Forensics — OSINT Image & Video Verification",
+    description:
+      "Verify before you publish. Drop an image for error-level analysis (tamper detection), EXIF timeline forensics, reverse-search launchers (TinEye/Yandex/Google), frame-by-frame video comparison, and shadow-angle geolocation. Pure client-side canvas work — nothing leaves your browser.",
+    path: "/the-forensics/",
+  },
 };
 
 /** Get metadata for a page path, falling back to site defaults */
