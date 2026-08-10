@@ -536,6 +536,7 @@ const DIRECTORY_CLUSTERS: DirectoryClusterDef[] = [
     entries: [
       { href: "/fortress/", code: "07", navKey: "nav.fortress", branchKey: "branch.fortress", primary: true },
       { href: "/the-onion/", code: "56", navKey: "nav.the-onion", branchKey: "branch.onion" },
+      { href: "/the-stepping-stone/", code: "62", navKey: "nav.the-stepping-stone", branchKey: "branch.stepping_stone" },
       { href: "/the-digest/", code: "57", navKey: "nav.the-digest", branchKey: "branch.digest" },
       { href: "/the-changelog/", code: "58", navKey: "nav.the-changelog", branchKey: "branch.changelog" },
     ],
