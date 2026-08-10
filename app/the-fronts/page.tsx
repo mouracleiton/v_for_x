@@ -13,6 +13,11 @@ import { sound } from "@/lib/sound";
 import { formatNumber, formatPct } from "@/lib/format";
 import { calculateVulnerability, scoreColor, scoreLabel } from "@/lib/vulnerability";
 import {
+  getEjatlasSummary,
+  getTopConflictCountries,
+  getGlobalCategories,
+} from "@/lib/ejatlas";
+import {
   RadarChart,
   Radar,
   PolarGrid,
@@ -368,6 +373,9 @@ export default function TheFrontsPage() {
         </div>
       </TerminalCard>
 
+      {/* ═══ ENVIRONMENTAL CONFLICT FRONT (EJAtlas) ═══ */}
+      <EjatlasSection />
+
       {/* Cross-links */}
       <div className="flex flex-wrap gap-2">
         <Link href="/the-index/" className="text-xs px-3 py-1.5 border border-border-dim text-content-secondary hover:border-blood hover:text-blood-bright">
@@ -381,5 +389,164 @@ export default function TheFrontsPage() {
         </Link>
       </div>
     </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ENVIRONMENTAL CONFLICT FRONT (EJAtlas)
+   Global socio-environmental conflicts from ejatlas.org
+   ═══════════════════════════════════════════════════════════════ */
+
+function shortCatName(name: string): string {
+  return name.replace(/\(.*\)/, "").replace(/&.*/, "").trim();
+}
+
+function EjatlasSection() {
+  const { lang } = useStore();
+  const eja = useMemo(() => getEjatlasSummary(), []);
+  const topCountries = useMemo(() => getTopConflictCountries(15), []);
+  const categories = useMemo(() => getGlobalCategories(), []);
+  const [view, setView] = useState<"countries" | "categories" | "companies">("countries");
+
+  const maxCat = Math.max(...categories.map((c) => c.count));
+  const stopped = eja.summary.by_status.find((s) => s.name === "stopped")?.count ?? 0;
+  const pctStopped = ((stopped / eja.metadata.total_conflicts) * 100).toFixed(0);
+
+  return (
+    <TerminalCard
+      title={`ENVIRONMENTAL CONFLICT FRONT // ${formatNumber(eja.metadata.total_conflicts)} CASES`}
+      accent="green"
+      glow
+      className="mb-6"
+    >
+      <div className="space-y-4">
+        {/* Attribution */}
+        <div className="text-[10px] text-content-dim border-b border-border-dim pb-2">
+          Data:{" "}
+          <a href="https://ejatlas.org" target="_blank" rel="noopener noreferrer" className="text-terminal-green hover:underline">
+            EJAtlas
+          </a>{" "}
+          — Global Atlas of Environmental Justice · ICTA-UAB · CC BY-NC-SA 3.0 · {eja.metadata.total_countries} countries · {formatNumber(eja.metadata.total_companies)} companies
+        </div>
+
+        {/* Headline stats */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          <div>
+            <div className="text-[10px] text-content-dim uppercase tracking-widest">Total Conflicts</div>
+            <div className="text-3xl text-blood-bright font-bold">{formatNumber(eja.metadata.total_conflicts)}</div>
+          </div>
+          <div>
+            <div className="text-[10px] text-content-dim uppercase tracking-widest">Countries</div>
+            <div className="text-3xl text-content-primary font-bold">{eja.metadata.total_countries}</div>
+          </div>
+          <div>
+            <div className="text-[10px] text-content-dim uppercase tracking-widest">Companies Named</div>
+            <div className="text-3xl text-warning-amber font-bold">{formatNumber(eja.metadata.total_companies)}</div>
+          </div>
+          <div>
+            <div className="text-[10px] text-content-dim uppercase tracking-widest">Stopped / Suspended</div>
+            <div className="text-3xl text-terminal-green font-bold">{formatNumber(stopped)}</div>
+            <div className="text-[10px] text-terminal-green">{pctStopped}% success rate</div>
+          </div>
+          <div>
+            <div className="text-[10px] text-content-dim uppercase tracking-widest">High Intensity</div>
+            <div className="text-3xl text-blood font-bold">
+              {eja.summary.by_intensity.find((i) => i.name === "high")?.count ?? 0}
+            </div>
+          </div>
+        </div>
+
+        {/* View toggle */}
+        <div className="flex gap-1">
+          {([
+            ["countries", "TOP COUNTRIES"],
+            ["categories", "CONFLICT TYPES"],
+            ["companies", "TOP COMPANIES"],
+          ] as const).map(([key, label]) => (
+            <button
+              key={key}
+              onClick={() => { setView(key); sound.nav(); }}
+              className={`px-3 py-1 text-[10px] font-bold border transition-colors ${
+                view === key
+                  ? "border-terminal-green text-terminal-green bg-terminal-green/5"
+                  : "border-border-dim text-content-dim hover:text-content-secondary"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {/* View content */}
+        {view === "countries" && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+            {topCountries.map((c, i) => {
+              const country = data.countries.find((co) => co.iso3 === c.iso3);
+              const name = country?.name_en ?? c.iso3;
+              const stoppedPct = c.total > 0 ? (c.stopped / c.total) * 100 : 0;
+              return (
+                <Link
+                  key={c.iso3}
+                  href={`/sorrow-map/${c.iso3.toLowerCase()}/`}
+                  className="flex items-center gap-2 p-2 border border-border-dim hover:border-blood transition-colors group"
+                >
+                  <span className="text-content-dim font-bold text-xs w-6">#{i + 1}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs text-content-primary font-bold group-hover:text-blood-bright truncate">{name}</div>
+                    <div className="text-[9px] text-content-dim">
+                      {c.total} conflicts · {c.high_severity} high · {stoppedPct.toFixed(0)}% stopped
+                    </div>
+                  </div>
+                  <span className="text-lg font-bold text-blood-bright">{c.total}</span>
+                </Link>
+              );
+            })}
+          </div>
+        )}
+
+        {view === "categories" && (
+          <div className="space-y-1.5">
+            {categories.map((cat) => (
+              <div key={cat.name} className="flex items-center gap-2 text-xs">
+                <span className="text-content-secondary flex-1 truncate" title={cat.name}>
+                  {shortCatName(cat.name)}
+                </span>
+                <div className="w-32 h-3 bg-void border border-border-dim flex-shrink-0">
+                  <div
+                    className="h-full bg-blood/60"
+                    style={{ width: `${(cat.count / maxCat) * 100}%` }}
+                  />
+                </div>
+                <span className="text-content-dim w-8 text-right">{cat.count}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {view === "companies" && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-1">
+            {eja.summary.top_companies.map((c, i) => (
+              <div key={c.name} className="flex items-center gap-2 p-1.5 text-xs border border-border-dim bg-void/50">
+                <span className="text-content-dim w-4 text-right">{i + 1}.</span>
+                <span className="text-content-secondary flex-1 truncate" title={c.name}>{c.name}</span>
+                <span className="text-blood-bright font-bold">{c.count}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Status breakdown */}
+        <div className="flex flex-wrap gap-2 pt-2 border-t border-border-dim">
+          {eja.summary.by_status.filter((s) => s.name && s.name !== "unknown").map((s) => (
+            <StatusPill
+              key={s.name}
+              color={s.name === "stopped" ? "green" : s.name === "in operation" ? "blood" : "dim"}
+            >
+              {s.name === "in operation" ? "ACTIVE" : s.name === "stopped" ? "STOPPED" : s.name.toUpperCase().slice(0, 12)}: {s.count}
+            </StatusPill>
+          ))}
+        </div>
+      </div>
+    </TerminalCard>
   );
 }

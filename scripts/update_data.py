@@ -72,14 +72,15 @@ def main() -> int:
     if args.dry_run:
         print(f"{Style.DIM}(dry-run mode — no commands will execute){Style.RESET}")
     if args.skip_fetch:
-        print(f"{Style.WARN}(--skip-fetch: sanctions dossier fetch will be skipped){Style.RESET}")
+        print(f"{Style.WARN}(--skip-fetch: sanctions + EJAtlas fetch will be skipped){Style.RESET}")
 
     steps: list[tuple[str, list[str]]] = [
-        ("1/5 snapshot-old", [sys.executable, "snapshot.py", "save"]),
-        ("2/5 enrich-backbone", [sys.executable, "enrich_backbone.py"]),
+        ("1/6 snapshot-old", [sys.executable, "snapshot.py", "save"]),
+        ("2/6 enrich-backbone", [sys.executable, "enrich_backbone.py"]),
     ]
     if not args.skip_fetch:
-        steps.append(("3/5 fetch-sanctions", [sys.executable, "fetch_sanctions_dossiers.py", "--limit", "50"]))
+        steps.append(("3/6 fetch-sanctions", [sys.executable, "fetch_sanctions_dossiers.py", "--limit", "50"]))
+        steps.append(("4/6 fetch-ejatlas", [sys.executable, "fetch_ejatlas.py"]))
     # Renumber dynamically after optional skip
     steps.append(("snapshot-new", [sys.executable, "snapshot.py", "save"]))
     steps.append(("generate-api", [sys.executable, "generate_api.py"]))

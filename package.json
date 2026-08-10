@@ -7,6 +7,7 @@
     "build": "next build && python3 scripts/generate_api.py && python3 scripts/copy_headers.py",
     "update-data": "python3 scripts/update_data.py",
     "update-data:dry": "python3 scripts/update_data.py --dry-run",
+    "fetch-ejatlas": "python3 scripts/fetch_ejatlas.py",
     "snapshot": "python3 scripts/snapshot.py save",
     "start": "next start",
     "test": "vitest run",

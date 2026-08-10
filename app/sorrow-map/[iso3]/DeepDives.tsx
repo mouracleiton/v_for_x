@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import TerminalCard from "@/components/ui/TerminalCard";
 import DataBar from "@/components/ui/DataBar";
@@ -10,7 +10,8 @@ import { formatNumber, formatMoney } from "@/lib/format";
 import { countryToBlueprints } from "@/lib/crosslinks";
 import backbone from "@/data/world_backbone.json";
 import blueprintsData from "@/data/blueprints.json";
-import type { WorldBackbone } from "@/lib/types";
+import ejatlasSummary from "@/data/ejatlas-summary.json";
+import type { WorldBackbone, EjatlasSummary } from "@/lib/types";
 import { useStore } from "@/stores/useStore";
 import { tc } from "@/lib/i18n-content";
 
@@ -1367,5 +1368,187 @@ function BlueprintLinks({ country }: { country: CountryData }) {
         })}
       </div>
     </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ENVIRONMENTAL CONFLICTS DEEP-DIVE (EJAtlas integration)
+   Shows socio-environmental conflicts from ejatlas.org
+   ═══════════════════════════════════════════════════════════════ */
+
+const ejaData = ejatlasSummary as EjatlasSummary;
+
+const INTENSITY_COLORS: Record<string, string> = {
+  high: "text-blood-bright",
+  medium: "text-warning-amber",
+  low: "text-content-secondary",
+  latent: "text-content-dim",
+  unknown: "text-content-dim",
+};
+
+const STATUS_COLORS: Record<string, "green" | "blood" | "amber" | "dim"> = {
+  stopped: "green",
+  "in operation": "blood",
+  "under construction": "amber",
+};
+
+function shortCat(name: string): string {
+  return name
+    .replace(/\(.*\)/, "")
+    .replace(/&.*/, "")
+    .trim();
+}
+
+export function EnvironmentalConflictsDeepDive({ country }: { country: CountryData }) {
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const cs = ejaData.country_summaries[country.iso3];
+
+  if (!cs || cs.total === 0) return null;
+
+  const pctStopped = cs.total > 0 ? (cs.stopped / cs.total) * 100 : 0;
+  const maxCat = Math.max(...cs.top_categories.map((c) => c.count), 1);
+
+  return (
+    <TerminalCard title="ENVIRONMENTAL CONFLICTS" accent="green">
+      <div className="space-y-3">
+        {/* Source attribution */}
+        <div className="text-[10px] text-content-dim border-b border-border-dim pb-2">
+          Source:{" "}
+          <a
+            href="https://ejatlas.org"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-terminal-green hover:underline"
+          >
+            EJAtlas
+          </a>{" "}
+          — Global Atlas of Environmental Justice (ICTA-UAB) · CC BY-NC-SA 3.0
+        </div>
+
+        {/* Summary stats */}
+        <InsightBanner severity={cs.high_severity > 5 ? "critical" : cs.total > 20 ? "warning" : "info"}>
+          <strong className="text-blood-bright">{cs.total}</strong> documented socio-environmental{" "}
+          {cs.total === 1 ? "conflict" : "conflicts"} in {country.name_en}.
+          {cs.high_severity > 0 && (
+            <> <strong className="text-blood-bright">{cs.high_severity}</strong> classified high-intensity.</>
+          )}
+          {cs.stopped > 0 && (
+            <> <strong className="text-terminal-green">{cs.stopped}</strong> successfully stopped ({pctStopped.toFixed(0)}%).</>
+          )}
+        </InsightBanner>
+
+        {/* Stat grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+          <MiniStat label="Total Conflicts" value={String(cs.total)} accent="blood" />
+          <MiniStat label="High Intensity" value={String(cs.high_severity)} accent="amber" />
+          <MiniStat label="Stopped" value={String(cs.stopped)} sub={`${pctStopped.toFixed(0)}% success`} accent="green" />
+          <MiniStat
+            label="Global Rank"
+            value={(() => {
+              const ranked = Object.entries(ejaData.country_summaries)
+                .sort((a, b) => b[1].total - a[1].total)
+                .map(([iso]) => iso);
+              const r = ranked.indexOf(country.iso3) + 1;
+              return r > 0 ? `#${r}` : "N/A";
+            })()}
+            accent="primary"
+          />
+        </div>
+
+        {/* Top categories */}
+        <div className="space-y-1">
+          <div className="text-[10px] text-content-dim uppercase tracking-widest mb-1">
+            Conflict Categories
+          </div>
+          {cs.top_categories.map((cat) => (
+            <div key={cat.name} className="flex items-center gap-2 text-xs">
+              <span className="text-content-secondary flex-1 truncate" title={cat.name}>
+                {shortCat(cat.name)}
+              </span>
+              <div className="w-20 h-3 bg-void border border-border-dim">
+                <div
+                  className="h-full bg-terminal-green/60"
+                  style={{ width: `${(cat.count / maxCat) * 100}%` }}
+                />
+              </div>
+              <span className="text-content-dim w-6 text-right">{cat.count}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Top conflicts list */}
+        <div className="space-y-1">
+          <div className="text-[10px] text-content-dim uppercase tracking-widest mb-1">
+            Notable Conflicts
+          </div>
+          {cs.top_conflicts.map((c) => {
+            const isExpanded = expanded === c.id;
+            const statusColor = STATUS_COLORS[c.status] ?? "dim";
+            return (
+              <div key={c.id} className="border border-border-dim bg-void/50">
+                <button
+                  onClick={() => setExpanded(isExpanded ? null : c.id)}
+                  className="w-full text-left p-2 hover:bg-panel-hi/40 transition-colors"
+                >
+                  <div className="flex items-start gap-2">
+                    <span className={`text-[9px] font-bold uppercase mt-0.5 ${INTENSITY_COLORS[c.intensity] ?? "text-content-dim"}`}>
+                      {c.intensity}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs text-content-primary font-bold truncate">{c.name}</div>
+                      {c.loc && (
+                        <div className="text-[10px] text-content-dim">{c.loc}{c.yr ? ` · ${c.yr}` : ""}</div>
+                      )}
+                    </div>
+                    <StatusPill color={statusColor}>
+                      {c.status === "stopped" ? "STOPPED" : c.status === "in operation" ? "ACTIVE" : c.status ? c.status.slice(0, 8).toUpperCase() : "UNKNOWN"}
+                    </StatusPill>
+                  </div>
+                  {c.cat.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-1 ml-8">
+                      {c.cat.map((cat) => (
+                        <span key={cat} className="text-[9px] text-content-dim bg-panel px-1 border border-border-dim">
+                          {shortCat(cat)}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </button>
+                {isExpanded && (
+                  <div className="px-2 pb-2 ml-8 space-y-1.5">
+                    {c.hl && (
+                      <p className="text-[11px] text-content-secondary leading-relaxed">{c.hl}</p>
+                    )}
+                    {c.affected !== null && c.affected > 0 && (
+                      <div className="text-[10px] text-blood-bright">
+                        Affected: ~{formatNumber(c.affected)} people
+                      </div>
+                    )}
+                    <a
+                      href={c.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[10px] text-terminal-green hover:underline"
+                    >
+                      → View full case on EJAtlas
+                    </a>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Footer */}
+        <div className="border-t border-border-dim pt-2">
+          <Link
+            href="/the-fronts/"
+            className="text-[10px] text-blood-bright hover:underline"
+          >
+            → Explore all environmental conflicts on The Fronts
+          </Link>
+        </div>
+      </div>
+    </TerminalCard>
   );
 }

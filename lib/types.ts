@@ -391,3 +391,77 @@ export interface WorldBackbone {
   implementation_phases: ImplementationPhase[];
   sdg_equations?: SdgEquations;
 }
+
+// ── EJAtlas Environmental Conflicts ──
+
+export interface EjatlasConflict {
+  id: string;
+  name: string;
+  iso3: string;
+  location: string;
+  headline: string;
+  cat: string[];
+  comm: string[];
+  companies: { n: string; c: string }[];
+  intensity: "high" | "medium" | "low" | "latent" | "unknown";
+  status: string;
+  success: string;
+  affected: number | null;
+  inv_musd: number | null;
+  yr: number | null;
+  imp_env: string[];
+  imp_soc: string[];
+  mobil: string[];
+  sev: "high" | "moderate" | "low";
+  url: string;
+}
+
+export interface EjatlasTopConflict {
+  id: string;
+  name: string;
+  loc: string;
+  hl: string;
+  cat: string[];
+  intensity: string;
+  status: string;
+  sev: string;
+  yr: number | null;
+  affected: number | null;
+  url: string;
+}
+
+export interface EjatlasCountrySummary {
+  total: number;
+  stopped: number;
+  top_categories: { name: string; count: number }[];
+  high_severity: number;
+  top_conflicts: EjatlasTopConflict[];
+}
+
+export interface EjatlasSummary {
+  metadata: {
+    schema_version: string;
+    title: string;
+    description: string;
+    source: string;
+    extracted_from: string;
+    license: string;
+    generated_at: string;
+    total_conflicts: number;
+    total_countries: number;
+    total_companies: number;
+    note: string;
+  };
+  summary: {
+    by_category: { name: string; count: number }[];
+    by_commodity: { name: string; count: number }[];
+    top_companies: { name: string; count: number }[];
+    by_status: { name: string; count: number }[];
+    by_intensity: { name: string; count: number }[];
+  };
+  country_summaries: Record<string, EjatlasCountrySummary>;
+}
+
+export interface EjatlasData extends EjatlasSummary {
+  conflicts: EjatlasConflict[];
+}
