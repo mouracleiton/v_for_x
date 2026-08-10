@@ -35,6 +35,7 @@ const STATIC_PATHS = [
   "/the-war-room/",
   "/the-sentinel/",
   "/the-pulse/",
+  "/the-faces/",
   "/the-forensics/",
   "/the-nexus/",
   "/the-verdict/",
