@@ -301,4 +301,5 @@ export const branchLinks = [
   { href: "/the-resistance/", label: "RESISTANCE", code: "59" },
   { href: "/the-war-room/", label: "WAR ROOM", code: "60" },
   { href: "/the-sentinel/", label: "SENTINEL", code: "61" },
+  { href: "/the-nexus/", label: "NEXUS", code: "62" },
 ] as const;
