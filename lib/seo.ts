@@ -374,6 +374,13 @@ export const PAGE_META: Record<string, PageMeta> = {
       "Resistance ripeness scoring from structural conditions for 200 countries. Historical nonviolent movements from the NAVCO dataset (Chenoweth). 18 resistance tactics from Gene Sharp's methods, ranked by effectiveness. Nonviolence wins 53% vs 26%.",
     path: "/the-resistance/",
   },
+
+  "/the-war-room/": {
+    title: "The War Room — Live Conflict Intelligence (ISW)",
+    description:
+      "Live open-source war assessments from the Institute for the Study of War. 6 active conflict theaters — Russia-Ukraine, Middle East/Iran, China-Taiwan, the adversary entente, cognitive warfare, and the future of war. Daily updates, key developments, featured reports.",
+    path: "/the-war-room/",
+  },
 };
 
 /** Get metadata for a page path, falling back to site defaults */

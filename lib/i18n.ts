@@ -102,6 +102,7 @@ export const NAV_T: Record<Lang, Record<string, string>> = {
     "nav.the-exchange": "EXCHANGE",
     "nav.the-field-manual": "FIELD MANUAL",
     "nav.the-resistance": "RESISTANCE",
+    "nav.the-war-room": "WAR ROOM",
     // UI
     "ui.navigate": "Navigate",
     "ui.search": "Search",
