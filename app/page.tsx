@@ -447,6 +447,7 @@ const DIRECTORY_CLUSTERS: DirectoryClusterDef[] = [
     entries: [
       { href: "/sorrow-map/", code: "01", navKey: "nav.sorrow-map", branchKey: "branch.sorrow_map", primary: true },
       { href: "/the-lives/", code: "26", navKey: "nav.the-lives", branchKey: "branch.lives" },
+      { href: "/the-faces/", code: "62", navKey: "nav.the-faces", branchKey: "branch.faces" },
       { href: "/the-dashboard/", code: "25", navKey: "nav.the-dashboard", branchKey: "branch.dashboard" },
       { href: "/the-alerts/", code: "27", navKey: "nav.the-alerts", branchKey: "branch.alerts" },
       { href: "/the-exodus/", code: "16", navKey: "nav.the-exodus", branchKey: "branch.exodus" },
