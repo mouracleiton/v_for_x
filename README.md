@@ -104,6 +104,7 @@ Demographics · Economy · Health · Human Development · Hunger · Conflict · 
 | Crypto | Web Crypto API (SHA-256, AES-GCM, ECDSA P-256) |
 | Sound | Web Audio API (procedural — no audio files) |
 | Persistence | IndexedDB / LocalStorage (client-side only) |
+| On-device AI | transformers.js (WebGPU/WASM) — semantic understanding, zero query leakage |
 
 ---
 
@@ -122,6 +123,30 @@ Strict cyberpunk terminal aesthetic — every pixel obeys:
 - **prefers-reduced-motion** respected — disables all animations
 - **Mobile responsive** — effects reduce intensity on small screens
 - **Print mode** — Protocol X blueprints strip all effects for physical distribution
+
+---
+
+## On-device Semantic Oracle
+
+The Oracle (`/the-oracle/`) answers plain-English questions over the 200×28 data matrix. It runs **two engines**, both fully on-device:
+
+- **Exact** — instant heuristic pattern matching for threshold/rank queries (`"hunger > 30%"`, `"top 10 by military"`).
+- **Semantic** — a small transformer model (`all-MiniLM-L6-v2`, ~23 MB) loaded via [transformers.js](https://huggingface.co/docs/transformers.js), running in-browser on **WebGPU** (or WASM fallback). It embeds every country's crisis profile and every metric into a vector index, then answers *conceptual* questions that keywords cannot:
+
+> *"Which countries are most likely to tip into famine next year?"*
+
+The semantic ranker blends two on-device signals: a direction-normalized **composite** crisis score weighted by the metrics most relevant to the query (80%), plus direct **query↔country semantic similarity** (20%). Every result shows its top contributing dimensions for explainability.
+
+**Privacy by design.** The model and its WASM runtime are public open-source artifacts fetched once and cached locally forever. Every query is embedded on-device and compared against the local index — **nothing about your questions ever leaves the browser.** This is the platform's most defensible differentiator: real natural-language understanding that never phones home.
+
+The computed 200-country + metric vector index is persisted in IndexedDB (keyed by model + data version), so repeat visits are instantly ready.
+
+| Module | Role |
+|--------|------|
+| `lib/semantic-oracle.ts` | Pure vector math, normalization, scoring, ranking (model-agnostic, fully unit-tested) |
+| `lib/embeddings.ts` | Runtime loader for transformers.js (WebGPU/WASM, progress, caching) |
+| `app/the-oracle/page.tsx` | Dual-engine UI with graceful fallback + privacy panel |
+| `tests/semantic-oracle.test.ts` | 24 tests covering math, normalization, and end-to-end ranking on real data |
 
 ---
 
@@ -186,6 +211,7 @@ v-for-x/
 
 - **229 static pages** generated at build time (200 country detail pages + 12 blueprints + 5 dossiers + 9 branch pages)
 - **Zero external API calls** at runtime — all data is bundled
+- **On-device semantic AI** — a transformer model runs in your browser (WebGPU/WASM) to answer conceptual natural-language questions about the data; queries never leave the device
 - **Zero tracking** — no analytics, no cookies, no third-party scripts
 - **Zero API keys** — Leaflet uses bundled GeoJSON, no Mapbox/Google token
 - **Offline-capable** — works from a USB drive with no internet
