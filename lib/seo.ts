@@ -388,6 +388,14 @@ export const PAGE_META: Record<string, PageMeta> = {
       "Map state and repressive forces during protests in real time. Drop anonymous incident markers (kettles, tear gas, mass arrests, snipers, military deployment, comms blackouts). Live heat zones, threat clustering, escape-vector routing. Local-first, anonymous, time-decaying — nothing leaves your device.",
     path: "/the-sentinel/",
   },
+
+  "/the-mirror/": {
+    title: "The Mirror — One-Command Deployment Kit",
+    description:
+      "One command pulls the latest static build, pins it to IPFS, and stands up a censorship-resistant V FOR X mirror in under five minutes. Docker, cloud-init, Raspberry Pi, and Tor paths. Mint a signed 'I mirrored this' badge that feeds a distributed, serverless node list.",
+    path: "/the-mirror/",
+  },
+
   "/the-chronicle/": {
     title: "The Chronicle — Distributed Event Mapping",
     description:
