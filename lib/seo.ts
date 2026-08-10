@@ -395,6 +395,34 @@ export const PAGE_META: Record<string, PageMeta> = {
       "One command pulls the latest static build, pins it to IPFS, and stands up a censorship-resistant V FOR X mirror in under five minutes. Docker, cloud-init, Raspberry Pi, and Tor paths. Mint a signed 'I mirrored this' badge that feeds a distributed, serverless node list.",
     path: "/the-mirror/",
   },
+
+  "/the-chronicle/": {
+    title: "The Chronicle — Distributed Event Mapping",
+    description:
+      "A crowdsourced, verified incident map — a distributed Ushahidi. Submit geolocated events; each is cryptographically signed and hash-chained into a tamper-evident append-only log. Community members corroborate reports, raising verification status. No authority can silently rewrite the record. Plotted across a map and timeline.",
+    path: "/the-chronicle/",
+  },
+
+  "/the-pulse/": {
+    title: "The Pulse — Multi-source Crisis Reader",
+    description:
+      "Client-side RSS / nitter / Atom aggregator. Consumes public humanitarian feeds (ReliefWeb, FEWS NET, WFP, UNHCR, ICRC, MSF, Crisis Group, Amnesty, HRW), filters them through regional crisis keyword lexicons, and ranks every story by the platform's own vulnerability scores. IndexedDB cache, fully offline-readable.",
+    path: "/the-pulse/",
+  },
+
+  "/the-forensics/": {
+    title: "The Forensics — OSINT Image & Video Verification",
+    description:
+      "Verify before you publish. Drop an image for error-level analysis (tamper detection), EXIF timeline forensics, reverse-search launchers (TinEye/Yandex/Google), frame-by-frame video comparison, and shadow-angle geolocation. Pure client-side canvas work — nothing leaves your browser.",
+    path: "/the-forensics/",
+  },
+
+  "/the-verdict/": {
+    title: "The Verdict — Structured Fact-Checking Engine",
+    description:
+      "Rapid-response misinformation counter. Take any regime or official claim, attach 3 SHA-256-verified sources, and render a structured verdict (true / false / misleading / mixed) with a confidence score. Distinct from The Tribunal (legal cases) and The Registry (dossiers).",
+    path: "/the-verdict/",
+  },
 };
 
 /** Get metadata for a page path, falling back to site defaults */
