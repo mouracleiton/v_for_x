@@ -99,6 +99,7 @@ const STATIC_PAGES = [
   { label: "The Field Manual", href: "/the-field-manual/", desc: "Printable survival guides" },
   { label: "The Resistance", href: "/the-resistance/", desc: "Civil resistance analytics" },
   { label: "The Sentinel", href: "/the-sentinel/", desc: "Real-time repression & protest map" },
+  { label: "The Chronicle", href: "/the-chronicle/", desc: "Signed, hash-chained incident map" },
   { label: "The Forensics", href: "/the-forensics/", desc: "OSINT image & video verification" },
   { label: "The Nexus", href: "/the-nexus/", desc: "Kleptocracy & dirty-money ownership graph" },
 ];

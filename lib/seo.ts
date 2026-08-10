@@ -388,6 +388,13 @@ export const PAGE_META: Record<string, PageMeta> = {
       "Map state and repressive forces during protests in real time. Drop anonymous incident markers (kettles, tear gas, mass arrests, snipers, military deployment, comms blackouts). Live heat zones, threat clustering, escape-vector routing. Local-first, anonymous, time-decaying — nothing leaves your device.",
     path: "/the-sentinel/",
   },
+  "/the-chronicle/": {
+    title: "The Chronicle — Distributed Event Mapping",
+    description:
+      "A crowdsourced, verified incident map — a distributed Ushahidi. Submit geolocated events; each is cryptographically signed and hash-chained into a tamper-evident append-only log. Community members corroborate reports, raising verification status. No authority can silently rewrite the record. Plotted across a map and timeline.",
+    path: "/the-chronicle/",
+  },
+
   "/the-pulse/": {
     title: "The Pulse — Multi-source Crisis Reader",
     description:

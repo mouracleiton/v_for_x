@@ -63,3 +63,13 @@ privacy differentiator.
 **Answers questions keyword matching cannot**, e.g.
 *"Which countries are most likely to tip into famine next year?"* — surfaces
 Sudan, DRC, Yemen, Madagascar, Afghanistan, Syria via composite hunger risk.
+
+## Phase 5: Distributed Event Mapping ✅
+- [x] The Chronicle (/the-chronicle) — crowdsourced, verified incident map (distributed Ushahidi)
+  - lib/chronicle.ts: signed, hash-chained append-only event log (SHA-256 + ECDSA P-256)
+  - Chain integrity verification with tamper detection (verifyEvent / verifyChain)
+  - Community corroboration → tiered verification status (UNVERIFIED → SIGNED → CORROBORATED → VERIFIED)
+  - Leaflet incident map + timeline-bucket view + event feed + inspector
+  - Anonymous keypair identity, export/import for multi-device verification
+  - 44 new tests (lib/chronicle.ts); 594 tests total across 29 files
+## New Module: lib/chronicle.ts
