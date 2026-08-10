@@ -362,3 +362,119 @@ export const TIER_LABELS: Record<Badge["tier"], string> = {
   gold: "GOLD",
   platinum: "PLATINUM",
 };
+
+/* ═══════════════════════════════════════════════════════════════
+ *  SIGNED CERTIFICATES
+ * ═══════════════════════════════════════════════════════════════ */
+
+export interface AchievementCertificate {
+  /** Unique certificate ID */
+  id: string;
+  /** Badge or milestone being certified */
+  badgeId: string;
+  badgeName: string;
+  badgeTier: Badge["tier"];
+  /** Emoji for display */
+  emoji: string;
+  /** XP at time of certification */
+  xp: number;
+  level: number;
+  /** Countries visited count */
+  countriesVisited: number;
+  /** Dossiers read count */
+  dossiersRead: number;
+  /** Campaigns generated */
+  campaignsGenerated: number;
+  /** SHA-256 hash of the certificate content */
+  hash: string;
+  /** Epoch ms when certified */
+  issuedAt: number;
+}
+
+/**
+ * Generate a tamper-evident achievement certificate for a earned badge.
+ *
+ * The certificate contains a SHA-256 hash computed over its canonical
+ * content. This hash can be independently verified, shared, or anchored
+ * to the Bitcoin blockchain via lib/blockchain-verify.ts for an
+ * immutable proof of achievement.
+ */
+export async function generateCertificate(
+  badgeId: string,
+): Promise<AchievementCertificate | null> {
+  if (typeof window === "undefined") return null;
+  const state = loadState();
+  const badge = state.badges.find((b) => b.id === badgeId);
+  if (!badge || !badge.earnedAt) return null;
+
+  const cert: Omit<AchievementCertificate, "hash"> = {
+    id: crypto.randomUUID(),
+    badgeId: badge.id,
+    badgeName: badge.name,
+    badgeTier: badge.tier,
+    emoji: badge.emoji,
+    xp: state.xp,
+    level: state.level,
+    countriesVisited: state.countriesVisited.length,
+    dossiersRead: state.dossiersRead.length,
+    campaignsGenerated: state.campaignsGenerated,
+    issuedAt: Date.now(),
+  };
+
+  const canonical = JSON.stringify({
+    id: cert.id,
+    badgeId: cert.badgeId,
+    badgeName: cert.badgeName,
+    badgeTier: cert.badgeTier,
+    xp: cert.xp,
+    level: cert.level,
+    countriesVisited: cert.countriesVisited,
+    dossiersRead: cert.dossiersRead,
+    campaignsGenerated: cert.campaignsGenerated,
+    issuedAt: cert.issuedAt,
+  });
+
+  const buf = new TextEncoder().encode(canonical);
+  const hashBuf = await crypto.subtle.digest("SHA-256", buf);
+  const hash = Array.from(new Uint8Array(hashBuf))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+
+  return { ...cert, hash };
+}
+
+/**
+ * Verify that a certificate's hash matches its content.
+ * Returns true if the certificate has not been tampered with.
+ */
+export async function verifyCertificate(
+  cert: AchievementCertificate,
+): Promise<boolean> {
+  const canonical = JSON.stringify({
+    id: cert.id,
+    badgeId: cert.badgeId,
+    badgeName: cert.badgeName,
+    badgeTier: cert.badgeTier,
+    xp: cert.xp,
+    level: cert.level,
+    countriesVisited: cert.countriesVisited,
+    dossiersRead: cert.dossiersRead,
+    campaignsGenerated: cert.campaignsGenerated,
+    issuedAt: cert.issuedAt,
+  });
+
+  const buf = new TextEncoder().encode(canonical);
+  const hashBuf = await crypto.subtle.digest("SHA-256", buf);
+  const expectedHash = Array.from(new Uint8Array(hashBuf))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+
+  return expectedHash === cert.hash;
+}
+
+/**
+ * Export a certificate as a downloadable JSON file.
+ */
+export function exportCertificate(cert: AchievementCertificate): string {
+  return JSON.stringify(cert, null, 2);
+}

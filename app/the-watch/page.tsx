@@ -15,6 +15,14 @@ import {
   type WatchOperator,
   type WatchResult,
 } from "@/lib/watch";
+import {
+  runAlertCheck,
+  requestNotificationPermission,
+  notificationsEnabled,
+  fireAlertNotifications,
+  formatAlertSummary,
+  type AlertCheckResult,
+} from "@/lib/alert-engine";
 
 const data = backbone as WorldBackbone;
 const STORAGE_KEY = "vfx-watch";
@@ -22,6 +30,8 @@ const STORAGE_KEY = "vfx-watch";
 export default function TheWatchPage() {
   const [rules, setRules] = useState<WatchRule[]>([]);
   const [results, setResults] = useState<WatchResult[]>([]);
+  const [alertCheck, setAlertCheck] = useState<AlertCheckResult | null>(null);
+  const [notifEnabled, setNotifEnabled] = useState(false);
 
   // Form
   const [ruleName, setRuleName] = useState("");
@@ -46,9 +56,25 @@ export default function TheWatchPage() {
   useEffect(() => {
     if (rules.length > 0) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(rules));
-      setResults(evaluateAllRules(rules, data));
+      const evalResults = evaluateAllRules(rules, data);
+      setResults(evalResults);
+      const check = runAlertCheck(evalResults);
+      setAlertCheck(check);
     }
   }, [rules]);
+
+  useEffect(() => {
+    setNotifEnabled(notificationsEnabled());
+  }, []);
+
+  const handleEnableNotifications = useCallback(async () => {
+    const granted = await requestNotificationPermission();
+    setNotifEnabled(granted);
+    if (granted && alertCheck) {
+      fireAlertNotifications(alertCheck);
+    }
+    sound.success();
+  }, [alertCheck]);
 
   const handleAddRule = useCallback(() => {
     if (!ruleName) return;
@@ -77,6 +103,25 @@ export default function TheWatchPage() {
           <div><div className="text-3xl font-bold text-blood-bright">{triggeredCount}</div><div className="text-xs text-content-dim">TRIGGERED</div></div>
           <div><div className="text-3xl font-bold text-content-primary">{rules.length - triggeredCount}</div><div className="text-xs text-content-dim">CLEAR</div></div>
           <div><div className="text-3xl font-bold text-content-primary">{rules.length}</div><div className="text-xs text-content-dim">TOTAL RULES</div></div>
+        </div>
+        {alertCheck && alertCheck.newCount > 0 && (
+          <div className="mt-3 p-2 border border-blood-bright/50 bg-blood-bright/10 text-center">
+            <span className="text-blood-bright text-xs font-bold">
+              ⚠ {alertCheck.newCount} NEW ALERT{alertCheck.newCount > 1 ? "S" : ""} SINCE LAST VISIT
+            </span>
+          </div>
+        )}
+        <div className="mt-3 flex items-center gap-2 justify-center">
+          {notifEnabled ? (
+            <span className="text-[10px] text-terminal-green">🔔 Notifications enabled — new alerts will fire on visit</span>
+          ) : (
+            <button
+              onClick={handleEnableNotifications}
+              className="text-[10px] px-3 py-1 border border-border-dim text-content-secondary hover:border-blood hover:text-blood-bright"
+            >
+              Enable browser notifications for new alerts
+            </button>
+          )}
         </div>
       </TerminalCard>
 
