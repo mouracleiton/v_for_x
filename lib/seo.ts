@@ -303,6 +303,13 @@ export const PAGE_META: Record<string, PageMeta> = {
     path: "/the-canary/",
   },
 
+  "/the-guardian/": {
+    title: "The Guardian — People's Dead Man's Switch",
+    description:
+      "Scheduled check-ins, trusted-contact escalation, encrypted last-known-location, and panic-triggered broadcast. A life-safety net for activists and journalists. AES-GCM encryption, PBKDF2 key derivation, duress codes, zero data leaves your device.",
+    path: "/the-guardian/",
+  },
+
   "/the-cipher/": {
     title: "The Cipher — Steganography & One-Time Pad",
     description:

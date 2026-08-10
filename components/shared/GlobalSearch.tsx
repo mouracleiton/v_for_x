@@ -87,6 +87,7 @@ const STATIC_PAGES = [
   { label: "The Crucible", href: "/the-crucible/", desc: "Cascading crisis simulator" },
   { label: "The Cartographer", href: "/the-cartographer/", desc: "Custom choropleth builder" },
   { label: "The Canary", href: "/the-canary/", desc: "Dead man's switch timer" },
+  { label: "The Guardian", href: "/the-guardian/", desc: "People's check-in & panic switch" },
   { label: "The Cipher", href: "/the-cipher/", desc: "Steganography & one-time pads" },
   { label: "The Relay", href: "/the-relay/", desc: "Offline burst message format" },
   { label: "The Quorum", href: "/the-quorum/", desc: "Anonymous ZK voting" },

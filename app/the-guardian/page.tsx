@@ -1,0 +1,789 @@
+"use client";
+
+/**
+ * V FOR X — The Guardian (People's Dead Man's Switch)
+ *
+ * [59] THE GUARDIAN — Code: 59
+ *
+ * Canary is a dead man's switch for data. This is for people.
+ */
+
+import { useState, useEffect, useCallback, useRef } from "react";
+import TerminalCard from "@/components/ui/TerminalCard";
+import { sound } from "@/lib/sound";
+import {
+  armGuardian,
+  checkIn,
+  evaluateStatus,
+  formatDuration,
+  generateGuardianToken,
+  decryptLocation,
+  captureLocation,
+  triggerPanic,
+  clearPanic,
+  disarmGuardian,
+  buildPanicBroadcast,
+  buildEscalationNotice,
+  getEscalationState,
+  sortedContacts,
+  type GuardianRecord,
+  type GuardianStatusResult,
+  type TrustedContact,
+  type LocationData,
+} from "@/lib/guardian";
+
+const STORAGE_KEY = "vfx-guardian";
+
+interface DraftContact {
+  id: string;
+  label: string;
+  handle: string;
+  escalateAfterMin: number;
+}
+
+export default function TheGuardianPage() {
+  const [record, setRecord] = useState<GuardianRecord | null>(null);
+  const [status, setStatus] = useState<GuardianStatusResult | null>(null);
+  const [loaded, setLoaded] = useState(false);
+
+  // Setup form state
+  const [label, setLabel] = useState("Field reporter");
+  const [checkInHours, setCheckInHours] = useState(12);
+  const [passphrase, setPassphrase] = useState("");
+  const [confirmPass, setConfirmPass] = useState("");
+  const [safeCode, setSafeCode] = useState("");
+  const [duressCode, setDuressCode] = useState("");
+  const [contacts, setContacts] = useState<DraftContact[]>([
+    { id: "c1", label: "Editor", handle: "", escalateAfterMin: 0 },
+  ]);
+  const [escalationMessage, setEscalationMessage] = useState(
+    "If you receive this alert, I may have been detained, arrested, or am in danger. Contact my lawyer and the press freedom hotline immediately. Do not contact local authorities first.",
+  );
+  const [error, setError] = useState("");
+  const [token, setToken] = useState<string | null>(null);
+
+  // Check-in form
+  const [checkPass, setCheckPass] = useState("");
+  const [checkWord, setCheckWord] = useState("");
+  const [checkInNote, setCheckInNote] = useState("");
+
+  // Location
+  const [locPass, setLocPass] = useState("");
+  const [decryptedLoc, setDecryptedLoc] = useState<LocationData | null>(null);
+  const [locError, setLocError] = useState("");
+  const [capturing, setCapturing] = useState(false);
+
+  // Panic / broadcast
+  const [panicBroadcast, setPanicBroadcast] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const panicHeldRef = useRef(false);
+  const panicTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Load
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored) as GuardianRecord;
+        setRecord(parsed);
+        setStatus(evaluateStatus(parsed));
+        setToken(generateGuardianToken(parsed));
+      }
+    } catch { /* ignore */ }
+    setLoaded(true);
+  }, []);
+
+  // Tick status every second
+  useEffect(() => {
+    if (!record) return;
+    const interval = setInterval(() => {
+      setStatus(evaluateStatus(record));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [record]);
+
+  // Persist
+  useEffect(() => {
+    if (record && loaded) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(record));
+    }
+  }, [record, loaded]);
+
+  const addContact = useCallback(() => {
+    setContacts((cs) => [
+      ...cs,
+      {
+        id: "c" + Math.random().toString(36).slice(2, 8),
+        label: "",
+        handle: "",
+        escalateAfterMin: cs.length === 0 ? 0 : 60,
+      },
+    ]);
+  }, []);
+
+  const updateContact = useCallback((id: string, patch: Partial<DraftContact>) => {
+    setContacts((cs) => cs.map((c) => (c.id === id ? { ...c, ...patch } : c)));
+  }, []);
+
+  const removeContact = useCallback((id: string) => {
+    setContacts((cs) => cs.filter((c) => c.id !== id));
+  }, []);
+
+  const handleArm = useCallback(async () => {
+    setError("");
+    if (passphrase.length < 8) {
+      setError("// PASSPHRASE MUST BE AT LEAST 8 CHARACTERS");
+      sound.error();
+      return;
+    }
+    if (passphrase !== confirmPass) {
+      setError("// PASSPHRASES DO NOT MATCH");
+      sound.error();
+      return;
+    }
+    if (!safeCode || safeCode.length < 3) {
+      setError("// SAFE WORD MUST BE AT LEAST 3 CHARACTERS");
+      sound.error();
+      return;
+    }
+    if (!duressCode || duressCode.length < 3) {
+      setError("// DURESS WORD MUST BE AT LEAST 3 CHARACTERS");
+      sound.error();
+      return;
+    }
+    if (safeCode === duressCode) {
+      setError("// SAFE WORD AND DURESS WORD MUST BE DIFFERENT");
+      sound.error();
+      return;
+    }
+    const cleanContacts = contacts.filter((c) => c.label.trim() && c.handle.trim());
+    if (cleanContacts.length === 0) {
+      setError("// AT LEAST ONE TRUSTED CONTACT IS REQUIRED");
+      sound.error();
+      return;
+    }
+    try {
+      const r = await armGuardian(passphrase, {
+        label,
+        checkInHours,
+        contacts: cleanContacts as TrustedContact[],
+        escalationMessage,
+        safeCode,
+        duressCode,
+      });
+      setRecord(r);
+      setStatus(evaluateStatus(r));
+      setToken(generateGuardianToken(r));
+      setPassphrase("");
+      setConfirmPass("");
+      sound.success();
+    } catch (e) {
+      setError(`// ${e instanceof Error ? e.message : "Unknown error"}`);
+      sound.error();
+    }
+  }, [passphrase, confirmPass, safeCode, duressCode, contacts, label, checkInHours, escalationMessage]);
+
+  const handleCheckIn = useCallback(async () => {
+    if (!record) return;
+    setError("");
+    try {
+      const { record: updated } = await checkIn(record, checkPass, checkWord);
+      setRecord(updated);
+      setStatus(evaluateStatus(updated));
+      setCheckPass("");
+      setCheckWord("");
+      setCheckInNote(
+        updated.duressFlag ? "CHECK-IN ACCEPTED." : "CHECK-IN ACCEPTED. Timer reset.",
+      );
+      sound.success();
+    } catch (e) {
+      setError(`// ${e instanceof Error ? e.message : "Check-in failed"}`);
+      sound.error();
+    }
+  }, [record, checkPass, checkWord]);
+
+  const captureGeo = useCallback(async () => {
+    if (!record) return;
+    setLocError("");
+    if (!locPass) {
+      setLocError("// ENTER PASSPHRASE TO ENCRYPT LOCATION");
+      return;
+    }
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      setLocError("// GEOLOCATION UNAVAILABLE IN THIS BROWSER");
+      return;
+    }
+    setCapturing(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const loc: LocationData = {
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+            accuracy: pos.coords.accuracy,
+          };
+          const updated = await captureLocation(record, locPass, loc);
+          setRecord(updated);
+          setStatus(evaluateStatus(updated));
+          setLocPass("");
+          sound.success();
+        } catch (e) {
+          setLocError(`// ${e instanceof Error ? e.message : "Capture failed"}`);
+          sound.error();
+        } finally {
+          setCapturing(false);
+        }
+      },
+      (err) => {
+        setLocError(`// GEOLOCATION ERROR: ${err.message}`);
+        sound.error();
+        setCapturing(false);
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
+    );
+  }, [record, locPass]);
+
+  const handleDecryptLoc = useCallback(async () => {
+    if (!record) return;
+    setLocError("");
+    try {
+      const loc = await decryptLocation(record, locPass);
+      setDecryptedLoc(loc);
+      sound.success();
+    } catch (e) {
+      setLocError(`// ${e instanceof Error ? e.message : "Decrypt failed"}`);
+      sound.error();
+    }
+  }, [record, locPass]);
+
+  // Panic: hold 3s to avoid accidental trigger
+  const panicDown = useCallback(() => {
+    if (!record) return;
+    panicHeldRef.current = false;
+    panicTimerRef.current = setTimeout(() => {
+      panicHeldRef.current = true;
+      const panicked = triggerPanic(record);
+      setRecord(panicked);
+      setStatus(evaluateStatus(panicked));
+      sound.error();
+      setPanicBroadcast(buildPanicBroadcast(panicked, decryptedLoc));
+    }, 3000);
+  }, [record, decryptedLoc]);
+
+  const panicUp = useCallback(() => {
+    if (panicTimerRef.current) clearTimeout(panicTimerRef.current);
+  }, []);
+
+  const handleClearPanic = useCallback(() => {
+    if (!record) return;
+    const cleared = clearPanic(record);
+    setRecord(cleared);
+    setStatus(evaluateStatus(cleared));
+    setPanicBroadcast(null);
+    sound.success();
+  }, [record]);
+
+  const handleCopy = useCallback((text: string) => {
+    try {
+      navigator.clipboard?.writeText(text);
+      setCopied(true);
+      sound.copy();
+      setTimeout(() => setCopied(false), 1500);
+    } catch { /* ignore */ }
+  }, []);
+
+  const handleDisarm = useCallback(() => {
+    if (!record) return;
+    const disarmed = disarmGuardian(record);
+    setRecord(disarmed);
+    setStatus(evaluateStatus(disarmed));
+    sound.success();
+  }, [record]);
+
+  const handleDestroy = useCallback(() => {
+    localStorage.removeItem(STORAGE_KEY);
+    setRecord(null);
+    setStatus(null);
+    setToken(null);
+    setDecryptedLoc(null);
+    setPanicBroadcast(null);
+    setCheckInNote("");
+    sound.error();
+  }, []);
+
+  if (!loaded) return null;
+
+  const hasGuardian = !!record && record.status !== "safe";
+  const escalation = record ? getEscalationState(record) : null;
+
+  const statusColor =
+    status?.status === "armed"
+      ? "var(--color-terminal-green)"
+      : status?.status === "warning"
+        ? "var(--color-warning-amber)"
+        : "var(--color-blood-bright)";
+
+  return (
+    <div className="p-3 sm:p-6 md:p-10 max-w-4xl mx-auto">
+      <h1 className="text-3xl sm:text-4xl text-blood-bright font-bold tracking-widest mb-2">
+        🛡 THE GUARDIAN
+      </h1>
+      <p className="text-content-secondary text-sm mb-6">
+        // dead man&apos;s switch for people — check in, or your trusted contacts escalate. encrypted location, duress codes, panic broadcast.
+      </p>
+
+      {hasGuardian && record && status ? (
+        <div className="space-y-4">
+          {/* STATUS */}
+          <TerminalCard
+            title="STATUS"
+            accent={
+              status.status === "armed"
+                ? "green"
+                : status.status === "warning"
+                  ? "amber"
+                  : "blood"
+            }
+            glow={status.status === "overdue" || status.status === "panic" || status.status === "escalated"}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <div className="text-2xl font-bold" style={{ color: statusColor }}>
+                  {status.status.toUpperCase()}
+                </div>
+                <div className="text-xs text-content-dim mt-1">{record.config.label}</div>
+              </div>
+              <div className="text-right">
+                <div className="text-3xl font-bold font-mono" style={{
+                  color: status.fractionElapsed >= 0.75 ? "var(--color-blood-bright)" : "var(--color-content-primary)",
+                }}>
+                  {formatDuration(status.msRemaining)}
+                </div>
+                <div className="text-xs text-content-dim">REMAINING</div>
+              </div>
+            </div>
+            <p className="text-sm text-content-secondary">{status.message}</p>
+            <div className="mt-4 h-3 bg-abyss border border-border-dim overflow-hidden">
+              <div
+                className="h-full transition-all duration-1000"
+                style={{
+                  width: `${status.fractionElapsed * 100}%`,
+                  backgroundColor:
+                    status.fractionElapsed >= 0.75
+                      ? "var(--color-blood-bright)"
+                      : status.fractionElapsed >= 0.5
+                        ? "var(--color-warning-amber)"
+                        : "var(--color-terminal-green)",
+                }}
+              />
+            </div>
+            {/* Location status indicator */}
+            <div className="mt-3 flex items-center gap-3 text-xs text-content-dim">
+              <span>
+                📍 {record.location ? `Last fix ${formatDuration(Date.now() - record.location.capturedAt)} ago` : "No location captured"}
+              </span>
+              <span>·</span>
+              <span>{record.config.contacts.length} trusted contact{record.config.contacts.length !== 1 ? "s" : ""}</span>
+            </div>
+          </TerminalCard>
+
+          {/* ESCALATION LADDER */}
+          {escalation && (
+            <TerminalCard title="ESCALATION LADDER" accent="amber">
+              <div className="space-y-2">
+                {sortedContacts(record.config.contacts).map((c, i) => {
+                  const tier = escalation.tiers.find((t) => t.contact.id === c.id);
+                  const due = tier?.due;
+                  return (
+                    <div
+                      key={c.id}
+                      className={`flex items-center justify-between border px-3 py-2 ${
+                        due ? "border-blood bg-blood/10" : "border-border-dim"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span
+                          className="text-xs font-mono w-6 text-center"
+                          style={{ color: due ? "var(--color-blood-bright)" : "var(--color-content-dim)" }}
+                        >
+                          T{i}
+                        </span>
+                        <div>
+                          <div className="text-sm text-content-primary font-bold">{c.label}</div>
+                          <div className="text-[10px] text-content-dim">{c.handle}</div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-xs" style={{ color: due ? "var(--color-blood-bright)" : "var(--color-content-secondary)" }}>
+                          {due ? "DUE NOW" : `+${formatDuration(c.escalateAfterMin * 60_000)}`}
+                        </div>
+                        {due && (
+                          <button
+                            onClick={() => handleCopy(buildEscalationNotice(record, c, decryptedLoc))}
+                            className="text-[10px] text-blood-bright hover:underline mt-0.5"
+                          >
+                            [ COPY NOTICE ]
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              {copied && <p className="text-xs text-terminal-green mt-2">// COPIED TO CLIPBOARD</p>}
+            </TerminalCard>
+          )}
+
+          {/* CHECK-IN */}
+          {status.status !== "panic" && (
+            <TerminalCard title="CHECK-IN" accent="green">
+              <p className="text-sm text-content-secondary mb-3">
+                Enter your passphrase and a check-in word. Use your <span className="text-terminal-green font-bold">safe word</span> for a normal reset,
+                or your <span className="text-blood-bright font-bold">duress word</span> if coerced — it looks identical but silently escalates.
+              </p>
+              <input
+                type="password"
+                value={checkPass}
+                onChange={(e) => setCheckPass(e.target.value)}
+                placeholder="Passphrase"
+                className="w-full bg-abyss border border-border-dim px-3 py-2 text-sm text-content-primary mb-3 focus:border-blood"
+              />
+              <input
+                type="text"
+                value={checkWord}
+                onChange={(e) => setCheckWord(e.target.value)}
+                placeholder="Check-in word (safe or duress)"
+                className="w-full bg-abyss border border-border-dim px-3 py-2 text-sm text-content-primary mb-3 focus:border-blood"
+              />
+              <button
+                onClick={handleCheckIn}
+                className="px-4 py-2 text-xs font-bold bg-blood text-white hover:bg-blood-bright transition-colors"
+              >
+                [ CHECK IN ]
+              </button>
+              {checkInNote && <p className="text-xs text-terminal-green mt-2 font-mono">// {checkInNote}</p>}
+            </TerminalCard>
+          )}
+
+          {/* PANIC */}
+          <TerminalCard title="PANIC BROADCAST" accent="blood" glow={status.status === "panic"}>
+            {status.status === "panic" ? (
+              <div className="space-y-3">
+                <p className="text-sm text-blood-bright font-bold">PANIC ACTIVE. Your contacts should act now.</p>
+                {panicBroadcast && (
+                  <div>
+                    <pre className="text-xs bg-abyss border border-border-dim p-3 whitespace-pre-wrap text-content-primary font-mono">
+                      {panicBroadcast}
+                    </pre>
+                    <button
+                      onClick={() => handleCopy(panicBroadcast)}
+                      className="mt-2 px-4 py-2 text-xs font-bold border border-blood text-blood-bright hover:bg-blood hover:text-white transition-colors"
+                    >
+                      [ COPY BROADCAST ]
+                    </button>
+                  </div>
+                )}
+                <button
+                  onClick={handleClearPanic}
+                  className="px-4 py-2 text-xs border border-border-dim text-content-secondary hover:border-blood"
+                >
+                  [ CLEAR PANIC ]
+                </button>
+              </div>
+            ) : (
+              <div>
+                <p className="text-sm text-content-secondary mb-2">
+                  Hold for 3 seconds to trigger an immediate panic broadcast with your last-known-location.
+                </p>
+                <button
+                  onMouseDown={panicDown}
+                  onMouseUp={panicUp}
+                  onMouseLeave={panicUp}
+                  onTouchStart={panicDown}
+                  onTouchEnd={panicUp}
+                  className="w-full px-4 py-4 text-sm font-bold bg-blood text-white hover:bg-blood-bright transition-colors select-none"
+                >
+                  [ ⚠ HOLD 3s — PANIC ]
+                </button>
+              </div>
+            )}
+          </TerminalCard>
+
+          {/* LAST-KNOWN-LOCATION */}
+          <TerminalCard title="LAST-KNOWN-LOCATION (ENCRYPTED)" accent="amber">
+            {record.location ? (
+              <div className="space-y-3">
+                <p className="text-xs text-content-secondary">
+                  Encrypted location stored locally (AES-GCM). Captured {formatDuration(Date.now() - record.location.capturedAt)} ago.
+                  Decrypt only when needed.
+                </p>
+                {decryptedLoc ? (
+                  <div className="bg-abyss border border-border-dim p-3 text-sm">
+                    <div className="font-mono text-content-primary">
+                      {decryptedLoc.lat.toFixed(5)}, {decryptedLoc.lng.toFixed(5)}
+                    </div>
+                    {decryptedLoc.accuracy != null && (
+                      <div className="text-xs text-content-dim mt-1">±{Math.round(decryptedLoc.accuracy)}m accuracy</div>
+                    )}
+                    <a
+                      href={`https://www.openstreetmap.org/?mlat=${decryptedLoc.lat}&mlon=${decryptedLoc.lng}#map=16/${decryptedLoc.lat}/${decryptedLoc.lng}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-blood-bright hover:underline mt-2 inline-block"
+                    >
+                      [ OPEN IN MAP ↗ ]
+                    </a>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <input
+                      type="password"
+                      value={locPass}
+                      onChange={(e) => setLocPass(e.target.value)}
+                      placeholder="Passphrase to decrypt"
+                      className="flex-1 bg-abyss border border-border-dim px-3 py-2 text-sm text-content-primary focus:border-blood"
+                    />
+                    <button
+                      onClick={handleDecryptLoc}
+                      className="px-4 py-2 text-xs border border-border-dim text-content-secondary hover:border-blood"
+                    >
+                      [ DECRYPT ]
+                    </button>
+                  </div>
+                )}
+                <button
+                  onClick={() => { setDecryptedLoc(null); setLocPass(""); }}
+                  className="text-[10px] text-content-dim hover:text-blood"
+                >
+                  [ HIDE DECRYPTED LOCATION ]
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-xs text-content-secondary">No location captured yet. Capture your current position, encrypted with your passphrase.</p>
+                <div className="flex gap-2">
+                  <input
+                    type="password"
+                    value={locPass}
+                    onChange={(e) => setLocPass(e.target.value)}
+                    placeholder="Passphrase to encrypt"
+                    className="flex-1 bg-abyss border border-border-dim px-3 py-2 text-sm text-content-primary focus:border-blood"
+                  />
+                  <button
+                    onClick={captureGeo}
+                    disabled={capturing}
+                    className="px-4 py-2 text-xs font-bold border border-blood text-blood-bright hover:bg-blood hover:text-white transition-colors disabled:opacity-50"
+                  >
+                    {capturing ? "[ LOCATING... ]" : "[ CAPTURE LOCATION ]"}
+                  </button>
+                </div>
+              </div>
+            )}
+            {locError && <p className="text-blood-bright text-xs font-mono mt-2">{locError}</p>}
+          </TerminalCard>
+
+          {/* GUARDIAN TOKEN */}
+          {token && (
+            <TerminalCard title="GUARDIAN TOKEN" accent="amber">
+              <p className="text-xs text-content-secondary mb-2">
+                Share this token with your trusted contacts in advance. Separately, share the passphrase through a different channel.
+                If you miss a check-in, they use both to decrypt your last-known-location.
+              </p>
+              <code className="block text-xs bg-abyss border border-border-dim p-3 break-all text-warning-amber">
+                {token}
+              </code>
+            </TerminalCard>
+          )}
+
+          {/* ESCALATION MESSAGE */}
+          <TerminalCard title="ESCALATION MESSAGE" accent="blood">
+            <p className="text-sm text-content-primary whitespace-pre-wrap">
+              {record.config.escalationMessage}
+            </p>
+          </TerminalCard>
+
+          {/* DANGER ZONE */}
+          <TerminalCard title="DANGER ZONE" accent="blood">
+            <p className="text-xs text-content-secondary mb-3">
+              Disarm stands the guardian down (recoverable). Destroy permanently deletes everything from this device — irreversible.
+            </p>
+            <div className="flex gap-2 flex-wrap">
+              <button
+                onClick={handleDisarm}
+                className="px-4 py-2 text-xs border border-border-dim text-content-secondary hover:border-blood"
+              >
+                [ DISARM ]
+              </button>
+              <button
+                onClick={handleDestroy}
+                className="px-4 py-2 text-xs font-bold border border-blood text-blood-bright hover:bg-blood hover:text-white transition-colors"
+              >
+                [ DESTROY GUARDIAN ]
+              </button>
+            </div>
+          </TerminalCard>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {/* SETUP FORM */}
+          <TerminalCard title="ARM GUARDIAN" accent="blood">
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs text-content-dim uppercase tracking-widest">Label (who is being guarded)</label>
+                <input
+                  type="text"
+                  value={label}
+                  onChange={(e) => setLabel(e.target.value)}
+                  className="w-full bg-abyss border border-border-dim px-3 py-2 text-sm text-content-primary mt-1 focus:border-blood"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs text-content-dim uppercase tracking-widest">Check-in Interval: {checkInHours} hours</label>
+                <input
+                  type="range"
+                  min={1}
+                  max={168}
+                  value={checkInHours}
+                  onChange={(e) => setCheckInHours(Number(e.target.value))}
+                  className="w-full mt-1"
+                />
+                <div className="flex justify-between text-xs text-content-dim">
+                  <span>1h</span><span>12h</span><span>24h</span><span>168h (7d)</span>
+                </div>
+              </div>
+
+              {/* TRUSTED CONTACTS */}
+              <div>
+                <label className="text-xs text-content-dim uppercase tracking-widest">Trusted Contacts (escalation chain)</label>
+                <div className="space-y-2 mt-1">
+                  {contacts.map((c, i) => (
+                    <div key={c.id} className="grid grid-cols-12 gap-2 items-center">
+                      <span className="col-span-1 text-[10px] text-content-dim text-center">T{i}</span>
+                      <input
+                        type="text"
+                        value={c.label}
+                        onChange={(e) => updateContact(c.id, { label: e.target.value })}
+                        placeholder="Role (Editor)"
+                        className="col-span-3 bg-abyss border border-border-dim px-2 py-1.5 text-xs text-content-primary focus:border-blood"
+                      />
+                      <input
+                        type="text"
+                        value={c.handle}
+                        onChange={(e) => updateContact(c.id, { handle: e.target.value })}
+                        placeholder="Channel (Signal, email)"
+                        className="col-span-4 bg-abyss border border-border-dim px-2 py-1.5 text-xs text-content-primary focus:border-blood"
+                      />
+                      <input
+                        type="number"
+                        min={0}
+                        value={c.escalateAfterMin}
+                        onChange={(e) => updateContact(c.id, { escalateAfterMin: Number(e.target.value) })}
+                        title="Minutes after deadline to notify this contact"
+                        className="col-span-3 bg-abyss border border-border-dim px-2 py-1.5 text-xs text-content-primary focus:border-blood"
+                      />
+                      <span className="col-span-1 text-[10px] text-content-dim">min</span>
+                      {contacts.length > 1 && (
+                        <button
+                          onClick={() => removeContact(c.id)}
+                          className="col-span-12 text-[10px] text-blood-bright hover:underline text-right"
+                        >
+                          [ REMOVE ]
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <button
+                  onClick={addContact}
+                  className="mt-2 text-xs text-blood-bright hover:underline"
+                >
+                  [ + ADD CONTACT ]
+                </button>
+              </div>
+
+              <div>
+                <label className="text-xs text-content-dim uppercase tracking-widest">Escalation Message</label>
+                <textarea
+                  value={escalationMessage}
+                  onChange={(e) => setEscalationMessage(e.target.value)}
+                  rows={3}
+                  className="w-full bg-abyss border border-border-dim px-3 py-2 text-sm text-content-primary mt-1 focus:border-blood"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs text-content-dim uppercase tracking-widest">Safe Word (min 3 chars)</label>
+                  <input
+                    type="text"
+                    value={safeCode}
+                    onChange={(e) => setSafeCode(e.target.value)}
+                    placeholder="e.g. sunrise"
+                    className="w-full bg-abyss border border-border-dim px-3 py-2 text-sm text-content-primary mt-1 focus:border-blood"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-content-dim uppercase tracking-widest">Duress Word (min 3 chars)</label>
+                  <input
+                    type="text"
+                    value={duressCode}
+                    onChange={(e) => setDuressCode(e.target.value)}
+                    placeholder="e.g. nightfall"
+                    className="w-full bg-abyss border border-border-dim px-3 py-2 text-sm text-content-primary mt-1 focus:border-blood"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs text-content-dim uppercase tracking-widest">Passphrase (min 8 chars)</label>
+                  <input
+                    type="password"
+                    value={passphrase}
+                    onChange={(e) => setPassphrase(e.target.value)}
+                    className="w-full bg-abyss border border-border-dim px-3 py-2 text-sm text-content-primary mt-1 focus:border-blood"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-content-dim uppercase tracking-widest">Confirm Passphrase</label>
+                  <input
+                    type="password"
+                    value={confirmPass}
+                    onChange={(e) => setConfirmPass(e.target.value)}
+                    className="w-full bg-abyss border border-border-dim px-3 py-2 text-sm text-content-primary mt-1 focus:border-blood"
+                  />
+                </div>
+              </div>
+
+              {error && <p className="text-blood-bright text-sm font-mono">{error}</p>}
+
+              <button
+                onClick={handleArm}
+                className="w-full px-4 py-3 text-sm font-bold bg-blood text-white hover:bg-blood-bright transition-colors"
+              >
+                [ ARM GUARDIAN ]
+              </button>
+            </div>
+          </TerminalCard>
+
+          {/* HOW IT WORKS */}
+          <TerminalCard title="HOW IT WORKS" accent="amber">
+            <ol className="space-y-2 text-sm text-content-secondary">
+              <li><span className="text-blood-bright font-bold">1.</span> Set a check-in interval and name trusted contacts (escalation chain).</li>
+              <li><span className="text-blood-bright font-bold">2.</span> Choose a <span className="text-terminal-green">safe word</span> and a <span className="text-blood-bright">duress word</span>. Share the passphrase with contacts out-of-band.</li>
+              <li><span className="text-blood-bright font-bold">3.</span> Check in before each deadline using your passphrase + a word.</li>
+              <li><span className="text-blood-bright font-bold">4.</span> Capture your location anytime — it is encrypted (AES-GCM) and stays on this device.</li>
+              <li><span className="text-blood-bright font-bold">5.</span> Miss a check-in and the escalation ladder activates: contacts are notified in sequence.</li>
+              <li><span className="text-blood-bright font-bold">6.</span> Under coercion? Use the duress word — it looks like a normal check-in but silently escalates.</li>
+              <li><span className="text-blood-bright font-bold">7.</span> In immediate danger? Hold PANIC 3s to broadcast your location + message.</li>
+            </ol>
+            <p className="text-xs text-content-dim mt-4">
+              ⚠ This is a heuristic client-side timer. V FOR X has no backend and cannot send messages itself — it prepares them. Your trusted contact must actually carry the alert. Share the passphrase and guardian token through separate, secure channels. For genuine life-safety, layer this with human check-ins, a legal contact, and press-freedom support lines.
+            </p>
+          </TerminalCard>
+        </div>
+      )}
+    </div>
+  );
+}
