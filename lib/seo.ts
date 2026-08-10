@@ -388,6 +388,13 @@ export const PAGE_META: Record<string, PageMeta> = {
       "Map state and repressive forces during protests in real time. Drop anonymous incident markers (kettles, tear gas, mass arrests, snipers, military deployment, comms blackouts). Live heat zones, threat clustering, escape-vector routing. Local-first, anonymous, time-decaying — nothing leaves your device.",
     path: "/the-sentinel/",
   },
+  "/the-pulse/": {
+    title: "The Pulse — Multi-source Crisis Reader",
+    description:
+      "Client-side RSS / nitter / Atom aggregator. Consumes public humanitarian feeds (ReliefWeb, FEWS NET, WFP, UNHCR, ICRC, MSF, Crisis Group, Amnesty, HRW), filters them through regional crisis keyword lexicons, and ranks every story by the platform's own vulnerability scores. IndexedDB cache, fully offline-readable.",
+    path: "/the-pulse/",
+  },
+
   "/the-forensics/": {
     title: "The Forensics — OSINT Image & Video Verification",
     description:
