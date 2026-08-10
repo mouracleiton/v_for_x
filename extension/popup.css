@@ -1,0 +1,283 @@
+/* ═══════════════════════════════════════════════════════════════
+   V FOR X COMPASS — popup styles
+   Command Center theme: deep navy · alert crimson · intel cyan-green
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  --void: #060b14;
+  --abyss: #0a1220;
+  --panel: #0f1a2e;
+  --panel-hi: #142238;
+  --border-dim: #1a2a44;
+  --border-bright: #2a4264;
+  --blood: #c42b3e;
+  --blood-bright: #e23856;
+  --blood-dim: #5a1828;
+  --green: #22d3a6;
+  --amber: #f0a93b;
+  --command: #5b9cf6;
+  --command-bright: #7db5ff;
+  --fg: #dfe7f5;
+  --fg-2: #8da3c4;
+  --fg-3: #4a5d7a;
+  --mono: "JetBrains Mono", "Fira Code", "SF Mono", "Cascadia Code",
+    "Menlo", "Consolas", monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--void);
+  color: var(--fg);
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* subtle scanline overlay for that command-center feel */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0) 0,
+    rgba(0, 0, 0, 0) 2px,
+    rgba(15, 26, 46, 0.08) 3px,
+    rgba(15, 26, 46, 0.08) 3px
+  );
+  z-index: 1000;
+}
+
+.wrap {
+  width: 320px;
+  padding: 14px;
+}
+
+/* ── Brand ─────────────────────────────────────────────────── */
+.brand {
+  border-bottom: 1px solid var(--border-dim);
+  padding-bottom: 12px;
+  margin-bottom: 14px;
+}
+
+.logo-line {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+}
+
+.logo-mark {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--blood-bright);
+  text-shadow: 0 0 10px rgba(196, 43, 62, 0.45);
+  letter-spacing: -1px;
+  line-height: 1;
+}
+
+.logo-text {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--fg);
+}
+
+.tag {
+  font-size: 10px;
+  color: var(--fg-3);
+  margin-top: 4px;
+  letter-spacing: 0.04em;
+}
+
+/* ── Section blocks ────────────────────────────────────────── */
+.block {
+  margin-bottom: 14px;
+}
+
+.label {
+  display: block;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--fg-3);
+  margin-bottom: 7px;
+}
+
+/* ── Search ────────────────────────────────────────────────── */
+.search-row {
+  display: flex;
+  gap: 6px;
+}
+
+#country-search {
+  flex: 1;
+  min-width: 0;
+  background: var(--abyss);
+  border: 1px solid var(--border-dim);
+  color: var(--fg);
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 8px 10px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+#country-search::placeholder {
+  color: var(--fg-3);
+}
+
+#country-search:focus {
+  border-color: var(--command);
+}
+
+#search-go {
+  background: var(--blood-dim);
+  border: 1px solid var(--blood);
+  color: var(--blood-bright);
+  font-family: var(--mono);
+  font-size: 15px;
+  font-weight: 700;
+  width: 38px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+#search-go:hover {
+  background: var(--blood);
+  color: #fff;
+}
+
+.hint {
+  font-size: 10px;
+  color: var(--fg-3);
+  margin-top: 6px;
+}
+
+#search-hint.err {
+  color: var(--amber);
+}
+
+/* ── Quick links grid ──────────────────────────────────────── */
+.links {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+
+.qlink {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--panel);
+  border: 1px solid var(--border-dim);
+  color: var(--fg);
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 8px 10px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.qlink:hover {
+  border-color: var(--blood);
+  background: var(--panel-hi);
+}
+
+.qlink:nth-child(5) {
+  grid-column: span 2;
+}
+
+.ql-ico {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.ql-name {
+  color: var(--fg);
+}
+
+/* ── Highlight toggle ──────────────────────────────────────── */
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: var(--abyss);
+  border: 1px solid var(--border-dim);
+  color: var(--fg-2);
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 9px 11px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.toggle:hover {
+  border-color: var(--border-bright);
+}
+
+.toggle-led {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--fg-3);
+  border: 1px solid var(--border-bright);
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+
+.toggle[aria-pressed="true"] {
+  border-color: var(--blood);
+  color: var(--blood-bright);
+}
+
+.toggle[aria-pressed="true"] .toggle-led {
+  background: var(--blood-bright);
+  border-color: var(--blood-bright);
+  box-shadow: 0 0 8px rgba(226, 56, 86, 0.6);
+}
+
+.toggle-text {
+  flex: 1;
+}
+
+/* ── Footer ────────────────────────────────────────────────── */
+.footer {
+  border-top: 1px solid var(--border-dim);
+  padding-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  color: var(--fg-3);
+}
+
+.dot {
+  color: var(--border-bright);
+}
+
+.home-link {
+  color: var(--green);
+  cursor: pointer;
+  margin-left: auto;
+}
+
+.home-link:hover {
+  color: var(--command-bright);
+}
+
+/* slim scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-bright);
+}

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>V FOR X Compass</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <!-- ── Brand header ── -->
+      <header class="brand">
+        <div class="logo-line">
+          <span class="logo-mark">V</span>
+          <span class="logo-text">FOR X</span>
+        </div>
+        <div class="tag">// COMPASS · field intelligence overlay</div>
+      </header>
+
+      <!-- ── Country search ── -->
+      <section class="block">
+        <label class="label" for="country-search">// COUNTRY LOOKUP</label>
+        <div class="search-row">
+          <input
+            id="country-search"
+            type="text"
+            placeholder="e.g. Sudan, DR Congo, USA…"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button id="search-go" title="Open dossier" aria-label="Open dossier">→</button>
+        </div>
+        <div id="search-hint" class="hint">Type any country name, then press Enter.</div>
+      </section>
+
+      <!-- ── Quick links ── -->
+      <section class="block">
+        <div class="label">// QUICK ACCESS</div>
+        <div class="links">
+          <button class="qlink" data-url="sorrow-map/">
+            <span class="ql-ico">🗺</span><span class="ql-name">Sorrow Map</span>
+          </button>
+          <button class="qlink" data-url="registry/">
+            <span class="ql-ico">📇</span><span class="ql-name">Registry</span>
+          </button>
+          <button class="qlink" data-url="the-dashboard/">
+            <span class="ql-ico">📊</span><span class="ql-name">Dashboard</span>
+          </button>
+          <button class="qlink" data-url="the-alerts/">
+            <span class="ql-ico">🚨</span><span class="ql-name">Alerts</span>
+          </button>
+          <button class="qlink" data-url="the-press-kit/">
+            <span class="ql-ico">📰</span><span class="ql-name">Press Kit</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- ── Page overlay toggle ── -->
+      <section class="block">
+        <div class="label">// PAGE OVERLAY</div>
+        <button id="highlight-toggle" class="toggle" aria-pressed="false">
+          <span class="toggle-led" aria-hidden="true"></span>
+          <span class="toggle-text">Highlight countries on this page</span>
+        </button>
+        <div class="hint">Underlines every recognised country name in crimson.</div>
+      </section>
+
+      <!-- ── Footer stats ── -->
+      <footer class="footer">
+        <span>200 countries · 35 sections</span>
+        <span class="dot">·</span>
+        <a id="open-home" class="home-link" href="#" title="Open V FOR X">v-for-x ↗</a>
+      </footer>
+    </div>
+
+    <script src="countries.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

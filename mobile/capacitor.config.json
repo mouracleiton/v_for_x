@@ -1,0 +1,12 @@
+{
+  "_comment": "V FOR X Capacitor config. Setup: (1) npm run build to produce the static export in ./out — this is the webDir. (2) npx cap sync to copy web assets into native projects. (3) npx cap add android / npx cap add ios to scaffold native shells. (4) npx cap open android (Android Studio) or npx cap open ios (Xcode) to build & deploy. Because V FOR X is a fully static export, every native build bundles a complete offline node.",
+  "appId": "foundation.aaif.vforx",
+  "appName": "V FOR X",
+  "webDir": "out",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}

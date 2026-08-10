@@ -74,6 +74,8 @@ export const useStore = create<VFXState>((set) => ({
         sessionStorage.clear();
       } catch { /* ignore */ }
       indexedDB.deleteDatabase("vfx-store");
+      // Destroy the encrypted vault (panic wipe)
+      indexedDB.deleteDatabase("vfx-vault");
       // Purge service worker caches (critical for panic wipe)
       if ("caches" in window) {
         caches.keys().then((names) => {

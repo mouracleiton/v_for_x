@@ -202,6 +202,178 @@ export const PAGE_META: Record<string, PageMeta> = {
     description: "Free, open satellite imagery makes destruction undeniable. Inspect documented conflict and crisis zones from orbit across monitored countries — the evidence regimes cannot censor.",
     path: "/the-satellite/",
   },
+  "/the-onion/": {
+    title: "The Onion — Tor Hidden Service Mirror Guide",
+    description: "Step-by-step guide to mirror V FOR X as a Tor .onion hidden service. Censorship-resistant hosting on a Linux server with hardened Nginx, zero JS logging, and full security checklist.",
+    path: "/the-onion/",
+  },
+  "/the-academy/": {
+    title: "The Academy — Interactive Crisis Education",
+    description: "4 free interactive courses on global hunger, the economics of war, corruption, and the climate-displacement crisis. Data-driven modules, quizzes, certificates. Learn the numbers that change minds.",
+    path: "/the-academy/",
+  },
+  "/print/": {
+    title: "Printable Country Briefs — V FOR X",
+    description:
+      "Data-dense, print-ready intelligence briefs for any of 200 countries. Key metrics, crisis indicators, vulnerability breakdown, and dossier references. Export to PDF or HTML.",
+    path: "/print/",
+  },
+  "/the-chart-builder/": {
+    title: "The Chart Builder — Custom Data Visualizer",
+    description:
+      "Build custom charts from 200 countries × 40 metrics. Multi-metric bar, line, and scatter plots. Filter by region, sort, export as PNG/CSV, and share via encoded URL.",
+    path: "/the-chart-builder/",
+  },
+  "/the-digest/": {
+    title: "The Digest — Personalized Crisis Email Feed",
+    description:
+      "Build a personalized crisis digest: pick countries and topics, choose a cadence, and deliver it to your inbox via RSS-to-email (follow.it / Blogtrottr). Styled HTML email, RSS feed, and QR share — all generated live.",
+    path: "/the-digest/",
+  },
+  "/the-forecast/": {
+    title: "The Forecast — Transparent Crisis Risk Model",
+    description:
+      "A transparent, weighted 10-factor risk model ranks the most stressed countries on a 0-100 scale. Fully disclosed weights, factor breakdowns, and a momentum forecast. Heuristic scoring — not predictive AI.",
+    path: "/the-forecast/",
+  },
+  "/the-analyzer/": {
+    title: "The Analyzer — Client-side Document Triage",
+    description:
+      "Drop or paste a document and get an instant client-side triage: red-flag terms (shell companies, sanctions, corruption, human rights, environmental), country mentions linked to dossiers, sentiment, and key phrases. No text leaves your browser.",
+    path: "/the-analyzer/",
+  },
+
+  "/the-vault/": {
+    title: "The Vault — Curated Public Datasets for Accountability",
+    description:
+      "A vetted registry of 36 open datasets for exposing corruption, mapping conflict, and documenting human-rights abuse. Conflict, sanctions, censorship, hunger, climate, inequality — all country-keyed and free.",
+    path: "/the-vault/",
+  },
+  "/the-safehouse/": {
+    title: "The Safehouse — Encrypted Evidence Store",
+    description:
+      "AES-GCM encrypted client-side evidence and notes store for citizen journalists. Zero data leaves your device. PBKDF2 passphrase-derived keys, duress-wipe integration, encrypted export. Store observations, source notes, and evidence securely offline.",
+    path: "/the-safehouse/",
+  },
+
+  "/the-chain/": {
+    title: "The Chain — Arms, Sanctions & Aid Relationship Graph",
+    description:
+      "Interactive geopolitical relationship graph: who sells weapons to whom (SIPRI arms transfers), who sanctions whom (UN/EU/US regimes), and who donates aid to whom (OECD DAC). 50 countries, 79 tracked flows. Country-centric and global ranking views.",
+    path: "/the-chain/",
+  },
+
+  "/the-countdown/": {
+    title: "The Countdown — SDG 2030 Deadline Tracker",
+    description:
+      "Six UN Sustainable Development Goals. Six parallel equations — water (SDG 6), health (SDG 3), energy (SDG 7), education (SDG 4), climate (SDG 13), inequality (SDG 10). Each with a gap in human lives, a cost in billions, and a ticking clock. All off track.",
+    path: "/the-countdown/",
+  },
+
+  "/the-oracle/": {
+    title: "The Oracle — Natural-Language Data Query Engine",
+    description:
+      "Ask any question about 200 countries × 24 dimensions in plain English. 'Which countries spend more on military than healthcare?' 'Top 10 by hunger in Africa.' Instant ranked answers. No API calls, no AI service — pure client-side pattern matching.",
+    path: "/the-oracle/",
+  },
+
+  "/the-crucible/": {
+    title: "The Crucible — Cascading Crisis Simulator",
+    description:
+      "Apply crisis shocks to any country — GDP collapse, conflict onset, climate disaster, food system failure, health emergency — and watch domino effects cascade across every dimension. Compound effects, heuristic multipliers from real crisis data (Syria, Yemen, Lebanon).",
+    path: "/the-crucible/",
+  },
+
+  "/the-cartographer/": {
+    title: "The Cartographer — Custom Choropleth Map Builder",
+    description:
+      "Build custom world map visualizations from 26 metrics across 200 countries. Choose from 6 color scales (Blood Red, Inferno, Matrix, Amber, Ice, Mono), set custom breakpoints, and generate bespoke choropleth maps. Different from Chart Builder and Sorrow Map.",
+    path: "/the-cartographer/",
+  },
+
+  "/the-canary/": {
+    title: "The Canary — Dead Man's Switch",
+    description:
+      "Encrypt a payload with AES-GCM. Arm a timer. If you stop checking in, it releases. A whistleblower's insurance policy. PBKDF2 key derivation, release tokens, zero data leaves your device.",
+    path: "/the-canary/",
+  },
+
+  "/the-cipher/": {
+    title: "The Cipher — Steganography & One-Time Pad",
+    description:
+      "Hide messages in images (LSB steganography, 2 bits per RGB channel), encrypt with information-theoretically secure one-time pads, and encode burst messages with a 20-entry field codebook. All client-side, all anonymous.",
+    path: "/the-cipher/",
+  },
+
+  "/the-relay/": {
+    title: "The Relay — Offline Burst Message Format",
+    description:
+      "Compact message envelope for QR codes, LoRa packets, and dead drops when the internet is cut. Encode, segment into QR-sized chunks, and relay messages offline. Message templates for alerts, coordinates, and supply requests.",
+    path: "/the-relay/",
+  },
+
+  "/the-quorum/": {
+    title: "The Quorum — Anonymous ZK Voting",
+    description:
+      "Anonymous collective decision-making with zero-knowledge proofs. Vote without revealing who you are or how you voted. ZK set-membership proofs prevent double-voting without exposing identity. Prove eligibility without revealing which country you're from.",
+    path: "/the-quorum/",
+  },
+
+  "/the-tribunal/": {
+    title: "The Tribunal — Citizen Case Builder",
+    description:
+      "Build evidence-backed accountability cases against officials and regimes. Hash-chained evidence ledger, 11 legal framework templates (Rome Statute, UDHR, UNCAC, Geneva Conventions), case strength scoring. A citizen-run ICC case preparation tool.",
+    path: "/the-tribunal/",
+  },
+
+  "/the-promises/": {
+    title: "The Promises — Politician Truth Score",
+    description:
+      "Track politician pledges versus deliveries. Record promises, update their status, and compute a transparent weighted truth-score. Who kept their word and who lied? Importance-weighted scoring, overdue tracking, politician rankings.",
+    path: "/the-promises/",
+  },
+
+  "/the-lives/": {
+    title: "The Lives — Memorial Counter",
+    description:
+      "The statistics represent real human lives. A running memorial counter for every person lost to preventable causes — hunger (9M/yr), conflict, disease, lack of clean water. Real-time toll since your visit. Add names to the memorial wall.",
+    path: "/the-lives/",
+  },
+
+  "/the-testimony/": {
+    title: "The Testimony — Signed Witness Statements",
+    description:
+      "Collect timestamped, ECDSA-signed witness statements. Hash-chained into a tamper-evident append-only log. Anonymous signing with P-256 keypairs. For Tribunal cases, ICC submissions, media reports.",
+    path: "/the-testimony/",
+  },
+
+  "/the-watch/": {
+    title: "The Watch — Threshold Alert Rules",
+    description:
+      "Define threshold alert rules across 15 crisis metrics for 200 countries. 'Alert me when any country's hunger rate exceeds 30%.' Evaluated client-side on every visit. Integrates with the risk model. 5 preset rules included.",
+    path: "/the-watch/",
+  },
+
+  "/the-exchange/": {
+    title: "The Exchange — Decentralized Mutual-Aid Matching",
+    description:
+      "Post what you have and what you need. The matching engine connects complementary offers and requests across 13 resource categories. No registration, no tracking, no central authority. Scored matching with geographic proximity.",
+    path: "/the-exchange/",
+  },
+
+  "/the-field-manual/": {
+    title: "The Field Manual — Scenario Survival Guides",
+    description:
+      "10 printable, scenario-specific survival guides: grid failure, arrest, natural disaster, active conflict, medical emergency, digital breach, civil unrest, border crossing, communication blackout, and emergency evacuation. Each with phased actions, checklists, and warnings.",
+    path: "/the-field-manual/",
+  },
+
+  "/the-resistance/": {
+    title: "The Resistance — Civil Movement Analytics",
+    description:
+      "Resistance ripeness scoring from structural conditions for 200 countries. Historical nonviolent movements from the NAVCO dataset (Chenoweth). 18 resistance tactics from Gene Sharp's methods, ranked by effectiveness. Nonviolence wins 53% vs 26%.",
+    path: "/the-resistance/",
+  },
 };
 
 /** Get metadata for a page path, falling back to site defaults */

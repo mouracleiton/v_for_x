@@ -25,6 +25,13 @@ const STATIC_PATHS = [
   "/the-badges/", "/the-changelog/", "/the-press-kit/",
   "/the-simulator/", "/the-alerts/", "/the-satellite/",
   "/the-vault/",
+  "/the-chart-builder/", "/the-digest/", "/the-forecast/",
+  "/the-analyzer/", "/the-academy/", "/the-onion/",
+  "/the-safehouse/", "/the-chain/", "/the-countdown/",
+  "/the-oracle/", "/the-crucible/", "/the-cartographer/",
+  "/the-canary/", "/the-cipher/", "/the-relay/", "/the-quorum/",
+  "/the-tribunal/", "/the-promises/", "/the-lives/", "/the-testimony/",
+  "/the-watch/", "/the-exchange/", "/the-field-manual/", "/the-resistance/",
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

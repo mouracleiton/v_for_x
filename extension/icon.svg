@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- V FOR X Compass icon — crimson V on deep navy. -->
+<!-- Generate PNGs at 16/48/128 from this SVG (see README.md). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" role="img" aria-label="V FOR X">
+  <!-- navy background -->
+  <rect width="16" height="16" fill="#060b14" />
+  <!-- subtle border to read on dark toolbars -->
+  <rect x="0.5" y="0.5" width="15" height="15" fill="none" stroke="#1a2a44" stroke-width="1" />
+  <!-- crimson V -->
+  <path d="M3 4 L8 12 L13 4" fill="none" stroke="#c42b3e" stroke-width="2.4"
+        stroke-linecap="square" stroke-linejoin="miter" />
+</svg>
