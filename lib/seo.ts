@@ -395,6 +395,13 @@ export const PAGE_META: Record<string, PageMeta> = {
     path: "/the-chronicle/",
   },
 
+  "/the-pulse/": {
+    title: "The Pulse — Multi-source Crisis Reader",
+    description:
+      "Client-side RSS / nitter / Atom aggregator. Consumes public humanitarian feeds (ReliefWeb, FEWS NET, WFP, UNHCR, ICRC, MSF, Crisis Group, Amnesty, HRW), filters them through regional crisis keyword lexicons, and ranks every story by the platform's own vulnerability scores. IndexedDB cache, fully offline-readable.",
+    path: "/the-pulse/",
+  },
+
   "/the-forensics/": {
     title: "The Forensics — OSINT Image & Video Verification",
     description:
