@@ -374,6 +374,13 @@ export const PAGE_META: Record<string, PageMeta> = {
       "Resistance ripeness scoring from structural conditions for 200 countries. Historical nonviolent movements from the NAVCO dataset (Chenoweth). 18 resistance tactics from Gene Sharp's methods, ranked by effectiveness. Nonviolence wins 53% vs 26%.",
     path: "/the-resistance/",
   },
+
+  "/the-sentinel/": {
+    title: "The Sentinel — Real-time Repression Map",
+    description:
+      "Map state and repressive forces during protests in real time. Drop anonymous incident markers (kettles, tear gas, mass arrests, snipers, military deployment, comms blackouts). Live heat zones, threat clustering, escape-vector routing. Local-first, anonymous, time-decaying — nothing leaves your device.",
+    path: "/the-sentinel/",
+  },
 };
 
 /** Get metadata for a page path, falling back to site defaults */

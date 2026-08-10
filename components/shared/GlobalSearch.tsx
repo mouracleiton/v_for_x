@@ -98,6 +98,7 @@ const STATIC_PAGES = [
   { label: "The Exchange", href: "/the-exchange/", desc: "Mutual-aid matching" },
   { label: "The Field Manual", href: "/the-field-manual/", desc: "Printable survival guides" },
   { label: "The Resistance", href: "/the-resistance/", desc: "Civil resistance analytics" },
+  { label: "The Sentinel", href: "/the-sentinel/", desc: "Real-time repression & protest map" },
 ];
 
 /** Simple fuzzy match — returns a score (0 = no match, higher = better) */
