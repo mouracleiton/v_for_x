@@ -381,6 +381,13 @@ export const PAGE_META: Record<string, PageMeta> = {
       "Live open-source war assessments from the Institute for the Study of War. 6 active conflict theaters — Russia-Ukraine, Middle East/Iran, China-Taiwan, the adversary entente, cognitive warfare, and the future of war. Daily updates, key developments, featured reports.",
     path: "/the-war-room/",
   },
+
+  "/the-sentinel/": {
+    title: "The Sentinel — Real-time Repression Map",
+    description:
+      "Map state and repressive forces during protests in real time. Drop anonymous incident markers (kettles, tear gas, mass arrests, snipers, military deployment, comms blackouts). Live heat zones, threat clustering, escape-vector routing. Local-first, anonymous, time-decaying — nothing leaves your device.",
+    path: "/the-sentinel/",
+  },
 };
 
 /** Get metadata for a page path, falling back to site defaults */

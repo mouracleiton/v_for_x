@@ -33,6 +33,7 @@ const STATIC_PATHS = [
   "/the-tribunal/", "/the-promises/", "/the-lives/", "/the-testimony/",
   "/the-watch/", "/the-exchange/", "/the-field-manual/", "/the-resistance/",
   "/the-war-room/",
+  "/the-sentinel/",
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
