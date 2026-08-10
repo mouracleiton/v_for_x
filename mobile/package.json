@@ -1,0 +1,23 @@
+{
+  "name": "v-for-x-mobile",
+  "version": "1.0.0",
+  "private": true,
+  "description": "V FOR X — native shell (Capacitor) wrapping the static export in ./out",
+  "scripts": {
+    "build": "npm run build --prefix .. && npx cap sync",
+    "sync": "npx cap sync",
+    "add:android": "npx cap add android",
+    "add:ios": "npx cap add ios",
+    "open:android": "npx cap open android",
+    "open:ios": "npx cap open ios"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.1.2",
+    "@capacitor/core": "^6.1.2",
+    "@capacitor/ios": "^6.1.2"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^6.1.2"
+  }
+}

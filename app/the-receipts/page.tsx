@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef } from "react";
 import TerminalCard from "@/components/ui/TerminalCard";
+import StatusPill from "@/components/ui/StatusPill";
 import { sound } from "@/lib/sound";
 import { hashFile, formatHashForDisplay } from "@/lib/citizen-tools";
 import {
@@ -18,6 +19,14 @@ import {
   formatCustodyReport,
   type CustodyEntry,
 } from "@/lib/custody";
+import {
+  fetchManifest,
+  verifyManifest,
+  shortFingerprint,
+  type VerificationResult,
+} from "@/lib/data-verifier";
+import { tc } from "@/lib/i18n-content";
+import { useStore } from "@/stores/useStore";
 
 export default function TheReceiptsPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -27,7 +36,11 @@ export default function TheReceiptsPage() {
   const [custody, setCustody] = useState<CustodyEntry[]>([]);
   const [verifyFile, setVerifyFile] = useState<File | null>(null);
   const [verifyResult, setVerifyResult] = useState<string>("");
+  const [scanning, setScanning] = useState(false);
+  const [scanResult, setScanResult] = useState<VerificationResult | null>(null);
+  const [scanError, setScanError] = useState("");
   const custodyRef = useRef<CustodyEntry[]>([]);
+  const { lang } = useStore();
 
   const handleFile = useCallback(async (f: File) => {
     setFile(f);
@@ -112,6 +125,23 @@ export default function TheReceiptsPage() {
     URL.revokeObjectURL(url);
     sound.success();
   }, [file, hash]);
+
+  const handleScan = useCallback(async () => {
+    if (scanning) return;
+    setScanning(true);
+    setScanError("");
+    try {
+      const manifest = await fetchManifest();
+      const res = await verifyManifest(manifest);
+      setScanResult(res);
+      res.rootValid && res.failCount === 0 ? sound.success() : sound.error();
+    } catch {
+      setScanError("✗ Manifest unavailable — this copy may be truncated or offline");
+      sound.error();
+    } finally {
+      setScanning(false);
+    }
+  }, [scanning]);
 
   const pending = result?.pending;
   const confirmed = result && !result.pending;
@@ -291,6 +321,60 @@ export default function TheReceiptsPage() {
           </TerminalCard>
         </div>
       )}
+
+      {/* Data integrity scan */}
+      <div className="mt-4">
+        <TerminalCard title={tc(lang, "receipts.integrity_scan")} accent="green">
+          <p className="text-xs text-content-dim mb-3">{tc(lang, "receipts.integrity_desc")}</p>
+          <button
+            onClick={handleScan}
+            disabled={scanning}
+            className="px-3 py-1 border border-border-dim text-content-secondary hover:border-cyan-400 hover:text-cyan-400 text-xs disabled:opacity-50"
+          >
+            {scanning ? tc(lang, "receipts.scanning") : tc(lang, "receipts.scan_btn")}
+          </button>
+
+          {scanError && (
+            <div className="mt-3 text-amber-400 text-xs font-mono">{scanError}</div>
+          )}
+
+          {scanResult && (
+            <div className="mt-3 space-y-2">
+              <div className="flex items-center gap-2">
+                {scanResult.rootValid ? (
+                  <StatusPill color="green">{tc(lang, "receipts.root_match")}</StatusPill>
+                ) : (
+                  <StatusPill color="blood">{tc(lang, "receipts.root_mismatch")}</StatusPill>
+                )}
+              </div>
+              <div className="text-xs text-content-secondary font-mono">
+                {scanResult.okCount} {tc(lang, "receipts.files_ok")}
+                {scanResult.failCount > 0 && (
+                  <span className="text-blood-bright">
+                    {" · "}
+                    {scanResult.failCount} {tc(lang, "receipts.files_failed")}
+                  </span>
+                )}
+              </div>
+              <div className="text-[10px] text-content-dim font-mono">
+                ROOT {shortFingerprint(scanResult.computedRoot)} · EXPECTED{" "}
+                {shortFingerprint(scanResult.expectedRoot)}
+              </div>
+              {scanResult.failCount > 0 && (
+                <ul className="mt-2 space-y-1">
+                  {scanResult.entries
+                    .filter((e) => !e.ok)
+                    .map((e) => (
+                      <li key={e.path} className="text-[10px] text-blood-bright font-mono">
+                        ✗ {e.path} — {e.reason}
+                      </li>
+                    ))}
+                </ul>
+              )}
+            </div>
+          )}
+        </TerminalCard>
+      </div>
 
       <div className="mt-6 text-center text-[10px] text-content-dim">
         Free · No API key · Powered by OpenTimestamps · Evidence never leaves your device

@@ -19,6 +19,14 @@ try {
   console.error("[V4X Compass] failed to load countries.js:", e);
 }
 
+// Alert ticker (loads independently; the rest of the worker keeps
+// working even if the feed is unreachable).
+try {
+  importScripts("alerts.js");
+} catch (e) {
+  console.error("[V4X Compass] failed to load alerts.js:", e);
+}
+
 // Namespace guard: if countries.js somehow didn't load, fall back to no-op
 // resolvers so the worker never throws on startup.
 const C = typeof self.V4X_COUNTRIES !== "undefined"
@@ -105,3 +113,19 @@ chrome.runtime.onStartup &&
   chrome.runtime.onStartup.addListener(() => {
     /* worker warmed — countries.js re-imported by importScripts on next wake */
   });
+
+// ── 4. Alert ticker ────────────────────────────────────────────
+// Polls the published feed; on first run primes the store silently,
+// afterwards the badge + notification fire only on actual changes.
+const A = typeof self.V4X_ALERTS !== "undefined" ? self.V4X_ALERTS : null;
+
+function startTicker() {
+  if (!A) return;
+  A.pollOnce(true).catch(() => {}); // prime silently
+  chrome.alarms.create("v4x-tick", { periodInMinutes: 15 });
+  chrome.alarms.onAlarm.addListener((alarm) => {
+    if (alarm && alarm.name === "v4x-tick") A.pollOnce(false).catch(() => {});
+  });
+}
+
+startTicker();

@@ -31,8 +31,24 @@ import {
   type TrustedContact,
   type LocationData,
 } from "@/lib/guardian";
+import {
+  createGuardianSigningKey,
+  buildReleasePacket,
+  verifyReleasePacket,
+  encodeReleasePacket,
+  decodeReleasePacket,
+  decryptPacketLocation,
+  buildPacketUrl,
+  parseHashPacket,
+  packetFingerprint,
+  type GuardianSigningKey,
+  type ReleasePacket,
+} from "@/lib/guardian-packet";
+import { tc } from "@/lib/i18n-content";
+import { useStore } from "@/stores/useStore";
 
 const STORAGE_KEY = "vfx-guardian";
+const SIGNING_KEY_STORAGE = "vfx-guardian-signing-key";
 
 interface DraftContact {
   id: string;
@@ -42,6 +58,7 @@ interface DraftContact {
 }
 
 export default function TheGuardianPage() {
+  const { lang } = useStore();
   const [record, setRecord] = useState<GuardianRecord | null>(null);
   const [status, setStatus] = useState<GuardianStatusResult | null>(null);
   const [loaded, setLoaded] = useState(false);
@@ -79,6 +96,19 @@ export default function TheGuardianPage() {
   const panicHeldRef = useRef(false);
   const panicTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Release relay
+  const [signingKey, setSigningKey] = useState<GuardianSigningKey | null>(null);
+  const [packetToken, setPacketToken] = useState<string | null>(null);
+  const [packetUrl, setPacketUrl] = useState<string | null>(null);
+  const [packetError, setPacketError] = useState("");
+  const [inboxToken, setInboxToken] = useState("");
+  const [inboxResult, setInboxResult] = useState<{
+    kind: "ok" | "fail";
+    packet?: ReleasePacket;
+    message: string;
+  } | null>(null);
+  const [inboxDecrypt, setInboxDecrypt] = useState("");
+
   // Load
   useEffect(() => {
     try {
@@ -88,6 +118,10 @@ export default function TheGuardianPage() {
         setRecord(parsed);
         setStatus(evaluateStatus(parsed));
         setToken(generateGuardianToken(parsed));
+      }
+      const keyStored = localStorage.getItem(SIGNING_KEY_STORAGE);
+      if (keyStored) {
+        setSigningKey(JSON.parse(keyStored) as GuardianSigningKey);
       }
     } catch { /* ignore */ }
     setLoaded(true);
@@ -108,6 +142,27 @@ export default function TheGuardianPage() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(record));
     }
   }, [record, loaded]);
+
+  // Persist signing key
+  useEffect(() => {
+    if (signingKey) {
+      localStorage.setItem(SIGNING_KEY_STORAGE, JSON.stringify(signingKey));
+    }
+  }, [signingKey]);
+
+  // RELAY: auto-consume a release packet carried in the URL hash (#packet=...)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const token = parseHashPacket(window.location.hash);
+    if (token) {
+      setInboxToken(token);
+      void handleVerifyPacket(token);
+      try {
+        history.replaceState(null, "", window.location.pathname);
+      } catch { /* ignore */ }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const addContact = useCallback(() => {
     setContacts((cs) => [
@@ -302,14 +357,99 @@ export default function TheGuardianPage() {
 
   const handleDestroy = useCallback(() => {
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(SIGNING_KEY_STORAGE);
     setRecord(null);
     setStatus(null);
     setToken(null);
     setDecryptedLoc(null);
     setPanicBroadcast(null);
     setCheckInNote("");
+    setSigningKey(null);
+    setPacketToken(null);
+    setPacketUrl(null);
     sound.error();
   }, []);
+
+  // RELAY: ensure a signing key exists, then build a release packet
+  const ensureSigningKey = useCallback(async (): Promise<GuardianSigningKey | null> => {
+    if (signingKey) return signingKey;
+    try {
+      const key = await createGuardianSigningKey();
+      setSigningKey(key);
+      return key;
+    } catch {
+      return null;
+    }
+  }, [signingKey]);
+
+  const handleBuildPacket = useCallback(async () => {
+    if (!record) return;
+    setPacketError("");
+    const key = await ensureSigningKey();
+    if (!key) {
+      setPacketError("// WEB CRYPTO UNAVAILABLE — CANNOT SIGN PACKET");
+      sound.error();
+      return;
+    }
+    if (record.status === "safe") {
+      setPacketError("// GUARDIAN IS DISARMED (SAFE) — NOTHING TO RELEASE");
+      sound.error();
+      return;
+    }
+    try {
+      const packet = await buildReleasePacket(record, key, decryptedLoc);
+      const token = encodeReleasePacket(packet);
+      setPacketToken(token);
+      setPacketUrl(buildPacketUrl(token));
+      sound.success();
+    } catch (e) {
+      setPacketError(`// ${e instanceof Error ? e.message : "Packet build failed"}`);
+      sound.error();
+    }
+  }, [record, signingKey, ensureSigningKey, decryptedLoc]);
+
+  const handleVerifyPacket = useCallback(async (token: string) => {
+    const raw = token.trim();
+    if (!raw) return;
+    try {
+      const packet = decodeReleasePacket(raw);
+      const valid = await verifyReleasePacket(packet);
+      if (valid) {
+        setInboxResult({
+          kind: "ok",
+          packet,
+          message: `✓ VERIFIED — ${packet.label} · ${packet.status.toUpperCase()} · fp ${packetFingerprint(packet)} · ${new Date(packet.ts).toISOString().replace("T", " ").slice(0, 16)}`,
+        });
+        sound.success();
+      } else {
+        setInboxResult({ kind: "fail", message: "✗ PACKET REJECTED — signature invalid or content tampered" });
+        sound.error();
+      }
+    } catch (e) {
+      setInboxResult({
+        kind: "fail",
+        message: `✗ ${e instanceof Error ? e.message : "Malformed release token"}`,
+      });
+      sound.error();
+    }
+  }, []);
+
+  const handleInboxDecrypt = useCallback(async () => {
+    if (!inboxResult?.packet || !inboxResult.packet.location || !inboxDecrypt) return;
+    try {
+      const location = await decryptPacketLocation(inboxResult.packet, inboxDecrypt);
+      setInboxResult((prev) =>
+        prev ? { ...prev, message: `${prev.message}\n📍 DECRYPTED LOCATION: ${location.lat.toFixed(5)}, ${location.lng.toFixed(5)}${location.accuracy != null ? ` (±${Math.round(location.accuracy)}m)` : ""}${location.note ? ` — ${location.note}` : ""}` } : prev,
+      );
+      setInboxDecrypt("");
+      sound.success();
+    } catch {
+      setInboxResult((prev) =>
+        prev ? { ...prev, message: `${prev.message}\n✗ Decryption failed — wrong passphrase or no location blob` } : prev,
+      );
+      sound.error();
+    }
+  }, [inboxResult, inboxDecrypt]);
 
   if (!loaded) return null;
 
@@ -594,6 +734,107 @@ export default function TheGuardianPage() {
               </code>
             </TerminalCard>
           )}
+
+          {/* RELEASE RELAY */}
+          <TerminalCard title={tc(lang, "guardian.relay_title")} accent="blood" glow={status.status === "panic" || status.status === "overdue" || status.status === "escalated"}>
+            <p className="text-xs text-content-secondary mb-3">
+              {tc(lang, "guardian.relay_desc")}
+            </p>
+
+            {/* Outbox */}
+            <div className="mb-4">
+              <div className="text-[10px] text-content-dim uppercase tracking-widest mb-2">OUTBOX</div>
+              {!packetToken ? (
+                <button
+                  onClick={handleBuildPacket}
+                  className="px-4 py-2 text-xs font-bold border border-blood text-blood-bright hover:bg-blood hover:text-white transition-colors"
+                >
+                  {tc(lang, "guardian.build_packet")}
+                </button>
+              ) : (
+                <div className="border border-blood/40 bg-blood/5 p-3 space-y-2">
+                  <div className="text-[10px] text-blood-bright font-mono break-all">
+                    VFXGP {packetToken.slice(0, 24)}…{packetToken.slice(-8)} ({packetToken.length} chars)
+                  </div>
+                  <div className="flex gap-2 flex-wrap">
+                    <button
+                      onClick={() => handleCopy(packetToken)}
+                      className="px-3 py-1.5 text-[10px] border border-blood text-blood-bright hover:bg-blood hover:text-white"
+                    >
+                      {tc(lang, "guardian.copy_token")}
+                    </button>
+                    {packetUrl && (
+                      <>
+                        <button
+                          onClick={() => handleCopy(packetUrl)}
+                          className="px-3 py-1.5 text-[10px] border border-border-dim text-content-secondary hover:border-blood"
+                        >
+                          {tc(lang, "guardian.mirror_link")}
+                        </button>
+                        <span className="text-[10px] text-content-dim self-center font-mono break-all">
+                          {packetUrl.slice(0, 80)}…
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+              {packetError && <p className="text-blood-bright text-xs font-mono mt-2">{packetError}</p>}
+            </div>
+
+            {/* Inbox */}
+            <div>
+              <div className="text-[10px] text-content-dim uppercase tracking-widest mb-2">INBOX</div>
+              {inboxResult?.kind === "ok" && inboxResult.packet ? (
+                <>
+                  <div className="border border-terminal-green/40 bg-terminal-green/5 p-3 mb-2 whitespace-pre-wrap text-xs text-content-primary font-mono">
+                    {inboxResult.message}
+                  </div>
+                  {inboxResult.packet.location && (
+                    <div className="flex gap-2 mb-2">
+                      <input
+                        type="password"
+                        value={inboxDecrypt}
+                        onChange={(e) => setInboxDecrypt(e.target.value)}
+                        placeholder="Passphrase to decrypt last-known-location"
+                        className="flex-1 bg-abyss border border-border-dim px-3 py-2 text-xs text-content-primary focus:border-terminal-green"
+                      />
+                      <button
+                        onClick={handleInboxDecrypt}
+                        className="px-3 py-1.5 text-[10px] border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void"
+                      >
+                        [ DECRYPT LOCATION ]
+                      </button>
+                    </div>
+                  )}
+                </>
+              ) : inboxResult?.kind === "fail" ? (
+                <div className="border border-blood bg-blood/5 p-3 mb-2 text-xs text-blood-bright font-mono whitespace-pre-wrap">
+                  {inboxResult.message}
+                </div>
+              ) : null}
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={inboxToken}
+                  onChange={(e) => setInboxToken(e.target.value)}
+                  placeholder={tc(lang, "guardian.packet_ph")}
+                  className="flex-1 bg-abyss border border-border-dim px-3 py-2 text-xs text-content-primary focus:border-blood font-mono"
+                />
+                <button
+                  onClick={() => handleVerifyPacket(inboxToken)}
+                  disabled={!inboxToken.trim()}
+                  className="px-4 py-2 text-xs border border-border-dim text-content-secondary hover:border-blood disabled:opacity-30"
+                >
+                  {tc(lang, "guardian.verify_packet")}
+                </button>
+              </div>
+            </div>
+
+            <p className="text-[10px] text-content-dim mt-3">
+              {tc(lang, "guardian.packets_note")}
+            </p>
+          </TerminalCard>
 
           {/* ESCALATION MESSAGE */}
           <TerminalCard title="ESCALATION MESSAGE" accent="blood">
