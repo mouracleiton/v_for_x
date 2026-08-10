@@ -321,17 +321,17 @@ function buildNarrative(
 ): string {
   const actions: string[] = [];
   if (config.militaryReduction > 0)
-    actions.push(`redirecting ${config.militaryReduction}% of military spending into civilian needs`);
+    actions.push(`redirect ${config.militaryReduction}% of military spending into civilian needs`);
   if (config.healthIncrease > 0)
-    actions.push(`raising health expenditure by ${config.healthIncrease}%`);
+    actions.push(`raise health expenditure by ${config.healthIncrease}%`);
   if (config.educationBoost > 0)
-    actions.push(`boosting education by ${config.educationBoost}%`);
+    actions.push(`boost education by ${config.educationBoost}%`);
   if (config.foodAidAmount > 0)
-    actions.push(`injecting $${config.foodAidAmount}B in targeted food aid`);
+    actions.push(`inject $${config.foodAidAmount}B in targeted food aid`);
   if (config.conflictResolution)
-    actions.push("resolving the active armed conflict");
+    actions.push("resolve the active armed conflict");
   if (config.climateActionPct > 0)
-    actions.push(`committing to ${config.climateActionPct}% climate adaptation`);
+    actions.push(`commit to ${config.climateActionPct}% climate adaptation`);
 
   const lead =
     actions.length > 0

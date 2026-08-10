@@ -62,7 +62,7 @@ function fmt(unit: string, v: number | null): string {
   if (v === null || v === undefined) return "N/A";
   switch (unit) {
     case "$":
-      return "$" + formatMoney(v);
+      return formatMoney(v);
     case "% GDP":
       return v.toFixed(1) + "%";
     case "%":
@@ -103,6 +103,13 @@ export default function SimulatorPage() {
     () => COUNTRIES.find((c) => c.iso3 === iso3) ?? COUNTRIES[0],
     [iso3]
   );
+
+  // population_m is only present for a subset of countries; fall back to the
+  // always-present demographics.population (absolute count) when missing.
+  const popM =
+    country.population_m != null
+      ? country.population_m
+      : (country.demographics.population ?? 0) / 1e6;
 
   const result = useMemo(
     () => (country ? simulateScenario(country, config) : null),
@@ -170,7 +177,7 @@ export default function SimulatorPage() {
             ))}
           </select>
           <span className="text-xs text-content-dim">
-            {country.region} · pop {country.population_m.toFixed(1)}M
+            {country.region} · pop {popM.toFixed(1)}M
           </span>
         </div>
       </TerminalCard>
