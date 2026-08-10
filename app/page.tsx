@@ -460,6 +460,7 @@ const DIRECTORY_CLUSTERS: DirectoryClusterDef[] = [
       { href: "/the-vault/", code: "31", navKey: "nav.the-vault", branchKey: "branch.vault" },
       { href: "/the-chain/", code: "32", navKey: "nav.the-chain", branchKey: "branch.chain" },
       { href: "/the-compare/", code: "33", navKey: "nav.the-compare", branchKey: "branch.compare" },
+      { href: "/the-price-tag/", code: "72", navKey: "nav.the-price-tag", branchKey: "branch.price_tag" },
     ],
   },
   {
@@ -481,6 +482,8 @@ const DIRECTORY_CLUSTERS: DirectoryClusterDef[] = [
       { href: "/the-cartographer/", code: "36", navKey: "nav.the-cartographer", branchKey: "branch.cartographer" },
       { href: "/the-briefing/", code: "21", navKey: "nav.the-briefing", branchKey: "branch.briefing" },
       { href: "/the-analyzer/", code: "37", navKey: "nav.the-analyzer", branchKey: "branch.analyzer" },
+      { href: "/the-microscope/", code: "74", navKey: "nav.the-microscope", branchKey: "branch.microscope" },
+      { href: "/the-domino/", code: "73", navKey: "nav.the-domino", branchKey: "branch.domino" },
       { href: "/the-api/", code: "23", navKey: "nav.the-api", branchKey: "branch.api" },
     ],
   },
@@ -512,6 +515,8 @@ const DIRECTORY_CLUSTERS: DirectoryClusterDef[] = [
       { href: "/the-testimony/", code: "46", navKey: "nav.the-testimony", branchKey: "branch.testimony" },
       { href: "/the-watch/", code: "47", navKey: "nav.the-watch", branchKey: "branch.watch" },
       { href: "/the-countdown/", code: "48", navKey: "nav.the-countdown", branchKey: "branch.countdown" },
+      { href: "/the-scoreboard/", code: "75", navKey: "nav.the-scoreboard", branchKey: "branch.scoreboard" },
+      { href: "/the-tipping-point/", code: "76", navKey: "nav.the-tipping-point", branchKey: "branch.tipping_point" },
     ],
   },
   {

@@ -112,6 +112,11 @@ const STATIC_PAGES = [
   { label: "The Classifier", href: "/the-classifier/", desc: "On-device document triage" },
   { label: "The Radar", href: "/the-radar/", desc: "Corruption database" },
   { label: "The World Data", href: "/the-world-data/", desc: "OWID data explorer" },
+  { label: "The Price Tag", href: "/the-price-tag/", desc: "Live cost of inaction meter" },
+  { label: "The Domino", href: "/the-domino/", desc: "Cascading crisis simulator" },
+  { label: "The Microscope", href: "/the-microscope/", desc: "Single-metric deep-dive explorer" },
+  { label: "The Scoreboard", href: "/the-scoreboard/", desc: "Improvement velocity leaderboard" },
+  { label: "The Tipping Point", href: "/the-tipping-point/", desc: "Early warning threshold system" },
 ];
 
 /** Simple fuzzy match — returns a score (0 = no match, higher = better) */
