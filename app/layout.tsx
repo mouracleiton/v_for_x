@@ -1,9 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import BranchNav from "@/components/shared/BranchNav";
+import AppChrome from "@/components/shared/AppChrome";
 import ServiceWorkerRegister from "@/components/shared/ServiceWorkerRegister";
-import GlobalSearch from "@/components/shared/GlobalSearch";
-import EasterEggPopup from "@/components/shared/EasterEggPopup";
 import { SITE } from "@/lib/seo";
 
 export const metadata: Metadata = {
@@ -84,12 +82,7 @@ export default function RootLayout({
     <html lang="en">
       <body className="flicker">
         <ServiceWorkerRegister />
-        <div className="scanlines crt-vignette grain min-h-screen flex">
-          <BranchNav />
-          <main className="flex-1 min-w-0 max-w-full">{children}</main>
-        </div>
-        <GlobalSearch />
-        <EasterEggPopup />
+        <AppChrome>{children}</AppChrome>
       </body>
     </html>
   );
