@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { getStoredLang, setStoredLang, type Lang } from "@/lib/i18n";
+import { getStoredLang, isRTL, setStoredLang, type Lang } from "@/lib/i18n";
 
 export interface AnonymousIdentity {
   handle: string;
@@ -101,7 +101,7 @@ export const useStore = create<VFXState>((set) => ({
     // Apply RTL/LTR direction and lang attribute
     if (typeof window !== "undefined") {
       document.documentElement.lang = lang;
-      document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+      document.documentElement.dir = isRTL(lang) ? "rtl" : "ltr";
     }
     set({ lang });
   },

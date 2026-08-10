@@ -11,7 +11,7 @@
 
 import type { Lang } from "./i18n";
 
-export const TIMELINE_PART2: Record<string, Record<Lang, string[]>> = {
+export const TIMELINE_PART2: Record<string, Partial<Record<Lang, string[]>>> = {
   /* ═══════════════════════════════════════════════════════════════
    * HTI — Haiti (7 events)
    * ═══════════════════════════════════════════════════════════════ */

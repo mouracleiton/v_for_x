@@ -1,6 +1,6 @@
 "use client";
 
-import { use } from "react";
+import { use, useEffect, useState, useCallback, type ChangeEvent, type DragEvent } from "react";
 import Link from "next/link";
 import dossiersData from "@/data/dossier-seed.json";
 import TerminalCard from "@/components/ui/TerminalCard";
@@ -11,6 +11,22 @@ import { useStore } from "@/stores/useStore";
 import { tc } from "@/lib/i18n-content";
 import type { Lang } from "@/lib/i18n";
 import { td } from "@/lib/dossiers-i18n";
+import { fmtBytes } from "@/lib/forensics";
+import {
+  makeEvidenceRecord,
+  recordItems,
+  exportEvidenceBundle,
+  parseEvidenceBundle,
+  verifyEvidenceChain,
+  rechainRecords,
+  hashChainId,
+  sealWithZK,
+  type EvidenceItem,
+  type EvidenceRecord,
+  type EvidenceChainReport,
+} from "@/lib/evidence-room";
+import { verifySetMembership, type ZKCommitment } from "@/lib/zk";
+import { GENESIS_HASH } from "@/lib/dag";
 import BlindedReview from "./BlindedReview";
 
 interface Dossier {
@@ -67,6 +83,365 @@ const statusColor = (status: string): "blood" | "amber" | "green" | "dim" => {
       return "dim";
   }
 };
+
+const ZK_CLAIMS = [
+  "I HOLD PRIMARY SOURCE MATERIAL",
+  "I WAS PRESENT AT THE EVENT",
+  "I CORROBORATE THE CHAIN",
+] as const;
+
+function fallbackCopy(text: string): boolean {
+  try {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand("copy");
+    document.body.removeChild(ta);
+    return ok;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * THE EVIDENCE ROOM — evidence-chain workbench for a dossier.
+ * Drop files → sha256 → seal records into a hash chain → ZK seal →
+ * export/import VFXEV1: bundles. 100% client-side; chain persists to
+ * localStorage under `vfx-evidence-room-<dossierId>`.
+ */
+function EvidenceRoom({ dossier, claimTitle }: { dossier: Dossier; claimTitle: string }) {
+  const [items, setItems] = useState<EvidenceItem[]>([]);
+  const [records, setRecords] = useState<EvidenceRecord[]>([]);
+  const [statusMsg, setStatusMsg] = useState("");
+  const [verifyReport, setVerifyReport] = useState<EvidenceChainReport | null>(null);
+  const [zkClaim, setZkClaim] = useState<string>(ZK_CLAIMS[0]);
+  const [zkProof, setZkProof] = useState<ZKCommitment | null>(null);
+  const [importToken, setImportToken] = useState("");
+
+  const storageKey = `vfx-evidence-room-${dossier.id}`;
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (raw) setRecords(parseEvidenceBundle(raw));
+    } catch { /* ignore */ }
+  }, [storageKey]);
+
+  const persist = (next: EvidenceRecord[]) => {
+    setRecords(next);
+    try {
+      localStorage.setItem(storageKey, exportEvidenceBundle(next));
+    } catch { /* ignore */ }
+  };
+
+  const handleFiles = useCallback(async (files: FileList | File[] | null) => {
+    if (!files || files.length === 0) return;
+    const list = Array.from(files);
+    try {
+      const buffers = await Promise.all(list.map((f) => f.arrayBuffer()));
+      const next = await recordItems(
+        buffers.map((b) => new Uint8Array(b)),
+        list.map((f) => f.name),
+        list.map((f) => f.type || "application/octet-stream"),
+      );
+      setItems((prev) => [...prev, ...next]);
+      setStatusMsg(`+${next.length} FILE(S) HASHED (SHA-256) — READY TO SEAL`);
+      sound.keystroke();
+    } catch {
+      setStatusMsg("// HASHING FAILED — WEB CRYPTO UNAVAILABLE");
+      sound.error();
+    }
+  }, []);
+
+  const handleSeal = useCallback(() => {
+    if (items.length === 0) {
+      setStatusMsg("// NO FILES HASHED — DROP EVIDENCE FIRST");
+      sound.error();
+      return;
+    }
+    const prevHash = records.length > 0 ? records[records.length - 1].hash : GENESIS_HASH;
+    const rec = makeEvidenceRecord(
+      { iso3: dossier.country_iso3, claim: claimTitle, subject: dossier.subject, items },
+      prevHash,
+    );
+    persist([...records, rec]);
+    setItems([]);
+    setVerifyReport(null);
+    setZkProof(null);
+    setStatusMsg(`SEALED ${rec.id} — ${rec.hash.slice(0, 16)}… @ ${new Date(rec.sealedAt).toLocaleTimeString()}`);
+    sound.success();
+  }, [items, records, dossier, claimTitle]);
+
+  const handleVerify = useCallback(() => {
+    if (records.length === 0) {
+      setStatusMsg("// CHAIN EMPTY — NOTHING TO VERIFY");
+      sound.error();
+      return;
+    }
+    const report = verifyEvidenceChain(records);
+    setVerifyReport(report);
+    setStatusMsg(
+      report.rootOk
+        ? `CHAIN INTACT — ${records.length} RECORD(S), ROOT OK`
+        : `CHAIN COMPROMISED — ${report.links.filter((l) => !l.ok).length} BROKEN LINK(S)`,
+    );
+    if (report.rootOk) sound.success();
+    else sound.error();
+  }, [records]);
+
+  const handleExport = useCallback(() => {
+    if (records.length === 0) {
+      setStatusMsg("// CHAIN EMPTY — NOTHING TO EXPORT");
+      sound.error();
+      return;
+    }
+    const token = exportEvidenceBundle(records);
+    const finish = () => {
+      const blob = new Blob([token], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `vfx-evidence-${dossier.id}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      setStatusMsg("BUNDLE EXPORTED — VFXEV1: TOKEN COPIED + FILE DOWNLOADED");
+      sound.copy();
+    };
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(token).then(finish).catch(() => {});
+      return;
+    }
+    if (fallbackCopy(token)) finish();
+  }, [records, dossier.id]);
+
+  const handleImport = useCallback(() => {
+    const token = importToken.trim();
+    if (!token) return;
+    try {
+      const incoming = parseEvidenceBundle(token);
+      const report = verifyEvidenceChain(incoming);
+      if (!report.rootOk) {
+        setStatusMsg("// IMPORT REJECTED — BUNDLE CHAIN FAILS VERIFICATION");
+        sound.error();
+        return;
+      }
+      const seen = new Set(records.map((r) => r.id));
+      const fresh = incoming.filter((r) => !seen.has(r.id));
+      if (fresh.length === 0) {
+        setStatusMsg("// NO NEW RECORDS — ALREADY IN CHAIN");
+        sound.select();
+        return;
+      }
+      const base = records.length > 0 ? records[records.length - 1].hash : GENESIS_HASH;
+      persist([...records, ...rechainRecords(fresh, base)]);
+      setImportToken("");
+      setVerifyReport(null);
+      setStatusMsg(`+${fresh.length} RECORD(S) IMPORTED + VERIFIED — RE-CHAINED`);
+      sound.success();
+    } catch (e) {
+      setStatusMsg(`// ${e instanceof Error ? e.message : "MALFORMED BUNDLE"}`);
+      sound.error();
+    }
+  }, [importToken, records]);
+
+  const handleSignZk = useCallback(async () => {
+    if (records.length === 0) {
+      setStatusMsg("// NO SEALED RECORDS — SEAL ONE FIRST");
+      sound.error();
+      return;
+    }
+    const rec = records[records.length - 1];
+    const validSet = records.map((r) => r.hash);
+    try {
+      const sealed = await sealWithZK(rec, zkClaim, validSet);
+      persist(records.map((r) => (r.id === sealed.id ? sealed : r)));
+      const ok = sealed.zk ? await verifySetMembership(sealed.zk, validSet) : false;
+      setZkProof(sealed.zk ?? null);
+      setStatusMsg(`ZK COMMITMENT SEALED ${ok ? "+ VERIFIED" : "+ UNVERIFIED"} — ${zkClaim}`);
+      sound.success();
+    } catch (e) {
+      setStatusMsg(`// ${e instanceof Error ? e.message : "ZK SEAL FAILED"}`);
+      sound.error();
+    }
+  }, [records, zkClaim]);
+
+  return (
+    <TerminalCard title="EVIDENCE ROOM" accent="amber" className="mb-6">
+      <div className="flex flex-wrap items-center gap-3 mb-3 text-[10px] font-mono">
+        <StatusPill color="dim">{records.length} SEALED</StatusPill>
+        <StatusPill color="amber">{items.length} STAGED</StatusPill>
+        {verifyReport && (
+          <StatusPill color={verifyReport.rootOk ? "green" : "blood"}>
+            {verifyReport.rootOk ? "ROOT OK" : "ROOT BROKEN"}
+          </StatusPill>
+        )}
+        <span className="text-content-dim">{dossier.id} · {dossier.country_iso3}</span>
+      </div>
+
+      {/* File drop / pick */}
+      <label
+        onDragOver={(e: DragEvent<HTMLLabelElement>) => e.preventDefault()}
+        onDrop={(e: DragEvent<HTMLLabelElement>) => {
+          e.preventDefault();
+          void handleFiles(e.dataTransfer.files);
+        }}
+        className="block border border-dashed border-border-dim bg-void p-4 text-center cursor-pointer hover:border-warning-amber transition-colors mb-3"
+      >
+        <input
+          type="file"
+          multiple
+          className="hidden"
+          onChange={(e: ChangeEvent<HTMLInputElement>) => {
+            void handleFiles(e.target.files);
+            e.target.value = "";
+          }}
+        />
+        <span className="text-[10px] text-content-dim uppercase tracking-widest">
+          DROP EVIDENCE FILES — OR CLICK TO BROWSE
+        </span>
+      </label>
+
+      {/* Staged items */}
+      {items.length > 0 && (
+        <div className="space-y-1 mb-3">
+          {items.map((it) => (
+            <div key={it.id} className="flex items-center gap-2 text-[10px] font-mono">
+              <StatusPill color="amber">MINTED</StatusPill>
+              <span className="text-content-primary truncate flex-1">{it.name}</span>
+              <span className="text-content-dim">{fmtBytes(it.size)}</span>
+              <span className="text-content-dim">{it.sha256.slice(0, 12)}…</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Actions */}
+      <div className="flex flex-wrap gap-2 mb-3">
+        <button
+          onClick={handleSeal}
+          className="px-3 py-1.5 text-xs border border-blood text-blood-bright hover:bg-blood hover:text-void transition-colors"
+        >
+          SEAL RECORD
+        </button>
+        <button
+          onClick={handleVerify}
+          disabled={records.length === 0}
+          className="px-3 py-1.5 text-xs border border-border-dim text-content-secondary hover:border-terminal-green disabled:opacity-30 transition-colors"
+        >
+          VERIFY CHAIN
+        </button>
+        <button
+          onClick={handleExport}
+          disabled={records.length === 0}
+          className="px-3 py-1.5 text-xs border border-border-dim text-content-secondary hover:border-terminal-green disabled:opacity-30 transition-colors"
+        >
+          EXPORT BUNDLE
+        </button>
+      </div>
+
+      {/* Sealed records */}
+      {records.length > 0 && (
+        <div className="space-y-2 mb-3">
+          {records.map((r, i) => (
+            <div key={r.id} className="border border-border-dim bg-void p-2">
+              <div className="flex items-center gap-2 text-[10px] font-mono">
+                <StatusPill color="green">SEALED</StatusPill>
+                <span className="text-content-primary truncate flex-1" title={`${r.id}\n${r.hash}`}>
+                  {i + 1} · {r.id} · {r.hash.slice(0, 16)}…
+                </span>
+                {r.zk && <StatusPill color="amber">ZK</StatusPill>}
+              </div>
+              <div className="text-[10px] text-content-secondary mt-1 truncate">
+                {r.claim} — {new Date(r.sealedAt).toLocaleString()}
+              </div>
+              <div className="text-[9px] text-content-dim font-mono mt-1 truncate">
+                {r.items.map((it) => `${it.name} (${it.sha256.slice(0, 12)}…)`).join(" · ")}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Verify report */}
+      {verifyReport && (
+        <div className="border border-border-dim bg-void p-2 mb-3">
+          <div className="flex flex-wrap items-center gap-2 mb-1 text-[10px] font-mono">
+            <StatusPill color={verifyReport.rootOk ? "green" : "blood"}>
+              {verifyReport.rootOk ? "ROOT OK" : "ROOT BROKEN"}
+            </StatusPill>
+            <span className="text-content-dim">Chain Root: {hashChainId(records).slice(0, 32)}…</span>
+          </div>
+          {verifyReport.links.map((l) => (
+            <div key={l.id} className="flex items-center gap-2 text-[10px] font-mono py-0.5">
+              <StatusPill color={l.ok ? "green" : "blood"}>{l.ok ? "LINK OK" : "BROKEN"}</StatusPill>
+              <span className="text-content-primary">{l.id}</span>
+              {!l.ok && <span className="text-content-dim truncate">{l.reason}</span>}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Import */}
+      <div className="flex gap-2 mb-3">
+        <input
+          value={importToken}
+          onChange={(e) => setImportToken(e.target.value)}
+          placeholder="PASTE VFXEV1: BUNDLE TO VERIFY + MERGE"
+          className="flex-1 bg-void border border-border-dim px-3 py-2 text-[10px] text-content-primary font-mono focus:border-warning-amber"
+        />
+        <button
+          onClick={handleImport}
+          disabled={!importToken.trim()}
+          className="px-3 py-1.5 text-xs border border-border-dim text-content-secondary hover:border-warning-amber disabled:opacity-30 transition-colors"
+        >
+          IMPORT BUNDLE
+        </button>
+      </div>
+
+      {/* ZK claim seal */}
+      <div className="border border-border-dim bg-void p-2 mb-3">
+        <div className="text-[10px] text-content-dim uppercase tracking-widest mb-2">ZK CLAIM SEAL</div>
+        <div className="flex flex-wrap gap-2">
+          <select
+            value={zkClaim}
+            onChange={(e) => { setZkClaim(e.target.value); sound.keystroke(); }}
+            className="bg-void border border-border-dim px-2 py-1 text-[10px] text-content-primary"
+          >
+            {ZK_CLAIMS.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+          <button
+            onClick={handleSignZk}
+            disabled={records.length === 0}
+            className="px-3 py-1.5 text-xs border border-warning-amber text-warning-amber hover:bg-warning-amber hover:text-void disabled:opacity-30 transition-colors"
+          >
+            SIGN WITH ZK CLAIM
+          </button>
+        </div>
+        {zkProof && (
+          <pre className="text-[9px] text-content-dim font-mono overflow-x-auto mt-2">
+            {JSON.stringify(zkProof, null, 2)}
+          </pre>
+        )}
+        <p className="text-[9px] text-content-dim mt-1">
+          Fiat-Shamir commitment over the latest sealed hash — proves knowledge of one sealed record WITHOUT revealing which dossier.
+        </p>
+      </div>
+
+      {statusMsg && <p className="text-[10px] text-terminal-green mt-2 font-mono">{statusMsg}</p>}
+      <p className="text-[10px] text-content-dim italic mt-3">
+        Evidence is self-attested: anyone can verify the chain, nobody vouches for the truth. The chain proves the record was not altered after sealing.
+      </p>
+      <p className="text-[10px] text-content-dim mt-1">
+        Recorded for eternity: sealed chains await notarization on the Receipts DAG; for now they persist in this browser (localStorage) only — export the bundle to keep them.
+      </p>
+    </TerminalCard>
+  );
+}
 
 export default function DossierContent({
   params,
@@ -204,6 +579,9 @@ export default function DossierContent({
 
       {/* Blinded peer review — commit/reveal corroboration */}
       <BlindedReview dossierId={d.id} lang={lang} />
+
+      {/* THE EVIDENCE ROOM — evidence-chain workbench */}
+      <EvidenceRoom dossier={d} claimTitle={di.subject} />
 
       {/* Right of response */}
       <TerminalCard title={tc(lang, "card.right_of_response")} accent="amber" className="mb-6">

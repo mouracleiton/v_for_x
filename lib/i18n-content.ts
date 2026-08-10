@@ -9,7 +9,7 @@
 
 import type { Lang } from "./i18n";
 
-type Dict = Record<string, Record<Lang, string>>;
+type Dict = Record<string, Partial<Record<Lang, string>>>;
 
 export const CONTENT_T: Dict = {
   /* ═══════════════════════════════════════════════════════════════

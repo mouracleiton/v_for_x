@@ -17,7 +17,7 @@
 
 import type { Lang } from "./i18n";
 
-export const TIMELINE_PART4: Record<string, Record<Lang, string[]>> = {
+export const TIMELINE_PART4: Record<string, Partial<Record<Lang, string[]>>> = {
   SDN: {
     en: [
       "Conflict erupts in Darfur. Mass displacement begins.",

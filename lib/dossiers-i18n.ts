@@ -17,7 +17,7 @@ export interface DossierI18n {
   countryDataRef: string;
 }
 
-export const DOSSIER_I18N: Record<string, Record<Lang, DossierI18n>> = {
+export const DOSSIER_I18N: Record<string, Partial<Record<Lang, DossierI18n>>> = {
 
   /* ═══════════════════════════════════════════════════════════════
      REG-001 — [REDACTED] Former Minister of Defense, Sudan

@@ -73,7 +73,7 @@ export interface FacesLabels {
   ethical_note: string;
 }
 
-export const FACES_I18N: Record<Lang, FacesLabels> = {
+export const FACES_I18N: Partial<Record<Lang, FacesLabels>> = {
   en: {
     tagline: "Humanizing the data",
     intro: "The-lives counts the dead. The-testimony logs the evidence. The-faces gives them names, voices, and faces — consented, anonymized first-person stories from the front lines of preventable suffering.",
@@ -717,5 +717,5 @@ export const FACES_I18N: Record<Lang, FacesLabels> = {
 };
 
 export function ft(lang: Lang): FacesLabels {
-  return FACES_I18N[lang] ?? FACES_I18N.en;
+  return FACES_I18N[lang] ?? FACES_I18N.en!;
 }

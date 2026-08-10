@@ -45,7 +45,6 @@
 - [x] The Bridge (/the-bridge) — data import/export hub
 
 ## Phase 8 — Censorship-Resistance Sprint
-
 ### Automated WebRTC Signaling (The Web)
 - [x] lib/signal-relay.ts — VFXSIG1: tokens, room codes, SignalBus (BroadcastChannel), clipboard watch, hash-link signaling
 - [x] AUTO-SIGNALING RELAY panel in /the-web (auto-share offers, answer overrides, live room activity)
@@ -78,3 +77,58 @@
 - [x] PWA manifest + icons + service worker already in repo (public/manifest.json, sw.js)
 
 ## Test Coverage: 1251 tests across 64 files
+
+## Phase 9 — Reach, Trust & Resilience Sprint
+
+### Automatic Dead Man's Switch (The Guardian)
+- [x] lib/deadman.ts — decideRelease at deadline, panic/duress immediate, dedupe per deadline, prune, VFXDM1 share strings, localStorage ledger
+- [x] AUTO-RELEASE panel in /the-guardian (armed toggle, countdown, release → clipboard + URL + history)
+- [x] Tests: tests/deadman.test.ts (19)
+
+### WebRTC File Transfer + Mesh Store-and-Forward (The Web)
+- [x] lib/file-transfer.ts — VFXFILE1 chunked AES-GCM protocol, per-chunk IV, SHA-256 verify, dead-drop file envelopes
+- [x] lib/mesh-store.ts — IndexedDB mailbox (vfx-store v6) + localStorage fallback, TTL, 5-hop cap, seen-ring dedupe
+- [x] FILE TRANSFER + MESH OUTBOX panels in /the-web; file dead drops with key-gated unlock
+- [x] Tests: tests/file-transfer.test.ts + tests/mesh-store.test.ts (23)
+
+### Collaborative Documents (The Docs)
+- [x] lib/crdt.ts — RGA with tombstones from scratch (zero deps), path-based convergent ordering, VFXCRDT1 tokens
+- [x] app/the-docs — editor, doc list, export/import, BroadcastChannel sync, merge log
+- [x] Tests: tests/crdt.test.ts (18)
+
+### Evidence Room (Registry)
+- [x] lib/evidence-room.ts — SHA-256 items, hash-chained records (VFXEV1), chain verify, ZK custody seal (reuses zk.ts)
+- [x] EVIDENCE ROOM card in registry dossiers (drop → mint → seal → verify → export/import)
+- [x] Tests: tests/evidence-room.test.ts (37)
+
+### Public Witness Ledger (The Receipts)
+- [x] lib/witness.ts — signed hash-chained statements (VFXWIT1), ephemeral ECDSA authorship, ZK blur
+- [x] PUBLIC WITNESS LEDGER card in /the-receipts (compose → sign → chain verify → export/import)
+- [x] Tests: tests/witness.test.ts (31)
+
+### i18n: Persian + Urdu, RTL everywhere
+- [x] Lang extended to 12 (fa/ur); NAV_T + SECTION_DESC complete; hreflang/og/Intl locales
+- [x] Content dictionaries typed Partial<Record<Lang,…>> with en fallback; isRTL routed through setLang
+- [x] dir-aware CSS in globals.css (text, inputs, terminal cards; data blocks stay LTR)
+- [x] Tests: tests/i18n.test.ts (6)
+
+### The Mirror Ring (/the-mirror-ring)
+- [x] lib/mirror-ring.ts — seed + localStorage ring, dedupe/cap/sort, share text, fingerprint root
+- [x] Page: ring list, VFXM1: verify-and-add (via lib/mirror.ts), one-click host swap, ring share
+- [x] Tests: tests/mirror-ring.test.ts (21)
+
+### Offline Briefcase (Fortress)
+- [x] sw.js — VFX_BUNDLE_START/STOP/STATUS crawl (BFS over same-origin links, 400-page cap, progress)
+- [x] OFFLINE BRIEFCASE card in /the-fortress (client child component)
+
+### Polyglot Oracle
+- [x] lib/embeddings.ts — SEMANTIC_MODELS registry (EN 384D + ML 768D), resolveModel/modelForLang, per-model pipelines
+- [x] /the-oracle model selector with persistence, per-model index cache key, ML error hint
+- [x] Tests: tests/polyglot-oracle.test.ts (12)
+
+### Viral Glitch Cards (ShareableStat)
+- [x] lib/stat-card.ts — layout/wrap/fit + canvas renderGlitchCard (scanlines, grain, chromatic aberration)
+- [x] [ CARD ] button in ShareableStat → 1200×630 PNG download + navigator.share
+- [x] Tests: tests/stat-card.test.ts (29)
+
+## Test Coverage: 1445 tests across 74 files

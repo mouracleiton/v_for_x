@@ -7,7 +7,7 @@
 import { openDB, type IDBPDatabase } from "idb";
 
 const DB_NAME = "vfx-store";
-const DB_VERSION = 5;
+const DB_VERSION = 6;
 
 export interface LedgerEntry {
   id?: number;
@@ -99,6 +99,12 @@ export function getDB(): Promise<IDBPDatabase> {
         // semantic index is rebuilt only when the model or data changes.
         if (!db.objectStoreNames.contains("semantic_index")) {
           db.createObjectStore("semantic_index", { keyPath: "cacheKey" });
+        }
+        // ── v6 store: store-and-forward mesh mailbox (The Web) ──
+        // Offline mail deposited by/for peers, carried across the mesh.
+        if (!db.objectStoreNames.contains("mesh_mailbox")) {
+          const mesh = db.createObjectStore("mesh_mailbox", { keyPath: "id" });
+          mesh.createIndex("by-to", "to");
         }
       },
     });

@@ -19,7 +19,7 @@ export interface BlueprintI18n {
 }
 
 /** Category translations for blueprint filter chips. */
-export const CATEGORY_I18N: Record<string, Record<Lang, string>> = {
+export const CATEGORY_I18N: Record<string, Partial<Record<Lang, string>>> = {
   ALL: {
     en: "ALL", pt: "TODOS", es: "TODOS", fr: "TOUS",
     zh: "全部", ja: "全て", ko: "전체", hi: "सभी", ar: "الكل", ru: "ВСЕ",
@@ -62,7 +62,7 @@ export function tCategory(lang: Lang, category: string): string {
    BLUEPRINT TRANSLATIONS
    ═══════════════════════════════════════════════════════════════ */
 
-export const BLUEPRINT_I18N: Record<string, Record<Lang, BlueprintI18n>> = {
+export const BLUEPRINT_I18N: Record<string, Partial<Record<Lang, BlueprintI18n>>> = {
 
   /* ── water-solar-purification ─────────────────────────────── */
   "water-solar-purification": {
@@ -2111,5 +2111,5 @@ export const BLUEPRINT_I18N: Record<string, Record<Lang, BlueprintI18n>> = {
 export function tbp(lang: Lang, blueprintId: string): BlueprintI18n | null {
   const bp = BLUEPRINT_I18N[blueprintId];
   if (!bp) return null;
-  return bp[lang] ?? bp.en;
+  return bp[lang] ?? bp.en ?? null;
 }

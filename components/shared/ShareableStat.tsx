@@ -5,6 +5,7 @@ import { sound } from "@/lib/sound";
 import { EmbedButton, tweetIntent } from "@/components/shared/EmbedButton";
 import { tc } from "@/lib/i18n-content";
 import { useStore } from "@/stores/useStore";
+import { GLITCH_CARD, cardFileName, renderGlitchCard } from "@/lib/stat-card";
 import type { Lang } from "@/lib/i18n";
 
 interface ShareableStatProps {
@@ -14,6 +15,10 @@ interface ShareableStatProps {
 
 export default function ShareableStat({ text, lang }: ShareableStatProps) {
   const [copied, setCopied] = useState(false);
+  const [cardState, setCardState] = useState<"idle" | "rendering" | "saved">(
+    "idle",
+  );
+  const [cardName, setCardName] = useState("");
   const { lang: storeLang } = useStore();
   const effectiveLang = lang ?? storeLang;
 
@@ -25,6 +30,60 @@ export default function ShareableStat({ text, lang }: ShareableStatProps) {
       setTimeout(() => setCopied(false), 2000);
     } catch {
       sound.error();
+    }
+  };
+
+  const makeCard = async () => {
+    if (typeof document === "undefined") return;
+    const canvas = document.createElement("canvas");
+    canvas.width = GLITCH_CARD.width;
+    canvas.height = GLITCH_CARD.height;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return; // jsdom / no-canvas environments: no-op
+    setCardState("rendering");
+    sound.select();
+
+    try {
+      renderGlitchCard(ctx, text);
+      const blob = await new Promise<Blob | null>((resolve) =>
+        canvas.toBlob(resolve, "image/png"),
+      );
+      if (!blob) {
+        sound.error();
+        setCardState("idle");
+        return;
+      }
+
+      const fileName = cardFileName(text);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+
+      const files = [new File([blob], fileName, { type: "image/png" })];
+      if (
+        typeof navigator !== "undefined" &&
+        typeof navigator.canShare === "function" &&
+        navigator.canShare({ files })
+      ) {
+        try {
+          await navigator.share({ files });
+        } catch {
+          // user dismissed the share sheet — download already fired
+        }
+      }
+
+      setCardName(fileName);
+      setCardState("saved");
+      sound.success();
+      setTimeout(() => setCardState("idle"), 3000);
+    } catch {
+      sound.error();
+      setCardState("idle");
     }
   };
 
@@ -52,6 +111,22 @@ export default function ShareableStat({ text, lang }: ShareableStatProps) {
           >
             {tc(effectiveLang, "ui.tweet")}
           </a>
+          <button
+            onClick={makeCard}
+            disabled={cardState === "rendering"}
+            title={cardName || "GLITCH CARD"}
+            className={`text-[10px] px-2 py-0.5 border transition-colors text-center no-print ${
+              cardState === "saved"
+                ? "border-terminal-green text-terminal-green"
+                : "text-content-dim group-hover:text-blood border-border-dim group-hover:border-blood"
+            } ${cardState === "rendering" ? "cursor-wait opacity-60" : ""}`}
+          >
+            {cardState === "rendering"
+              ? "[ RENDERING… ]"
+              : cardState === "saved"
+                ? `[ SAVED ${cardName} ]`
+                : "[ CARD ]"}
+          </button>
           <div className="no-print">
             <EmbedButton text={text} lang={effectiveLang} />
           </div>

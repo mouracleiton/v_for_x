@@ -101,6 +101,7 @@ Demographics · Economy · Health · Human Development · Hunger · Conflict · 
 | State | Zustand |
 | Maps | react-leaflet + Leaflet |
 | Charts | ASCII bar charts (no chart library overhead) |
+| CRDT | Custom RGA documents (from scratch, zero deps) |
 | Crypto | Web Crypto API (SHA-256, AES-GCM, ECDSA P-256) |
 | Sound | Web Audio API (procedural — no audio files) |
 | Persistence | IndexedDB / LocalStorage (client-side only) |
@@ -170,7 +171,7 @@ npm run build
 npx serve out/
 ```
 
-The build produces 229 static HTML pages in `out/`. No server required. Deploy to any static host (GitHub Pages, IPFS, USB drive).
+The build produces 231 static HTML pages in `out/`. No server required. Deploy to any static host (GitHub Pages, IPFS, USB drive).
 
 ---
 
@@ -218,7 +219,9 @@ v-for-x/
 │   ├── the-web/                # [05] The Web
 │   ├── the-trail/              # [06] The Trail
 │   ├── fortress/               # [07] The Fortress
-│   └── the-mask/               # [08] The Mask
+│   ├── the-mask/               # [08] The Mask
+│   ├── the-docs/               # Collaborative CRDT documents
+│   └── the-mirror-ring/        # Verified mirror directory
 ├── components/
 │   ├── ui/                     # TerminalCard, GlitchText, Typewriter, DataBar, StatusPill
 │   ├── map/                    # ChoroplethMap (react-leaflet)
@@ -233,7 +236,7 @@ v-for-x/
 
 ## Key Features
 
-- **229 static pages** generated at build time (200 country detail pages + 12 blueprints + 5 dossiers + 9 branch pages)
+- **231 static pages** generated at build time (200 country detail pages + 12 blueprints + 5 dossiers + 9 branch pages + 2 new routes)
 - **Zero external API calls** at runtime — all data is bundled
 - **On-device semantic AI** — a transformer model runs in your browser (WebGPU/WASM) to answer conceptual natural-language questions about the data; queries never leave the device
 - **Zero tracking** — no analytics, no cookies, no third-party scripts
@@ -245,6 +248,17 @@ v-for-x/
 - **Signed data manifest** — every build hashes its public data API files (205 entries, deterministic root); the Receipts page verifies any copy locally, so tampered mirrors are detectable with zero network trust
 - **Browser-to-browser signaling** — The Web pairs peers via VFXSIG tokens over clipboard/BroadcastChannel/hash links, no server in the path
 - **Extension alert ticker** — the V FOR X Compass add-on polls a tiny generated feed and raises badge/notifications only when the watchlist actually changes
+- **Dead man's switch auto-release** — the Guardian's armed ladder fires by itself at the missed deadline: builds the ECDSA-signed release packet, copies the token to the clipboard, and surfaces it for trusted contacts; duress/panic release immediately
+- **Chunked encrypted file transfer** — The Web ships files over the live peer channel (VFXFILE1), per-chunk AES-GCM, SHA-256 verified on arrival; received files can be planted as encrypted dead drops
+- **Mesh store-and-forward** — offline mail rides the peer mesh: queued in IndexedDB, flushed when peers meet, TTL-expired, hop-capped to 5
+- **Collaborative documents (The Docs)** — offline-first conflict-free text docs built on a from-scratch RGA CRDT (no yjs/automerge); sync by copy, paste, or BroadcastChannel; concurrent edits always converge
+- **Evidence Room (Registry)** — hash-chain evidence bundles sealed per dossier, verifiable offline (VFXEV1), optional ZK commitment of custody
+- **Public Witness Ledger (The Receipts)** — signed, hash-chained public statements (VFXWIT1), exportable/importable, signature proves authorship without a name
+- **Mirror Ring (/the-mirror-ring)** — verified mirror directory: paste a VFXM1: claim token, verify the signature locally, swap hosts with one click, share the ring as a text block
+- **Offline Briefcase (Fortress)** — one tap crawls the whole static platform into the service-worker cache with live progress; the site then runs with zero connectivity
+- **Polyglot Oracle** — the on-device semantic model is now selectable: fast English (23 MB) or the multilingual MiniLM-L12 (~118 MB quantized) covering 50+ languages; inference and indexing still stay in the browser
+- **12 languages, 3 RTL** — Persian (فارسی) and Urdu (اردو) join Arabic as full right-to-left layouts with dir-aware CSS
+- **Glitch Cards** — every ShareableStat can render as a downloadable 1200×630 PNG glitch card (canvas-drawn, zero server, zero libraries)
 
 ---
 

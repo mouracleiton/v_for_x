@@ -10,6 +10,7 @@ const LOCALE_MAP: Record<Lang, string> = {
   en: "en-US", pt: "pt-BR", es: "es-ES", fr: "fr-FR",
   zh: "zh-CN", ja: "ja-JP", ko: "ko-KR", hi: "hi-IN",
   ar: "ar-SA", ru: "ru-RU",
+  fa: "fa-IR", ur: "ur-PK",
 };
 
 export function localeOf(lang: Lang): string {
