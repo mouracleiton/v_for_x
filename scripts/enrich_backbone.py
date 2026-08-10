@@ -34,19 +34,35 @@ USAGE:
 import json
 import copy
 import os
+import sys
 from pathlib import Path
 
 # ── Paths ──────────────────────────────────────────────────────
 REPO_ROOT = Path(__file__).resolve().parent.parent
 BACKBONE_PATH = REPO_ROOT / "data" / "world_backbone.json"
-OPENREP_PATH = Path("/home/shadowghost/project/open-republic-website/dados_api.json")
 OUTPUT_PATH = REPO_ROOT / "data" / "world_backbone.json"  # overwrite in-place
+
+# Resolve the OpenRepublic data file from env var or known locations.
+# If unavailable, exit gracefully — the backbone is already enriched.
+_openrep_candidates = [
+    os.environ.get("OPENREP_DATA_PATH"),
+    str(REPO_ROOT / "data" / "dados_api.json"),
+    str(REPO_ROOT.parent / "open-republic-website" / "dados_api.json"),
+    "/home/shadowghost/project/open-republic-website/dados_api.json",
+]
+OPENREP_PATH = next((Path(p) for p in _openrep_candidates if p and Path(p).exists()), None)
+
+if OPENREP_PATH is None:
+    print("⚠ dados_api.json not found — skipping OpenRepublic enrichment.")
+    print("  Set OPENREP_DATA_PATH or place the file at data/dados_api.json.")
+    print("  The backbone is already enriched from a previous run; exiting cleanly.")
+    sys.exit(0)
 
 # ── Load data ──────────────────────────────────────────────────
 print("Loading world_backbone.json...")
 backbone = json.loads(BACKBONE_PATH.read_text(encoding="utf-8"))
 
-print("Loading dados_api.json (OpenRepublic)...")
+print(f"Loading {OPENREP_PATH.name} (OpenRepublic)...")
 openrep = json.loads(OPENREP_PATH.read_text(encoding="utf-8"))
 
 

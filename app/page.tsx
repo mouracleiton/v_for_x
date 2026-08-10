@@ -361,112 +361,13 @@ export default function HomePage() {
         {" "}{tc(lang, "home.entries")}
       </h2>
 
-      {/* EXPLORE — understand the crisis */}
-      <div className="mb-6">
-        <div className="flex items-center gap-2 mb-3">
-          <span className="text-[10px] text-blood-bright font-bold uppercase tracking-widest">{tc(lang, "home.explore")}</span>
-          <span className="text-[10px] text-content-dim">{tc(lang, "home.explore_sub")}</span>
-          <div className="flex-1 h-px bg-border-dim" />
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-          {[
-            { href: "/sorrow-map/", code: "01", label: t(lang, "nav.sorrow-map"), desc: tc(lang, "branch.sorrow_map"), primary: true },
-            { href: "/the-dashboard/", code: "25", label: t(lang, "nav.the-dashboard"), desc: tc(lang, "branch.dashboard") },
-            { href: "/the-exodus/", code: "16", label: t(lang, "nav.the-exodus"), desc: tc(lang, "branch.exodus") },
-            { href: "/the-fronts/", code: "19", label: t(lang, "nav.the-fronts"), desc: tc(lang, "branch.fronts") },
-            { href: "/the-stories/", code: "14", label: t(lang, "nav.the-stories"), desc: tc(lang, "branch.stories") },
-            { href: "/the-archive/", code: "10", label: t(lang, "nav.the-archive"), desc: tc(lang, "branch.archive") },
-          ].map((b) => (
-            <Link key={b.href} href={b.href} className={`terminal-card p-3 hover:border-blood transition-colors block ${b.primary ? "border-blood-dim" : ""}`}>
-              <div className="text-[10px] text-content-dim">[{b.code}]</div>
-              <div className="text-xs font-bold text-blood mt-1">{b.label}</div>
-              <div className="text-[10px] text-content-secondary mt-0.5">{b.desc}</div>
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      {/* ANALYZE — make the argument */}
-      <div className="mb-6">
-        <div className="flex items-center gap-2 mb-3">
-          <span className="text-[10px] text-terminal-green font-bold uppercase tracking-widest">{tc(lang, "home.analyze")}</span>
-          <span className="text-[10px] text-content-dim">{tc(lang, "home.analyze_sub")}</span>
-          <div className="flex-1 h-px bg-border-dim" />
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-          {[
-            { href: "/equation/", code: "02", label: t(lang, "nav.equation"), desc: tc(lang, "branch.equation"), primary: true },
-            { href: "/the-choice/", code: "20", label: t(lang, "nav.the-choice"), desc: tc(lang, "branch.choice") },
-            { href: "/the-allocator/", code: "15", label: t(lang, "nav.the-allocator"), desc: tc(lang, "branch.allocator") },
-            { href: "/the-timeline/", code: "22", label: t(lang, "nav.the-timeline"), desc: tc(lang, "branch.timeline") },
-            { href: "/the-index/", code: "13", label: t(lang, "nav.the-index"), desc: tc(lang, "branch.index") },
-            { href: "/the-lens/", code: "09", label: t(lang, "nav.the-lens"), desc: tc(lang, "branch.lens") },
-            { href: "/the-ledger/", code: "24", label: t(lang, "nav.the-ledger"), desc: tc(lang, "branch.ledger") },
-            { href: "/the-tactics/", code: "17", label: t(lang, "nav.the-tactics"), desc: tc(lang, "branch.tactics") },
-            { href: "/the-matrix/", code: "18", label: t(lang, "nav.the-matrix"), desc: tc(lang, "branch.matrix") },
-            { href: "/the-briefing/", code: "21", label: t(lang, "nav.the-briefing"), desc: tc(lang, "branch.briefing") },
-            { href: "/the-api/", code: "23", label: t(lang, "nav.the-api"), desc: tc(lang, "branch.api") },
-          ].map((b) => (
-            <Link key={b.href} href={b.href} className={`terminal-card p-3 hover:border-blood transition-colors block ${b.primary ? "border-blood-dim" : ""}`}>
-              <div className="text-[10px] text-content-dim">[{b.code}]</div>
-              <div className="text-xs font-bold text-blood mt-1">{b.label}</div>
-              <div className="text-[10px] text-content-secondary mt-0.5">{b.desc}</div>
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      {/* ACT — take action */}
-      <div className="mb-6">
-        <div className="flex items-center gap-2 mb-3">
-          <span className="text-[10px] text-warning-amber font-bold uppercase tracking-widest">{tc(lang, "home.act")}</span>
-          <span className="text-[10px] text-content-dim">{tc(lang, "home.act_sub")}</span>
-          <div className="flex-1 h-px bg-border-dim" />
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-          {[
-            { href: "/the-act/", code: "12", label: t(lang, "nav.the-act"), desc: tc(lang, "branch.act"), primary: true },
-            { href: "/protocol-x/", code: "03", label: t(lang, "nav.protocol-x"), desc: tc(lang, "branch.protocol") },
-            { href: "/registry/", code: "04", label: t(lang, "nav.registry"), desc: tc(lang, "branch.registry") },
-            { href: "/the-signal/", code: "11", label: t(lang, "nav.the-signal"), desc: tc(lang, "branch.signal") },
-            { href: "/the-trail/", code: "06", label: t(lang, "nav.the-trail"), desc: tc(lang, "branch.trail") },
-          ].map((b) => (
-            <Link key={b.href} href={b.href} className={`terminal-card p-3 hover:border-blood transition-colors block ${b.primary ? "border-blood-dim" : ""}`}>
-              <div className="text-[10px] text-content-dim">[{b.code}]</div>
-              <div className="text-xs font-bold text-blood mt-1">{b.label}</div>
-              <div className="text-[10px] text-content-secondary mt-0.5">{b.desc}</div>
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      {/* INFRASTRUCTURE — tools & security */}
-      <div className="mb-12">
-        <div className="flex items-center gap-2 mb-3">
-          <span className="text-[10px] text-content-dim font-bold uppercase tracking-widest">{tc(lang, "home.infra")}</span>
-          <span className="text-[10px] text-content-dim">{tc(lang, "home.infra_sub")}</span>
-          <div className="flex-1 h-px bg-border-dim" />
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-          {[
-            { href: "/the-web/", code: "05", label: t(lang, "nav.the-web"), desc: tc(lang, "branch.web") },
-            { href: "/the-mask/", code: "08", label: t(lang, "nav.the-mask"), desc: tc(lang, "branch.mask") },
-            { href: "/fortress/", code: "07", label: t(lang, "nav.fortress"), desc: tc(lang, "branch.fortress") },
-          ].map((b) => (
-            <Link key={b.href} href={b.href} className="terminal-card p-3 hover:border-blood transition-colors block">
-              <div className="text-[10px] text-content-dim">[{b.code}]</div>
-              <div className="text-xs font-bold text-blood mt-1">{b.label}</div>
-              <div className="text-[10px] text-content-secondary mt-0.5">{b.desc}</div>
-            </Link>
-          ))}
-        </div>
-      </div>
+      <SectionDirectory lang={lang} />
 
       {/* Footer */}
       <footer className="border-t border-border-dim pt-4 pb-8">
         <div className="text-center text-3xl mb-3">🦀</div>
         <div className="flex flex-col md:flex-row justify-between gap-2 text-xs text-content-dim">
-          <span>{tc(lang, "home.data_sync")} {data.metadata.created} · {data.metadata.total_countries} {tc(lang, "home.countries_count")}</span>
+          <span>{tc(lang, "home.data_sync")} {data.metadata.last_updated || data.metadata.created} · {data.metadata.total_countries} {tc(lang, "home.countries_count")}</span>
           <span>{tc(lang, "home.sources_count")} {data.metadata.sources.length} {tc(lang, "home.official_cc0")}</span>
         </div>
       </footer>
@@ -532,5 +433,136 @@ function EnvironmentalJusticeStrip() {
         <Link href="/the-fronts/" className="text-blood-bright hover:underline">Explore all →</Link>
       </div>
     </TerminalCard>
+  );
+}
+
+type DirectoryEntry = { href: string; code: string; navKey: string; branchKey: string; primary?: boolean };
+type DirectoryClusterDef = { headerKey: string; subKey: string; accent: string; entries: DirectoryEntry[] };
+
+const DIRECTORY_CLUSTERS: DirectoryClusterDef[] = [
+  {
+    headerKey: "home.explore",
+    subKey: "home.explore_sub",
+    accent: "text-blood-bright",
+    entries: [
+      { href: "/sorrow-map/", code: "01", navKey: "nav.sorrow-map", branchKey: "branch.sorrow_map", primary: true },
+      { href: "/the-lives/", code: "26", navKey: "nav.the-lives", branchKey: "branch.lives" },
+      { href: "/the-dashboard/", code: "25", navKey: "nav.the-dashboard", branchKey: "branch.dashboard" },
+      { href: "/the-alerts/", code: "27", navKey: "nav.the-alerts", branchKey: "branch.alerts" },
+      { href: "/the-exodus/", code: "16", navKey: "nav.the-exodus", branchKey: "branch.exodus" },
+      { href: "/the-fronts/", code: "19", navKey: "nav.the-fronts", branchKey: "branch.fronts" },
+      { href: "/the-satellite/", code: "28", navKey: "nav.the-satellite", branchKey: "branch.satellite" },
+      { href: "/the-stories/", code: "14", navKey: "nav.the-stories", branchKey: "branch.stories" },
+      { href: "/the-oracle/", code: "29", navKey: "nav.the-oracle", branchKey: "branch.oracle" },
+      { href: "/the-archive/", code: "10", navKey: "nav.the-archive", branchKey: "branch.archive" },
+      { href: "/the-forecast/", code: "30", navKey: "nav.the-forecast", branchKey: "branch.forecast" },
+      { href: "/the-vault/", code: "31", navKey: "nav.the-vault", branchKey: "branch.vault" },
+      { href: "/the-chain/", code: "32", navKey: "nav.the-chain", branchKey: "branch.chain" },
+      { href: "/the-compare/", code: "33", navKey: "nav.the-compare", branchKey: "branch.compare" },
+    ],
+  },
+  {
+    headerKey: "home.analyze",
+    subKey: "home.analyze_sub",
+    accent: "text-terminal-green",
+    entries: [
+      { href: "/equation/", code: "02", navKey: "nav.equation", branchKey: "branch.equation", primary: true },
+      { href: "/the-choice/", code: "20", navKey: "nav.the-choice", branchKey: "branch.choice" },
+      { href: "/the-allocator/", code: "15", navKey: "nav.the-allocator", branchKey: "branch.allocator" },
+      { href: "/the-simulator/", code: "34", navKey: "nav.the-simulator", branchKey: "branch.simulator" },
+      { href: "/the-timeline/", code: "22", navKey: "nav.the-timeline", branchKey: "branch.timeline" },
+      { href: "/the-index/", code: "13", navKey: "nav.the-index", branchKey: "branch.index" },
+      { href: "/the-lens/", code: "09", navKey: "nav.the-lens", branchKey: "branch.lens" },
+      { href: "/the-ledger/", code: "24", navKey: "nav.the-ledger", branchKey: "branch.ledger" },
+      { href: "/the-crucible/", code: "35", navKey: "nav.the-crucible", branchKey: "branch.crucible" },
+      { href: "/the-tactics/", code: "17", navKey: "nav.the-tactics", branchKey: "branch.tactics" },
+      { href: "/the-matrix/", code: "18", navKey: "nav.the-matrix", branchKey: "branch.matrix" },
+      { href: "/the-cartographer/", code: "36", navKey: "nav.the-cartographer", branchKey: "branch.cartographer" },
+      { href: "/the-briefing/", code: "21", navKey: "nav.the-briefing", branchKey: "branch.briefing" },
+      { href: "/the-analyzer/", code: "37", navKey: "nav.the-analyzer", branchKey: "branch.analyzer" },
+      { href: "/the-api/", code: "23", navKey: "nav.the-api", branchKey: "branch.api" },
+    ],
+  },
+  {
+    headerKey: "home.act",
+    subKey: "home.act_sub",
+    accent: "text-warning-amber",
+    entries: [
+      { href: "/the-act/", code: "12", navKey: "nav.the-act", branchKey: "branch.act", primary: true },
+      { href: "/protocol-x/", code: "03", navKey: "nav.protocol-x", branchKey: "branch.protocol" },
+      { href: "/registry/", code: "04", navKey: "nav.registry", branchKey: "branch.registry" },
+      { href: "/the-resistance/", code: "38", navKey: "nav.the-resistance", branchKey: "branch.resistance" },
+      { href: "/the-signal/", code: "11", navKey: "nav.the-signal", branchKey: "branch.signal" },
+      { href: "/the-exchange/", code: "39", navKey: "nav.the-exchange", branchKey: "branch.exchange" },
+      { href: "/the-trail/", code: "06", navKey: "nav.the-trail", branchKey: "branch.trail" },
+      { href: "/the-academy/", code: "40", navKey: "nav.the-academy", branchKey: "branch.academy" },
+      { href: "/the-field-manual/", code: "42", navKey: "nav.the-field-manual", branchKey: "branch.field_manual" },
+      { href: "/the-badges/", code: "41", navKey: "nav.the-badges", branchKey: "branch.badges" },
+      { href: "/the-submit/", code: "43", navKey: "nav.the-submit", branchKey: "branch.submit" },
+    ],
+  },
+  {
+    headerKey: "home.hold",
+    subKey: "home.hold_sub",
+    accent: "text-[#00bbff]",
+    entries: [
+      { href: "/the-promises/", code: "44", navKey: "nav.the-promises", branchKey: "branch.promises", primary: true },
+      { href: "/the-tribunal/", code: "45", navKey: "nav.the-tribunal", branchKey: "branch.tribunal" },
+      { href: "/the-testimony/", code: "46", navKey: "nav.the-testimony", branchKey: "branch.testimony" },
+      { href: "/the-watch/", code: "47", navKey: "nav.the-watch", branchKey: "branch.watch" },
+      { href: "/the-countdown/", code: "48", navKey: "nav.the-countdown", branchKey: "branch.countdown" },
+    ],
+  },
+  {
+    headerKey: "home.protect",
+    subKey: "home.protect_sub",
+    accent: "text-[#bb66ff]",
+    entries: [
+      { href: "/the-mask/", code: "08", navKey: "nav.the-mask", branchKey: "branch.mask", primary: true },
+      { href: "/the-safehouse/", code: "49", navKey: "nav.the-safehouse", branchKey: "branch.safehouse" },
+      { href: "/the-cipher/", code: "50", navKey: "nav.the-cipher", branchKey: "branch.cipher" },
+      { href: "/the-canary/", code: "51", navKey: "nav.the-canary", branchKey: "branch.canary" },
+      { href: "/the-press-kit/", code: "52", navKey: "nav.the-press-kit", branchKey: "branch.press_kit" },
+      { href: "/the-web/", code: "05", navKey: "nav.the-web", branchKey: "branch.web" },
+      { href: "/the-relay/", code: "53", navKey: "nav.the-relay", branchKey: "branch.relay" },
+      { href: "/the-quorum/", code: "54", navKey: "nav.the-quorum", branchKey: "branch.quorum" },
+      { href: "/the-network/", code: "55", navKey: "nav.the-network", branchKey: "branch.network" },
+    ],
+  },
+  {
+    headerKey: "home.infra",
+    subKey: "home.infra_sub",
+    accent: "text-content-dim",
+    entries: [
+      { href: "/fortress/", code: "07", navKey: "nav.fortress", branchKey: "branch.fortress", primary: true },
+      { href: "/the-onion/", code: "56", navKey: "nav.the-onion", branchKey: "branch.onion" },
+      { href: "/the-digest/", code: "57", navKey: "nav.the-digest", branchKey: "branch.digest" },
+      { href: "/the-changelog/", code: "58", navKey: "nav.the-changelog", branchKey: "branch.changelog" },
+    ],
+  },
+];
+
+function SectionDirectory({ lang }: { lang: Lang }) {
+  return (
+    <>
+      {DIRECTORY_CLUSTERS.map((cluster, ci) => (
+        <div key={cluster.headerKey} className={ci === DIRECTORY_CLUSTERS.length - 1 ? "mb-12" : "mb-6"}>
+          <div className="flex items-center gap-2 mb-3">
+            <span className={`text-[10px] font-bold uppercase tracking-widest ${cluster.accent}`}>{tc(lang, cluster.headerKey)}</span>
+            <span className="text-[10px] text-content-dim">{tc(lang, cluster.subKey)}</span>
+            <div className="flex-1 h-px bg-border-dim" />
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            {cluster.entries.map((b) => (
+              <Link key={b.href} href={b.href} className={`terminal-card p-3 hover:border-blood transition-colors block ${b.primary ? "border-blood-dim" : ""}`}>
+                <div className="text-[10px] text-content-dim">[{b.code}]</div>
+                <div className="text-xs font-bold text-blood mt-1">{t(lang, b.navKey)}</div>
+                <div className="text-[10px] text-content-secondary mt-0.5">{tc(lang, b.branchKey)}</div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      ))}
+    </>
   );
 }

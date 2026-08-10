@@ -8,9 +8,11 @@ refresh is a single command:
 
   1. snapshot.py save           — preserve the old backbone for diffing
   2. enrich_backbone.py         — merge deep-data into world_backbone.json
-  3. fetch_sanctions_dossiers.py — refresh adjudicated entity dossiers
-  4. snapshot.py save           — preserve the new backbone (for next diff)
-  5. generate_api.py             — rebuild static API JSON into out/api/
+  3. fetch_worldbank.py         — pull live indicators from the World Bank API
+  4. fetch_sanctions_dossiers.py — refresh adjudicated entity dossiers
+  5. fetch_ejatlas.py            — refresh environmental conflict data
+  6. snapshot.py save           — preserve the new backbone (for next diff)
+  7. generate_api.py             — rebuild static API JSON into out/api/
 
 Each step logs its status. A failure in any step halts the pipeline so
 partial/corrupt data never ships.
@@ -72,16 +74,16 @@ def main() -> int:
     if args.dry_run:
         print(f"{Style.DIM}(dry-run mode — no commands will execute){Style.RESET}")
     if args.skip_fetch:
-        print(f"{Style.WARN}(--skip-fetch: sanctions + EJAtlas fetch will be skipped){Style.RESET}")
+        print(f"{Style.WARN}(--skip-fetch: World Bank, sanctions, and EJAtlas fetch will be skipped){Style.RESET}")
 
     steps: list[tuple[str, list[str]]] = [
-        ("1/6 snapshot-old", [sys.executable, "snapshot.py", "save"]),
-        ("2/6 enrich-backbone", [sys.executable, "enrich_backbone.py"]),
+        ("snapshot-old", [sys.executable, "snapshot.py", "save"]),
+        ("enrich-backbone", [sys.executable, "enrich_backbone.py"]),
     ]
     if not args.skip_fetch:
-        steps.append(("3/6 fetch-sanctions", [sys.executable, "fetch_sanctions_dossiers.py", "--limit", "50"]))
-        steps.append(("4/6 fetch-ejatlas", [sys.executable, "fetch_ejatlas.py"]))
-    # Renumber dynamically after optional skip
+        steps.append(("fetch-worldbank", [sys.executable, "fetch_worldbank.py"]))
+        steps.append(("fetch-sanctions", [sys.executable, "fetch_sanctions_dossiers.py", "--limit", "50"]))
+        steps.append(("fetch-ejatlas", [sys.executable, "fetch_ejatlas.py"]))
     steps.append(("snapshot-new", [sys.executable, "snapshot.py", "save"]))
     steps.append(("generate-api", [sys.executable, "generate_api.py"]))
 
