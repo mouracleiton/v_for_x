@@ -162,7 +162,7 @@
 
 - [x] lib/identity.ts — ECDSA P-256 unified identity, VFXID1, safety numbers, sign/verify
 - [x] lib/tokens.ts — full VFX* prefix registry + detectToken
-- [ ] lib/vfxpack.ts — VFXPACK1 create/encode/merge/validate
+- [x] lib/vfxpack.ts — VFXPACK1 create/encode/merge/validate
 - [ ] Bridge UI: build/import VFXPACK1 from selected stores + paste
 
 ### Missions, personas, playbooks
