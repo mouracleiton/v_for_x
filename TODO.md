@@ -182,7 +182,7 @@
 - [x] lib/subnational.ts + /the-subnational — admin-area vulnerability map
 - [x] lib/mirror-consensus.ts + /the-consensus — root hash fork detection
 - [x] lib/ops-journal.ts — local self-stats
-- [ ] /the-tokens — interop catalog + paste detector
+- [x] /the-tokens — interop catalog + paste detector
 
 ### Tests
 
