@@ -27,7 +27,7 @@
 - [x] Simulate → Forecast → Campaign pipeline (lib/pipeline.ts)
 - [x] Exchange → Relay transport bridge (lib/exchange-relay.ts)
 - [x] Gamification → signed certificates (generateCertificate/verifyCertificate)
-- [ ] Correlation explorer library (lib/correlation.ts — Pearson, Spearman, p-values, matrix)
+- [x] Correlation explorer library (lib/correlation.ts — Pearson, Spearman, p-values, matrix)
 
 ### Crypto Identity Layer (Phase B)
 
