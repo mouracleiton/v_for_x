@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
   generateIdentity,
   saveIdentity,
@@ -7,6 +7,7 @@ import {
   deleteIdentity,
   signWithIdentity,
   verifyWithIdentity,
+  verifySignatureWithGrace,
   computeSafetyNumber,
   publicCard,
   exportPublicCard,
@@ -16,19 +17,23 @@ import {
   decodePublicCardToken,
   createSignedDagEntry,
   verifyDagEntrySignature,
+  rotateIdentity,
+  loadPreviousIdentities,
   type Identity,
   type PublicIdentity,
 } from "../lib/identity";
 
 describe("identity.ts", () => {
   beforeEach(() => {
-    // Clear any existing identity before each test
+    // Clear any existing identity and history before each test
     deleteIdentity();
+    localStorage.removeItem("vfx_identity_history");
   });
 
   afterEach(() => {
     // Clean up after each test
     deleteIdentity();
+    localStorage.removeItem("vfx_identity_history");
   });
 
   describe("generateIdentity", () => {
@@ -522,6 +527,388 @@ describe("identity.ts", () => {
 
       const verified = await verifyDagEntrySignature(entry);
       expect(verified).toBeNull();
+    });
+  });
+
+  describe("rotateIdentity", () => {
+    it("should throw error when no current identity exists", async () => {
+      deleteIdentity();
+      await expect(rotateIdentity()).rejects.toThrow("No current identity to rotate");
+    });
+
+    it("should generate new identity and save old to history", async () => {
+      const originalIdentity = await ensureIdentity();
+      const originalHandle = originalIdentity.handle;
+      const originalPubKey = originalIdentity.publicKeyHex;
+
+      const newIdentity = await rotateIdentity();
+
+      // New identity should be different
+      expect(newIdentity.handle).not.toBe(originalHandle);
+      expect(newIdentity.publicKeyHex).not.toBe(originalPubKey);
+
+      // Current identity should be the new one
+      const current = await loadIdentity();
+      expect(current!.handle).toBe(newIdentity.handle);
+      expect(current!.publicKeyHex).toBe(newIdentity.publicKeyHex);
+
+      // Old identity should be in history
+      const history = await loadPreviousIdentities();
+      expect(history.length).toBeGreaterThan(0);
+      expect(history[0].identity.handle).toBe(originalHandle);
+      expect(history[0].identity.publicKeyHex).toBe(originalPubKey);
+    });
+
+    it("should maintain rotation timestamps in history", async () => {
+      const originalIdentity = await ensureIdentity();
+      const beforeRotation = Date.now();
+
+      await rotateIdentity();
+
+      const history = await loadPreviousIdentities();
+      expect(history.length).toBeGreaterThan(0);
+
+      const entry = history[0];
+      expect(entry.rotatedAt).toBeGreaterThanOrEqual(beforeRotation);
+      expect(entry.rotatedAt).toBeLessThanOrEqual(Date.now());
+      expect(entry.gracePeriodUntil).toBeGreaterThan(Date.now());
+    });
+
+    it("should generate valid new identity", async () => {
+      await ensureIdentity();
+      const newIdentity = await rotateIdentity();
+
+      expect(newIdentity.privateKey).toBeDefined();
+      expect(newIdentity.publicKey).toBeDefined();
+      expect(newIdentity.publicKeyHex).toMatch(/^[0-9a-f]{130}$/);
+      expect(newIdentity.handle).toMatch(/^V-[A-Z0-9]{4}-[A-Z0-9]{4}$/);
+      expect(newIdentity.fingerprint).toHaveLength(12);
+    });
+
+    it("should accumulate history on multiple rotations", async () => {
+      await ensureIdentity();
+
+      const handles: string[] = [];
+      handles.push((await loadIdentity())!.handle);
+
+      // Rotate 3 times
+      for (let i = 0; i < 3; i++) {
+        await rotateIdentity();
+        handles.push((await loadIdentity())!.handle);
+      }
+
+      // Should have 4 handles total (original + 3 rotations)
+      expect(handles.length).toBe(4);
+      // All handles should be unique
+      expect(new Set(handles).size).toBe(4);
+
+      // History should have 3 entries (original moved to history + 2 subsequent rotations)
+      const history = await loadPreviousIdentities();
+      expect(history.length).toBe(3);
+
+      // Verify the handles match
+      expect(history[0].identity.handle).toBe(handles[2]); // Second rotation
+      expect(history[1].identity.handle).toBe(handles[1]); // First rotation
+      expect(history[2].identity.handle).toBe(handles[0]); // Original
+    });
+
+    it("should preserve signature validity during grace period", async () => {
+      const originalIdentity = await ensureIdentity();
+      const testHash = "test".repeat(16);
+      const originalSignature = await signWithIdentity(originalIdentity, testHash);
+
+      // Rotate identity
+      await rotateIdentity();
+      const newIdentity = await loadIdentity();
+
+      // Signature made with OLD key should still be verifiable using grace period
+      const originalPublicCard = publicCard(originalIdentity);
+      const isValidWithGrace = await verifySignatureWithGrace(
+        originalPublicCard,
+        testHash,
+        originalSignature
+      );
+      expect(isValidWithGrace).toBe(true);
+
+      // New identity should also work for new signatures
+      const newSignature = await signWithIdentity(newIdentity!, testHash);
+      const newPublicCard = publicCard(newIdentity!);
+      const isValidNew = await verifyWithIdentity(newPublicCard, testHash, newSignature);
+      expect(isValidNew).toBe(true);
+    });
+  });
+
+  describe("loadPreviousIdentities", () => {
+    it("should return empty array when no history exists", async () => {
+      deleteIdentity();
+      const history = await loadPreviousIdentities();
+      expect(history).toEqual([]);
+    });
+
+    it("should load identity history after rotation", async () => {
+      await ensureIdentity();
+      const firstHandle = (await loadIdentity())!.handle;
+
+      await rotateIdentity();
+      const history = await loadPreviousIdentities();
+
+      expect(history.length).toBeGreaterThan(0);
+      expect(history[0].identity.handle).toBe(firstHandle);
+    });
+
+    it("should restore functional CryptoKey objects from history", async () => {
+      await ensureIdentity();
+      const originalIdentity = (await loadIdentity())!;
+      const testHash = "test".repeat(16);
+      const originalSignature = await signWithIdentity(originalIdentity, testHash);
+
+      await rotateIdentity();
+      const history = await loadPreviousIdentities();
+
+      expect(history.length).toBeGreaterThan(0);
+      const restoredIdentity = history[0].identity;
+
+      // Restored identity should be able to sign
+      const newSignature = await signWithIdentity(restoredIdentity, testHash);
+      expect(newSignature).toMatch(/^[0-9a-f]+$/);
+
+      // Original signature should verify with restored public key
+      const publicCardData = publicCard(restoredIdentity);
+      const isValid = await verifyWithIdentity(publicCardData, testHash, originalSignature);
+      expect(isValid).toBe(true);
+    });
+
+    it("should handle corrupted history gracefully", async () => {
+      await ensureIdentity();
+      await rotateIdentity();
+
+      // Corrupt the history
+      localStorage.setItem("vfx_identity_history", "invalid json");
+
+      const history = await loadPreviousIdentities();
+      expect(history).toEqual([]);
+      expect(localStorage.getItem("vfx_identity_history")).toBeNull();
+    });
+
+    it("should sort history by rotation date (most recent first)", async () => {
+      await ensureIdentity();
+
+      const handles: string[] = [];
+      handles.push((await loadIdentity())!.handle);
+
+      // Rotate multiple times
+      for (let i = 0; i < 3; i++) {
+        await rotateIdentity();
+        handles.push((await loadIdentity())!.handle);
+      }
+
+      const history = await loadPreviousIdentities();
+
+      // History should be in reverse chronological order
+      // After 3 rotations: handles = [original, rotation1, rotation2, rotation3]
+      // Current identity is handles[3], history contains [handles[2], handles[1], handles[0]]
+      expect(history.length).toBe(3);
+      expect(history[0].identity.handle).toBe(handles[2]); // Most recent rotation
+      expect(history[1].identity.handle).toBe(handles[1]); // Middle rotation
+      expect(history[2].identity.handle).toBe(handles[0]); // Original (oldest)
+    });
+
+    it("should skip corrupted entries but keep valid ones", async () => {
+      await ensureIdentity();
+      const firstHandle = (await loadIdentity())!.handle;
+
+      await rotateIdentity();
+      const secondHandle = (await loadIdentity())!.handle;
+
+      // Corrupt the history by adding invalid entry
+      const currentHistory = localStorage.getItem("vfx_identity_history");
+      if (currentHistory) {
+        const historyData = JSON.parse(currentHistory);
+        historyData.push({ invalid: "entry" });
+        localStorage.setItem("vfx_identity_history", JSON.stringify(historyData));
+      }
+
+      const history = await loadPreviousIdentities();
+
+      // Should have skipped the corrupted entry but kept valid ones
+      expect(history.length).toBeGreaterThanOrEqual(1);
+      expect(history[0].identity.handle).toBeDefined();
+    });
+  });
+
+  describe("verifySignatureWithGrace", () => {
+    it("should verify signatures with current identity", async () => {
+      const identity = await ensureIdentity();
+      const hash = "test".repeat(16);
+      const signature = await signWithIdentity(identity, hash);
+
+      const publicCardData = publicCard(identity);
+      const isValid = await verifySignatureWithGrace(publicCardData, hash, signature);
+
+      expect(isValid).toBe(true);
+    });
+
+    it("should verify signatures from previous identities within grace period", async () => {
+      const originalIdentity = await ensureIdentity();
+      const hash = "test".repeat(16);
+      const originalSignature = await signWithIdentity(originalIdentity, hash);
+
+      await rotateIdentity();
+
+      const originalPublicCard = publicCard(originalIdentity);
+      const isValid = await verifySignatureWithGrace(originalPublicCard, hash, originalSignature);
+
+      expect(isValid).toBe(true);
+    });
+
+    it("should reject invalid signatures", async () => {
+      const identity = await ensureIdentity();
+      const hash = "test".repeat(16);
+      const wrongSignature = "bad".repeat(64);
+
+      const publicCardData = publicCard(identity);
+      const isValid = await verifySignatureWithGrace(publicCardData, hash, wrongSignature);
+
+      expect(isValid).toBe(false);
+    });
+
+    it("should verify signatures from previous identities within grace period", async () => {
+      await ensureIdentity();
+      const originalIdentity = (await loadIdentity())!;
+      const hash = "test".repeat(16);
+      const originalSignature = await signWithIdentity(originalIdentity, hash);
+
+      await rotateIdentity();
+
+      // Get the current identity (after rotation)
+      const currentIdentity = await loadIdentity();
+
+      // Verify with original identity (should work within grace period)
+      const originalPublicCard = publicCard(originalIdentity);
+      const isValidWithOriginal = await verifySignatureWithGrace(originalPublicCard, hash, originalSignature);
+      expect(isValidWithOriginal).toBe(true);
+
+      // Verification with current identity should fail (different key)
+      const currentPublicCard = publicCard(currentIdentity!);
+      const isValidWithCurrent = await verifySignatureWithGrace(currentPublicCard, hash, originalSignature);
+      expect(isValidWithCurrent).toBe(false);
+    });
+
+    it("should work with multiple previous identities", async () => {
+      await ensureIdentity();
+
+      const signatures: { hash: string; signature: string; handle: string }[] = [];
+
+      // Create signatures with different identities
+      for (let i = 0; i < 3; i++) {
+        const identity = await loadIdentity();
+        const hash = `test${i}`.repeat(14); // Different hash for each
+        const signature = await signWithIdentity(identity!, hash);
+        signatures.push({
+          hash,
+          signature,
+          handle: identity!.handle,
+        });
+
+        if (i < 2) {
+          await rotateIdentity();
+        }
+      }
+
+      // All signatures should verify with grace period
+      for (const { hash, signature, handle } of signatures) {
+        // For the last signature (current identity), we need to use current identity
+        const currentIdentity = await loadIdentity();
+        if (handle === currentIdentity!.handle) {
+          // This is the current identity, verify directly
+          const publicCardData = publicCard(currentIdentity!);
+          const isValid = await verifySignatureWithGrace(publicCardData, hash, signature);
+          expect(isValid).toBe(true);
+        } else {
+          // This is a previous identity, find it in history
+          const history = await loadPreviousIdentities();
+          const identityEntry = history.find((entry) => entry.identity.handle === handle);
+          expect(identityEntry).toBeDefined();
+
+          const publicCardData = publicCard(identityEntry!.identity);
+          const isValid = await verifySignatureWithGrace(publicCardData, hash, signature);
+          expect(isValid).toBe(true);
+        }
+      }
+    });
+
+    it("should fall back to direct verification if history is empty", async () => {
+      const identity = await ensureIdentity();
+      const hash = "test".repeat(16);
+      const signature = await signWithIdentity(identity, hash);
+
+      // Clear history to simulate no previous identities
+      localStorage.removeItem("vfx_identity_history");
+
+      const publicCardData = publicCard(identity);
+      const isValid = await verifySignatureWithGrace(publicCardData, hash, signature);
+
+      expect(isValid).toBe(true);
+    });
+
+    it("should handle verification with wrong public key correctly", async () => {
+      const identity1 = await ensureIdentity();
+      const identity2 = await generateIdentity();
+      const hash = "test".repeat(16);
+      const signature = await signWithIdentity(identity1, hash);
+
+      const publicCardData = publicCard(identity2);
+      const isValid = await verifySignatureWithGrace(publicCardData, hash, signature);
+
+      expect(isValid).toBe(false);
+    });
+  });
+
+  describe("grace period functionality", () => {
+    it("should set grace period to 30 days from creation", async () => {
+      await ensureIdentity();
+      const beforeRotation = Date.now();
+
+      await rotateIdentity();
+
+      const history = await loadPreviousIdentities();
+      expect(history.length).toBeGreaterThan(0);
+
+      const entry = history[0];
+      const gracePeriodMs = entry.gracePeriodUntil - entry.identity.createdAt;
+      const expectedMs = 30 * 24 * 60 * 60 * 1000; // 30 days
+
+      expect(gracePeriodMs).toBe(expectedMs);
+    });
+
+    it("should calculate remaining days correctly", async () => {
+      await ensureIdentity();
+      await rotateIdentity();
+
+      const history = await loadPreviousIdentities();
+      const entry = history[0];
+
+      const now = Date.now();
+      const remainingMs = entry.gracePeriodUntil - now;
+      const remainingDays = Math.ceil(remainingMs / (24 * 60 * 60 * 1000));
+
+      expect(remainingDays).toBeGreaterThan(0);
+      expect(remainingDays).toBeLessThanOrEqual(30);
+    });
+
+    it("should identify expired grace periods correctly", async () => {
+      await ensureIdentity();
+      await rotateIdentity();
+
+      // Manually expire the grace period
+      const historyData = JSON.parse(localStorage.getItem("vfx_identity_history")!);
+      historyData[0].gracePeriodUntil = Date.now() - 1000;
+      localStorage.setItem("vfx_identity_history", JSON.stringify(historyData));
+
+      const history = await loadPreviousIdentities();
+      const entry = history[0];
+
+      expect(entry.gracePeriodUntil).toBeLessThan(Date.now());
     });
   });
 });

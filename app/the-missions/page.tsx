@@ -34,6 +34,8 @@ import {
   type Identity,
   encodeIdentityToken,
   encodePublicCardToken,
+  rotateIdentity,
+  loadPreviousIdentities,
 } from "@/lib/identity";
 import {
   runSafetyChecks,
@@ -85,6 +87,12 @@ export default function TheMissionsPage() {
   const [importToken, setImportToken] = useState<string>("");
   const [importStatus, setImportStatus] = useState<string>("");
 
+  // Key rotation state
+  const [showRotateKeyConfirm, setShowRotateKeyConfirm] = useState(false);
+  const [rotateKeyStatus, setRotateKeyStatus] = useState<string>("");
+  const [previousIdentities, setPreviousIdentities] = useState<any[]>([]);
+  const [showIdentityHistory, setShowIdentityHistory] = useState(false);
+
   /* ═══════════════════════════════════════════════════════════════
      Initialization
      ═══════════════════════════════════════════════════════════════ */
@@ -99,7 +107,7 @@ export default function TheMissionsPage() {
     }
 
     // Load identity
-    ensureIdentity().then((id) => {
+    ensureIdentity().then(async (id) => {
       if (id) {
         setIdentity(id);
         logEvent({
@@ -107,6 +115,14 @@ export default function TheMissionsPage() {
           title: `Loaded identity: ${id.handle}`,
           details: { handle: id.handle },
         });
+
+        // Load identity history
+        try {
+          const history = await loadPreviousIdentities();
+          setPreviousIdentities(history);
+        } catch {
+          // No history yet
+        }
       }
     }).catch(() => {
       // No identity yet, that's okay
@@ -213,6 +229,51 @@ export default function TheMissionsPage() {
       console.error("Failed to export public card:", error);
     }
   }, [identity]);
+
+  const handleRotateKey = useCallback(async () => {
+    if (!identity) return;
+
+    try {
+      setRotateKeyStatus("Rotating keys...");
+      const newIdentity = await rotateIdentity();
+      setIdentity(newIdentity);
+      setShowRotateKeyConfirm(false);
+
+      // Load previous identities for display
+      const history = await loadPreviousIdentities();
+      setPreviousIdentities(history);
+
+      logEvent({
+        type: "identity_rotated",
+        title: `Rotated identity key: ${identity.handle} → ${newIdentity.handle}`,
+        details: {
+          oldHandle: identity.handle,
+          newHandle: newIdentity.handle,
+          oldFingerprint: identity.fingerprint,
+          newFingerprint: newIdentity.fingerprint,
+        },
+      });
+
+      setRotateKeyStatus(`✓ Key rotated successfully. Old key remains valid for 30 days.`);
+      sound.success();
+    } catch (error) {
+      setRotateKeyStatus("✗ Failed to rotate key");
+      sound.error();
+      console.error("Failed to rotate key:", error);
+    }
+  }, [identity]);
+
+  const handleLoadIdentityHistory = useCallback(async () => {
+    try {
+      const history = await loadPreviousIdentities();
+      setPreviousIdentities(history);
+      setShowIdentityHistory(!showIdentityHistory);
+      sound.select();
+    } catch (error) {
+      sound.error();
+      console.error("Failed to load identity history:", error);
+    }
+  }, [showIdentityHistory]);
 
   /* ═══════════════════════════════════════════════════════════════
      Mission Handlers
@@ -462,7 +523,30 @@ export default function TheMissionsPage() {
                 <div className="text-sm font-mono text-content-primary">{identity.fingerprint}</div>
               </div>
             </div>
-            <div className="flex gap-2">
+
+            {/* Key Rotation Status */}
+            {rotateKeyStatus && (
+              <div className={`p-2 border ${rotateKeyStatus.startsWith("✓") ? "border-terminal-green/50 bg-terminal-green/5" : "border-blood/50 bg-blood/5"}`}>
+                <div className="text-xs">{rotateKeyStatus}</div>
+              </div>
+            )}
+
+            {/* Previous Identities Indicator */}
+            {previousIdentities.length > 0 && (
+              <div className="p-2 border border-warning-amber/30 bg-warning-amber/5">
+                <div className="text-xs text-warning-amber mb-1">
+                  ⚠️ {previousIdentities.length} previous {previousIdentities.length === 1 ? "identity" : "identities"} in grace period
+                </div>
+                <button
+                  onClick={handleLoadIdentityHistory}
+                  className="text-xs px-2 py-1 border border-warning-amber text-warning-amber hover:bg-warning-amber hover:text-void"
+                >
+                  {showIdentityHistory ? "HIDE HISTORY" : "VIEW HISTORY"}
+                </button>
+              </div>
+            )}
+
+            <div className="flex gap-2 flex-wrap">
               <button
                 onClick={handleExportIdentity}
                 className="text-xs px-3 py-1 border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void"
@@ -481,7 +565,43 @@ export default function TheMissionsPage() {
               >
                 {showIdentity ? "HIDE DETAILS" : "SHOW DETAILS"}
               </button>
+              <button
+                onClick={() => setShowRotateKeyConfirm(true)}
+                className="text-xs px-3 py-1 border border-blood text-blood hover:bg-blood hover:text-void"
+              >
+                ROTATE KEY
+              </button>
             </div>
+
+            {/* Identity History Display */}
+            {showIdentityHistory && previousIdentities.length > 0 && (
+              <div className="mt-3 p-3 bg-panel border border-border-dim">
+                <div className="text-xs text-content-dim mb-2">PREVIOUS IDENTITIES (GRACE PERIOD)</div>
+                <div className="space-y-2">
+                  {previousIdentities.map((entry, index) => {
+                    const daysRemaining = Math.max(0, Math.ceil((entry.gracePeriodUntil - Date.now()) / (24 * 60 * 60 * 1000)));
+                    const isExpired = entry.gracePeriodUntil <= Date.now();
+
+                    return (
+                      <div key={index} className={`p-2 border ${isExpired ? "border-blood/30 bg-blood/5" : "border-warning-amber/30 bg-warning-amber/5"}`}>
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="text-xs font-bold text-content-primary">{entry.identity.handle}</div>
+                          <StatusPill color={isExpired ? "blood" : "amber"}>
+                            {isExpired ? "EXPIRED" : `${daysRemaining}D LEFT`}
+                          </StatusPill>
+                        </div>
+                        <div className="text-xs text-content-dim font-mono">{entry.identity.fingerprint}</div>
+                        <div className="text-xs text-content-dim mt-1">
+                          Rotated: {new Date(entry.rotatedAt).toLocaleDateString()}
+                          {isExpired ? " • Grace period ended" : " • Grace period active"}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {showIdentity && (
               <div className="mt-3 p-3 bg-panel border border-border-dim">
                 <div className="text-xs text-content-dim mb-2">Public Key (hex)</div>
@@ -866,6 +986,51 @@ export default function TheMissionsPage() {
           )}
         </div>
       </TerminalCard>
+
+      {/* Key Rotation Confirmation Modal */}
+      {showRotateKeyConfirm && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <TerminalCard title="⚠️ ROTATE IDENTITY KEY" accent="blood" glow className="max-w-lg">
+            <div className="space-y-4">
+              <div className="text-xs text-content-secondary">
+                <p className="mb-2">
+                  You are about to rotate your cryptographic identity key. This is a significant operation:
+                </p>
+                <ul className="space-y-1 ml-4 list-disc">
+                  <li>A new keypair will be generated</li>
+                  <li>Your current key will be moved to history</li>
+                  <li>Signatures made with your old key will remain valid for 30 days</li>
+                  <li>After 30 days, the old key will be permanently deleted</li>
+                </ul>
+                <p className="mt-2 text-blood-bright font-bold">
+                  Make sure you have exported your current identity before proceeding!
+                </p>
+              </div>
+
+              <div className="p-2 border border-warning-amber/30 bg-warning-amber/5">
+                <div className="text-xs text-warning-amber mb-1">CURRENT IDENTITY</div>
+                <div className="text-xs text-content-primary font-bold">{identity?.handle}</div>
+                <div className="text-xs text-content-dim font-mono">{identity?.fingerprint}</div>
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={handleRotateKey}
+                  className="flex-1 py-2 border border-blood text-blood-bright hover:bg-blood hover:text-void text-xs font-bold"
+                >
+                  CONFIRM ROTATION
+                </button>
+                <button
+                  onClick={() => setShowRotateKeyConfirm(false)}
+                  className="flex-1 py-2 border border-border-dim text-content-secondary hover:border-terminal-green hover:text-terminal-green text-xs"
+                >
+                  CANCEL
+                </button>
+              </div>
+            </div>
+          </TerminalCard>
+        </div>
+      )}
     </div>
   );
 }

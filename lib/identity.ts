@@ -49,6 +49,22 @@ export interface IdentityToken {
 /** Storage key for identity in localStorage */
 const IDENTITY_STORAGE_KEY = "vfx_identity";
 
+/** Storage key for identity history (previous identities for grace period) */
+const IDENTITY_HISTORY_KEY = "vfx_identity_history";
+
+/** Grace period for signature verification (30 days in milliseconds) */
+const GRACE_PERIOD_MS = 30 * 24 * 60 * 60 * 1000;
+
+/** Entry in identity history */
+interface IdentityHistoryEntry {
+  /** The identity that was rotated out */
+  identity: Identity;
+  /** When this identity was rotated out (timestamp) */
+  rotatedAt: number;
+  /** When the grace period ends (timestamp) */
+  gracePeriodUntil: number;
+}
+
 /**
  * Generate a new unified identity.
  *
@@ -184,6 +200,229 @@ export async function ensureIdentity(): Promise<Identity> {
  */
 export function deleteIdentity(): void {
   localStorage.removeItem(IDENTITY_STORAGE_KEY);
+}
+
+/**
+ * Rotate to a new identity key.
+ *
+ * This function:
+ * 1. Generates a new keypair
+ * 2. Saves the old identity to history with rotation timestamp
+ * 3. Sets the new identity as current
+ * 4. Prunes old identities whose grace period has expired
+ *
+ * The old identity remains verifiable for 30 days (grace period).
+ * Returns the new identity.
+ */
+export async function rotateIdentity(): Promise<Identity> {
+  // Load current identity
+  const currentIdentity = await loadIdentity();
+  if (!currentIdentity) {
+    throw new Error("No current identity to rotate. Use generateIdentity() first.");
+  }
+
+  // Generate new identity
+  const newIdentity = await generateIdentity();
+
+  // Save current identity to history
+  await saveIdentityToHistory(currentIdentity);
+
+  // Save new identity as current
+  await saveIdentity(newIdentity);
+
+  // Prune expired identities from history
+  await pruneExpiredIdentities();
+
+  return newIdentity;
+}
+
+/**
+ * Save an identity to the history for grace period verification.
+ */
+async function saveIdentityToHistory(identity: Identity): Promise<void> {
+  const history = await loadPreviousIdentities();
+
+  const entry: IdentityHistoryEntry = {
+    identity,
+    rotatedAt: Date.now(),
+    gracePeriodUntil: identity.createdAt + GRACE_PERIOD_MS,
+  };
+
+  // Add to history (most recent first)
+  history.unshift(entry);
+
+  // Save to localStorage - need to await the crypto key exports
+  const historyData = await Promise.all(
+    history.map(async (entry) => ({
+      privateJwk: await crypto.subtle.exportKey("jwk", entry.identity.privateKey),
+      publicJwk: await crypto.subtle.exportKey("jwk", entry.identity.publicKey),
+      publicKeyHex: entry.identity.publicKeyHex,
+      handle: entry.identity.handle,
+      fingerprint: entry.identity.fingerprint,
+      createdAt: entry.identity.createdAt,
+      rotatedAt: entry.rotatedAt,
+      gracePeriodUntil: entry.gracePeriodUntil,
+    }))
+  );
+
+  localStorage.setItem(IDENTITY_HISTORY_KEY, JSON.stringify(historyData));
+}
+
+/**
+ * Load all previous identities from history.
+ *
+ * Returns an array of IdentityHistoryEntry, ordered from most recent to oldest.
+ */
+export async function loadPreviousIdentities(): Promise<IdentityHistoryEntry[]> {
+  const stored = localStorage.getItem(IDENTITY_HISTORY_KEY);
+  if (!stored) return [];
+
+  try {
+    const historyData = JSON.parse(stored);
+    const now = Date.now();
+
+    const entries: IdentityHistoryEntry[] = [];
+
+    for (const data of historyData) {
+      try {
+        const privateKey = await crypto.subtle.importKey(
+          "jwk",
+          data.privateJwk,
+          { name: "ECDSA", namedCurve: "P-256" },
+          true,
+          ["sign"]
+        );
+
+        const publicKey = await crypto.subtle.importKey(
+          "jwk",
+          data.publicJwk,
+          { name: "ECDSA", namedCurve: "P-256" },
+          true,
+          ["verify"]
+        );
+
+        entries.push({
+          identity: {
+            privateKey,
+            publicKey,
+            publicKeyHex: data.publicKeyHex,
+            handle: data.handle,
+            fingerprint: data.fingerprint,
+            createdAt: data.createdAt,
+          },
+          rotatedAt: data.rotatedAt,
+          gracePeriodUntil: data.gracePeriodUntil,
+        });
+      } catch {
+        // Skip corrupted entry
+        continue;
+      }
+    }
+
+    // Sort by rotatedAt descending (most recent first)
+    return entries.sort((a, b) => b.rotatedAt - a.rotatedAt);
+  } catch {
+    // Corrupted storage, clear it
+    localStorage.removeItem(IDENTITY_HISTORY_KEY);
+    return [];
+  }
+}
+
+/**
+ * Prune identities from history whose grace period has expired.
+ */
+async function pruneExpiredIdentities(): Promise<void> {
+  const history = await loadPreviousIdentities();
+  const now = Date.now();
+
+  // Filter out entries where grace period has expired
+  const validEntries = history.filter((entry) => entry.gracePeriodUntil > now);
+
+  if (validEntries.length === history.length) {
+    // Nothing to prune
+    return;
+  }
+
+  // Save pruned history
+  if (validEntries.length === 0) {
+    localStorage.removeItem(IDENTITY_HISTORY_KEY);
+  } else {
+    const historyData = await Promise.all(
+      validEntries.map(async (entry) => ({
+        privateJwk: await crypto.subtle.exportKey("jwk", entry.identity.privateKey),
+        publicJwk: await crypto.subtle.exportKey("jwk", entry.identity.publicKey),
+        publicKeyHex: entry.identity.publicKeyHex,
+        handle: entry.identity.handle,
+        fingerprint: entry.identity.fingerprint,
+        createdAt: entry.identity.createdAt,
+        rotatedAt: entry.rotatedAt,
+        gracePeriodUntil: entry.gracePeriodUntil,
+      }))
+    );
+
+    localStorage.setItem(IDENTITY_HISTORY_KEY, JSON.stringify(historyData));
+  }
+}
+
+/**
+ * Verify a signature with grace period support.
+ *
+ * This function attempts to verify a signature using:
+ * 1. The provided public identity
+ * 2. Any previous identities still within their 30-day grace period
+ *
+ * This is useful during key rotation transition periods where signatures
+ * made with the old key should still be accepted.
+ *
+ * Returns true if the signature is valid with any identity (current or within grace period).
+ */
+export async function verifySignatureWithGrace(
+  publicIdentity: PublicIdentity,
+  hash: string,
+  signature: string
+): Promise<boolean> {
+  const now = Date.now();
+
+  // First, try verifying with the provided public identity
+  const directVerify = await verifyWithIdentity(publicIdentity, hash, signature);
+  if (directVerify) {
+    return true;
+  }
+
+  // If that fails, check if any previous identities match and are within grace period
+  const history = await loadPreviousIdentities();
+
+  for (const entry of history) {
+    // Skip if grace period has expired
+    if (entry.gracePeriodUntil <= now) {
+      continue;
+    }
+
+    // Check if this history entry matches the provided public identity
+    if (
+      entry.identity.publicKeyHex === publicIdentity.publicKeyHex &&
+      entry.identity.handle === publicIdentity.handle
+    ) {
+      // This is a previous identity - verify with it
+      const verifyResult = await verifyWithIdentity(
+        {
+          publicKeyHex: entry.identity.publicKeyHex,
+          handle: entry.identity.handle,
+          fingerprint: entry.identity.fingerprint,
+          createdAt: entry.identity.createdAt,
+        },
+        hash,
+        signature
+      );
+
+      if (verifyResult) {
+        return true;
+      }
+    }
+  }
+
+  // No valid signature found
+  return false;
 }
 
 /**
