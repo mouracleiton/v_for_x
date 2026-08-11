@@ -11,7 +11,23 @@ import { tc } from "@/lib/i18n-content";
 import { td } from "@/lib/dossiers-i18n";
 import { t } from "@/lib/i18n";
 import { useStore } from "@/stores/useStore";
-import { parseQuery, executeQuery } from "@/lib/oracle";
+import { parseQuery, executeQuery, METRICS } from "@/lib/oracle";
+import {
+  buildSemanticIndex,
+  semanticSearch,
+  isConceptualQuery,
+  type SemanticIndex,
+  type SemanticSearchResult,
+  type EmbedFn,
+} from "@/lib/semantic-oracle";
+import {
+  getEmbedder,
+  isSemanticSupported,
+  resolveModel,
+  SEMANTIC_MODELS,
+  SEMANTIC_MODEL_ID,
+} from "@/lib/embeddings";
+import { semanticIndexGet, semanticIndexPut } from "@/lib/idb";
 
 const data = backbone as WorldBackbone;
 const blueprints = (Array.isArray(blueprintsData) ? blueprintsData : (blueprintsData as { blueprints: unknown[] }).blueprints) as {
@@ -153,6 +169,87 @@ export default function GlobalSearch() {
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
+  // ── Semantic engine state ──
+  const [semanticReady, setSemanticReady] = useState(false);
+  const [semanticResult, setSemanticResult] = useState<SemanticSearchResult | null>(null);
+  const indexRef = useRef<SemanticIndex | null>(null);
+  const embedRef = useRef<EmbedFn | null>(null);
+  const initInFlight = useRef(false);
+
+  // ── Initialize semantic engine on mount ──
+  useEffect(() => {
+    const initSemantic = async () => {
+      if (!isSemanticSupported() || initInFlight.current) return;
+      initInFlight.current = true;
+
+      try {
+        const model = SEMANTIC_MODELS[0]; // Default English model
+        const result = await getEmbedder(() => {}, model);
+        if (!result) return;
+
+        const { embed, status } = result;
+        embedRef.current = embed;
+
+        const schemaVersion = data.metadata.schema_version;
+        const lastUpdated = data.metadata.last_updated ?? data.metadata.created;
+        const isoSig = data.countries.map((c) => c.iso3).join(",");
+        const cacheKey = `${status.modelId}|${schemaVersion}|${lastUpdated}|${isoSig}`;
+
+        // Try loading from cache first
+        const cached = await semanticIndexGet(cacheKey);
+        if (
+          cached &&
+          cached.countryVectors.length === data.countries.length &&
+          cached.metricVectors.length === METRICS.length
+        ) {
+          indexRef.current = {
+            modelId: cached.modelId,
+            dim: cached.dim,
+            cacheKey,
+            metrics: METRICS,
+            countries: data.countries,
+            metricVectors: cached.metricVectors,
+            countryVectors: cached.countryVectors,
+            metricStats: cached.metricStats,
+          };
+          setSemanticReady(true);
+          return;
+        }
+
+        // Build the index on-device
+        const index = await buildSemanticIndex(data.countries, METRICS, embed, {
+          modelId: status.modelId,
+          schemaVersion,
+          lastUpdated,
+          chunkSize: 24,
+        });
+        indexRef.current = index;
+
+        // Persist for instant reuse
+        await semanticIndexPut({
+          cacheKey,
+          modelId: index.modelId,
+          dim: index.dim,
+          builtAt: Date.now(),
+          metricVectors: index.metricVectors,
+          countryVectors: index.countryVectors,
+          metricStats: index.metricStats,
+          metricIds: METRICS.map((m) => m.id),
+          iso3s: data.countries.map((c) => c.iso3),
+        });
+
+        setSemanticReady(true);
+      } catch (err) {
+        console.warn("Semantic engine initialization failed:", err);
+        // Silently fail - GlobalSearch will fall back to keyword matching
+      } finally {
+        initInFlight.current = false;
+      }
+    };
+
+    initSemantic();
+  }, []);
+
   // Keyboard shortcut: Cmd/Ctrl+K to open, Escape to close
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -253,6 +350,8 @@ export default function GlobalSearch() {
   // Search results
   const searchResults = useMemo(() => {
     if (!query.trim()) return [];
+
+    const trimmed = query.trim();
     const scored = index
       .map((r) => {
         const s = Math.max(
@@ -264,9 +363,41 @@ export default function GlobalSearch() {
       .filter((r) => r.score > 0)
       .sort((a, b) => b.score - a.score);
 
-    // Conceptual query layer: when the query looks like a data question
+    // ── Semantic search layer (when available) ──
+    if (semanticReady && embedRef.current && indexRef.current) {
+      const embed = embedRef.current;
+      const index = indexRef.current;
+
+      // Use semantic search for conceptual queries
+      if (isConceptualQuery(trimmed)) {
+        (async () => {
+          try {
+            const [queryVec] = await embed([trimmed]);
+            const result = semanticSearch(queryVec, index, { topK: 20 });
+            setSemanticResult(result);
+          } catch (err) {
+            console.warn("Semantic search failed:", err);
+            setSemanticResult(null);
+          }
+        })();
+
+        // Return empty while semantic search loads
+        if (semanticResult) {
+          const semanticScored: SearchResult[] = semanticResult.results.map((r) => ({
+            type: "query" as ResultType,
+            label: r.country.name_en,
+            sublabel: `${r.country.iso3} · ${r.topMetrics.slice(0, 2).map((m) => `${m.metric.label.split(" ")[0]}·${(m.normalizedValue * 100).toFixed(0)}%`).join(" · ")}`,
+            href: `/sorrow-map/${r.country.iso3.toLowerCase()}/`,
+            score: 85 - r.rank * 2, // High score for semantic results
+          }));
+          return [...semanticScored, ...scored.slice(0, 10)];
+        }
+        return scored.slice(0, 10);
+      }
+    }
+
+    // ── Conceptual query layer: when the query looks like a data question
     // (not a name lookup), try the keyword oracle for ranked country results.
-    const trimmed = query.trim();
     const looksConceptual =
       /\b(top|bottom|highest|lowest|most|least|countries|where|by|which|rank|compare)\b/i.test(
         trimmed,
@@ -295,7 +426,7 @@ export default function GlobalSearch() {
     }
 
     return scored.slice(0, 15);
-  }, [query, index]);
+  }, [query, index, semanticReady, semanticResult]);
 
   // Group results by type for display
   const grouped = useMemo(() => {
