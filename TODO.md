@@ -207,7 +207,7 @@ Prioritize work that completes **See → Understand → Act → Hold → Coordin
 ## Phase 11 — Identity everywhere (crypto spine)
 
 - [x] Default signing UIs to `lib/identity.ts`: Witness/Receipts, Mirror claims, Trail DAG (`createSignedDagEntry`), Registry blinded reviews (`signRevealWithIdentity`), gamification certificates
-- [ ] Web DataChannel signs with VFXID1 (`ensureIdentity` / `importKeyPair`); hydrates from `loadIdentity` on mount
+- [x] Web DataChannel signs with VFXID1 (`ensureIdentity` / `importKeyPair`); hydrates from `loadIdentity` on mount
 - [ ] CRDT Docs: actor = VFXID1 handle; `encodeSigned` / `verifyTokenSignature` on export/import
 - [ ] Safety number: pairwise panel on Web mesh-hello; Docs shows own safety number
 - [ ] Identity public card export (no private key) — `encodePublicCardToken` / `publicCard` in `lib/identity.ts` (+ Missions UI)
