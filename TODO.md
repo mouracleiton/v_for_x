@@ -186,7 +186,7 @@
 
 ### Tests
 
-- [ ] tests/identity.test.ts, vfxpack, missions-personas, registry-safety, phase10-data (29 new)
+- [x] tests/identity.test.ts, vfxpack, missions-personas, registry-safety, phase10-data (29 new)
 
 ### Still open from “build all” (next sprints)
 
