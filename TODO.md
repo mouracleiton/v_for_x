@@ -181,7 +181,7 @@
 - [x] lib/relationships.ts + /the-flows — arms/sanctions/aid corridors
 - [x] lib/subnational.ts + /the-subnational — admin-area vulnerability map
 - [x] lib/mirror-consensus.ts + /the-consensus — root hash fork detection
-- [ ] lib/ops-journal.ts — local self-stats
+- [x] lib/ops-journal.ts — local self-stats
 - [ ] /the-tokens — interop catalog + paste detector
 
 ### Tests
