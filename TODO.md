@@ -173,7 +173,7 @@
 - [x] /the-missions — persona picker, identity, mission runner, safety engine, ops journal
 - [x] /the-playbooks — checklist UI
 - [x] BranchNav persona filter + FULL NAV toggle; store persona/fullNav
-- [ ] Home CTA → missions / playbooks / bridge
+- [x] Home CTA → missions / playbooks / bridge
 
 ### Trust + dormant data
 

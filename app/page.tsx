@@ -232,6 +232,71 @@ export default function HomePage() {
         </p>
       </div>
 
+      {/* CTAs — Missions, Playbooks, Bridge */}
+      <TerminalCard title={tc(lang, "home.cta_title")} className="mb-6" glow>
+        <p className="text-xs text-content-dim mb-4">
+          {tc(lang, "home.cta_subtitle")}
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {/* Missions CTA */}
+          <Link
+            href="/the-missions/"
+            className="terminal-card p-4 hover:border-blood transition-colors block"
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-2xl">🎯</span>
+              <h3 className="text-sm font-bold text-blood-bright glow-blood">
+                {tc(lang, "home.missions_title")}
+              </h3>
+            </div>
+            <p className="text-xs text-content-secondary mb-3">
+              {tc(lang, "home.missions_desc")}
+            </p>
+            <div className="text-[10px] text-blood-dim font-bold uppercase tracking-widest">
+              {tc(lang, "home.start_missions")}
+            </div>
+          </Link>
+
+          {/* Playbooks CTA */}
+          <Link
+            href="/the-playbooks/"
+            className="terminal-card p-4 hover:border-terminal-green transition-colors block"
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-2xl">📋</span>
+              <h3 className="text-sm font-bold text-terminal-green glow-green">
+                {tc(lang, "home.playbooks_title")}
+              </h3>
+            </div>
+            <p className="text-xs text-content-secondary mb-3">
+              {tc(lang, "home.playbooks_desc")}
+            </p>
+            <div className="text-[10px] text-terminal-green font-bold uppercase tracking-widest">
+              {tc(lang, "home.start_playbooks")}
+            </div>
+          </Link>
+
+          {/* Bridge CTA */}
+          <Link
+            href="/the-bridge/"
+            className="terminal-card p-4 hover:border-warning-amber transition-colors block"
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-2xl">🌉</span>
+              <h3 className="text-sm font-bold text-warning-amber">
+                {tc(lang, "home.bridge_title")}
+              </h3>
+            </div>
+            <p className="text-xs text-content-secondary mb-3">
+              {tc(lang, "home.bridge_desc")}
+            </p>
+            <div className="text-[10px] text-warning-amber font-bold uppercase tracking-widest">
+              {tc(lang, "home.start_bridge")}
+            </div>
+          </Link>
+        </div>
+      </TerminalCard>
+
       {/* SDG2 Status */}
       <TerminalCard
         title={tc(lang, "home.sdg2_status")}
