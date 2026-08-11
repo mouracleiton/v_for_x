@@ -1,5 +1,6 @@
-import { describe, it, expect } from "vitest";
-import { CRDTDoc, CRDT_PREFIX, mergeDocs, parseOpId } from "../lib/crdt";
+import { describe, it, expect, beforeEach } from "vitest";
+import { CRDTDoc, CRDT_PREFIX, CRDT_SIGNED_PREFIX, mergeDocs, parseOpId } from "../lib/crdt";
+import { generateIdentity, type Identity } from "../lib/identity";
 
 function doc(text: string, actor: string, docId = "d"): CRDTDoc {
   const d = new CRDTDoc(actor, docId);
@@ -191,5 +192,151 @@ describe("applyEdit (typing delta)", () => {
     const r = d.applyEdit("same", "same");
     expect(r).toEqual({ inserted: "", deleted: 0 });
     expect(d.toText()).toBe("same");
+  });
+});
+
+describe("signed tokens", () => {
+  let identity: Identity;
+
+  beforeEach(async () => {
+    identity = await generateIdentity();
+  });
+
+  it("encodes and decodes signed tokens correctly", async () => {
+    const d = doc("hello world", identity.handle, "test-doc");
+    const token = await d.encodeSigned(identity);
+
+    expect(token).toMatch(/^VFXCRDT1S:/);
+
+    const result = await CRDTDoc.decodeSigned(token);
+    expect(result).not.toBeNull();
+    expect(result!.doc.toText()).toBe("hello world");
+    expect(result!.doc.docId).toBe("test-doc");
+    expect(result!.identity.handle).toBe(identity.handle);
+    expect(result!.identity.publicKeyHex).toBe(identity.publicKeyHex);
+    expect(result!.identity.fingerprint).toBe(identity.fingerprint);
+  });
+
+  it("verifies signatures correctly", async () => {
+    const d = doc("test content", identity.handle, "verify-doc");
+    const token = await d.encodeSigned(identity);
+
+    const verified = await CRDTDoc.verifyTokenSignature(token);
+    expect(verified).not.toBeNull();
+    expect(verified!.handle).toBe(identity.handle);
+    expect(verified!.publicKeyHex).toBe(identity.publicKeyHex);
+    expect(verified!.fingerprint).toBe(identity.fingerprint);
+  });
+
+  it("rejects tokens with invalid signatures", async () => {
+    const d = doc("tampered content", identity.handle, "tamper-doc");
+    const token = await d.encodeSigned(identity);
+
+    // Tamper with the token
+    const tamperedToken = token + "tamper";
+
+    const result = await CRDTDoc.decodeSigned(tamperedToken);
+    expect(result).toBeNull();
+
+    const verified = await CRDTDoc.verifyTokenSignature(tamperedToken);
+    expect(verified).toBeNull();
+  });
+
+  it("preserves document operations in signed tokens", async () => {
+    const d = doc("initial", identity.handle, "ops-doc");
+    d.insertAt(7, " added");
+    d.deleteRange(0, 4); // delete "init"
+
+    const token = await d.encodeSigned(identity);
+    const result = await CRDTDoc.decodeSigned(token);
+
+    expect(result).not.toBeNull();
+    expect(result!.doc.toText()).toBe("ial added");
+    expect(result!.doc.getVersion()).toBe(d.getVersion());
+  });
+
+  it("merges signed tokens into existing docs", async () => {
+    const base = doc("hello", identity.handle, "merge-doc");
+    const other = new CRDTDoc("other-actor", "merge-doc");
+    other.applyOps(base.getOps());
+    other.insertAt(5, " world");
+
+    const token = await other.encodeSigned({
+      privateKey: identity.privateKey,
+      publicKeyHex: identity.publicKeyHex,
+      handle: identity.handle,
+    });
+
+    // Merge using decodeSigned and applyOps
+    const result = await CRDTDoc.decodeSigned(token);
+    expect(result).not.toBeNull();
+    const added = base.applyOps(result!.doc.getOps());
+    expect(added).toBeGreaterThan(0);
+    expect(base.toText()).toBe("hello world");
+  });
+
+  it("rejects signed tokens for different docIds", async () => {
+    const d1 = doc("doc1", identity.handle, "doc1");
+    const d2 = doc("doc2", "other-actor", "doc2");
+    const token = await d2.encodeSigned({
+      privateKey: identity.privateKey,
+      publicKeyHex: identity.publicKeyHex,
+      handle: identity.handle,
+    });
+
+    // Try to decode signed token with different docId
+    const result = await CRDTDoc.decodeSigned(token);
+    expect(result).not.toBeNull();
+    expect(result!.doc.docId).toBe("doc2");
+    expect(result!.doc.docId).not.toBe(d1.docId);
+
+    // Should not be able to merge directly due to docId mismatch
+    expect(() => {
+      d1.mergeToken(d2.encode());
+    }).toThrow(/Doc mismatch/);
+  });
+
+  it("handles non-ASCII content in signed tokens", async () => {
+    const d = doc("سلام 世界 😊", identity.handle, "unicode-doc");
+    const token = await d.encodeSigned(identity);
+
+    const result = await CRDTDoc.decodeSigned(token);
+    expect(result).not.toBeNull();
+    expect(result!.doc.toText()).toBe("سلام 世界 😊");
+  });
+
+  it("verifies tokens from different identities separately", async () => {
+    const identity1 = await generateIdentity();
+    const identity2 = await generateIdentity();
+
+    const d1 = doc("from identity 1", identity1.handle, "id-doc");
+    const d2 = doc("from identity 2", identity2.handle, "id-doc");
+
+    const token1 = await d1.encodeSigned(identity1);
+    const token2 = await d2.encodeSigned(identity2);
+
+    const verified1 = await CRDTDoc.verifyTokenSignature(token1);
+    const verified2 = await CRDTDoc.verifyTokenSignature(token2);
+
+    expect(verified1).not.toBeNull();
+    expect(verified2).not.toBeNull();
+    expect(verified1!.publicKeyHex).toBe(identity1.publicKeyHex);
+    expect(verified2!.publicKeyHex).toBe(identity2.publicKeyHex);
+    expect(verified1!.publicKeyHex).not.toBe(verified2!.publicKeyHex);
+  });
+
+  it("rejects malformed signed tokens", async () => {
+    expect(await CRDTDoc.decodeSigned("invalid")).toBeNull();
+    expect(await CRDTDoc.decodeSigned("VFXCRDT1S:")).toBeNull();
+    expect(await CRDTDoc.decodeSigned("VFXCRDT1S:invalid-base64===")).toBeNull();
+    expect(await CRDTDoc.verifyTokenSignature("not-a-token")).toBeNull();
+  });
+
+  it("rejects unsigned tokens in signed methods", async () => {
+    const d = doc("test", "actor", "doc");
+    const unsignedToken = d.encode();
+
+    expect(await CRDTDoc.decodeSigned(unsignedToken)).toBeNull();
+    expect(await CRDTDoc.verifyTokenSignature(unsignedToken)).toBeNull();
   });
 });

@@ -208,7 +208,7 @@ Prioritize work that completes **See → Understand → Act → Hold → Coordin
 
 - [x] Default signing UIs to `lib/identity.ts`: Witness/Receipts, Mirror claims, Trail DAG (`createSignedDagEntry`), Registry blinded reviews (`signRevealWithIdentity`), gamification certificates
 - [x] Web DataChannel signs with VFXID1 (`ensureIdentity` / `importKeyPair`); hydrates from `loadIdentity` on mount
-- [ ] CRDT Docs: actor = VFXID1 handle; `encodeSigned` / `verifyTokenSignature` on export/import
+- [x] CRDT Docs: actor = VFXID1 handle; `encodeSigned` / `verifyTokenSignature` on export/import
 - [ ] Safety number: pairwise panel on Web mesh-hello; Docs shows own safety number
 - [ ] Identity public card export (no private key) — `encodePublicCardToken` / `publicCard` in `lib/identity.ts` (+ Missions UI)
 - [ ] Key rotation + 30d grace: `rotateIdentity` / `loadPreviousIdentities` / `verifySignatureWithGrace`; Missions ROTATE KEY UI
@@ -604,6 +604,7 @@ Ideas from the “what more” pass that are **not** already covered in Phases 1
 - Phase 16 items (Protocol-X, radio, digest, sms, briefcase, print zine, sneakernet) were already implemented — marked [ ]
 - Phase 12 mesh voice marked + partial N-peer (mesh libs preexisted)
 - **Exchange → Relay transport bridge completed**: Added UI integration in /the-exchange page to export matches as offline relay messages for QR sharing
-- Verified: vitest selected (voice+mesh+phase16+exchange-relay) + tsc (our edits clean)
+- **CRDT Docs VFXID1 integration completed**: Added signed token export/import (VFXCRDT1S), actor now uses identity.handle, encodeSigned/verifyTokenSignature/decodeSigned methods, +11 tests
+- Verified: vitest selected (voice+mesh+phase16+exchange-relay+crdt) + tsc (our edits clean)
 - Decision filter followed: static/offline, trust (sign/pack/verify), existing objects (packs, tokens, IDB), no new orphans
-- Remaining ~184 open; prioritized north-star P21 + glue over new pages. Continue in batches.
+- Remaining ~183 open; prioritized north-star P21 + glue over new pages. Continue in batches.

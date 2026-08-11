@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import TerminalCard from "@/components/ui/TerminalCard";
 import StatusPill from "@/components/ui/StatusPill";
-import { CRDTDoc, CRDT_PREFIX } from "@/lib/crdt";
+import { CRDTDoc, CRDT_PREFIX, CRDT_SIGNED_PREFIX } from "@/lib/crdt";
+import { ensureIdentity, type Identity } from "@/lib/identity";
 import { sound } from "@/lib/sound";
 import { useStore } from "@/stores/useStore";
 
@@ -65,6 +66,7 @@ async function sha256HexFirst8(text: string): Promise<string> {
 
 export default function TheDocsPage() {
   const { identity } = useStore();
+  const [fullIdentity, setFullIdentity] = useState<Identity | null>(null);
   const [actor, setActor] = useState("");
   const [docs, setDocs] = useState<DocMeta[]>([]);
   const [activeId, setActiveId] = useState<string>("");
@@ -75,6 +77,12 @@ export default function TheDocsPage() {
   const [importInput, setImportInput] = useState("");
   const [log, setLog] = useState<string[]>([]);
   const [broadcasting, setBroadcasting] = useState(false);
+  const [verifiedIdentity, setVerifiedIdentity] = useState<{
+    handle: string;
+    fingerprint: string;
+    publicKeyHex: string;
+  } | null>(null);
+  const [importError, setImportError] = useState("");
   const docRef = useRef<CRDTDoc | null>(null);
   const busRef = useRef<BroadcastChannel | null>(null);
   const activeRef = useRef("");
@@ -83,16 +91,31 @@ export default function TheDocsPage() {
     setLog((prev) => [line, ...prev].slice(0, 8));
   }, []);
 
-  // Derive a stable actor id (from the anonymous identity when present).
+  // Load full identity for signed operations
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const id = await ensureIdentity();
+      if (!cancelled) setFullIdentity(id);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Derive a stable actor id (from the VFXID1 identity handle when present).
   useEffect(() => {
     let cancelled = false;
     (async () => {
       let id = readText(ACTOR_KEY, "");
       if (!id) {
-        if (identity?.handle) {
-          id = await sha256HexFirst8(identity.handle);
+        // Use VFXID1 handle directly as the actor for cryptographic identity
+        if (fullIdentity?.handle) {
+          id = fullIdentity.handle;
+        } else {
+          // Fallback to random UUID if no identity (should not happen with ensureIdentity)
+          id = crypto.randomUUID().slice(0, 8);
         }
-        if (!id) id = crypto.randomUUID().slice(0, 8);
         writeText(ACTOR_KEY, id);
       }
       if (!cancelled) setActor(id);
@@ -100,7 +123,7 @@ export default function TheDocsPage() {
     return () => {
       cancelled = true;
     };
-  }, [identity]);
+  }, [fullIdentity]);
 
   // Load the doc index + a persisted active doc.
   useEffect(() => {
@@ -195,12 +218,82 @@ export default function TheDocsPage() {
     appendLog(`exported ${doc.getVersion()} ops`);
   }, [appendLog]);
 
-  const importToken = useCallback(() => {
+  const exportSignedToken = useCallback(async () => {
+    const doc = docRef.current;
+    if (!doc || !fullIdentity) {
+      sound.error();
+      appendLog("! identity required for signed export");
+      return;
+    }
+    try {
+      const t = await doc.encodeSigned(fullIdentity);
+      setToken(t);
+      await navigator.clipboard.writeText(t);
+      setCopied(true);
+      sound.copy();
+      setTimeout(() => setCopied(false), 1600);
+      appendLog(`exported signed token (${doc.getVersion()} ops)`);
+    } catch {
+      sound.error();
+      appendLog("! signed export failed");
+    }
+  }, [appendLog, fullIdentity]);
+
+  const importToken = useCallback(async () => {
     const doc = docRef.current;
     if (!doc) return;
     const raw = importInput.trim();
+
+    // Reset verification state
+    setVerifiedIdentity(null);
+    setImportError("");
+
+    // Handle signed tokens
+    if (raw.startsWith(CRDT_SIGNED_PREFIX)) {
+      try {
+        const result = await CRDTDoc.decodeSigned(raw);
+        if (!result) {
+          sound.error();
+          setImportError("Invalid signature or malformed token");
+          appendLog("! signed token verification failed");
+          return;
+        }
+
+        // Verify it's for the same doc
+        if (result.doc.docId !== doc.docId) {
+          sound.error();
+          setImportError(`Doc mismatch: token is for "${result.doc.docId}", current is "${doc.docId}"`);
+          appendLog(`! doc mismatch: "${result.doc.docId}" != "${doc.docId}"`);
+          return;
+        }
+
+        // Apply the ops
+        const added = doc.applyOps(result.doc.getOps());
+        setText(doc.toText());
+        persistDoc(doc);
+        sound.success();
+
+        // Show verification result
+        setVerifiedIdentity({
+          handle: result.identity.handle,
+          fingerprint: result.identity.fingerprint,
+          publicKeyHex: result.identity.publicKeyHex,
+        });
+
+        appendLog(`+ merged ${added} ops from ${result.identity.handle} (verified)`);
+        setImportInput("");
+      } catch (err) {
+        sound.error();
+        setImportError(`Import failed: ${(err as Error).message}`);
+        appendLog(`! import failed: ${(err as Error).message}`);
+      }
+      return;
+    }
+
+    // Handle unsigned tokens
     if (!raw.startsWith(CRDT_PREFIX)) {
       sound.error();
+      setImportError("Not a CRDT token (must start with VFXCRDT1: or VFXCRDT1S:)");
       appendLog("! not a CRDT token");
       return;
     }
@@ -209,10 +302,11 @@ export default function TheDocsPage() {
       setText(doc.toText());
       persistDoc(doc);
       sound.success();
-      appendLog(`+ merged ${added} ops (v${doc.getVersion()})`);
+      appendLog(`+ merged ${added} ops (v${doc.getVersion()}) — WARNING: unsigned`);
       setImportInput("");
     } catch (err) {
       sound.error();
+      setImportError(`Import failed: ${(err as Error).message}`);
       appendLog(`! import failed: ${(err as Error).message}`);
     }
   }, [importInput, persistDoc, appendLog]);
@@ -390,8 +484,19 @@ export default function TheDocsPage() {
                 {copied ? "COPIED ✓" : "EXPORT TOKEN"}
               </button>
               <button
+                onClick={exportSignedToken}
+                disabled={!fullIdentity}
+                className={`border px-3 py-1 text-xs uppercase tracking-wider transition-colors ${
+                  fullIdentity
+                    ? "border-command text-command-bright hover:bg-command hover:text-black"
+                    : "border-border-dim text-content-dim cursor-not-allowed opacity-50"
+                }`}
+              >
+                EXPORT SIGNED
+              </button>
+              <button
                 onClick={broadcast}
-                className="border border-command text-command-bright px-3 py-1 text-xs uppercase tracking-wider hover:bg-command hover:text-black transition-colors"
+                className="border border-terminal-green text-terminal-green px-3 py-1 text-xs uppercase tracking-wider hover:bg-terminal-green hover:text-black transition-colors"
               >
                 BROADCAST (THIS DEVICE)
               </button>
@@ -407,7 +512,7 @@ export default function TheDocsPage() {
                 value={importInput}
                 onChange={(e) => setImportInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && importToken()}
-                placeholder="paste VFXCRDT1: token here"
+                placeholder="paste VFXCRDT1: or VFXCRDT1S: token"
                 aria-label="Import token"
                 className="flex-1 bg-void border border-border-dim px-2 py-1 text-xs text-content-primary focus:border-command outline-none"
               />
@@ -418,6 +523,19 @@ export default function TheDocsPage() {
                 IMPORT
               </button>
             </div>
+            {verifiedIdentity && (
+              <div className="mt-2 text-xs">
+                <p className="text-terminal-green">✓ VERIFIED SIGNATURE</p>
+                <p className="text-content-dim">
+                  From: {verifiedIdentity.handle} ({verifiedIdentity.fingerprint})
+                </p>
+              </div>
+            )}
+            {importError && (
+              <div className="mt-2 text-xs">
+                <p className="text-blood">! {importError}</p>
+              </div>
+            )}
           </TerminalCard>
 
           <TerminalCard title="MERGE LOG" accent="green">

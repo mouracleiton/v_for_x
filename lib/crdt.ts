@@ -46,6 +46,20 @@ export interface CRDTOp {
 }
 
 export const CRDT_PREFIX = "VFXCRDT1:";
+export const CRDT_SIGNED_PREFIX = "VFXCRDT1S:";
+
+export interface SignedCRDTToken {
+  version: 1;
+  docData: {
+    docId: string;
+    actorId: string;
+    lamport: number;
+    ops: CRDTOp[];
+  };
+  signature: string;
+  publicKeyHex: string;
+  handle: string;
+}
 
 function bufToB64url(buf: ArrayBuffer | Uint8Array): string {
   const bytes = buf instanceof Uint8Array ? buf : new Uint8Array(buf);
@@ -285,6 +299,211 @@ export class CRDTDoc {
   }
 
   /**
+   * Export as a signed token using VFXID1 identity.
+   *
+   * The signature covers the document content (ops, lamport, docId, actorId).
+   * This provides cryptographic proof of document origin and integrity.
+   *
+   * @param identity - The VFXID1 identity to sign with
+   * @returns A signed VFXCRDT1S token
+   */
+  async encodeSigned(identity: {
+    privateKey: CryptoKey;
+    publicKeyHex: string;
+    handle: string;
+  }): Promise<string> {
+    const docData = {
+      docId: this.docId,
+      actorId: this.actor,
+      lamport: this.lamport,
+      ops: this.getOps(),
+    };
+
+    // Create canonical representation for signing
+    const canonical = JSON.stringify(docData);
+    const messageBytes = new TextEncoder().encode(canonical);
+
+    // Sign the hash
+    const hashBuffer = await crypto.subtle.digest("SHA-256", messageBytes);
+    const hashHex = bytesToHex(new Uint8Array(hashBuffer));
+
+    const sigBuf = await crypto.subtle.sign(
+      { name: "ECDSA", hash: "SHA-256" },
+      identity.privateKey,
+      hashBuffer
+    );
+    const signature = bytesToHex(new Uint8Array(sigBuf));
+
+    const token: SignedCRDTToken = {
+      version: 1,
+      docData,
+      signature,
+      publicKeyHex: identity.publicKeyHex,
+      handle: identity.handle,
+    };
+
+    const json = JSON.stringify(token);
+    const payload = new TextEncoder().encode(json);
+    return CRDT_SIGNED_PREFIX + bufToB64url(payload);
+  }
+
+  /**
+   * Verify a signed CRDT token's signature.
+   *
+   * Returns the public identity of the signer if the signature is valid,
+   * otherwise returns null. This provides cryptographic verification of
+   * document origin without requiring the private key.
+   *
+   * @param token - A VFXCRDT1S token to verify
+   * @returns The public identity of the signer, or null if invalid
+   */
+  static async verifyTokenSignature(token: string): Promise<{
+    publicKeyHex: string;
+    handle: string;
+    fingerprint: string;
+  } | null> {
+    const raw = (token ?? "").trim();
+    if (!raw.startsWith(CRDT_SIGNED_PREFIX)) {
+      return null;
+    }
+
+    let json: string;
+    try {
+      json = new TextDecoder().decode(
+        b64urlToBuf(raw.slice(CRDT_SIGNED_PREFIX.length))
+      );
+    } catch {
+      return null;
+    }
+
+    let parsed: SignedCRDTToken;
+    try {
+      parsed = JSON.parse(json);
+    } catch {
+      return null;
+    }
+
+    if (parsed.version !== 1 || !parsed.docData || !parsed.signature) {
+      return null;
+    }
+
+    try {
+      // Create canonical representation for verification
+      const canonical = JSON.stringify(parsed.docData);
+      const messageBytes = new TextEncoder().encode(canonical);
+      const hashBuffer = await crypto.subtle.digest("SHA-256", messageBytes);
+
+      // Import public key
+      const pubKeyBytes = hexToBytes(parsed.publicKeyHex);
+      const publicKey = await crypto.subtle.importKey(
+        "raw",
+        pubKeyBytes.buffer as ArrayBuffer,
+        { name: "ECDSA", namedCurve: "P-256" },
+        false,
+        ["verify"]
+      );
+
+      // Verify signature
+      const sigBytes = hexToBytes(parsed.signature);
+      const isValid = await crypto.subtle.verify(
+        { name: "ECDSA", hash: "SHA-256" },
+        publicKey,
+        sigBytes.buffer as ArrayBuffer,
+        hashBuffer
+      );
+
+      if (!isValid) {
+        return null;
+      }
+
+      // Compute fingerprint
+      const fingerprintHashBuf = await crypto.subtle.digest(
+        "SHA-256",
+        pubKeyBytes.buffer as ArrayBuffer
+      );
+      const fingerprint = bytesToHex(new Uint8Array(fingerprintHashBuf)).slice(0, 12);
+
+      return {
+        publicKeyHex: parsed.publicKeyHex,
+        handle: parsed.handle,
+        fingerprint,
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Decode a signed CRDT token and return both the document and verified identity.
+   *
+   * This is the primary method for importing signed documents. It verifies the
+   * signature and reconstructs the CRDT document in one operation.
+   *
+   * @param token - A VFXCRDT1S token to decode and verify
+   * @returns An object with the doc and verified identity, or null if invalid
+   */
+  static async decodeSigned(token: string): Promise<{
+    doc: CRDTDoc;
+    identity: {
+      publicKeyHex: string;
+      handle: string;
+      fingerprint: string;
+    };
+  } | null> {
+    const raw = (token ?? "").trim();
+    if (!raw.startsWith(CRDT_SIGNED_PREFIX)) {
+      return null;
+    }
+
+    let json: string;
+    try {
+      json = new TextDecoder().decode(
+        b64urlToBuf(raw.slice(CRDT_SIGNED_PREFIX.length))
+      );
+    } catch {
+      return null;
+    }
+
+    let parsed: SignedCRDTToken;
+    try {
+      parsed = JSON.parse(json);
+    } catch {
+      return null;
+    }
+
+    if (
+      parsed.version !== 1 ||
+      !parsed.docData ||
+      !parsed.signature ||
+      !parsed.publicKeyHex
+    ) {
+      return null;
+    }
+
+    // Verify signature first
+    const identity = await CRDTDoc.verifyTokenSignature(token);
+    if (!identity) {
+      return null;
+    }
+
+    // Reconstruct the document
+    try {
+      const doc = new CRDTDoc(
+        parsed.docData.actorId,
+        parsed.docData.docId || "default"
+      );
+      doc.applyOps(parsed.docData.ops);
+      if (typeof parsed.docData.lamport === "number") {
+        doc.lamport = parsed.docData.lamport;
+      }
+
+      return { doc, identity };
+    } catch {
+      return null;
+    }
+  }
+
+  /**
    * Apply a local edit (old value → new value) to this doc.
    * Computes the minimal insert/delete delta and applies it.
    */
@@ -318,4 +537,25 @@ export function mergeDocs(a: CRDTDoc, b: CRDTDoc, actorId: string): CRDTDoc {
   merged.applyOps(a.getOps());
   merged.applyOps(b.getOps());
   return merged;
+}
+
+/**
+ * Convert a hex string to a Uint8Array.
+ */
+function hexToBytes(hex: string): Uint8Array {
+  const clean = hex.replace(/[^0-9a-fA-F]/g, "");
+  const buf = new Uint8Array(clean.length / 2);
+  for (let i = 0; i < buf.length; i++) {
+    buf[i] = parseInt(clean.substr(i * 2, 2), 16);
+  }
+  return buf;
+}
+
+/**
+ * Convert a Uint8Array to a hex string.
+ */
+function bytesToHex(bytes: Uint8Array): string {
+  return Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }
