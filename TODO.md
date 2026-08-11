@@ -190,7 +190,7 @@
 
 ### Still open from “build all” (next sprints)
 
-- [ ] Wire unified identity into Web/Witness/Mirror sign paths by default
+- [x] Wire unified identity into Web/Witness/Mirror sign paths by default
 - [ ] Multi-peer WebRTC mesh + group ratchet (mesh-presence, ratchet sender keys, reconnect)
 - [ ] Subnational layer on Sorrow Map (Leaflet), not only /the-subnational
 - [ ] OpenTimestamps / cosign build verify (Phase 13)

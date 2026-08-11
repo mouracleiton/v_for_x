@@ -38,7 +38,7 @@ import {
   zkProofForWitness,
   loadWitnessLedger,
   saveWitnessLedger,
-  createEphemeralSigner,
+  createIdentitySigner,
   LEDGER_PREFIX,
   MAX_WITNESS_TEXT,
   type SignedWitness,
@@ -191,7 +191,7 @@ export default function TheReceiptsPage() {
     try {
       const prevHash = ledger.length > 0 ? ledger[ledger.length - 1].hash : GENESIS_HASH;
       const iso3 = witnessIso3.trim() || undefined;
-      const signFn = identity ? await createEphemeralSigner() : undefined;
+      const signFn = identity ? await createIdentitySigner() : undefined;
       const stmt = await buildWitness({ text, iso3, ts: Date.now(), prevHash }, signFn);
       const next = [...ledger, stmt];
       setLedger(next);

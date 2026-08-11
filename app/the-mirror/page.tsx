@@ -6,8 +6,7 @@ import StatusPill from "@/components/ui/StatusPill";
 import { sound } from "@/lib/sound";
 import {
   MIRROR_KIT_VERSION,
-  generateMirrorKey,
-  createMirrorClaim,
+  createMirrorClaimWithIdentity,
   verifyMirrorClaim,
   encodeClaim,
   decodeClaim,
@@ -20,10 +19,10 @@ import {
   isValidSha256,
   TRANSPORT_LABELS,
   ALL_TRANSPORTS,
-  type MirrorKeyPair,
   type MirrorNode,
   type MirrorTransport,
 } from "@/lib/mirror";
+import { ensureIdentity } from "@/lib/identity";
 
 /* ═══════════════════════════════════════════════════════════
    V FOR X — The Mirror (one-command deployment kit)
@@ -34,7 +33,6 @@ import {
    platform.
    ═══════════════════════════════════════════════════════════ */
 
-const KEY_STORAGE = "vfx:mirror:key";
 const NODES_STORAGE = "vfx:mirror:nodes";
 
 const ONE_COMMAND =
@@ -94,9 +92,7 @@ ipfs add -r --pin out/
 ];
 
 export default function TheMirrorPage() {
-  /* ── operator identity ── */
-  const [key, setKey] = useState<MirrorKeyPair | null>(null);
-  const [keyBusy, setKeyBusy] = useState(false);
+  const [identityHandle, setIdentityHandle] = useState<string | null>(null);
 
   /* ── claim form ── */
   const [transport, setTransport] = useState<MirrorTransport>("onion");
@@ -121,10 +117,13 @@ export default function TheMirrorPage() {
 
   /* ── load persisted state ── */
   useEffect(() => {
-    try {
-      const k = localStorage.getItem(KEY_STORAGE);
-      if (k) setKey(JSON.parse(k));
-    } catch { /* ignore */ }
+    // Load unified identity
+    void (async () => {
+      try {
+        const identity = await ensureIdentity();
+        setIdentityHandle(identity.handle);
+      } catch { /* ignore */ }
+    })();
     try {
       const n = localStorage.getItem(NODES_STORAGE);
       if (n) setNodes(JSON.parse(n));
@@ -137,27 +136,12 @@ export default function TheMirrorPage() {
     try { localStorage.setItem(NODES_STORAGE, JSON.stringify(next)); } catch { /* ignore */ }
   }, []);
 
-  const handleGenerateKey = useCallback(async () => {
-    setKeyBusy(true);
-    try {
-      const k = await generateMirrorKey();
-      setKey(k);
-      try { localStorage.setItem(KEY_STORAGE, JSON.stringify(k)); } catch { /* ignore */ }
-      sound.success();
-    } catch {
-      setMintError("Web Crypto unavailable — needs HTTPS or localhost.");
-      sound.error();
-    } finally {
-      setKeyBusy(false);
-    }
-  }, []);
-
   const handleMint = useCallback(async () => {
     setMintError(null);
     setMintVerified(null);
-    if (!key) { setMintError("Generate an operator identity first."); return; }
+    if (!identityHandle) { setMintError("Unified identity not available. Please ensure you have an identity created."); return; }
     try {
-      const node = await createMirrorClaim(key, {
+      const node = await createMirrorClaimWithIdentity({
         transport,
         endpoint,
         region: region || undefined,
@@ -176,7 +160,7 @@ export default function TheMirrorPage() {
       setMintError(e instanceof Error ? e.message : "Failed to mint claim.");
       sound.error();
     }
-  }, [key, transport, endpoint, region, buildHash, buildVersion, nodes, persistNodes]);
+  }, [identityHandle, transport, endpoint, region, buildHash, buildVersion, nodes, persistNodes]);
 
   const handleAddToken = useCallback(async () => {
     setAddError(null);
@@ -318,34 +302,17 @@ export default function TheMirrorPage() {
           <div className="text-xs uppercase tracking-widest mb-2" style={{ color: "var(--color-blood-bright)" }}>
             01 — operator identity
           </div>
-          {key ? (
+          {identityHandle ? (
             <div className="flex flex-wrap items-center gap-3">
-              <StatusPill color="green">{key.handle}</StatusPill>
+              <StatusPill color="green">{identityHandle}</StatusPill>
               <span className="text-xs" style={{ color: "var(--color-content-dim)" }}>
-                pubkey: {shortHash(key.publicKey)}… (stored locally)
+                using unified identity (persistent across sessions)
               </span>
-              <button
-                onClick={handleGenerateKey}
-                disabled={keyBusy}
-                className="text-[10px] px-2 py-1 border uppercase tracking-wider transition-colors"
-                style={{ borderColor: "var(--color-border-bright)", color: "var(--color-content-secondary)" }}
-              >
-                rotate key
-              </button>
             </div>
           ) : (
-            <button
-              onClick={handleGenerateKey}
-              disabled={keyBusy}
-              className="text-xs px-3 py-2 border uppercase tracking-widest transition-colors"
-              style={{
-                borderColor: "var(--color-blood)",
-                color: "var(--color-blood-bright)",
-                background: "var(--color-panel)",
-              }}
-            >
-              {keyBusy ? "generating…" : "generate operator keypair"}
-            </button>
+            <div className="text-xs" style={{ color: "var(--color-content-dim)" }}>
+              Loading unified identity...
+            </div>
           )}
         </div>
 
@@ -410,7 +377,7 @@ export default function TheMirrorPage() {
         <div className="flex items-center gap-3 mb-3">
           <button
             onClick={handleMint}
-            disabled={!key || endpoint.trim().length < 3}
+            disabled={!identityHandle || endpoint.trim().length < 3}
             className="text-xs px-4 py-2 border uppercase tracking-widest transition-colors disabled:opacity-40"
             style={{
               borderColor: "var(--color-blood)",
