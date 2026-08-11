@@ -38,11 +38,11 @@
 
 ### New Directions (Phase C)
 
-- [ ] Statistical correlation library (Pearson R, Spearman R, R², p-values)
-- [ ] Chain of custody tracker (lib/custody.ts)
-- [ ] Data quality scoring (lib/data-quality.ts)
-- [ ] Trigger rules / rules engine (lib/trigger-engine.ts)
-- [ ] Monte Carlo simulator (lib/monte-carlo.ts)
+- [x] Statistical correlation library (Pearson R, Spearman R, R², p-values)
+- [x] Chain of custody tracker (lib/custody.ts)
+- [x] Data quality scoring (lib/data-quality.ts)
+- [x] Trigger rules / rules engine (lib/trigger-engine.ts)
+- [x] Monte Carlo simulator (lib/monte-carlo.ts)
 
 ### New Pages
 
