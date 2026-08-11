@@ -144,6 +144,15 @@ export const TOKEN_SPECS: TokenSpec[] = [
     signed: true,
     encrypted: false,
   },
+  {
+    prefix: "VFXMSN1:",
+    id: "VFXMSN1",
+    name: "Mission Progress",
+    description: "Guided mission progress tracking and completion",
+    module: "missions",
+    signed: false,
+    encrypted: false,
+  },
 ];
 
 /* ═══════════════════════════════════════════════════════════════
