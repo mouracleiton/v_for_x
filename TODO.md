@@ -34,7 +34,7 @@
 - [x] Real ECDSA signatures on DAG entries
 - [x] ECDH key agreement for dead drops (lib/ecdh.ts)
 - [x] Forward secrecy ratchet for messaging (lib/ratchet.ts)
-- [ ] Duress decoy mode (lib/duress-decoy.ts)
+- [x] Duress decoy mode (lib/duress-decoy.ts)
 
 ### New Directions (Phase C)
 
