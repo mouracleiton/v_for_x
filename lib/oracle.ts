@@ -353,6 +353,9 @@ function determineComparator(query: string, num: number | undefined): Comparator
     return "list";
   }
 
+  // "Bottom N" / "bottom" queries (without a min keyword above)
+  if (lower.includes("bottom")) return "bottom";
+
   return "top";
 }
 

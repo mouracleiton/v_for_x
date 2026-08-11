@@ -20,6 +20,7 @@ import {
 } from "@/lib/format";
 import { sound } from "@/lib/sound";
 import FreshnessBadge, { computeDataFreshness } from "@/components/shared/FreshnessBadge";
+import { generateCountryNarrative } from "@/lib/narrative";
 import {
   countryToEquation,
   countryToProtocol,
@@ -607,17 +608,25 @@ export default function CountryDetail({ params }: PageProps) {
         </div>
         {/* Action bar */}
         <div className="flex flex-wrap items-center gap-2 mt-3 no-print">
-          <button
-            onClick={() => { window.print(); sound.select(); }}
+          <Link
+            href={`/print/${c.iso3.toLowerCase()}/`}
+            onClick={() => sound.select()}
             className="text-[10px] px-2 py-1 border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void transition-colors uppercase tracking-widest"
           >
             🖨 PRINT / PDF BRIEF
-          </button>
+          </Link>
           <Link
             href={`/the-act/?country=${c.iso3}`}
             className="text-[10px] px-2 py-1 border border-blood text-blood-bright hover:bg-blood hover:text-void transition-colors uppercase tracking-widest"
           >
             → CAMPAIGN KIT
+          </Link>
+          <Link
+            href={`/the-corrections/?iso3=${c.iso3}&metric=hunger.prevalence_pct`}
+            onClick={() => sound.select()}
+            className="text-[10px] px-2 py-1 border border-warning-amber text-warning-amber hover:bg-warning-amber hover:text-void transition-colors uppercase tracking-widest"
+          >
+            ⚠ FLAG A NUMBER
           </Link>
           {/* Data freshness */}
           {(() => {
@@ -646,6 +655,26 @@ export default function CountryDetail({ params }: PageProps) {
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-4">
         {/* LEFT — main data */}
         <div className="space-y-4">
+          {/* Auto-generated narrative briefing */}
+          <TerminalCard accent="green" title="AUTO-GENERATED BRIEFING">
+            <div className="space-y-2 text-xs leading-relaxed">
+              {generateCountryNarrative(c).sentences.map((sn, i) => (
+                <p key={i} className="text-content-primary">
+                  <span className="text-terminal-green font-bold">▸ </span>
+                  <span className="text-content-dim uppercase text-[9px] mr-1">
+                    [{sn.dimension}]
+                  </span>
+                  {sn.text}
+                </p>
+              ))}
+            </div>
+            <p className="text-[10px] text-content-dim mt-3">
+              Generated live from this country&apos;s dataset — every sentence
+              is grounded in world_backbone.json, none fabricated. Missing data
+              is omitted, not invented.
+            </p>
+          </TerminalCard>
+
           {/* Overview */}
           <CollapsibleSection title={tc(lang, "section.overview")} defaultOpen accent="blood">
             <DataRow label={tc(lang, "detail.name_en")} value={c.name_en} />

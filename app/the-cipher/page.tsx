@@ -251,6 +251,9 @@ function StegoTab() {
         <p className="text-sm text-content-secondary mb-4">
           Hide a text message in the least-significant bits of an image. The image looks unchanged but carries a hidden payload. 2 bits per RGB channel.
         </p>
+        <p className="text-xs text-content-dim mb-4">
+          Tip: V FOR X glitch cards carry a hidden <code className="text-warning-amber">VFORX/STAT:</code> payload — load any downloaded card here and hit EXTRACT to verify it.
+        </p>
 
         <input
           type="file"

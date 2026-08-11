@@ -6,6 +6,7 @@ import { EmbedButton, tweetIntent } from "@/components/shared/EmbedButton";
 import { tc } from "@/lib/i18n-content";
 import { useStore } from "@/stores/useStore";
 import { GLITCH_CARD, cardFileName, renderGlitchCard } from "@/lib/stat-card";
+import { embedInImage } from "@/lib/cipher";
 import type { Lang } from "@/lib/i18n";
 
 interface ShareableStatProps {
@@ -45,6 +46,13 @@ export default function ShareableStat({ text, lang }: ShareableStatProps) {
 
     try {
       renderGlitchCard(ctx, text);
+      // Embed a hidden, machine-verifiable payload into the card's pixels:
+      // any card downloaded here can be authenticated via LSB extraction
+      // (The Cipher → STEGANOGRAPHY → load card → EXTRACT).
+      try {
+        const stegoPayload = `VFORX/STAT:${text}`;
+        ctx.putImageData(embedInImage(ctx.getImageData(0, 0, canvas.width, canvas.height), stegoPayload), 0, 0);
+      } catch { /* payload too large — export plain card */ }
       const blob = await new Promise<Blob | null>((resolve) =>
         canvas.toBlob(resolve, "image/png"),
       );
@@ -114,7 +122,7 @@ export default function ShareableStat({ text, lang }: ShareableStatProps) {
           <button
             onClick={makeCard}
             disabled={cardState === "rendering"}
-            title={cardName || "GLITCH CARD"}
+            title="Download a glitch card with a hidden verifiable payload (extract it at THE CIPHER)"
             className={`text-[10px] px-2 py-0.5 border transition-colors text-center no-print ${
               cardState === "saved"
                 ? "border-terminal-green text-terminal-green"

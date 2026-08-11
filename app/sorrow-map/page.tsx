@@ -12,6 +12,7 @@ import { t, type Lang } from "@/lib/i18n";
 import { tc } from "@/lib/i18n-content";
 import { severityColor, formatNumber, wfpClassLabel } from "@/lib/format";
 import type { WorldBackbone } from "@/lib/types";
+import { getCountryConflictSummary } from "@/lib/ejatlas";
 
 const ChoroplethMap = dynamic(
   () => import("@/components/map/ChoroplethMap"),
@@ -106,6 +107,8 @@ const DIMENSIONS: DimensionDef[] = [
   { key: "mental_health_alcohol_per_capita_liters", label: "label.alcohol_per_capita", category: "cat.mental_health", unit: "L" },
   { key: "mental_health_alcohol_use_disorders_pct", label: "label.alcohol_disorders", category: "cat.mental_health", unit: "%" },
   { key: "mental_health_govt_mh_expenditure_pct", label: "label.govt_mh_expenditure", category: "cat.mental_health", unit: "%", inverse: true },
+  // ── Environmental Justice (EJAtlas) ──
+  { key: "ejatlas_conflicts", label: "label.ejatlas_conflicts", category: "cat.environmental_justice", unit: "" },
 ];
 
 /**
@@ -292,7 +295,15 @@ export default function MapaDaDorPage() {
   useEffect(() => {
     fetch(`${basePath}/data/world_backbone_geo.json`)
       .then((r) => r.json() as Promise<GeoFeatureCollection>)
-      .then((d) => setGeoData(d))
+      .then((d) => {
+        // Inject EJAtlas environmental-conflict counts per country
+        for (const f of d.features) {
+          const iso3 = String(f.properties.iso3 ?? "").toUpperCase();
+          const summary = getCountryConflictSummary(iso3);
+          f.properties["ejatlas_conflicts"] = summary?.total ?? 0;
+        }
+        setGeoData(d);
+      })
       .catch(() => { /* offline fallback handled by null check */ });
   }, [basePath]);
 

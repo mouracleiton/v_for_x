@@ -23,6 +23,13 @@ import {
   formatAlertSummary,
   type AlertCheckResult,
 } from "@/lib/alert-engine";
+import {
+  evaluateAllTriggers,
+  presetTriggerRules,
+  formatRule,
+  type TriggerRule,
+  type TriggerFired,
+} from "@/lib/trigger-engine";
 
 const data = backbone as WorldBackbone;
 const STORAGE_KEY = "vfx-watch";
@@ -39,6 +46,28 @@ export default function TheWatchPage() {
   const [operator, setOperator] = useState<WatchOperator>(">=");
   const [threshold, setThreshold] = useState(70);
   const [scope, setScope] = useState<string>("all");
+
+  // Compound (trigger-engine) rules
+  const [triggerRules, setTriggerRules] = useState<TriggerRule[]>([]);
+  const TRIGGER_STORAGE_KEY = "vfx-trigger-rules";
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(TRIGGER_STORAGE_KEY);
+      setTriggerRules(stored ? JSON.parse(stored) : presetTriggerRules());
+    } catch { /* ignore */ }
+  }, []);
+
+  useEffect(() => {
+    if (triggerRules.length > 0) {
+      try { localStorage.setItem(TRIGGER_STORAGE_KEY, JSON.stringify(triggerRules)); } catch { /* ignore */ }
+    }
+  }, [triggerRules]);
+
+  const firedTriggers = useMemo(
+    () => evaluateAllTriggers(triggerRules, data),
+    [triggerRules]
+  );
 
   useEffect(() => {
     try {
@@ -155,6 +184,63 @@ export default function TheWatchPage() {
             </div>
           </TerminalCard>
         )}
+
+        <TerminalCard title="COMPOUND RULES (TRIGGER ENGINE)" accent="blood" glow={firedTriggers.length > 0}>
+          <p className="text-[11px] text-content-dim mb-3">
+            Multi-condition AND rules with actions — evaluated live against all 200 countries. Toggle to arm/disarm.
+          </p>
+          <div className="space-y-3">
+            {triggerRules.map((rule) => {
+              const fired = firedTriggers.find((f) => f.rule.id === rule.id);
+              return (
+                <div key={rule.id} className={`p-3 border ${fired ? "border-blood/50 bg-blood/5" : rule.active ? "border-border-dim bg-abyss" : "border-border-dim/40 bg-abyss/40 opacity-60"}`}>
+                  <div className="flex justify-between items-start gap-2">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-sm font-bold" style={{ color: fired ? "var(--color-blood-bright)" : "var(--color-content-primary)" }}>
+                          {fired ? "🚨 " : rule.active ? "◈ " : "⏸ "}{rule.name}
+                        </span>
+                        {fired && <span className="text-[10px] border border-blood/60 text-blood-bright px-1.5 py-0.5">FIRED · {fired.matchedCountries.length} {fired.matchedCountries.length === 1 ? "COUNTRY" : "COUNTRIES"}</span>}
+                      </div>
+                      <p className="text-xs text-content-dim mt-1 font-mono">{formatRule(rule)}</p>
+                      <p className="text-[10px] text-content-dim mt-0.5">
+                        ACTIONS: {rule.actions.join(" + ")}{rule.navigateTo ? ` → ${rule.navigateTo}` : ""} · FIRED {rule.fireCount}×
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setTriggerRules((prev) => prev.map((r) => r.id === rule.id ? { ...r, active: !r.active } : r));
+                        sound.select();
+                      }}
+                      className="text-[10px] px-2.5 py-1 border shrink-0 transition-colors"
+                      style={{ borderColor: rule.active ? "var(--color-terminal-green)" : "var(--color-border-dim)", color: rule.active ? "var(--color-terminal-green)" : "var(--color-content-dim)" }}
+                    >
+                      {rule.active ? "● ARMED" : "○ DISARMED"}
+                    </button>
+                  </div>
+                  {fired && fired.matchedCountries.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {fired.matchedCountries.map((c) => (
+                        <a key={c.iso3} href={`/sorrow-map/${c.iso3.toLowerCase()}/`} className="text-xs px-2 py-0.5 border border-border-dim hover:border-blood text-content-secondary">
+                          {c.name}
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+            <button
+              onClick={() => {
+                setTriggerRules(presetTriggerRules());
+                sound.success();
+              }}
+              className="text-[10px] px-3 py-1 border border-border-dim text-content-dim hover:text-content-secondary"
+            >
+              Reset to presets
+            </button>
+          </div>
+        </TerminalCard>
 
         <TerminalCard title="ADD RULE" accent="green">
           <div className="space-y-3">

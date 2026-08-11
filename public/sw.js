@@ -34,7 +34,8 @@ const SECTIONS = [
   "the-choice", "the-dashboard", "the-docs", "the-exodus", "the-fronts",
   "the-index", "the-ledger", "the-lens", "the-mask", "the-matrix",
   "the-mirror-ring", "the-signal", "the-stories", "the-tactics",
-  "the-timeline", "the-trail", "the-web",
+  "the-timeline", "the-trail", "the-web", "the-correlation-lab", "the-data-health", "the-violence", "the-prison",
+  "the-corrections",
 ];
 
 const PRECACHE = [

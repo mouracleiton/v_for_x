@@ -11,6 +11,7 @@ import {
   metricImproved,
   type ScenarioConfig,
 } from "@/lib/scenario-engine";
+import { runMonteCarlo, formatMonteCarloReport } from "@/lib/monte-carlo";
 import {
   BarChart,
   Bar,
@@ -114,6 +115,13 @@ export default function SimulatorPage() {
   const result = useMemo(
     () => (country ? simulateScenario(country, config) : null),
     [country, config]
+  );
+
+  const [mcIterations, setMcIterations] = useState(1000);
+  const [showMc, setShowMc] = useState(false);
+  const mc = useMemo(
+    () => (country && showMc ? runMonteCarlo(country, config, mcIterations) : null),
+    [country, config, mcIterations, showMc]
   );
 
   const presets = useMemo(() => getCountryScenarios(iso3), [iso3]);
@@ -373,6 +381,129 @@ export default function SimulatorPage() {
           </TerminalCard>
         </div>
       </div>
+
+      {/* ── Monte Carlo uncertainty analysis ── */}
+      <TerminalCard title="MONTE CARLO UNCERTAINTY ANALYSIS" accent="amber" className="mt-5">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-3">
+          <button
+            onClick={() => setShowMc((s) => !s)}
+            className="inline-pill px-3 py-1.5 text-xs border border-border-dim text-content-secondary hover:border-command hover:text-command-bright transition-colors"
+          >
+            {showMc ? "■ HIDE MONTE CARLO" : "▶ RUN MONTE CARLO"}
+          </button>
+          {showMc && (
+            <div className="flex items-center gap-2">
+              <label className="text-xs text-content-secondary">Iterations</label>
+              <select
+                value={mcIterations}
+                onChange={(e) => setMcIterations(Number(e.target.value))}
+                className="bg-abyss border border-border-dim text-content-primary px-2 py-1 text-xs"
+              >
+                {[100, 500, 1000, 5000, 10000].map((n) => (
+                  <option key={n} value={n}>{n.toLocaleString()}</option>
+                ))}
+              </select>
+              <span className="text-[10px] text-content-dim">
+                ±20% coefficient perturbation
+              </span>
+            </div>
+          )}
+        </div>
+
+        {mc && (
+          <div className="space-y-2">
+            <p className="text-[10px] text-content-dim">
+              {mc.iterations.toLocaleString()} simulations per metric · empirical 95% confidence intervals
+            </p>
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="text-[10px] uppercase tracking-widest text-content-dim border-b border-border-dim">
+                    <th className="text-left py-1 pr-2">Metric</th>
+                    <th className="text-right py-1 px-2">Median</th>
+                    <th className="text-right py-1 px-2">Mean</th>
+                    <th className="text-right py-1 px-2">σ</th>
+                    <th className="text-right py-1 px-2">95% CI</th>
+                    <th className="text-right py-1 px-2">P(improve)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {mc.distributions.map((d) => {
+                    const ci = mc.confidence95[d.key];
+                    const prob = mc.improvementProbability[d.key];
+                    const probColor =
+                      prob >= 0.8
+                        ? "var(--color-terminal-green)"
+                        : prob >= 0.5
+                          ? "var(--color-warning-amber)"
+                          : "var(--color-blood-bright)";
+                    return (
+                      <tr key={d.key} className="border-b border-border-dim/50">
+                        <td className="py-1 pr-2 text-content-primary">{d.label}</td>
+                        <td className="py-1 px-2 text-right tabular-nums text-content-primary">{d.median.toFixed(1)}</td>
+                        <td className="py-1 px-2 text-right tabular-nums text-content-secondary">{d.mean.toFixed(1)}</td>
+                        <td className="py-1 px-2 text-right tabular-nums text-content-dim">{d.stdDev.toFixed(1)}</td>
+                        <td className="py-1 px-2 text-right tabular-nums text-content-secondary">
+                          [{ci.low.toFixed(1)}, {ci.high.toFixed(1)}]
+                        </td>
+                        <td className="py-1 px-2 text-right tabular-nums font-bold" style={{ color: probColor }}>
+                          {(prob * 100).toFixed(0)}%
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Distribution visualization */}
+            <div className="mt-3 space-y-2">
+              {mc.distributions.slice(0, 4).map((d) => {
+                const ci = mc.confidence95[d.key];
+                const lo = Math.min(d.min, ci.low);
+                const hi = Math.max(d.max, ci.high);
+                const span = hi - lo || 1;
+                const mid = (ci.low + ci.high) / 2;
+                const ciLeft = ((ci.low - lo) / span) * 100;
+                const ciWidth = ((ci.high - ci.low) / span) * 100;
+                const medPct = ((d.median - lo) / span) * 100;
+                return (
+                  <div key={d.key}>
+                    <div className="flex justify-between text-[10px] text-content-dim mb-0.5">
+                      <span>{d.label}</span>
+                      <span className="tabular-nums">
+                        {d.min.toFixed(1)} … {d.max.toFixed(1)} ({d.unit})
+                      </span>
+                    </div>
+                    <div className="relative h-3 bg-abyss border border-border-dim">
+                      <div
+                        className="absolute top-0 bottom-0 bg-command/20 border-x border-command/50"
+                        style={{ left: `${ciLeft}%`, width: `${ciWidth}%` }}
+                      />
+                      <div
+                        className="absolute top-0 bottom-0 w-0.5 bg-terminal-green"
+                        style={{ left: `${medPct}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <details className="mt-3">
+              <summary className="text-[10px] text-content-dim cursor-pointer hover:text-content-secondary">
+                View full Monte Carlo report
+              </summary>
+              <pre className="mt-2 p-3 bg-abyss border border-border-dim text-[10px] text-content-secondary whitespace-pre-wrap overflow-x-auto">
+                {formatMonteCarloReport(mc)}
+              </pre>
+            </details>
+            <p className="text-[10px] text-content-dim mt-2">
+              Methodology: uniform ±20% perturbation on elasticity coefficients. Confidence intervals are empirical percentiles. Not a prediction — an uncertainty band around the model.
+            </p>
+          </div>
+        )}
+      </TerminalCard>
 
       {/* ── Narrative ── */}
       <TerminalCard title="IMPACT BRIEFING" accent="amber" className="mt-5">
