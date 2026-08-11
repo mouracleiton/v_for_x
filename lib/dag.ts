@@ -216,7 +216,7 @@ export async function signDagEntry(
   entry: DagEntry,
   privateKey: CryptoKey,
 ): Promise<string> {
-  const data = new TextEncoder().encode(entry.hash);
+  const data = hexToBytes(entry.hash);
   const sigBuf = await crypto.subtle.sign(
     { name: "ECDSA", hash: "SHA-256" },
     privateKey,
@@ -242,7 +242,7 @@ export async function verifyDagSignature(entry: DagEntry): Promise<boolean> {
       false,
       ["verify"],
     );
-    const data = new TextEncoder().encode(entry.hash);
+    const data = hexToBytes(entry.hash);
     const sigBytes = hexToBytes(entry.signature);
     return crypto.subtle.verify(
       { name: "ECDSA", hash: "SHA-256" },

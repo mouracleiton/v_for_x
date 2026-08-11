@@ -31,7 +31,7 @@
 
 ### Crypto Identity Layer (Phase B)
 
-- [ ] Real ECDSA signatures on DAG entries
+- [x] Real ECDSA signatures on DAG entries
 - [ ] ECDH key agreement for dead drops (lib/ecdh.ts)
 - [ ] Forward secrecy ratchet for messaging (lib/ratchet.ts)
 - [ ] Duress decoy mode (lib/duress-decoy.ts)
