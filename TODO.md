@@ -603,6 +603,7 @@ Ideas from the “what more” pass that are **not** already covered in Phases 1
 - Voice notes: lib/voice-notes.ts (record, VFXFILE1 framing, play, parse), VoiceNoteRecorder component, wired to /the-web, + tests/voice-notes.test.ts (passing)
 - Phase 16 items (Protocol-X, radio, digest, sms, briefcase, print zine, sneakernet) were already implemented — marked [ ]
 - Phase 12 mesh voice marked + partial N-peer (mesh libs preexisted)
-- Verified: vitest selected (voice+mesh+phase16) + tsc (our edits clean)
+- **Exchange → Relay transport bridge completed**: Added UI integration in /the-exchange page to export matches as offline relay messages for QR sharing
+- Verified: vitest selected (voice+mesh+phase16+exchange-relay) + tsc (our edits clean)
 - Decision filter followed: static/offline, trust (sign/pack/verify), existing objects (packs, tokens, IDB), no new orphans
-- Remaining ~185 open; prioritized north-star P21 + glue over new pages. Continue in batches.
+- Remaining ~184 open; prioritized north-star P21 + glue over new pages. Continue in batches.
