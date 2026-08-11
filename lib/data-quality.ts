@@ -84,7 +84,7 @@ const SURVEYED_FIELDS: FieldDef[] = [
   { path: "conflict.displacement_m", label: "Displacement" },
   // Military
   { path: "military.pct_gdp", label: "Military % GDP" },
-  { path: "military.expenditure_usd_b", label: "Military Expenditure" },
+  { path: "military.expenditure_usd", label: "Military Expenditure" },
   // Health
   { path: "health.life_expectancy", label: "Life Expectancy" },
   { path: "health.child_mortality_under5_per1k", label: "Child Mortality" },
@@ -92,7 +92,7 @@ const SURVEYED_FIELDS: FieldDef[] = [
   { path: "health.hospital_beds_per_1000", label: "Hospital Beds" },
   // Economy
   { path: "economy.gdp_per_capita_usd", label: "GDP per Capita" },
-  { path: "economy.gini", label: "Gini Coefficient" },
+  { path: "inequality.gini", label: "Gini Coefficient" },
   // Governance
   { path: "governance.corruption_perceptions_index", label: "Corruption Index" },
   { path: "governance.electoral_democracy_index", label: "Democracy Index" },
