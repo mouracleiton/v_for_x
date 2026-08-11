@@ -18,8 +18,6 @@
 import { useEffect, useMemo, useState } from "react";
 import TerminalCard from "@/components/ui/TerminalCard";
 import StatusPill from "@/components/ui/StatusPill";
-import EmptyState from "@/components/ui/EmptyState";
-import ShareSheet from "@/components/ui/ShareSheet";
 import { sound } from "@/lib/sound";
 import {
   decodeConsensusAttestation,
@@ -60,7 +58,6 @@ export default function TheConsensusPage() {
 
   /* ── UI state ── */
   const [selectedFork, setSelectedFork] = useState<ForkDetail | null>(null);
-  const [shareData, setShareData] = useState<{ title: string; text: string } | null>(null);
 
   /* ── load persisted attestations ── */
   useEffect(() => {
@@ -173,26 +170,30 @@ export default function TheConsensusPage() {
 
     try {
       const reportJson = await generateConsensusReport(attestations);
-      const timestamp = new Date().toISOString();
-      setShareData({
-        title: "Consensus Report",
-        text: reportJson,
-      });
+      await navigator.clipboard.writeText(reportJson);
+      setImportSuccess("Report copied to clipboard!");
+      setTimeout(() => setImportSuccess(null), 2000);
       sound.success();
     } catch (err) {
       console.error("Failed to generate report:", err);
+      setImportError("Failed to copy report");
       sound.error();
     }
   };
 
   /* ── share attestation ── */
-  const handleShareAttestation = (att: ConsensusAttestation) => {
-    const token = encodeConsensusAttestation(att);
-    setShareData({
-      title: "Consensus Attestation",
-      text: token,
-    });
-    sound.success();
+  const handleShareAttestation = async (att: ConsensusAttestation) => {
+    try {
+      const token = encodeConsensusAttestation(att);
+      await navigator.clipboard.writeText(token);
+      setImportSuccess("Attestation copied to clipboard!");
+      setTimeout(() => setImportSuccess(null), 2000);
+      sound.success();
+    } catch (err) {
+      console.error("Failed to copy attestation:", err);
+      setImportError("Failed to copy attestation");
+      sound.error();
+    }
   };
 
   /* ── get alert level color ── */
@@ -224,39 +225,28 @@ export default function TheConsensusPage() {
           </p>
         </div>
 
-        <EmptyState
-          title="No Attestations Collected"
-          description={
-            <div className="space-y-4">
-              <p>
-                Collect root hash attestations from multiple mirrors to detect forks.
-                When mirrors disagree on the root hash, it indicates potential censorship,
-                data manipulation, or network partition.
-              </p>
-              <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">
-                <p className="font-semibold mb-2">How to use:</p>
-                <ol className="list-decimal list-inside space-y-1 text-sm">
-                  <li>Visit different mirrors of this site</li>
-                  <li>Each mirror shares its root hash attestation (VFXCON1: token)</li>
-                  <li>Paste the attestations here to analyze consensus</li>
-                  <li>Review the analysis to detect forks and assess severity</li>
-                </ol>
-              </div>
+        <TerminalCard title="No Attestations Collected" className="mb-6">
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Collect root hash attestations from multiple mirrors to detect forks.
+              When mirrors disagree on the root hash, it indicates potential censorship,
+              data manipulation, or network partition.
+            </p>
+            <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">
+              <p className="font-semibold mb-2 text-sm">How to use:</p>
+              <ol className="list-decimal list-inside space-y-1 text-sm text-gray-600 dark:text-gray-400">
+                <li>Visit different mirrors of this site</li>
+                <li>Each mirror shares its root hash attestation (VFXCON1: token)</li>
+                <li>Paste the attestations here to analyze consensus</li>
+                <li>Review the analysis to detect forks and assess severity</li>
+              </ol>
             </div>
-          }
-          action={{
-            label: "Import Attestations",
-            onClick: () => document.getElementById("import-textarea")?.focus(),
-          }}
-        />
+          </div>
+        </TerminalCard>
 
-        <TerminalCard
-          title="Import Attestations"
-          className="mt-6"
-        >
+        <TerminalCard title="Import Attestations">
           <div className="space-y-4">
             <textarea
-              id="import-textarea"
               value={importText}
               onChange={(e) => setImportText(e.target.value)}
               placeholder="Paste VFXCON1: tokens or consensus reports (one per line)..."
@@ -362,7 +352,7 @@ export default function TheConsensusPage() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         {fork.isMajority && (
-                          <StatusPill status="success" label="MAJORITY" size="sm" />
+                          <StatusPill color="green">MAJORITY</StatusPill>
                         )}
                         <span className="font-mono text-sm">
                           {fork.shortFingerprint}
@@ -505,15 +495,6 @@ export default function TheConsensusPage() {
           </TerminalCard>
         </div>
       </div>
-
-      {/* ShareSheet */}
-      {shareData && (
-        <ShareSheet
-          title={shareData.title}
-          content={shareData.text}
-          onClose={() => setShareData(null)}
-        />
-      )}
     </div>
   );
 }
