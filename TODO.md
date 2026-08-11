@@ -16,7 +16,7 @@
 
 - [x] Background sync no longer POSTs to nonexistent /api/sync
 - [x] DAG anchoring chains to prior entries, not always genesis
-- [ ] Translation literal bug in the-exodus page fixed
+- [x] Translation literal bug in the-exodus page fixed
 - [ ] Tests added for blockchain-verify and offline-manager
 
 ### Module Connections (Phase A)

@@ -73,8 +73,8 @@ export default function TheExodusPage() {
           {tc(lang, "branch.exodus")}
         </h1>
         <p className="text-content-secondary text-sm mt-2">
-          // {formatNumber(stats.totalDisplaced)} people are forcibly displaced right now.
-          Every arc on this map is a human stream fleeing violence, hunger, or disaster.
+          // {formatNumber(stats.totalDisplaced)} {tc(lang, "exodus.people_displaced")}
+          {tc(lang, "exodus.every_arc_description")}
         </p>
       </div>
 
