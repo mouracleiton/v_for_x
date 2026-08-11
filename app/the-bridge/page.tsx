@@ -3,6 +3,16 @@
 import { useState, useCallback, useEffect } from "react";
 import TerminalCard from "@/components/ui/TerminalCard";
 import { sound } from "@/lib/sound";
+import {
+  encodePack,
+  decodePack,
+  validatePack,
+  createPackWithIdentity,
+  type VfxPack,
+  type PackVerifyResult,
+} from "@/lib/vfxpack";
+import { ensureIdentity, type Identity } from "@/lib/identity";
+import { detectToken, TOKEN_SPECS } from "@/lib/tokens";
 
 /* ═══════════════════════════════════════════════════════════════
    Types
@@ -66,6 +76,55 @@ const DATA_STORES: DataStore[] = [
 ];
 
 /* ═══════════════════════════════════════════════════════════════
+   Token collection helpers
+   ═══════════════════════════════════════════════════════════════ */
+
+/**
+ * Collect all VFX* tokens from a data store's localStorage keys.
+ * Scans each value and extracts any VFX* tokens found.
+ */
+function collectTokensFromStore(store: DataStore): string[] {
+  const tokens: string[] = [];
+
+  for (const key of store.storageKeys) {
+    const value = localStorage.getItem(key);
+    if (!value) continue;
+
+    try {
+      const data = JSON.parse(value);
+      const str = JSON.stringify(data);
+
+      // Find all VFX* token patterns in the string
+      const tokenPattern = /VFX[A-Z0-9]+:[^\s"'}\]]+/g;
+      const matches = str.match(tokenPattern);
+      if (matches) {
+        tokens.push(...matches);
+      }
+    } catch {
+      // If not JSON, try direct token detection
+      if (detectToken(value)) {
+        tokens.push(value.trim());
+      }
+    }
+  }
+
+  return tokens;
+}
+
+/**
+ * Collect all VFX* tokens from IndexedDB stores.
+ * This is async and would require idb access - for now returns empty.
+ * In a full implementation, this would query IndexedDB and extract tokens.
+ */
+async function collectTokensFromIDB(store: DataStore): Promise<string[]> {
+  if (!store.idbStores || store.idbStores.length === 0) {
+    return [];
+  }
+  // TODO: Implement IndexedDB token extraction when needed
+  return [];
+}
+
+/* ═══════════════════════════════════════════════════════════════
    Component
    ═══════════════════════════════════════════════════════════════ */
 
@@ -74,6 +133,12 @@ export default function TheBridgePage() {
   const [exportData, setExportData] = useState<string>("");
   const [importStatus, setImportStatus] = useState("");
   const [storeSizes, setStoreSizes] = useState<Record<string, number>>({});
+
+  // VFXPACK1 state
+  const [vfxPackToken, setVfxPackToken] = useState<string>("");
+  const [packValidation, setPackValidation] = useState<PackVerifyResult | null>(null);
+  const [isBuildingPack, setIsBuildingPack] = useState(false);
+  const [identity, setIdentity] = useState<Identity | null>(null);
 
   useEffect(() => {
     // Compute current data sizes
@@ -87,6 +152,11 @@ export default function TheBridgePage() {
       sizes[store.key] = total;
     }
     setStoreSizes(sizes);
+
+    // Load identity for signing packs
+    ensureIdentity().then(setIdentity).catch(() => {
+      // Identity creation failed, continue without it
+    });
   }, []);
 
   const toggleSelect = useCallback((key: string) => {
@@ -183,6 +253,204 @@ export default function TheBridgePage() {
     };
     reader.readAsText(file);
   }, []);
+
+  const handleBuildVFXPack = useCallback(async () => {
+    if (selected.size === 0) {
+      setImportStatus("✗ No stores selected — select at least one store");
+      sound.error();
+      return;
+    }
+
+    setIsBuildingPack(true);
+    setImportStatus("Collecting tokens from selected stores...");
+
+    try {
+      const allTokens: string[] = [];
+
+      for (const store of DATA_STORES) {
+        if (!selected.has(store.key)) continue;
+
+        const tokens = collectTokensFromStore(store);
+        allTokens.push(...tokens);
+
+        const idbTokens = await collectTokensFromIDB(store);
+        allTokens.push(...idbTokens);
+      }
+
+      // Deduplicate tokens
+      const uniqueTokens = Array.from(new Set(allTokens));
+
+      if (uniqueTokens.length === 0) {
+        setImportStatus("✗ No VFX* tokens found in selected stores");
+        sound.error();
+        setIsBuildingPack(false);
+        return;
+      }
+
+      // Create pack with identity if available
+      let pack: VfxPack;
+      if (identity) {
+        pack = await createPackWithIdentity(uniqueTokens, identity, {
+          label: `V FOR X Pack - ${new Date().toISOString()}`,
+          description: `Exported from ${selected.size} store(s)`,
+          kind: "backup",
+        });
+      } else {
+        // Create unsigned pack if no identity
+        const { createPack } = await import("@/lib/vfxpack");
+        pack = createPack(uniqueTokens, {
+          label: `V FOR X Pack - ${new Date().toISOString()}`,
+          description: `Exported from ${selected.size} store(s) (unsigned)`,
+          kind: "backup",
+        });
+      }
+
+      const token = encodePack(pack);
+      setVfxPackToken(token);
+
+      const validation = await validatePack(pack);
+      setPackValidation(validation);
+
+      setImportStatus(
+        `✓ Built VFXPACK1 with ${uniqueTokens.length} token(s) from ${selected.size} store(s)${identity ? "" : " (unsigned - no identity)"}`
+      );
+      sound.success();
+    } catch (error) {
+      setImportStatus(
+        `✗ Failed to build pack: ${error instanceof Error ? error.message : "unknown error"}`
+      );
+      sound.error();
+    } finally {
+      setIsBuildingPack(false);
+    }
+  }, [selected, identity]);
+
+  const handlePasteVFXPack = useCallback(async (pasted: string) => {
+    const trimmed = pasted.trim();
+    if (!trimmed) return;
+
+    setImportStatus("Validating VFXPACK1 token...");
+
+    try {
+      const pack = decodePack(trimmed);
+      const validation = await validatePack(pack);
+      setPackValidation(validation);
+      setVfxPackToken(trimmed);
+
+      if (validation.ok) {
+        setImportStatus(
+          `✓ Valid VFXPACK1 with ${validation.pack.tokens.length} token(s) - ${validation.tokenTypes.join(", ")}`
+        );
+        sound.success();
+      } else {
+        setImportStatus(`✗ Invalid pack: ${validation.reason}`);
+        sound.error();
+      }
+    } catch (error) {
+      setImportStatus(
+        `✗ Failed to decode pack: ${error instanceof Error ? error.message : "unknown error"}`
+      );
+      sound.error();
+      setPackValidation(null);
+    }
+  }, []);
+
+  const handleImportPack = useCallback(async () => {
+    if (!packValidation || !packValidation.ok) {
+      setImportStatus("✗ No valid pack to import");
+      sound.error();
+      return;
+    }
+
+    const pack = packValidation.pack;
+    let importedCount = 0;
+
+    for (const token of pack.tokens) {
+      // Try to detect token type and handle import
+      const detected = detectToken(token);
+      if (!detected) continue;
+
+      // Import based on token type
+      try {
+        switch (detected.spec.id) {
+          case "VFXID1":
+            // Import identity
+            const { decodeIdentityToken, saveIdentity } = await import("@/lib/identity");
+            const publicId = await decodeIdentityToken(token);
+            if (publicId) {
+              // Store the public identity info
+              localStorage.setItem("vfx-imported-identity", JSON.stringify(publicId));
+              importedCount++;
+            }
+            break;
+
+          case "VFXGP1":
+            // Import guardian packet
+            localStorage.setItem("vfx-imported-guardian-packet", token);
+            importedCount++;
+            break;
+
+          case "VFXRV1":
+            // Import blinded review
+            localStorage.setItem("vfx-imported-review", token);
+            importedCount++;
+            break;
+
+          case "VFXWIT1":
+            // Import witness statement
+            localStorage.setItem("vfx-imported-witness", token);
+            importedCount++;
+            break;
+
+          case "VFXEV1":
+            // Import evidence room
+            localStorage.setItem("vfx-imported-evidence", token);
+            importedCount++;
+            break;
+
+          case "VFXFILE1":
+            // Import file transfer reference
+            localStorage.setItem("vfx-imported-file", token);
+            importedCount++;
+            break;
+
+          case "VFXCRDT1":
+            // Import CRDT document
+            localStorage.setItem("vfx-imported-crdt", token);
+            importedCount++;
+            break;
+
+          case "VFXDM1":
+            // Import dead man's switch
+            localStorage.setItem("vfx-imported-deadman", token);
+            importedCount++;
+            break;
+
+          case "VFXM1":
+            // Import mirror claim
+            localStorage.setItem("vfx-imported-mirror", token);
+            importedCount++;
+            break;
+
+          case "VFXSIG1":
+            // Import WebRTC signal
+            localStorage.setItem("vfx-imported-signal", token);
+            importedCount++;
+            break;
+
+          default:
+            // Unknown token type, store as-is
+            localStorage.setItem(`vfx-imported-unknown-${Date.now()}`, token);
+            importedCount++;
+        }
+      } catch {
+        // Token import failed, skip it
+      }
+    }
+
+    setImportStatus(`✓ Imported ${importedCount} token(s) from pack`);
+    sound.success();
+  }, [packValidation]);
 
   const formatSize = (bytes: number): string => {
     if (bytes === 0) return "empty";
@@ -323,6 +591,104 @@ export default function TheBridgePage() {
           </TerminalCard>
         </div>
       )}
+
+      {/* VFXPACK1 Build */}
+      <div className="mt-4">
+        <TerminalCard title="BUILD VFXPACK1 TOKEN" accent="green">
+          <p className="text-xs text-content-dim mb-3">
+            Collect all VFX* tokens from selected stores and bundle them into
+            a single signed VFXPACK1 token for easy sharing and backup.
+          </p>
+
+          {selected.size > 0 && (
+            <button
+              onClick={handleBuildVFXPack}
+              disabled={isBuildingPack}
+              className="w-full py-2 border border-terminal-green text-terminal-green hover:bg-terminal-green/10 text-xs font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isBuildingPack
+                ? "⏳ BUILDING PACK..."
+                : `📦 BUILD VFXPACK1 FROM ${selected.size} STORE(S)`}
+            </button>
+          )}
+
+          {!identity && selected.size > 0 && (
+            <p className="text-[10px] text-amber-600 mt-2">
+              ⚠ No identity found - pack will be unsigned. Create an identity for
+              signed packs.
+            </p>
+          )}
+        </TerminalCard>
+      </div>
+
+      {/* VFXPACK1 Import */}
+      <div className="mt-4">
+        <TerminalCard title="IMPORT VFXPACK1 TOKEN" accent="blood">
+          <p className="text-xs text-content-dim mb-3">
+            Paste a VFXPACK1 token to validate and import its contents.
+          </p>
+
+          <textarea
+            value={vfxPackToken}
+            onChange={(e) => handlePasteVFXPack(e.target.value)}
+            placeholder="Paste VFXPACK1 token here..."
+            className="w-full p-2 bg-abyss border border-border-dim text-[10px] font-mono resize-y min-h-[60px] focus:border-terminal-green focus:outline-none"
+          />
+
+          {packValidation && (
+            <div className="mt-3 space-y-2">
+              <div
+                className={`text-xs font-mono p-2 border ${
+                  packValidation.ok
+                    ? "border-terminal-green/50 bg-terminal-green/5"
+                    : "border-blood/50 bg-blood/5"
+                }`}
+              >
+                <div className="font-bold">
+                  {packValidation.ok ? "✓ VALID PACK" : "✗ INVALID PACK"}
+                </div>
+                {!packValidation.ok && (
+                  <div className="text-content-dim mt-1">
+                    Reason: {packValidation.reason}
+                  </div>
+                )}
+                {packValidation.ok && (
+                  <>
+                    <div className="text-content-secondary mt-1">
+                      Tokens: {packValidation.pack.tokens.length}
+                    </div>
+                    <div className="text-content-dim mt-1">
+                      Types:{" "}
+                      {packValidation.tokenTypes.length > 0
+                        ? packValidation.tokenTypes.join(", ")
+                        : "none"}
+                    </div>
+                    {packValidation.pack.label && (
+                      <div className="text-content-secondary mt-1">
+                        Label: {packValidation.pack.label}
+                      </div>
+                    )}
+                    {packValidation.pack.signerPublicKey && (
+                      <div className="text-content-dim mt-1">
+                        ✓ Signed pack
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+
+              {packValidation.ok && packValidation.pack.tokens.length > 0 && (
+                <button
+                  onClick={handleImportPack}
+                  className="w-full py-2 border border-terminal-green text-terminal-green hover:bg-terminal-green/10 text-xs font-bold"
+                >
+                  ⬇ IMPORT {packValidation.pack.tokens.length} TOKEN(S)
+                </button>
+              )}
+            </div>
+          )}
+        </TerminalCard>
+      </div>
     </div>
   );
 }
