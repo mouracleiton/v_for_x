@@ -25,7 +25,7 @@
 - [x] ECDSA signatures on DAG entries (lib/dag.ts + signDagEntry/verifyDagSignature)
 - [x] Risk → Watch → Push alert pipeline (lib/alert-engine.ts)
 - [x] Simulate → Forecast → Campaign pipeline (lib/pipeline.ts)
-- [ ] Exchange → Relay transport bridge (lib/exchange-relay.ts)
+- [x] Exchange → Relay transport bridge (lib/exchange-relay.ts)
 - [ ] Gamification → signed certificates (generateCertificate/verifyCertificate)
 - [ ] Correlation explorer library (lib/correlation.ts — Pearson, Spearman, p-values, matrix)
 

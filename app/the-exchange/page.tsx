@@ -18,6 +18,7 @@ import {
   type PostType,
   type ResourceCategory,
 } from "@/lib/exchange";
+import { matchToRelay, matchesToRelays, type MatchBundle } from "@/lib/exchange-relay";
 
 const data = backbone as WorldBackbone;
 const STORAGE_KEY = "vfx-exchange";
@@ -25,6 +26,8 @@ const STORAGE_KEY = "vfx-exchange";
 export default function TheExchangePage() {
   const [posts, setPosts] = useState<AidPost[]>([]);
   const [tab, setTab] = useState<"matches" | "offers" | "requests">("matches");
+  const [relayBundles, setRelayBundles] = useState<MatchBundle[]>([]);
+  const [selectedMatch, setSelectedMatch] = useState<MatchBundle | null>(null);
 
   // Form
   const [postType, setPostType] = useState<PostType>("request");
@@ -62,6 +65,25 @@ export default function TheExchangePage() {
   const requests = useMemo(() => posts.filter((p) => p.type === "request" && p.active), [posts]);
   const matches = useMemo(() => findMatches(offers, requests), [offers, requests]);
   const stats = useMemo(() => computeStats(posts), [posts]);
+
+  // Generate relay bundles when matches change
+  useEffect(() => {
+    if (matches.length > 0) {
+      setRelayBundles(matchesToRelays(matches));
+    } else {
+      setRelayBundles([]);
+    }
+  }, [matches]);
+
+  const handleCopyRelay = useCallback((relayText: string) => {
+    navigator.clipboard?.writeText(relayText);
+    sound.copy();
+  }, []);
+
+  const handleShowRelayDetails = useCallback((bundle: MatchBundle) => {
+    setSelectedMatch(bundle);
+    sound.select();
+  }, []);
 
   return (
     <div className="p-3 sm:p-6 md:p-10 max-w-4xl mx-auto">
@@ -117,27 +139,68 @@ export default function TheExchangePage() {
           {matches.length === 0 ? (
             <TerminalCard accent="amber"><p className="text-sm text-content-secondary">No matches yet. Post an offer and a request to see matches.</p></TerminalCard>
           ) : (
-            matches.slice(0, 20).map((m, i) => (
-              <TerminalCard key={i} accent={m.score >= 60 ? "green" : "amber"}>
-                <div className="flex justify-between items-start gap-3">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="text-terminal-green">{CATEGORY_ICONS[m.offer.category]} {m.offer.resource}</span>
-                      <span className="text-content-dim">↔</span>
-                      <span className="text-blood-bright">{m.request.resource}</span>
-                    </div>
-                    <div className="text-xs text-content-dim mt-1">
-                      {m.offer.countryName} · {m.offer.handle} → {m.request.handle}
-                    </div>
-                    <div className="text-xs text-warning-amber mt-1">{m.reason}</div>
+            <>
+              <TerminalCard accent="green" className="mb-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-bold text-terminal-green">📡 RELAY EXPORT</h3>
+                    <p className="text-xs text-content-dim mt-1">Convert matches to offline QR messages for P2P delivery coordination</p>
                   </div>
-                  <div className="text-center">
-                    <div className="text-xl font-bold" style={{ color: m.score >= 60 ? "var(--color-terminal-green)" : "var(--color-warning-amber)" }}>{m.score}</div>
-                    <div className="text-xs text-content-dim">MATCH</div>
+                  <div className="text-xs text-content-secondary">
+                    {relayBundles.length} match{relayBundles.length !== 1 ? 'es' : ''} ready
                   </div>
                 </div>
               </TerminalCard>
-            ))
+
+              {matches.slice(0, 20).map((m, i) => {
+                const bundle = relayBundles.find(b => b.match === m);
+                if (!bundle) return null;
+                return (
+                <TerminalCard key={i} accent={m.score >= 60 ? "green" : "amber"}>
+                  <div className="flex justify-between items-start gap-3">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 text-sm">
+                        <span className="text-terminal-green">{CATEGORY_ICONS[m.offer.category]} {m.offer.resource}</span>
+                        <span className="text-content-dim">↔</span>
+                        <span className="text-blood-bright">{m.request.resource}</span>
+                      </div>
+                      <div className="text-xs text-content-dim mt-1">
+                        {m.offer.countryName} · {m.offer.handle} → {m.request.handle}
+                      </div>
+                      <div className="text-xs text-warning-amber mt-1">{m.reason}</div>
+                      <div className="flex gap-2 mt-2">
+                        <button
+                          onClick={() => handleCopyRelay(bundle.offerRelay)}
+                          className="px-2 py-1 text-xs border border-terminal-green text-terminal-green hover:bg-terminal-green/10"
+                          title="Copy relay message for offer side"
+                        >
+                          📋 OFFER RELAY
+                        </button>
+                        <button
+                          onClick={() => handleCopyRelay(bundle.requestRelay)}
+                          className="px-2 py-1 text-xs border border-blood text-blood hover:bg-blood/10"
+                          title="Copy relay message for request side"
+                        >
+                          📋 REQUEST RELAY
+                        </button>
+                        <button
+                          onClick={() => handleShowRelayDetails(bundle)}
+                          className="px-2 py-1 text-xs border border-warning-amber text-warning-amber hover:bg-warning-amber/10"
+                          title="View relay details"
+                        >
+                          🔍 DETAILS
+                        </button>
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xl font-bold" style={{ color: m.score >= 60 ? "var(--color-terminal-green)" : "var(--color-warning-amber)" }}>{m.score}</div>
+                      <div className="text-xs text-content-dim">MATCH</div>
+                      <div className="text-xs text-content-dim mt-1">{bundle.matchId}</div>
+                    </div>
+                  </div>
+                </TerminalCard>
+              )})}
+            </>
           )}
         </div>
       )}
@@ -152,6 +215,55 @@ export default function TheExchangePage() {
         <div className="space-y-2">
           {requests.map((p) => <PostCard key={p.id} post={p} />)}
         </div>
+      )}
+
+      {selectedMatch && (
+        <TerminalCard title="RELAY MESSAGE DETAILS" accent="green" className="mt-4">
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-content-dim">Match ID: {selectedMatch.matchId}</span>
+              <button onClick={() => setSelectedMatch(null)} className="text-xs text-content-secondary hover:text-content-primary">[CLOSE]</button>
+            </div>
+
+            <div>
+              <h4 className="text-xs font-bold text-terminal-green mb-2">📦 OFFER SIDE MESSAGE</h4>
+              <p className="text-xs text-content-dim mb-1">For the person offering resources:</p>
+              <code className="block text-xs bg-abyss border border-border-dim p-2 break-all text-terminal-green font-mono">
+                {selectedMatch.offerRelay}
+              </code>
+              <button
+                onClick={() => handleCopyRelay(selectedMatch.offerRelay)}
+                className="mt-2 px-3 py-1 text-xs border border-terminal-green text-terminal-green hover:bg-terminal-green/10"
+              >
+                [COPY OFFER RELAY]
+              </button>
+            </div>
+
+            <div>
+              <h4 className="text-xs font-bold text-blood-bright mb-2">📋 REQUEST SIDE MESSAGE</h4>
+              <p className="text-xs text-content-dim mb-1">For the person requesting resources:</p>
+              <code className="block text-xs bg-abyss border border-border-dim p-2 break-all text-blood font-mono">
+                {selectedMatch.requestRelay}
+              </code>
+              <button
+                onClick={() => handleCopyRelay(selectedMatch.requestRelay)}
+                className="mt-2 px-3 py-1 text-xs border border-blood text-blood hover:bg-blood/10"
+              >
+                [COPY REQUEST RELAY]
+              </button>
+            </div>
+
+            <div className="text-xs text-content-dim bg-abyss border border-border-dim p-2">
+              <p><strong>How to use:</strong></p>
+              <ul className="list-disc list-inside mt-1 space-y-1">
+                <li>Share the offer relay with the person who has resources</li>
+                <li>Share the request relay with the person who needs resources</li>
+                <li>Both can scan each other's QR codes to coordinate delivery offline</li>
+                <li>Messages use the VFX relay format for maximum compatibility</li>
+              </ul>
+            </div>
+          </div>
+        </TerminalCard>
       )}
     </div>
   );
