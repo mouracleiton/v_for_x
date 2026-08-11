@@ -194,10 +194,23 @@ export default function TheHeatmapPage() {
         if (Array.isArray(data.reports)) {
           // Merge, dedup by id
           const existing = new Set(reports.map((r) => r.id));
-          const imported = data.reports.filter((r: IncidentReport) => !existing.has(r.id));
-          const merged = [...reports, ...imported];
-          setReports(merged);
-          saveReports(merged);
+          const imported = data.reports.filter((r: IncidentReport) => !existing.has(r.id)) as IncidentReport[];
+
+          // Sort all reports by timestamp to maintain chronological order
+          const allReports = [...reports, ...imported].sort((a, b) => a.timestamp - b.timestamp);
+
+          // Rebuild the chain with correct prevHash linkage
+          let prevHash = GENESIS;
+          const rebuilt = allReports.map((report) => {
+            const updatedReport = { ...report, prevHash };
+            const hash = computeHash(updatedReport);
+            const fullReport: IncidentReport = { ...updatedReport, hash };
+            prevHash = hash;
+            return fullReport;
+          });
+
+          setReports(rebuilt);
+          saveReports(rebuilt);
           sound.success();
         }
       } catch {

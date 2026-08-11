@@ -15,7 +15,7 @@
 ### Bug Fixes (Phase D)
 
 - [x] Background sync no longer POSTs to nonexistent /api/sync
-- [ ] DAG anchoring chains to prior entries, not always genesis
+- [x] DAG anchoring chains to prior entries, not always genesis
 - [ ] Translation literal bug in the-exodus page fixed
 - [ ] Tests added for blockchain-verify and offline-manager
 
