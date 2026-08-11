@@ -23,7 +23,7 @@
 
 - [x] Semantic oracle wired into GlobalSearch (conceptual Cmd+K search)
 - [x] ECDSA signatures on DAG entries (lib/dag.ts + signDagEntry/verifyDagSignature)
-- [ ] Risk → Watch → Push alert pipeline (lib/alert-engine.ts)
+- [x] Risk → Watch → Push alert pipeline (lib/alert-engine.ts)
 - [ ] Simulate → Forecast → Campaign pipeline (lib/pipeline.ts)
 - [ ] Exchange → Relay transport bridge (lib/exchange-relay.ts)
 - [ ] Gamification → signed certificates (generateCertificate/verifyCertificate)
