@@ -6,7 +6,7 @@ import TerminalCard from "@/components/ui/TerminalCard";
 import StatusPill from "@/components/ui/StatusPill";
 import { useStore } from "@/stores/useStore";
 import { sound } from "@/lib/sound";
-import { ensureIdentity, signWithIdentity, type Identity } from "@/lib/identity";
+import { ensureIdentity, signWithIdentity, type Identity, computeSafetyNumber, type PublicIdentity } from "@/lib/identity";
 import {
   decodeSignalToken,
   encodeSignalToken,
@@ -56,6 +56,14 @@ interface P2PMessage {
   pubKey?: string;
   /** Whether the signature was verified on receipt */
   verified?: boolean;
+}
+
+interface MeshHelloMessage {
+  kind: "mesh-hello";
+  handle: string;
+  from?: string;
+  publicKeyHex?: string;
+  fingerprint?: string;
 }
 
 interface DeadDrop {
@@ -133,6 +141,10 @@ export default function TeiaPage() {
   const [myPeerHash, setMyPeerHash] = useState("");
   const peerHashRef = useRef("");
   const meshLogRef = useRef<string[]>([]);
+
+  // Safety number state
+  const [peerIdentity, setPeerIdentity] = useState<PublicIdentity | null>(null);
+  const [safetyNumber, setSafetyNumber] = useState<string>("");
 
   const pushMeshLog = useCallback((line: string) => {
     meshLogRef.current = [line, ...meshLogRef.current].slice(0, 10);
@@ -234,22 +246,42 @@ export default function TeiaPage() {
         return;
       }
       try {
-        const raw = JSON.parse(e.data) as P2PMessage & { kind?: string; msg?: MeshMessage; handle?: string; from?: string };
+        const raw = JSON.parse(e.data) as P2PMessage | MeshHelloMessage | { kind?: string; msg?: MeshMessage; handle?: string; from?: string };
         // MESH store-and-forward frames.
-        if (raw.kind === "mesh-hello" && raw.handle) {
-          const h = await peerHash(raw.handle);
-          log(`MESH: peer "${raw.handle}" joined — ${h}`);
+        if ("kind" in raw && raw.kind === "mesh-hello" && "handle" in raw) {
+          const hello = raw as MeshHelloMessage;
+          const h = await peerHash(hello.handle);
+          log(`MESH: peer "${hello.handle}" joined — ${h}`);
           if (!peerHashRef.current && identity) peerHashRef.current = await peerHash(identity.handle);
           const queued = await dequeueFor(h, Date.now());
           for (const m of queued) {
             if (dcRef.current?.readyState === "open") dcRef.current.send(JSON.stringify({ kind: "mesh", msg: m }));
           }
           if (queued.length > 0) log(`MESH: flushed ${queued.length} queued message(s) to peer`);
+
+          // Handle safety number if peer sent full identity
+          if (hello.publicKeyHex && hello.fingerprint) {
+            const peerId: PublicIdentity = {
+              handle: hello.handle,
+              publicKeyHex: hello.publicKeyHex,
+              fingerprint: hello.fingerprint,
+              createdAt: Date.now(),
+            };
+            setPeerIdentity(peerId);
+
+            // Compute safety number if we have our identity
+            if (identityRef.current) {
+              const sn = await computeSafetyNumber(identityRef.current, peerId);
+              setSafetyNumber(sn);
+              log(`SAFETY NUMBER: ${sn.slice(0, 12)}... (verify with your peer in person)`);
+            }
+          }
+
           void refreshMeshPending();
           return;
         }
-        if (raw.kind === "mesh" && raw.msg) {
-          void handleMeshMessage(raw.msg);
+        if ("kind" in raw && raw.kind === "mesh" && "msg" in raw) {
+          void handleMeshMessage(raw.msg as MeshMessage);
           return;
         }
         const msg = raw as P2PMessage;
@@ -755,7 +787,15 @@ export default function TeiaPage() {
     if (!identity) return;
     if (dcRef.current?.readyState !== "open") return;
     try {
-      dcRef.current.send(JSON.stringify({ kind: "mesh-hello", handle: identity.handle, from: peerHashRef.current }));
+      // Send full identity for safety number computation
+      const fullIdentity = identityRef.current;
+      dcRef.current.send(JSON.stringify({
+        kind: "mesh-hello",
+        handle: identity.handle,
+        from: peerHashRef.current,
+        publicKeyHex: fullIdentity?.publicKeyHex,
+        fingerprint: fullIdentity?.fingerprint,
+      }));
       const h = await peerHash(identity.handle);
       const queued = await dequeueFor(h, Date.now());
       for (const m of queued) {
@@ -1139,6 +1179,47 @@ export default function TeiaPage() {
               {tc(lang, "web.how_it_works")}
             </div>
           </TerminalCard>
+
+          {/* SAFETY NUMBER PANEL */}
+          {peerStatus === "connected" && peerIdentity && (
+            <TerminalCard title="SAFETY NUMBER — PAIRWISE VERIFICATION" accent="green" className="mb-6">
+              <p className="text-xs text-content-secondary mb-3">
+                This safety number uniquely identifies your connection with this peer.
+                Verify it in person or through a trusted channel to confirm you're talking to the right person.
+              </p>
+              <div className="space-y-2 mb-3">
+                <div className="flex items-center justify-between border border-border-dim bg-void p-2">
+                  <div>
+                    <div className="text-[10px] text-content-dim uppercase tracking-widest">YOUR FINGERPRINT</div>
+                    <div className="text-sm text-terminal-green font-mono mt-1">
+                      {identityRef.current?.fingerprint || "..."}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-[10px] text-content-dim uppercase tracking-widest">PEER FINGERPRINT</div>
+                    <div className="text-sm text-blood-bright font-mono mt-1">
+                      {peerIdentity.fingerprint}
+                    </div>
+                  </div>
+                </div>
+                <div className="border-2 border-terminal-green bg-terminal-green/5 p-3 text-center">
+                  <div className="text-[10px] text-terminal-green uppercase tracking-widest mb-2">
+                    SAFETY NUMBER
+                  </div>
+                  <div className="text-lg md:text-xl text-terminal-green font-mono font-bold tracking-wider">
+                    {safetyNumber ? safetyNumber.slice(0, 12) : "..."} {safetyNumber ? safetyNumber.slice(12, 24) : "..."} {safetyNumber ? safetyNumber.slice(24, 32) : "..."}
+                  </div>
+                  <div className="text-[9px] text-content-dim mt-2">
+                    Both sides should see the same number. Compare in person to verify authenticity.
+                  </div>
+                </div>
+                <div className="text-[10px] text-content-dim text-center">
+                  Peer: <span className="text-content-secondary">{peerIdentity.handle}</span> ·
+                  Public key: <span className="text-content-secondary font-mono">{peerIdentity.publicKeyHex.slice(0, 16)}...</span>
+                </div>
+              </div>
+            </TerminalCard>
+          )}
 
           {/* P2P Chat — only when connected */}
           <TerminalCard title={`P2P ENCRYPTED CHAT — ${channel}`} className="mb-6">

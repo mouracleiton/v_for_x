@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import TerminalCard from "@/components/ui/TerminalCard";
 import StatusPill from "@/components/ui/StatusPill";
 import { CRDTDoc, CRDT_PREFIX, CRDT_SIGNED_PREFIX } from "@/lib/crdt";
-import { ensureIdentity, type Identity } from "@/lib/identity";
+import { ensureIdentity, type Identity, exportPublicCard } from "@/lib/identity";
 import { sound } from "@/lib/sound";
 import { useStore } from "@/stores/useStore";
 
@@ -83,6 +83,12 @@ export default function TheDocsPage() {
     publicKeyHex: string;
   } | null>(null);
   const [importError, setImportError] = useState("");
+  const [publicCard, setPublicCard] = useState<{
+    handle: string;
+    fingerprint: string;
+    publicKeyHex: string;
+  } | null>(null);
+  const [copiedCard, setCopiedCard] = useState(false);
   const docRef = useRef<CRDTDoc | null>(null);
   const busRef = useRef<BroadcastChannel | null>(null);
   const activeRef = useRef("");
@@ -96,7 +102,16 @@ export default function TheDocsPage() {
     let cancelled = false;
     (async () => {
       const id = await ensureIdentity();
-      if (!cancelled) setFullIdentity(id);
+      if (!cancelled) {
+        setFullIdentity(id);
+        // Export public card (fingerprint info)
+        const card = exportPublicCard(id);
+        setPublicCard({
+          handle: card.handle,
+          fingerprint: card.fingerprint,
+          publicKeyHex: card.publicKeyHex,
+        });
+      }
     })();
     return () => {
       cancelled = true;
@@ -410,6 +425,11 @@ export default function TheDocsPage() {
         <StatusPill color={broadcasting ? "green" : "dim"}>
           {broadcasting ? "BROADCASTING" : "LOCAL"}
         </StatusPill>
+        {publicCard && (
+          <StatusPill color="amber">
+            SAFETY {publicCard.fingerprint}
+          </StatusPill>
+        )}
       </div>
 
       <div className="grid md:grid-cols-[220px_1fr] gap-4">
@@ -547,6 +567,61 @@ export default function TheDocsPage() {
                 </p>
               ))}
             </div>
+          </TerminalCard>
+
+          <TerminalCard title="YOUR SAFETY NUMBER" accent="green">
+            <p className="text-xs text-content-secondary leading-relaxed mb-3">
+              Your safety number (fingerprint) uniquely identifies you in the V FOR X network.
+              Share this with peers to verify they're connecting to the right person.
+              Compare it in person or through a trusted channel.
+            </p>
+            {publicCard ? (
+              <div className="space-y-3">
+                <div className="border-2 border-terminal-green bg-terminal-green/5 p-3 text-center">
+                  <div className="text-[10px] text-terminal-green uppercase tracking-widest mb-2">
+                    YOUR FINGERPRINT
+                  </div>
+                  <div className="text-lg md:text-xl text-terminal-green font-mono font-bold tracking-wider">
+                    {publicCard.fingerprint}
+                  </div>
+                  <div className="text-[10px] text-content-dim mt-2">
+                    Handle: <span className="text-content-secondary">{publicCard.handle}</span>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-[10px]">
+                  <div>
+                    <div className="text-content-dim uppercase tracking-widest">PUBLIC KEY (HEX)</div>
+                    <div className="text-content-secondary font-mono break-all">
+                      {publicCard.publicKeyHex.slice(0, 32)}...
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-content-dim uppercase tracking-widest">CREATED</div>
+                    <div className="text-content-secondary">
+                      {new Date(fullIdentity?.createdAt || Date.now()).toLocaleDateString()}
+                    </div>
+                  </div>
+                </div>
+                <button
+                  onClick={async () => {
+                    const cardText = `V FOR X IDENTITY\nHandle: ${publicCard.handle}\nFingerprint: ${publicCard.fingerprint}\nPublic Key: ${publicCard.publicKeyHex}`;
+                    try {
+                      await navigator.clipboard.writeText(cardText);
+                      setCopiedCard(true);
+                      sound.copy();
+                      setTimeout(() => setCopiedCard(false), 1600);
+                    } catch {
+                      sound.error();
+                    }
+                  }}
+                  className="w-full border border-terminal-green text-terminal-green px-3 py-2 text-xs uppercase tracking-wider hover:bg-terminal-green hover:text-black transition-colors"
+                >
+                  {copiedCard ? "COPIED ✓" : "COPY SAFETY NUMBER"}
+                </button>
+              </div>
+            ) : (
+              <p className="text-xs text-content-dim">Loading safety number...</p>
+            )}
           </TerminalCard>
 
           <TerminalCard title="HOW THIS WORKS">
