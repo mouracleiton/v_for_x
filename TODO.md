@@ -46,9 +46,9 @@
 
 ### New Pages
 
-- [ ] The Receipts (/the-receipts) — blockchain evidence timestamp UI
-- [ ] The Heatmap (/the-heatmap) — crowdsourced incident reporter
-- [ ] The Bridge (/the-bridge) — data import/export hub
+- [x] The Receipts (/the-receipts) — blockchain evidence timestamp UI
+- [x] The Heatmap (/the-heatmap) — crowdsourced incident reporter
+- [x] The Bridge (/the-bridge) — data import/export hub
 
 ## Phase 8 — Censorship-Resistance Sprint
 
