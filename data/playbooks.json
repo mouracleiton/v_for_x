@@ -1,0 +1,468 @@
+{
+  "version": 1,
+  "lastUpdated": "2026-08-11",
+  "playbooks": [
+    {
+      "id": "arrest_response",
+      "name": "Arrest & Detention Response",
+      "description": "Immediate actions and coordination steps when a team member or contact is arrested or detained",
+      "icon": "🚨",
+      "category": "legal",
+      "severity": "critical",
+      "estimatedTime": 180,
+      "recommendedFor": ["journalist", "activist", "aid_worker"],
+      "checklists": [
+        {
+          "id": "immediate_response",
+          "title": "Immediate Response (First 1 Hour)",
+          "items": [
+            "Confirm detention: Who, where, when, which authority",
+            "Contact emergency legal aid or human rights organization",
+            "Notify designated emergency contact (if safe to do so)",
+            "Enable dead man's switch for the detained person",
+            "Secure the detained person's digital footprint (change their passwords if you have access)",
+            "Document the arrest: location, time, badge numbers, vehicle details"
+          ]
+        },
+        {
+          "id": "legal_support",
+          "title": "Legal Support (Hours 1-24)",
+          "items": [
+            "Find and contact a lawyer who handles political/sensitive cases",
+            "Prepare habeas corpus or similar legal filing",
+            "Document any charges or lack thereof",
+            "Contact relevant consulates if foreign national",
+            "Inform relevant human rights organizations",
+            "Prepare public statement (coordinate with legal counsel first)"
+          ]
+        },
+        {
+          "id": "coordination",
+          "title": "Team Coordination",
+          "items": [
+            "Activate secure communication channel for detention response team",
+            "Assign point person for family liaison",
+            "Assign point person for media/public communication",
+            "Assign point person for legal coordination",
+            "Document all actions in ops journal",
+            "Review duress decoy mode for other at-risk team members"
+          ]
+        },
+        {
+          "id": "evidence_preservation",
+          "title": "Evidence & Documentation",
+          "items": [
+            "Create evidence room entry for arrest event",
+            "Collect witness statements from those present",
+            "Secure photo/video evidence of arrest (if available and safe)",
+            "Create timeline of events leading to arrest",
+            "Document any injuries or medical needs",
+            "Create witness ledger entry with signed statements"
+          ]
+        }
+      ],
+      "resources": [
+        {"type": "tool", "name": "Dead Man's Switch", "route": "/the-guardian"},
+        {"type": "tool", "name": "Witness Ledger", "route": "/the-receipts"},
+        {"type": "tool", "name": "Evidence Room", "route": "/the-fortress"},
+        {"type": "tool", "name": "Secure Comms", "route": "/the-web"}
+      ]
+    },
+    {
+      "id": "internet_shutdown",
+      "name": "Internet Shutdown Response",
+      "description": "Operate and coordinate during internet or communications blackout",
+      "icon": "📡",
+      "category": "infrastructure",
+      "severity": "high",
+      "estimatedTime": 240,
+      "recommendedFor": ["journalist", "activist", "aid_worker", "civilian"],
+      "checklists": [
+        {
+          "id": "immediate_response",
+          "title": "Immediate Response",
+          "items": [
+            "Switch to offline mode: disconnect network, use local data only",
+            "Activate offline briefcase if previously cached",
+            "Verify you have critical maps and data downloaded",
+            "Switch to mesh networking for peer-to-peer communication",
+            "Use relay/blueprints for information sharing via offline channels",
+            "Set up local Wi-Fi hotspot for nearby coordination if safe"
+          ]
+        },
+        {
+          "id": "information_gathering",
+          "title": "Information Gathering (Offline)",
+          "items": [
+            "Monitor local radio/TV for official announcements",
+            "Use in-person networks to verify information",
+            "Document all observations with timestamps (for later verification)",
+            "Map offline: note checkpoints, closures, incidents",
+            "Coordinate with neighbors for neighborhood watch",
+            "Use printed field manuals and protocols"
+          ]
+        },
+        {
+          "id": "coordination",
+          "title": "Coordination Without Network",
+          "items": [
+            "Use QR codes to share information in person",
+            "Leave relay messages at trusted dead drops",
+            "Use USB/sneakernet for data transfer between trusted parties",
+            "Meet in person at predetermined safe locations",
+            "Use face-to-face verification of information",
+            "Plan for network restoration: what to verify first"
+          ]
+        },
+        {
+          "id": "restoration",
+          "title": "When Network Returns",
+          "items": [
+            "Verify official narratives against offline documentation",
+            "Upload witness statements and evidence collected during blackout",
+            "Check for messages missed in offline mail/mesh store",
+            "Update maps with incidents observed during blackout",
+            "Share verified information with broader network",
+            "Document shutdown duration and impacts"
+          ]
+        }
+      ],
+      "resources": [
+        {"type": "tool", "name": "Offline Briefcase", "route": "/the-fortress"},
+        {"type": "tool", "name": "Mesh Networking", "route": "/the-web"},
+        {"type": "tool", "name": "Relay Messages", "route": "/the-relay"},
+        {"type": "tool", "name": "Field Manual", "route": "/the-field-manual"}
+      ]
+    },
+    {
+      "id": "forced_displacement",
+      "name": "Forced Displacement Response",
+      "description": "Emergency evacuation and displacement coordination",
+      "icon": "🚶",
+      "category": "humanitarian",
+      "severity": "critical",
+      "estimatedTime": 300,
+      "recommendedFor": ["aid_worker", "activist", "civilian"],
+      "checklists": [
+        {
+          "id": "immediate_safety",
+          "title": "Immediate Safety (0-2 Hours)",
+          "items": [
+            "MOVE if in immediate danger: personal safety first",
+            "Grab go-bag: documents, cash, phone, charger, medications",
+            "Signal trusted contacts you're safe (if possible)",
+            "Note your route and destination for later documentation",
+            "Mark your location on map before moving (if safe)",
+            "Help neighbors who need assistance (elderly, disabled, children)"
+          ]
+        },
+        {
+          "id": "coordination_hub",
+          "title": "Establish Coordination Hub",
+          "items": [
+            "Set up temporary coordination point at safe location",
+            "Use Trail for posting needs and offers",
+            "Coordinate with local aid organizations if present",
+            "Document displacement: households, routes, destinations",
+            "Map safe corridors and danger areas to avoid",
+            "Establish communication plan without network if needed"
+          ]
+        },
+        {
+          "id": "resource_allocation",
+          "title": "Resource Allocation",
+          "items": [
+            "Use Allocator to plan resource distribution",
+            "Prioritize: medical needs, children, elderly, disabled",
+            "Track inventory: food, water, shelter, medical supplies",
+            "Coordinate mutual aid via Trail matching",
+            "Document all allocations for transparency",
+            "Plan for duration: this may be prolonged"
+          ]
+        },
+        {
+          "id": "documentation",
+          "title": "Documentation & Evidence",
+          "items": [
+            "Document causes of displacement (if safe to observe)",
+            "Record human rights violations observed",
+            "Create evidence room entries for destruction/property loss",
+            "Document responsible parties (badges, units, vehicles)",
+            "Collect witness statements from other displaced persons",
+            "Prepare for future accountability: timestamp everything"
+          ]
+        }
+      ],
+      "resources": [
+        {"type": "tool", "name": "Trail Mutual Aid", "route": "/the-trail"},
+        {"type": "tool", "name": "Allocator", "route": "/the-allocator"},
+        {"type": "tool", "name": "Sorrow Map", "route": "/sorrow-map"},
+        {"type": "tool", "name": "Evidence Room", "route": "/the-fortress"}
+      ]
+    },
+    {
+      "id": "medical_crisis",
+      "name": "Medical Crisis Response",
+      "description": "Coordinate healthcare access during medical system collapse or attack",
+      "icon": "🏥",
+      "category": "health",
+      "severity": "critical",
+      "estimatedTime": 200,
+      "recommendedFor": ["aid_worker", "civilian", "journalist"],
+      "checklists": [
+        {
+          "id": "immediate_medical",
+          "title": "Immediate Medical Response",
+          "items": [
+            "Assess: life-threatening conditions first",
+            "Apply first aid for life-threatening injuries",
+            "Document symptoms and conditions for professional care",
+            "Note time of injury/illness onset",
+            "Preserve evidence of injuries (if caused by violence)",
+            "Do not move seriously injured persons unless necessary"
+          ]
+        },
+        {
+          "id": "healthcare_access",
+          "title": "Healthcare Access",
+          "items": [
+            "Identify functioning medical facilities",
+            "Map ambulance routes if operating",
+            "Use medical shortage board to find available resources",
+            "Coordinate with informal medical networks if hospitals compromised",
+            "Document barriers to medical access",
+            "Arrange medical transport if needed"
+          ]
+        },
+        {
+          "id": "documentation",
+          "title": "Medical Documentation",
+          "items": [
+            "Document all medical care provided and received",
+            "Record names of medical personnel (if safe)",
+            "Photograph injuries with timestamp for evidence",
+            "Document any denial of medical care",
+            "Track medication shortages and access issues",
+            "Create medical evidence room entries for conflict-related injuries"
+          ]
+        },
+        {
+          "id": "followup",
+          "title": "Follow-up & Long-term Care",
+          "items": [
+            "Plan for ongoing treatment needs",
+            "Coordinate follow-up care through Trail if needed",
+            "Document long-term impacts for advocacy",
+            "Connect with psychological support if available",
+            "Document medical infrastructure damage for accountability",
+            "Share medical data with relevant health organizations (safely)"
+          ]
+        }
+      ],
+      "resources": [
+        {"type": "tool", "name": "Medical Shortage Board", "route": "/the-trail"},
+        {"type": "tool", "name": "Trail Mutual Aid", "route": "/the-trail"},
+        {"type": "tool", "name": "Evidence Room", "route": "/the-fortress"},
+        {"type": "tool", "name": "Sorrow Map", "route": "/sorrow-map"}
+      ]
+    },
+    {
+      "id": "surveillance_detection",
+      "name": "Surveillance Detection Response",
+      "description": "Detect, evade, and respond to surveillance and monitoring",
+      "icon": "👁️",
+      "category": "security",
+      "severity": "high",
+      "estimatedTime": 150,
+      "recommendedFor": ["journalist", "activist", "aid_worker"],
+      "checklists": [
+        {
+          "id": "detection",
+          "title": "Detection Indicators",
+          "items": [
+            "Note: repeated sightings of same person/vehicle",
+            "Document: unusual interest in your work or contacts",
+            "Monitor: equipment interference (phone, computer)",
+            "Watch for: break-ins or theft of devices (not valuables)",
+            "Check: physical tampering with locks, windows, vehicle",
+            "Track: online account anomalies or password resets"
+          ]
+        },
+        {
+          "id": "immediate_response",
+          "title": "Immediate Response",
+          "items": [
+            "ASSUME worst case: you may be monitored",
+            "Stop sensitive communications until verified clear",
+            "Switch to secure, offline communication methods",
+            "Alert trusted contacts to be cautious",
+            "Enable duress decoy mode if identity/keys at risk",
+            "Do not confront or acknowledge surveillance"
+          ]
+        },
+        {
+          "id": "operational_security",
+          "title": "Operational Security",
+          "items": [
+            "Review and update threat model",
+            "Change meeting locations and routines",
+            "Use mesh networking instead of centralized comms",
+            "Sweep living/working space for listening devices (if safe)",
+            "Verify identity of all contacts before sharing sensitive info",
+            "Minimize digital footprint where possible"
+          ]
+        },
+        {
+          "id": "documentation",
+          "title": "Documentation",
+          "items": [
+            "Document surveillance incidents with timestamps",
+            "Create evidence room entries for each incident",
+            "Record details: persons, vehicles, locations, times",
+            "Photograph evidence (if safe to do so)",
+            "Share information with security support network",
+            "Update risk assessment for team operations"
+          ]
+        }
+      ],
+      "resources": [
+        {"type": "tool", "name": "Mask/OpSec", "route": "/the-mask"},
+        {"type": "tool", "name": "Secure Comms", "route": "/the-web"},
+        {"type": "tool", "name": "Duress Decoy", "route": "/the-fortress"},
+        {"type": "tool", "name": "Evidence Room", "route": "/the-fortress"}
+      ]
+    },
+    {
+      "id": "violent_crackdown",
+      "name": "Violent Crackdown Response",
+      "description": "Response to state violence, protest suppression, and mass arrests",
+      "icon": "⚠️",
+      "category": "security",
+      "severity": "critical",
+      "estimatedTime": 200,
+      "recommendedFor": ["journalist", "activist", "aid_worker"],
+      "checklists": [
+        {
+          "id": "immediate_safety",
+          "title": "Immediate Safety",
+          "items": [
+            "PERSONAL SAFETY FIRST: leave danger zone if possible",
+            "Help others evacuate if you can do so safely",
+            "Find cover: stay away from windows and street level",
+            "Document location and time for later verification",
+            "Do not draw attention to yourself if unsafe",
+            "Have escape route planned before engagement"
+          ]
+        },
+        {
+          "id": "documentation",
+          "title": "Documentation (If Safe)",
+          "items": [
+            "Document violations with timestamps and locations",
+            "Record badge numbers, vehicle IDs, unit markings",
+            "Photograph injuries and property damage",
+            "Collect witness contact information for follow-up",
+            "Note use of specific weapons or excessive force",
+            "Create evidence room entries for each incident"
+          ]
+        },
+        {
+          "id": "coordination",
+          "title": "Coordination & Support",
+          "items": [
+            "Coordinate medical care for injured",
+            "Set up notification system for arrests (check-in network)",
+            "Use Trail to coordinate safe houses and support",
+            "Map danger zones and safe corridors",
+            "Coordinate legal response for detained persons",
+            "Share verified information with media/organizations"
+          ]
+        },
+        {
+          "id": "accountability",
+          "title": "Accountability & Follow-up",
+          "items": [
+            "Create witness ledger entries with signed statements",
+            "Compile evidence into verified incident reports",
+            "Share evidence with human rights organizations",
+            "Create timeline of events for accountability",
+            "Document responsible units and individuals",
+            "Prepare for potential legal action or advocacy"
+          ]
+        }
+      ],
+      "resources": [
+        {"type": "tool", "name": "Witness Ledger", "route": "/the-receipts"},
+        {"type": "tool", "name": "Evidence Room", "route": "/the-fortress"},
+        {"type": "tool", "name": "Trail Mutual Aid", "route": "/the-trail"},
+        {"type": "tool", "name": "Sorrow Map", "route": "/sorrow-map"}
+      ]
+    },
+    {
+      "id": "document_emergency",
+      "name": "Document & Evidence Emergency",
+      "description": "Urgent document protection and evidence preservation under threat",
+      "icon": "📄",
+      "category": "evidence",
+      "severity": "critical",
+      "estimatedTime": 120,
+      "recommendedFor": ["journalist", "activist", "aid_worker", "researcher"],
+      "checklists": [
+        {
+          "id": "immediate_protection",
+          "title": "Immediate Document Protection",
+          "items": [
+            "IDENTIFY critical documents: evidence, sources, research data",
+            "Create evidence room entries for all critical items",
+            "Generate SHA-256 hashes for verification",
+            "Create VFXPACK1 bundles for export and backup",
+            "Upload to secure, distributed storage if possible",
+            "Destroy local copies if search/raid imminent (after secure backup)"
+          ]
+        },
+        {
+          "id": "source_protection",
+          "title": "Source Protection",
+          "items": [
+            "Protect source identities: encrypt or destroy identifying info",
+            "Use duress decoy mode to show fake document set if compelled",
+            "Enable dead man's switch for sensitive source information",
+            "Document what was destroyed and why for later reconstruction",
+            "Have verified testimony already if sources at risk",
+            "Clear browsing history and communication logs"
+          ]
+        },
+        {
+          "id": "verification_preparation",
+          "title": "Verification Preparation",
+          "items": [
+            "Create witness ledger entries for document authenticity",
+            "Document provenance: where, when, how obtained",
+            "Prepare verification packets for key documents",
+            "Create timestamped evidence chains for all critical items",
+            "Have verification keys ready for media/organizations",
+            "Document chain of custody thoroughly"
+          ]
+        },
+        {
+          "id": "contingency",
+          "title": "Contingency Planning",
+          "items": [
+            "Identify trusted recipients for emergency document release",
+            "Prepare Guardian release packets for worst-case scenario",
+            "Set up dead drops (digital or physical) for document recovery",
+            "Coordinate with trusted contacts for distributed storage",
+            "Have denial/release strategy prepared",
+            "Test that backup verification keys work"
+          ]
+        }
+      ],
+      "resources": [
+        {"type": "tool", "name": "Evidence Room", "route": "/the-fortress"},
+        {"type": "tool", "name": "VFXPACK Export", "route": "/the-bridge"},
+        {"type": "tool", "name": "Guardian Packets", "route": "/the-guardian"},
+        {"type": "tool", "name": "Witness Ledger", "route": "/the-receipts"}
+      ]
+    }
+  ]
+}
