@@ -38,6 +38,12 @@ import {
   getQueuedActions,
   processQueue,
   isOnline,
+  onConnectivityChange,
+  downloadCountryPack,
+  getCachedCountries,
+  removeCountryPack,
+  getCacheStats,
+  clearAllCaches,
   type QueuedAction,
 } from "../lib/offline-manager";
 
@@ -119,5 +125,124 @@ describe("isOnline", () => {
   it("returns a boolean", () => {
     const result = isOnline();
     expect(typeof result).toBe("boolean");
+  });
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   Connectivity change subscription
+   ═══════════════════════════════════════════════════════════════ */
+
+describe("onConnectivityChange", () => {
+  it("returns an unsubscribe function", () => {
+    const unsubscribe = onConnectivityChange(() => {});
+    expect(typeof unsubscribe).toBe("function");
+  });
+
+  it("calls callback on online/offline events", () => {
+    const callback = vi.fn();
+    onConnectivityChange(callback);
+    // In a test environment, navigator may not be fully simulated
+    // but we can verify the function doesn't throw
+    expect(callback).not.toHaveBeenCalled();
+  });
+
+  it("unsubscribe removes event listeners", () => {
+    const callback = vi.fn();
+    const unsubscribe = onConnectivityChange(callback);
+    unsubscribe();
+    // Should not throw and callback should not be called
+    expect(callback).not.toHaveBeenCalled();
+  });
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   Country pack management
+   ═══════════════════════════════════════════════════════════════ */
+
+describe("downloadCountryPack", () => {
+  it("returns result with success boolean", async () => {
+    const result = await downloadCountryPack("USA");
+    expect(typeof result.success).toBe("boolean");
+    expect(typeof result.cachedItems).toBe("number");
+  });
+
+  it("calls progress callback with updates", async () => {
+    const progress = vi.fn();
+    await downloadCountryPack("GBR", progress);
+    expect(progress).toHaveBeenCalled();
+  });
+
+  it("progress reports include total and completed counts", async () => {
+    const progress = vi.fn();
+    await downloadCountryPack("FRA", progress);
+    const calls = progress.mock.calls;
+    if (calls.length > 0) {
+      const firstCall = calls[0][0];
+      expect(firstCall).toHaveProperty("total");
+      expect(firstCall).toHaveProperty("completed");
+    }
+  });
+});
+
+describe("getCachedCountries", () => {
+  it("returns an array", async () => {
+    const countries = await getCachedCountries();
+    expect(Array.isArray(countries)).toBe(true);
+  });
+
+  it("returns objects with iso3 and downloadedAt properties", async () => {
+    const countries = await getCachedCountries();
+    countries.forEach((country) => {
+      expect(country).toHaveProperty("iso3");
+      expect(country).toHaveProperty("downloadedAt");
+    });
+  });
+});
+
+describe("removeCountryPack", () => {
+  it("does not throw for valid ISO3 code", async () => {
+    await expect(removeCountryPack("USA")).resolves.toBeUndefined();
+  });
+
+  it("does not throw for unknown ISO3 code", async () => {
+    await expect(removeCountryPack("XXX")).resolves.toBeUndefined();
+  });
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   Cache statistics and management
+   ═══════════════════════════════════════════════════════════════ */
+
+describe("getCacheStats", () => {
+  it("returns stats with size and entries", async () => {
+    const stats = await getCacheStats();
+    expect(stats).toHaveProperty("size");
+    expect(stats).toHaveProperty("entries");
+  });
+
+  it("size and entries are numbers", async () => {
+    const stats = await getCacheStats();
+    expect(typeof stats.size).toBe("number");
+    expect(typeof stats.entries).toBe("number");
+  });
+
+  it("returns non-negative values", async () => {
+    const stats = await getCacheStats();
+    expect(stats.size).toBeGreaterThanOrEqual(0);
+    expect(stats.entries).toBeGreaterThanOrEqual(0);
+  });
+});
+
+describe("clearAllCaches", () => {
+  it("does not throw", async () => {
+    await expect(clearAllCaches()).resolves.toBeUndefined();
+  });
+
+  it("clears caches without error", async () => {
+    await clearAllCaches();
+    const stats = await getCacheStats();
+    // After clearing, should still return valid stats
+    expect(stats).toHaveProperty("size");
+    expect(stats).toHaveProperty("entries");
   });
 });

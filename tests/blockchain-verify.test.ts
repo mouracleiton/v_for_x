@@ -1,10 +1,11 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import {
   createMerkleLeaf,
   anchorToDag,
   getQueuedStamps,
   clearQueuedStamp,
   verifyTimestamp,
+  notarizeEvidence,
   type MerkleProof,
 } from "../lib/blockchain-verify";
 import { GENESIS_HASH, type DagEntry } from "../lib/dag";
@@ -184,5 +185,48 @@ describe("verifyTimestamp", () => {
     const result = await verifyTimestamp(file);
     expect(result.confirmed).toBe(true);
     expect(result.blockHeight).toBe(blockHeight);
+  });
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   notarizeEvidence
+   ═══════════════════════════════════════════════════════════════ */
+
+describe("notarizeEvidence", () => {
+  it("throws for invalid hash format", async () => {
+    await expect(notarizeEvidence("not-a-hash")).rejects.toThrow(
+      "notarizeEvidence expects a 64-char hex SHA-256 digest"
+    );
+  });
+
+  it("throws for hash with wrong length", async () => {
+    await expect(notarizeEvidence("a".repeat(63))).rejects.toThrow();
+    await expect(notarizeEvidence("a".repeat(65))).rejects.toThrow();
+  });
+
+  it("returns pending result when network is unavailable", async () => {
+    const validHash = "a".repeat(64);
+    // Mock fetch to fail
+    global.fetch = vi.fn().mockRejectedValue(new Error("offline"));
+    const result = await notarizeEvidence(validHash);
+    expect(result.pending).toBe(true);
+    expect(result.hash).toBe(validHash);
+    expect(result.timestamp).toBeGreaterThan(0);
+  });
+
+  it("queues pending stamps locally on network failure", async () => {
+    const validHash = "b".repeat(64);
+    const before = getQueuedStamps().length;
+    global.fetch = vi.fn().mockRejectedValue(new Error("offline"));
+    await notarizeEvidence(validHash);
+    const after = getQueuedStamps();
+    expect(after.length).toBeGreaterThan(before);
+  });
+
+  it("normalizes hash to lowercase", async () => {
+    const upperHash = "A".repeat(64);
+    global.fetch = vi.fn().mockRejectedValue(new Error("offline"));
+    const result = await notarizeEvidence(upperHash);
+    expect(result.hash).toBe(upperHash.toLowerCase());
   });
 });
