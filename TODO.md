@@ -180,7 +180,7 @@
 - [x] lib/registry-safety.ts — 6 anti-witch-hunt gates + VFXERR1 errata
 - [x] lib/relationships.ts + /the-flows — arms/sanctions/aid corridors
 - [x] lib/subnational.ts + /the-subnational — admin-area vulnerability map
-- [ ] lib/mirror-consensus.ts + /the-consensus — root hash fork detection
+- [x] lib/mirror-consensus.ts + /the-consensus — root hash fork detection
 - [ ] lib/ops-journal.ts — local self-stats
 - [ ] /the-tokens — interop catalog + paste detector
 

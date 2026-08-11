@@ -153,6 +153,15 @@ export const TOKEN_SPECS: TokenSpec[] = [
     signed: false,
     encrypted: false,
   },
+  {
+    prefix: "VFXCON1:",
+    id: "VFXCON1",
+    name: "Consensus Attestation",
+    description: "Root hash fork detection across mirrors",
+    module: "mirror-consensus",
+    signed: true,
+    encrypted: false,
+  },
 ];
 
 /* ═══════════════════════════════════════════════════════════════
