@@ -15,7 +15,7 @@ import type { WorldBackbone } from "@/lib/types";
 import { getCountryConflictSummary } from "@/lib/ejatlas";
 
 const ChoroplethMap = dynamic(
-  () => import("@/components/map/ChoroplethMap"),
+  () => import("@/components/map/SubnationalChoroplethMap"),
   {
     ssr: false,
     loading: () => (
@@ -286,9 +286,11 @@ function HotspotList({ onSelect }: { onSelect: (iso3: string) => void }) {
 
 export default function MapaDaDorPage() {
   const router = useRouter();
-  const { setCurrentCountry, lang } = useStore();
+  const { setCurrentCountry, lang, currentCountry } = useStore();
   const [activeDimKey, setActiveDimKey] = useState(DIMENSIONS[0].key);
   const [geoData, setGeoData] = useState<GeoFeatureCollection | null>(null);
+  const [showSubnational, setShowSubnational] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const basePath = process.env.NODE_ENV === "production" ? "/v_for_x" : "";
 
   // Lazy-load 2.5MB GeoJSON at runtime instead of bundling into JS
@@ -321,10 +323,25 @@ export default function MapaDaDorPage() {
   const handleCountryClick = useCallback(
     (iso3: string) => {
       setCurrentCountry(iso3);
-      router.push(`/sorrow-map/${iso3.toLowerCase()}/`);
+      setSelectedCountry(iso3);
+
+      if (showSubnational) {
+        // In subnational mode, stay on the main map and show subdivisions
+        // Don't navigate away
+      } else {
+        // In normal mode, navigate to country detail page
+        router.push(`/sorrow-map/${iso3.toLowerCase()}/`);
+      }
     },
-    [router, setCurrentCountry]
+    [router, setCurrentCountry, showSubnational]
   );
+
+  const handleSubnationalToggle = useCallback((enabled: boolean) => {
+    setShowSubnational(enabled);
+    if (!enabled) {
+      setSelectedCountry(null);
+    }
+  }, []);
 
   return (
     <div className="p-3 sm:p-4 md:p-6 max-w-[1600px] mx-auto">
@@ -353,6 +370,39 @@ export default function MapaDaDorPage() {
           <div className="mt-4">
             <Legend dim={activeDim} range={severityRange} />
           </div>
+
+          {/* Subnational Toggle */}
+          <div className="border border-border-dim p-3 bg-abyss mt-4">
+            <div className="text-xs text-content-dim uppercase tracking-widest mb-2">
+              // VIEW MODE
+            </div>
+            <button
+              onClick={() => handleSubnationalToggle(!showSubnational)}
+              className={`w-full px-3 py-2 border transition-all text-xs ${
+                showSubnational
+                  ? "bg-terminal-green/20 border-terminal-green text-terminal-green"
+                  : "border-border-dim text-content-secondary hover:border-terminal-green hover:text-terminal-green"
+              }`}
+            >
+              {showSubnational ? "🗺️ SUBNATIONAL ON" : "🌍 COUNTRY LEVEL"}
+            </button>
+            {showSubnational && (
+              <div className="mt-2 text-[10px] text-content-dim">
+                {selectedCountry ? (
+                  <div>
+                    <span className="text-terminal-green">▶</span> {selectedCountry}
+                    <div className="text-[9px] mt-1 text-content-dim">
+                      Click other countries to switch focus
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-content-dim">
+                    Click a country to view subnational regions
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Center — map */}
@@ -364,6 +414,8 @@ export default function MapaDaDorPage() {
               onCountryClick={handleCountryClick}
               severityRange={severityRange}
               hotspotIso3s={hotspotIso3s}
+              selectedCountry={selectedCountry}
+              showSubnational={showSubnational}
             />
           ) : (
             <div className="h-full w-full flex items-center justify-center text-blood-bright text-xs">
