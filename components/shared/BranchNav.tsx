@@ -7,15 +7,21 @@ import { branchLinks } from "@/lib/crosslinks";
 import { sound } from "@/lib/sound";
 import { LANGS, t, SECTION_DESC, getStoredLang } from "@/lib/i18n";
 import { tc } from "@/lib/i18n-content";
+import { isRouteVisible, isRoutePrimary } from "@/lib/personas";
 import SoundToggle from "@/components/ui/SoundToggle";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 
 export default function BranchNav() {
   const pathname = usePathname();
-  const { navOpen, setNavOpen, lang, setLang } = useStore();
+  const { navOpen, setNavOpen, lang, setLang, persona, fullNav, toggleFullNav } = useStore();
   const drawerRef = useRef<HTMLDivElement>(null);
   const [langOpen, setLangOpen] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
+
+  // Filter branchLinks based on persona and fullNav setting
+  const filteredBranchLinks = useMemo(() => {
+    return branchLinks.filter((link) => isRouteVisible(link.code));
+  }, [persona, fullNav]);
 
   const guyFawkesAscii = [
     "    .:::::::::::.",
@@ -90,8 +96,9 @@ export default function BranchNav() {
         </Link>
 
         <div className="flex-1 overflow-y-auto">
-          {branchLinks.map((b) => {
+          {filteredBranchLinks.map((b) => {
             const active = pathname === b.href;
+            const isPrimary = isRoutePrimary(b.code);
             return (
               <Link
                 key={b.href}
@@ -99,6 +106,8 @@ export default function BranchNav() {
                 className={`flex items-center gap-2 px-4 py-2 text-xs border-b border-border-dim transition-colors ${
                   active
                     ? "bg-panel text-blood-bright border-l-2 border-l-blood"
+                    : isPrimary && persona
+                    ? "text-content-primary font-medium bg-panel/50 hover:bg-panel"
                     : "text-content-secondary hover:text-content-primary hover:bg-panel"
                 }`}
                 onClick={() => sound.nav()}
@@ -137,6 +146,20 @@ export default function BranchNav() {
               )}
             </div>
           </div>
+
+          {/* Full Nav Toggle */}
+          <button
+            onClick={() => { toggleFullNav(); sound.select(); }}
+            className={`text-[9px] px-2 py-1 border transition-colors w-full mb-2 ${
+              fullNav
+                ? "border-blood text-blood-bright bg-panel"
+                : "border-border-dim text-content-dim hover:border-blood hover:text-blood-bright"
+            }`}
+            title={fullNav ? "Show all routes" : persona ? "Show persona-filtered routes" : "No persona set"}
+          >
+            {fullNav ? "[✓] FULL NAV" : "[ ] FULL NAV"}
+          </button>
+
           <button
             onClick={() => {
               const evt = new KeyboardEvent("keydown", { key: "k", metaKey: true, ctrlKey: navigator.platform.includes("Mac") });
@@ -213,9 +236,10 @@ export default function BranchNav() {
         </div>
 
         {/* Drawer links — large tap targets */}
-        <div className="overflow-y-auto" style={{ maxHeight: "calc(100dvh - 120px)" }}>
-          {branchLinks.map((b) => {
+        <div className="overflow-y-auto" style={{ maxHeight: "calc(100dvh - 140px)" }}>
+          {filteredBranchLinks.map((b) => {
             const active = pathname === b.href;
+            const isPrimary = isRoutePrimary(b.code);
             return (
               <Link
                 key={b.href}
@@ -223,6 +247,8 @@ export default function BranchNav() {
                 className={`flex items-center gap-3 px-4 py-3 text-sm border-b border-border-dim transition-colors ${
                   active
                     ? "bg-panel text-blood-bright border-l-2 border-l-blood"
+                    : isPrimary && persona
+                    ? "text-content-primary font-medium bg-panel/50 active:bg-panel"
                     : "text-content-secondary active:text-blood-bright active:bg-panel"
                 }`}
                 onClick={() => {
@@ -242,6 +268,19 @@ export default function BranchNav() {
           className="px-4 py-3 border-t border-border-dim"
           style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 0.75rem)" }}
         >
+          {/* Full Nav Toggle in mobile drawer */}
+          <button
+            onClick={() => { toggleFullNav(); sound.select(); }}
+            className={`text-[10px] px-3 py-2 border transition-colors w-full mb-3 ${
+              fullNav
+                ? "border-blood text-blood-bright bg-panel"
+                : "border-border-dim text-content-dim hover:border-blood hover:text-blood-bright"
+            }`}
+            title={fullNav ? "Show all routes" : persona ? "Show persona-filtered routes" : "No persona set"}
+          >
+            {fullNav ? "[✓] FULL NAV" : "[ ] FULL NAV"}
+          </button>
+
           {/* Language selector in mobile drawer */}
           <div className="flex items-center gap-1 flex-wrap mb-3 justify-center">
             {LANGS.map((l) => (

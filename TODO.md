@@ -172,7 +172,7 @@
 - [x] data/playbooks.json + lib/playbooks.ts — 7 situation playbooks
 - [x] /the-missions — persona picker, identity, mission runner, safety engine, ops journal
 - [x] /the-playbooks — checklist UI
-- [ ] BranchNav persona filter + FULL NAV toggle; store persona/fullNav
+- [x] BranchNav persona filter + FULL NAV toggle; store persona/fullNav
 - [ ] Home CTA → missions / playbooks / bridge
 
 ### Trust + dormant data

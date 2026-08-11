@@ -1,5 +1,12 @@
 import { create } from "zustand";
 import { getStoredLang, isRTL, setStoredLang, type Lang } from "@/lib/i18n";
+import {
+  getPersona,
+  setPersona as setPersonaStorage,
+  getFullNav,
+  setFullNav as setFullNavStorage,
+  type PersonaId,
+} from "@/lib/personas";
 
 export interface AnonymousIdentity {
   handle: string;
@@ -42,6 +49,16 @@ interface VFXState {
   // Language
   lang: Lang;
   setLang: (lang: Lang) => void;
+
+  // Persona filtering
+  persona: PersonaId | null;
+  setPersona: (persona: PersonaId | null) => void;
+  clearPersona: () => void;
+
+  // Full navigation toggle
+  fullNav: boolean;
+  toggleFullNav: () => void;
+  setFullNav: (enabled: boolean) => void;
 }
 
 export const useStore = create<VFXState>((set) => ({
@@ -104,5 +121,39 @@ export const useStore = create<VFXState>((set) => ({
       document.documentElement.dir = isRTL(lang) ? "rtl" : "ltr";
     }
     set({ lang });
+  },
+
+  // Persona filtering - initialize from localStorage
+  persona: typeof window !== "undefined" ? getPersona() : null,
+  setPersona: (persona) => {
+    if (persona === null) {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("vfx_persona");
+      }
+      set({ persona: null });
+    } else {
+      setPersonaStorage(persona);
+      set({ persona });
+    }
+  },
+  clearPersona: () => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("vfx_persona");
+    }
+    set({ persona: null });
+  },
+
+  // Full navigation toggle - initialize from localStorage
+  fullNav: typeof window !== "undefined" ? getFullNav() : false,
+  toggleFullNav: () => {
+    const current = typeof window !== "undefined" ? getFullNav() : false;
+    const newValue = !current;
+    setFullNavStorage(newValue);
+    set({ fullNav: newValue });
+    return newValue;
+  },
+  setFullNav: (enabled) => {
+    setFullNavStorage(enabled);
+    set({ fullNav: enabled });
   },
 }));
