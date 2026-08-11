@@ -453,3 +453,195 @@ export async function verifyDagEntrySignature(
     createdAt: entry.ts,
   };
 }
+
+/**
+ * Sign a witness statement using the unified identity.
+ *
+ * This function creates a signing function compatible with lib/witness.ts
+ * that uses the unified identity for signing witness statements.
+ */
+export async function signWitnessWithIdentity(
+  identity: Identity
+): Promise<(content: string) => Promise<{ signature: string; publicKey: string }>> {
+  return async (content: string) => {
+    // Import public key as SPKI for witness format
+    const pubRaw = await crypto.subtle.exportKey("spki", identity.publicKey);
+    const publicKeyBase64 = btoa(String.fromCharCode(...new Uint8Array(pubRaw)));
+
+    // Sign the content
+    const contentBytes = new TextEncoder().encode(content);
+    const sigBuf = await crypto.subtle.sign(
+      { name: "ECDSA", hash: "SHA-256" },
+      identity.privateKey,
+      contentBytes
+    );
+    const signatureBase64 = btoa(String.fromCharCode(...new Uint8Array(sigBuf)));
+
+    return {
+      signature: signatureBase64,
+      publicKey: publicKeyBase64
+    };
+  };
+}
+
+/**
+ * Sign a mirror claim using the unified identity.
+ *
+ * This function generates a mirror keypair compatible with lib/mirror.ts
+ * but derived from the unified identity.
+ */
+export async function signMirrorClaimWithIdentity(
+  identity: Identity,
+  input: {
+    transport: string;
+    endpoint: string;
+    region?: string;
+    buildHash?: string;
+    buildVersion?: string;
+  }
+): Promise<import("./mirror").MirrorNode> {
+  const { createMirrorClaim, MIRROR_KIT_VERSION } = await import("./mirror");
+
+  // Create a mirror-compatible keypair from the identity
+  const pubRaw = await crypto.subtle.exportKey("spki", identity.publicKey);
+  const publicKeyBase64 = btoa(String.fromCharCode(...new Uint8Array(pubRaw)));
+
+  // Generate handle from identity's public key hash
+  const pubHashBuf = await crypto.subtle.digest("SHA-256", pubRaw);
+  const pubHashHex = bytesToHex(new Uint8Array(pubHashBuf));
+  const handle = `V-${pubHashHex.slice(0, 4)}-${pubHashHex.slice(4, 8)}`;
+
+  const mirrorKey = {
+    publicKey: publicKeyBase64,
+    privateKey: "", // We'll sign directly using identity.privateKey
+    handle,
+  };
+
+  // Create the claim content
+  const ts = Date.now();
+  const id = crypto.randomUUID();
+
+  const partial = {
+    id,
+    handle,
+    transport: input.transport,
+    endpoint: input.endpoint,
+    region: input.region?.trim() || undefined,
+    buildHash: input.buildHash?.trim() || "unknown",
+    buildVersion: input.buildVersion?.trim() || undefined,
+    kitVersion: MIRROR_KIT_VERSION,
+    ts,
+  };
+
+  // Sign using identity
+  const canonical = JSON.stringify({
+    id: partial.id,
+    handle: partial.handle,
+    transport: partial.transport,
+    endpoint: partial.endpoint,
+    region: partial.region ?? "",
+    buildHash: partial.buildHash,
+    buildVersion: partial.buildVersion ?? "",
+    kitVersion: partial.kitVersion,
+    ts: partial.ts,
+  });
+
+  const contentBytes = new TextEncoder().encode(canonical);
+  const contentHashBuf = await crypto.subtle.digest("SHA-256", contentBytes);
+  const contentHash = bytesToHex(new Uint8Array(contentHashBuf));
+
+  const sigBuf = await crypto.subtle.sign(
+    { name: "ECDSA", hash: "SHA-256" },
+    identity.privateKey,
+    contentBytes
+  );
+  const signatureBase64 = btoa(String.fromCharCode(...new Uint8Array(sigBuf)));
+
+  return {
+    ...partial,
+    signerPublicKey: publicKeyBase64,
+    signature: signatureBase64,
+    contentHash,
+  } as import("./mirror").MirrorNode;
+}
+
+/**
+ * Sign a review reveal using the unified identity.
+ *
+ * This function signs a blinded peer review reveal using the unified identity.
+ */
+export async function signReviewRevealWithIdentity(
+  identity: Identity,
+  revealed: import("./review").RevealedReview
+): Promise<import("./review").RevealedReview> {
+  const { canonicalReview } = await import("./review");
+
+  const canonical = canonicalReview(revealed.review, revealed.nonce);
+  const contentBytes = new TextEncoder().encode(canonical);
+
+  // Export public key as SPKI
+  const pubRaw = await crypto.subtle.exportKey("spki", identity.publicKey);
+  const publicKeyBase64 = btoa(String.fromCharCode(...new Uint8Array(pubRaw)))
+    .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+
+  // Sign
+  const sigBuf = await crypto.subtle.sign(
+    { name: "ECDSA", hash: "SHA-256" },
+    identity.privateKey,
+    contentBytes
+  );
+  const signatureBase64 = btoa(String.fromCharCode(...new Uint8Array(sigBuf)))
+    .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+
+  return {
+    ...revealed,
+    signature: signatureBase64,
+    signerPublicKey: publicKeyBase64,
+  };
+}
+
+/**
+ * Sign a gamification certificate using the unified identity.
+ *
+ * This function creates a signed achievement certificate that proves
+ * the badge was earned by the identity holder.
+ */
+export async function signCertificateWithIdentity(
+  identity: Identity,
+  cert: import("./gamification").AchievementCertificate
+): Promise<import("./gamification").AchievementCertificate & {
+  signature?: string;
+  signerPublicKey?: string;
+  signerHandle?: string;
+}> {
+  // Create canonical content
+  const canonical = JSON.stringify({
+    id: cert.id,
+    badgeId: cert.badgeId,
+    badgeName: cert.badgeName,
+    badgeTier: cert.badgeTier,
+    xp: cert.xp,
+    level: cert.level,
+    countriesVisited: cert.countriesVisited,
+    dossiersRead: cert.dossiersRead,
+    campaignsGenerated: cert.campaignsGenerated,
+    issuedAt: cert.issuedAt,
+  });
+
+  const contentBytes = new TextEncoder().encode(canonical);
+
+  // Export public key as hex
+  const pubRaw = await crypto.subtle.exportKey("raw", identity.publicKey);
+  const publicKeyHex = bytesToHex(new Uint8Array(pubRaw));
+
+  // Sign the hash
+  const hashBuf = await crypto.subtle.digest("SHA-256", contentBytes);
+  const signature = await signWithIdentity(identity, bytesToHex(new Uint8Array(hashBuf)));
+
+  return {
+    ...cert,
+    signature,
+    signerPublicKey: publicKeyHex,
+    signerHandle: identity.handle,
+  };
+}

@@ -512,3 +512,18 @@ export async function computeManifestRoot(
   const blob = new TextEncoder().encode(JSON.stringify(sorted));
   return hexFromBuf(await crypto.subtle.digest("SHA-256", blob));
 }
+
+/**
+ * Create and sign a mirror claim using the unified identity.
+ *
+ * This function uses the persistent unified identity from lib/identity.ts
+ * instead of generating a new keypair per claim. This provides better
+ * continuity and allows operators to prove authorship across sessions.
+ */
+export async function createMirrorClaimWithIdentity(
+  input: CreateClaimInput,
+): Promise<MirrorNode> {
+  const { ensureIdentity, signMirrorClaimWithIdentity } = await import("./identity");
+  const identity = await ensureIdentity();
+  return await signMirrorClaimWithIdentity(identity, input);
+}

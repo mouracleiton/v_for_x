@@ -420,3 +420,18 @@ export function saveLocalNonce(dossierId: string, nonce: string | null): void {
     else localStorage.setItem(STORE_PREFIX + dossierId + ":nonce", nonce);
   } catch { /* ignore */ }
 }
+
+/**
+ * Sign a review reveal using the unified identity.
+ *
+ * This function uses the persistent unified identity from lib/identity.ts
+ * instead of generating ephemeral keypairs. This provides better continuity
+ * and allows reviewers to maintain their identity across sessions.
+ */
+export async function signRevealWithIdentity(
+  revealed: RevealedReview,
+): Promise<RevealedReview> {
+  const { ensureIdentity, signReviewRevealWithIdentity } = await import("./identity");
+  const identity = await ensureIdentity();
+  return await signReviewRevealWithIdentity(identity, revealed);
+}

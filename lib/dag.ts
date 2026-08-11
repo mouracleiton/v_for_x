@@ -284,3 +284,19 @@ function hexToBytes(hex: string): Uint8Array<ArrayBuffer> {
   }
   return out;
 }
+
+/**
+ * Create a signed DAG entry using the unified identity by default.
+ *
+ * This is a convenience function that creates a DAG entry and signs it
+ * using the unified identity from lib/identity.ts, providing a consistent
+ * signing experience across all modules.
+ */
+export async function createIdentitySignedDagEntry(
+  data: Omit<DagEntry, "hash" | "prevHash" | "id" | "signature" | "signerPubKey">,
+  prevHash: string,
+): Promise<DagEntry> {
+  const { ensureIdentity, createSignedDagEntry } = await import("./identity");
+  const identity = await ensureIdentity();
+  return await createSignedDagEntry(data, prevHash, identity);
+}

@@ -478,3 +478,86 @@ export async function verifyCertificate(
 export function exportCertificate(cert: AchievementCertificate): string {
   return JSON.stringify(cert, null, 2);
 }
+
+/**
+ * Generate a signed achievement certificate using the unified identity.
+ *
+ * This function creates a tamper-evident certificate that is cryptographically
+ * signed by the unified identity, providing verifiable proof of achievement.
+ */
+export async function generateSignedCertificate(
+  badgeId: string,
+): Promise<AchievementCertificate & {
+  signature?: string;
+  signerPublicKey?: string;
+  signerHandle?: string;
+} | null> {
+  if (typeof window === "undefined") return null;
+
+  const { ensureIdentity, signCertificateWithIdentity } = await import("./identity");
+  const identity = await ensureIdentity();
+
+  const cert = await generateCertificate(badgeId);
+  if (!cert) return null;
+
+  return await signCertificateWithIdentity(identity, cert);
+}
+
+/**
+ * Verify a signed certificate's signature and content hash.
+ *
+ * This function verifies both the cryptographic signature and the content hash,
+ * ensuring the certificate has not been tampered with and was signed by the
+ * claimed identity.
+ */
+export async function verifySignedCertificate(
+  cert: AchievementCertificate & {
+    signature?: string;
+    signerPublicKey?: string;
+    signerHandle?: string;
+  },
+): Promise<boolean> {
+  // First verify the content hash
+  const hashValid = await verifyCertificate(cert);
+  if (!hashValid) return false;
+
+  // Then verify the signature if present
+  if (!cert.signature || !cert.signerPublicKey) {
+    // Unsigned certificate is valid if hash matches
+    return true;
+  }
+
+  try {
+    const { verifyWithIdentity } = await import("./identity");
+    const publicIdentity = {
+      publicKeyHex: cert.signerPublicKey,
+      handle: cert.signerHandle || "",
+      fingerprint: "",
+      createdAt: cert.issuedAt,
+    };
+
+    // Reconstruct the hash that was signed
+    const canonical = JSON.stringify({
+      id: cert.id,
+      badgeId: cert.badgeId,
+      badgeName: cert.badgeName,
+      badgeTier: cert.badgeTier,
+      xp: cert.xp,
+      level: cert.level,
+      countriesVisited: cert.countriesVisited,
+      dossiersRead: cert.dossiersRead,
+      campaignsGenerated: cert.campaignsGenerated,
+      issuedAt: cert.issuedAt,
+    });
+
+    const buf = new TextEncoder().encode(canonical);
+    const hashBuf = await crypto.subtle.digest("SHA-256", buf);
+    const hash = Array.from(new Uint8Array(hashBuf))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+
+    return await verifyWithIdentity(publicIdentity, hash, cert.signature);
+  } catch {
+    return false;
+  }
+}

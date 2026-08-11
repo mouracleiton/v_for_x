@@ -588,3 +588,16 @@ export function loadSessionPrivateKey(): string | null {
     return null;
   }
 }
+
+/**
+ * Create a signer using the unified identity from lib/identity.ts.
+ *
+ * This function creates a signing function compatible with buildWitness
+ * that uses the persistent unified identity instead of ephemeral session keys.
+ * This provides better continuity across sessions and devices.
+ */
+export async function createIdentitySigner(): Promise<WitnessSignFn> {
+  const { ensureIdentity, signWitnessWithIdentity } = await import("./identity");
+  const identity = await ensureIdentity();
+  return await signWitnessWithIdentity(identity);
+}
