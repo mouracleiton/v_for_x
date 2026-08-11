@@ -199,7 +199,7 @@ export async function signWithIdentity(
   const sigBuf = await crypto.subtle.sign(
     { name: "ECDSA", hash: "SHA-256" },
     identity.privateKey,
-    data
+    data.buffer as ArrayBuffer
   );
   return bytesToHex(new Uint8Array(sigBuf));
 }
@@ -218,7 +218,7 @@ export async function verifyWithIdentity(
     const pubKeyBytes = hexToBytes(publicIdentity.publicKeyHex);
     const cryptoKey = await crypto.subtle.importKey(
       "raw",
-      pubKeyBytes,
+      pubKeyBytes.buffer as ArrayBuffer,
       { name: "ECDSA", namedCurve: "P-256" },
       false,
       ["verify"]
@@ -228,8 +228,8 @@ export async function verifyWithIdentity(
     return await crypto.subtle.verify(
       { name: "ECDSA", hash: "SHA-256" },
       cryptoKey,
-      sigBytes,
-      data
+      sigBytes.buffer as ArrayBuffer,
+      data.buffer as ArrayBuffer
     );
   } catch {
     return false;
@@ -252,7 +252,7 @@ export async function computeSafetyNumber(
   const keys = [identityA.publicKeyHex, identityB.publicKeyHex].sort();
   const combined = keys.join("");
   const buf = new TextEncoder().encode(combined);
-  const hashBuf = await crypto.subtle.digest("SHA-256", buf);
+  const hashBuf = await crypto.subtle.digest("SHA-256", buf.buffer as ArrayBuffer);
   return bytesToHex(new Uint8Array(hashBuf));
 }
 
@@ -282,7 +282,7 @@ export async function encodeIdentityToken(identity: Identity): Promise<string> {
   const sigBuf = await crypto.subtle.sign(
     { name: "ECDSA", hash: "SHA-256" },
     identity.privateKey,
-    messageBuf
+    messageBuf.buffer as ArrayBuffer
   );
   const signature = bytesToHex(new Uint8Array(sigBuf));
 
@@ -327,7 +327,7 @@ export async function decodeIdentityToken(
 
     const publicKey = await crypto.subtle.importKey(
       "raw",
-      pubKeyBytes,
+      pubKeyBytes.buffer as ArrayBuffer,
       { name: "ECDSA", namedCurve: "P-256" },
       false,
       ["verify"]
@@ -336,8 +336,8 @@ export async function decodeIdentityToken(
     const isValid = await crypto.subtle.verify(
       { name: "ECDSA", hash: "SHA-256" },
       publicKey,
-      sigBytes,
-      messageBuf
+      sigBytes.buffer as ArrayBuffer,
+      messageBuf.buffer as ArrayBuffer
     );
 
     if (!isValid) {
@@ -345,7 +345,7 @@ export async function decodeIdentityToken(
     }
 
     // Compute fingerprint
-    const hashBuf = await crypto.subtle.digest("SHA-256", pubKeyBytes);
+    const hashBuf = await crypto.subtle.digest("SHA-256", pubKeyBytes.buffer as ArrayBuffer);
     const fingerprint = bytesToHex(new Uint8Array(hashBuf)).slice(0, 12);
 
     return {
@@ -443,7 +443,7 @@ export async function verifyDagEntrySignature(
 
   // Compute fingerprint
   const pubKeyBytes = hexToBytes(entry.signerPubKey);
-  const hashBuf = await crypto.subtle.digest("SHA-256", pubKeyBytes);
+  const hashBuf = await crypto.subtle.digest("SHA-256", pubKeyBytes.buffer as ArrayBuffer);
   const fingerprint = bytesToHex(new Uint8Array(hashBuf)).slice(0, 12);
 
   return {

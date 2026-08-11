@@ -522,7 +522,7 @@ export function completeMissionStep(missionId: MissionId, stepId: string): void 
   const missionProgress = state.missions[missionId];
 
   // Add step to completed if not already there
-  if (!missionProgress.completedSteps.includes(stepId)) {
+  if (missionProgress && !missionProgress.completedSteps.includes(stepId)) {
     missionProgress.completedSteps.push(stepId);
     missionProgress.lastCompletedAt = Date.now();
   }
@@ -530,7 +530,7 @@ export function completeMissionStep(missionId: MissionId, stepId: string): void 
   // Check if mission is complete
   const mission = MISSIONS[missionId];
   const allStepIds = mission.steps.map((s) => s.id);
-  const isComplete = allStepIds.every((id) => missionProgress.completedSteps.includes(id));
+  const isComplete = missionProgress && allStepIds.every((id) => missionProgress.completedSteps.includes(id));
 
   if (isComplete && !missionProgress.completedAt) {
     missionProgress.completedAt = Date.now();

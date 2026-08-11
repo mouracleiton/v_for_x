@@ -497,7 +497,7 @@ describe("missions.ts — Token Persistence", () => {
 
     // Clear the in-memory cache (simulating page reload)
     const restoredState = getMissionsState();
-    expect(restoredState.missions.establish_identity.completedSteps).toHaveLength(2);
+    expect(restoredState.missions.establish_identity?.completedSteps).toHaveLength(2);
     expect(isStepCompleted("establish_identity", "choose_persona")).toBe(true);
   });
 });

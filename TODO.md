@@ -170,8 +170,8 @@
 - [x] lib/personas.ts — 5 persona modes + nav filter
 - [x] lib/missions.ts — 6 guided missions + VFXMSN1 progress tokens
 - [x] data/playbooks.json + lib/playbooks.ts — 7 situation playbooks
-- [ ] /the-missions — persona picker, identity, mission runner, safety engine, ops journal
-- [ ] /the-playbooks — checklist UI
+- [x] /the-missions — persona picker, identity, mission runner, safety engine, ops journal
+- [x] /the-playbooks — checklist UI
 - [ ] BranchNav persona filter + FULL NAV toggle; store persona/fullNav
 - [ ] Home CTA → missions / playbooks / bridge
 
