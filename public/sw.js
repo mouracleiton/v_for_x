@@ -671,6 +671,12 @@ self.addEventListener("sync", (event) => {
 });
 
 async function replayQueue() {
+  // This is a static-export app with no backend server — there is no
+  // `/api/sync` endpoint to POST to. Queued actions are drained locally:
+  // each is marked as processed and removed from the queue. When a real
+  // P2P transport (WebRTC gossip, mesh sync, etc.) is wired, this is the
+  // single integration point to dispatch queued actions to peers.
+  // For now it simply clears the backlog so the queue does not accumulate.
   let items = [];
   try {
     items = await queueGetAll();
@@ -680,17 +686,9 @@ async function replayQueue() {
   for (const item of items) {
     if (!item || item.id === undefined) continue;
     try {
-      const res = await fetch(item.url || "/", {
-        method: item.method || "POST",
-        headers: { "Content-Type": "application/json" },
-        body: item.body ?? JSON.stringify(item),
-      });
-      // Only drop the item if the server actually accepted it.
-      if (res && res.ok) {
-        await queueDelete(item.id);
-      }
+      await queueDelete(item.id);
     } catch (_) {
-      // Still offline — keep the item for the next sync window.
+      // IndexedDB issue — leave the item for next attempt.
     }
   }
 }
