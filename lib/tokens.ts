@@ -162,6 +162,15 @@ export const TOKEN_SPECS: TokenSpec[] = [
     signed: true,
     encrypted: false,
   },
+  {
+    prefix: "VFXID1PUB:",
+    id: "VFXID1PUB",
+    name: "Public Identity Card",
+    description: "Public identity information (handle, public key, fingerprint, no signature)",
+    module: "identity",
+    signed: false,
+    encrypted: false,
+  },
 ];
 
 /* ═══════════════════════════════════════════════════════════════

@@ -210,7 +210,7 @@ Prioritize work that completes **See → Understand → Act → Hold → Coordin
 - [x] Web DataChannel signs with VFXID1 (`ensureIdentity` / `importKeyPair`); hydrates from `loadIdentity` on mount
 - [x] CRDT Docs: actor = VFXID1 handle; `encodeSigned` / `verifyTokenSignature` on export/import
 - [x] Safety number: pairwise panel on Web mesh-hello; Docs shows own safety number
-- [ ] Identity public card export (no private key) — `encodePublicCardToken` / `publicCard` in `lib/identity.ts` (+ Missions UI)
+- [x] Identity public card export (no private key) — `encodePublicCardToken` / `publicCard` in `lib/identity.ts` (+ Missions UI)
 - [ ] Key rotation + 30d grace: `rotateIdentity` / `loadPreviousIdentities` / `verifySignatureWithGrace`; Missions ROTATE KEY UI
 - [ ] Bind mission progress + ops journal events to identity handle/fingerprint on save/log
 - [ ] Panic wipe audit registry: `lib/storage-map.ts` (+ rotation/duress backup keys)

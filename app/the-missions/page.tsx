@@ -33,6 +33,7 @@ import {
   ensureIdentity,
   type Identity,
   encodeIdentityToken,
+  encodePublicCardToken,
 } from "@/lib/identity";
 import {
   runSafetyChecks,
@@ -197,6 +198,19 @@ export default function TheMissionsPage() {
     } catch (error) {
       sound.error();
       console.error("Failed to export identity:", error);
+    }
+  }, [identity]);
+
+  const handleExportPublicCard = useCallback(() => {
+    if (!identity) return;
+
+    try {
+      const token = encodePublicCardToken(identity);
+      setExportToken(token);
+      sound.success();
+    } catch (error) {
+      sound.error();
+      console.error("Failed to export public card:", error);
     }
   }, [identity]);
 
@@ -454,6 +468,12 @@ export default function TheMissionsPage() {
                 className="text-xs px-3 py-1 border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void"
               >
                 EXPORT IDENTITY
+              </button>
+              <button
+                onClick={handleExportPublicCard}
+                className="text-xs px-3 py-1 border border-border-dim text-content-secondary hover:border-terminal-green hover:text-terminal-green"
+              >
+                EXPORT PUBLIC CARD
               </button>
               <button
                 onClick={() => setShowIdentity(!showIdentity)}

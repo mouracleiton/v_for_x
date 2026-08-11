@@ -8,9 +8,12 @@ import {
   signWithIdentity,
   verifyWithIdentity,
   computeSafetyNumber,
+  publicCard,
   exportPublicCard,
   encodeIdentityToken,
   decodeIdentityToken,
+  encodePublicCardToken,
+  decodePublicCardToken,
   createSignedDagEntry,
   verifyDagEntrySignature,
   type Identity,
@@ -306,6 +309,114 @@ describe("identity.ts", () => {
       const wrongPrefix = token.replace("VFXID1:", "VFXID2:");
       const decoded = await decodeIdentityToken(wrongPrefix);
       expect(decoded).toBeNull();
+    });
+  });
+
+  describe("publicCard", () => {
+    it("should export only public information", async () => {
+      const identity = await generateIdentity();
+      const card = publicCard(identity);
+
+      expect(card.publicKeyHex).toBe(identity.publicKeyHex);
+      expect(card.handle).toBe(identity.handle);
+      expect(card.fingerprint).toBe(identity.fingerprint);
+      expect(card.createdAt).toBe(identity.createdAt);
+      expect((card as any).privateKey).toBeUndefined();
+      expect((card as any).publicKey).toBeUndefined();
+    });
+
+    it("should not include private key in public card", async () => {
+      const identity = await generateIdentity();
+      const card = publicCard(identity);
+
+      const cardJson = JSON.stringify(card);
+      expect(cardJson).not.toContain("private");
+    });
+  });
+
+  describe("encodePublicCardToken and decodePublicCardToken", () => {
+    it("should encode and decode public card token correctly", async () => {
+      const identity = await generateIdentity();
+      const token = encodePublicCardToken(identity);
+
+      expect(token).toMatch(/^VFXID1PUB:/);
+
+      const decoded = decodePublicCardToken(token);
+      expect(decoded).not.toBeNull();
+      expect(decoded!.publicKeyHex).toBe(identity.publicKeyHex);
+      expect(decoded!.handle).toBe(identity.handle);
+      expect(decoded!.fingerprint).toBe(identity.fingerprint);
+      expect(decoded!.createdAt).toBe(identity.createdAt);
+    });
+
+    it("should not include private key in public card token", async () => {
+      const identity = await generateIdentity();
+      const token = encodePublicCardToken(identity);
+
+      const tokenJson = atob(token.slice(10));
+      expect(tokenJson).not.toContain("private");
+    });
+
+    it("should handle malformed public card tokens", () => {
+      expect(decodePublicCardToken("invalid")).toBeNull();
+      expect(decodePublicCardToken("VFXID1PUB:")).toBeNull();
+      expect(decodePublicCardToken("VFXID1PUB:invalid-base64")).toBeNull();
+    });
+
+    it("should reject tokens with wrong prefix", () => {
+      expect(decodePublicCardToken("VFXID1:something")).toBeNull();
+      expect(decodePublicCardToken("VFXID2:something")).toBeNull();
+    });
+
+    it("should reject tokens with wrong version", async () => {
+      const identity = await generateIdentity();
+      const token = encodePublicCardToken(identity);
+
+      // Parse and modify version
+      const base64 = token.slice(10);
+      const json = atob(base64);
+      const data = JSON.parse(json);
+      data.version = 2;
+      const tamperedJson = JSON.stringify(data);
+      const tamperedBase64 = btoa(tamperedJson);
+      const tamperedToken = `VFXID1PUB:${tamperedBase64}`;
+
+      const decoded = decodePublicCardToken(tamperedToken);
+      expect(decoded).toBeNull();
+    });
+
+    it("should encode public card from exported public identity", async () => {
+      const identity = await generateIdentity();
+      const exported = publicCard(identity);
+      const token = encodePublicCardToken(identity);
+
+      const decoded = decodePublicCardToken(token);
+      expect(decoded).not.toBeNull();
+      expect(decoded!.publicKeyHex).toBe(exported.publicKeyHex);
+      expect(decoded!.handle).toBe(exported.handle);
+      expect(decoded!.fingerprint).toBe(exported.fingerprint);
+      expect(decoded!.createdAt).toBe(exported.createdAt);
+    });
+
+    it("should differentiate between VFXID1 and VFXID1PUB tokens", async () => {
+      const identity = await generateIdentity();
+      const signedToken = await encodeIdentityToken(identity);
+      const publicCardToken = encodePublicCardToken(identity);
+
+      expect(signedToken).toMatch(/^VFXID1:/);
+      expect(publicCardToken).toMatch(/^VFXID1PUB:/);
+
+      // Signed token should decode with signature verification
+      const signedDecoded = await decodeIdentityToken(signedToken);
+      expect(signedDecoded).not.toBeNull();
+
+      // Public card token should decode without signature verification
+      const publicDecoded = decodePublicCardToken(publicCardToken);
+      expect(publicDecoded).not.toBeNull();
+
+      // Both should have the same public information
+      expect(signedDecoded!.publicKeyHex).toBe(publicDecoded!.publicKeyHex);
+      expect(signedDecoded!.handle).toBe(publicDecoded!.handle);
     });
   });
 

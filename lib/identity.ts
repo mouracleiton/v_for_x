@@ -261,13 +261,23 @@ export async function computeSafetyNumber(
  *
  * This can be shared with others for verification purposes.
  */
-export function exportPublicCard(identity: Identity): PublicIdentity {
+export function publicCard(identity: Identity): PublicIdentity {
   return {
     publicKeyHex: identity.publicKeyHex,
     handle: identity.handle,
     fingerprint: identity.fingerprint,
     createdAt: identity.createdAt,
   };
+}
+
+/**
+ * Export identity as a public card (no private key).
+ *
+ * This can be shared with others for verification purposes.
+ * @deprecated Use publicCard instead for consistency.
+ */
+export function exportPublicCard(identity: Identity): PublicIdentity {
+  return publicCard(identity);
 }
 
 /**
@@ -353,6 +363,58 @@ export async function decodeIdentityToken(
       handle: data.handle,
       fingerprint,
       createdAt: Date.now(), // Not stored in token
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Encode a public identity card as a VFXID1PUB token.
+ *
+ * Format: VFXID1PUB:base64url({version, handle, publicKeyHex, fingerprint, createdAt})
+ * This token contains NO private key and NO signature - it's purely for sharing your public identity.
+ * Use this when you want to share your identity info without proving ownership.
+ */
+export function encodePublicCardToken(identity: Identity): string {
+  const publicCardData = {
+    version: 1,
+    handle: identity.handle,
+    publicKeyHex: identity.publicKeyHex,
+    fingerprint: identity.fingerprint,
+    createdAt: identity.createdAt,
+  };
+
+  const json = JSON.stringify(publicCardData);
+  const base64 = btoa(json);
+  return `VFXID1PUB:${base64}`;
+}
+
+/**
+ * Decode a VFXID1PUB public card token.
+ *
+ * Returns the public identity if the format is valid, null otherwise.
+ * No signature verification is performed since public cards are not signed.
+ */
+export function decodePublicCardToken(token: string): PublicIdentity | null {
+  if (!token.startsWith("VFXID1PUB:")) {
+    return null;
+  }
+
+  try {
+    const base64 = token.slice(10); // Remove "VFXID1PUB:"
+    const json = atob(base64);
+    const data = JSON.parse(json);
+
+    if (data.version !== 1) {
+      return null;
+    }
+
+    return {
+      publicKeyHex: data.publicKeyHex,
+      handle: data.handle,
+      fingerprint: data.fingerprint,
+      createdAt: data.createdAt,
     };
   } catch {
     return null;
