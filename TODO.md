@@ -195,7 +195,7 @@
 - [x] Subnational layer on Sorrow Map (Leaflet), not only /the-subnational
 - [x] OpenTimestamps / cosign build verify (Phase 13)
 - [x] Shamir / voice notes / Nostr roots (voice notes implemented: record → VFXFILE1 → ShareSheet dead-drop/pack; more advanced Shamir/Nostr later)
-- [ ] Capacitor Guardian background check-in
+- [x] Capacitor Guardian background check-in
 - [ ] Full i18n for new Phase 10 UI strings (ongoing; EmptyState + ShareSheet titles use existing tc patterns)
 
 ---

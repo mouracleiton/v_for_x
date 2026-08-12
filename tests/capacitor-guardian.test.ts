@@ -1,0 +1,403 @@
+/**
+ * V FOR X — Tests for Capacitor Guardian Background Check-in
+ */
+
+import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
+import { GuardianRecord } from "@/lib/guardian";
+
+// Mock Capacitor modules BEFORE importing the module under test
+vi.mock("@capacitor/core", () => ({
+  Capacitor: {
+    isPluginAvailable: vi.fn(() => true),
+  },
+}));
+
+const mockLocalNotifications = {
+  checkPermissions: vi.fn(),
+  requestPermissions: vi.fn(),
+  schedule: vi.fn(),
+  cancel: vi.fn(),
+  getPending: vi.fn(),
+  addListener: vi.fn(),
+  removeListeners: vi.fn(),
+};
+
+vi.mock("@capacitor/local-notifications", () => ({
+  LocalNotifications: mockLocalNotifications,
+}));
+
+// Mock window.Capacitor context
+const mockCapacitor = {
+  isPluginAvailable: vi.fn(() => true),
+};
+
+Object.defineProperty(window, "Capacitor", {
+  value: mockCapacitor,
+  writable: true,
+  configurable: true,
+});
+
+import {
+  isAvailable,
+  requestPermissions,
+  scheduleGuardianNotifications,
+  cancelGuardianNotifications,
+  cancelAllGuardianNotifications,
+  getPendingNotificationCount,
+  setupNotificationListeners,
+} from "@/lib/capacitor-guardian";
+
+// Mock GuardianRecord for testing
+const mockGuardianRecord: GuardianRecord = {
+  id: "test-guardian-1",
+  config: {
+    label: "Test Guardian",
+    checkInHours: 12,
+    lastCheckIn: Date.now() - 3600000, // 1 hour ago
+    passphrase: "test-pass-123",
+    safeCode: "1234",
+    duressCode: "9999",
+    contacts: [
+      {
+        label: "Editor",
+        handle: "editor@news.com",
+        escalateAfterMin: 30,
+      },
+      {
+        label: "Lawyer",
+        handle: "lawyer@rights.org",
+        escalateAfterMin: 60,
+      },
+    ],
+    escalationMessage: "Test escalation message",
+  },
+  status: "armed",
+  duressFlag: false,
+  location: null,
+  salt: "test-salt",
+  iterations: 150000,
+  createdAt: Date.now() - 7200000,
+};
+
+describe("Capacitor Guardian", () => {
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe("isAvailable", () => {
+    it("returns true when permissions are granted", async () => {
+      mockLocalNotifications.checkPermissions.mockResolvedValue({
+        display: "granted",
+      });
+
+      const result = await isAvailable();
+
+      expect(result).toBe(true);
+    });
+
+    it("returns true when permissions prompt is available", async () => {
+      mockLocalNotifications.checkPermissions.mockResolvedValue({
+        display: "prompt",
+      });
+
+      const result = await isAvailable();
+
+      expect(result).toBe(true);
+    });
+
+    it("returns false when plugin throws", async () => {
+      mockLocalNotifications.checkPermissions.mockRejectedValue(
+        new Error("Plugin not installed"),
+      );
+
+      const result = await isAvailable();
+
+      expect(result).toBe(false);
+    });
+
+    it("returns false when Capacitor context is not available", async () => {
+      // @ts-ignore - testing undefined window
+      delete window.Capacitor;
+
+      const result = await isAvailable();
+
+      expect(result).toBe(false);
+
+      // Restore for other tests
+      window.Capacitor = {
+        isPluginAvailable: vi.fn(() => true),
+      };
+    });
+  });
+
+  describe("requestPermissions", () => {
+    it("requests and returns granted status", async () => {
+      mockLocalNotifications.requestPermissions.mockResolvedValue({
+        display: "granted",
+      });
+
+      const result = await requestPermissions();
+
+      expect(result).toBe(true);
+      expect(mockLocalNotifications.requestPermissions).toHaveBeenCalledTimes(1);
+    });
+
+    it("returns false when denied", async () => {
+      mockLocalNotifications.requestPermissions.mockResolvedValue({
+        display: "denied",
+      });
+
+      const result = await requestPermissions();
+
+      expect(result).toBe(false);
+    });
+
+    it("returns false when plugin throws", async () => {
+      mockLocalNotifications.requestPermissions.mockRejectedValue(
+        new Error("Plugin error"),
+      );
+
+      const result = await requestPermissions();
+
+      expect(result).toBe(false);
+    });
+  });
+
+  describe("scheduleGuardianNotifications", () => {
+    it("schedules reminder, deadline, and escalation notifications", async () => {
+      mockLocalNotifications.checkPermissions.mockResolvedValue({
+        display: "granted",
+      });
+      mockLocalNotifications.requestPermissions.mockResolvedValue({
+        display: "granted",
+      });
+      mockLocalNotifications.getPending.mockResolvedValue({
+        notifications: [],
+      });
+
+      await scheduleGuardianNotifications(
+        "test-guardian-1",
+        mockGuardianRecord,
+        [3600000, 86400000], // 1 hour and 24 hour reminders
+      );
+
+      expect(mockLocalNotifications.schedule).toHaveBeenCalledWith(
+        expect.objectContaining({
+          notifications: expect.arrayContaining([
+            expect.objectContaining({
+              title: "Guardian Check-in Reminder",
+              extra: expect.objectContaining({
+                type: "guardian-reminder",
+                guardianId: "test-guardian-1",
+              }),
+            }),
+            expect.objectContaining({
+              title: "⚠️ GUARDIAN CHECK-IN MISSED",
+              extra: expect.objectContaining({
+                type: "guardian-deadline",
+                guardianId: "test-guardian-1",
+              }),
+            }),
+            expect.objectContaining({
+              title: "Guardian Escalation: Editor",
+              extra: expect.objectContaining({
+                type: "guardian-escalation",
+                guardianId: "test-guardian-1",
+              }),
+            }),
+          ]),
+        }),
+      );
+    });
+
+    it("does not schedule reminders when deadline is in past", async () => {
+      const pastDeadlineRecord: GuardianRecord = {
+        ...mockGuardianRecord,
+        config: {
+          ...mockGuardianRecord.config,
+          lastCheckIn: Date.now() - 86400000, // 24 hours ago
+          checkInHours: 12,
+        },
+      };
+
+      mockLocalNotifications.checkPermissions.mockResolvedValue({
+        display: "granted",
+      });
+      mockLocalNotifications.requestPermissions.mockResolvedValue({
+        display: "granted",
+      });
+      mockLocalNotifications.getPending.mockResolvedValue({
+        notifications: [],
+      });
+
+      await scheduleGuardianNotifications(pastDeadlineRecord.id, pastDeadlineRecord);
+
+      // Should schedule deadline notification and escalations, but no reminders
+      const scheduleCall = mockLocalNotifications.schedule.mock.calls[0];
+      const notifications = scheduleCall[0].notifications;
+
+      const reminders = notifications.filter((n: any) => n.extra?.type === "guardian-reminder");
+      expect(reminders.length).toBe(0);
+    });
+
+    it("cancels existing notifications before scheduling new ones", async () => {
+      mockLocalNotifications.checkPermissions.mockResolvedValue({
+        display: "granted",
+      });
+      mockLocalNotifications.requestPermissions.mockResolvedValue({
+        display: "granted",
+      });
+      mockLocalNotifications.getPending.mockResolvedValue({
+        notifications: [{ id: 10001 }],
+      });
+      mockLocalNotifications.cancel.mockResolvedValue();
+
+      await scheduleGuardianNotifications("test-guardian-1", mockGuardianRecord);
+
+      expect(mockLocalNotifications.cancel).toHaveBeenCalledWith({
+        localNotifications: expect.arrayContaining([10001]),
+      });
+      expect(mockLocalNotifications.schedule).toHaveBeenCalled();
+    });
+
+    it("gracefully exits when plugin is not available", async () => {
+      mockLocalNotifications.checkPermissions.mockRejectedValue(
+        new Error("Plugin not available"),
+      );
+
+      await expect(
+        scheduleGuardianNotifications("test-guardian-1", mockGuardianRecord),
+      ).resolves.not.toThrow();
+
+      expect(mockLocalNotifications.schedule).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("cancelGuardianNotifications", () => {
+    it("cancels all notifications for a specific guardian", async () => {
+      mockLocalNotifications.checkPermissions.mockResolvedValue({
+        display: "granted",
+      });
+      mockLocalNotifications.getPending.mockResolvedValue({
+        notifications: [
+          { id: 10001 }, // In range
+          { id: 10002 }, // In range
+          { id: 20000 }, // Out of range (different guardian)
+        ],
+      });
+      mockLocalNotifications.cancel.mockResolvedValue();
+
+      await cancelGuardianNotifications("test-guardian-1");
+
+      expect(mockLocalNotifications.cancel).toHaveBeenCalledWith({
+        localNotifications: expect.arrayContaining([10001, 10002]),
+      });
+    });
+
+    it("does not throw when plugin is not available", async () => {
+      mockLocalNotifications.checkPermissions.mockRejectedValue(
+        new Error("Plugin error"),
+      );
+
+      await expect(
+        cancelGuardianNotifications("test-guardian-1"),
+      ).resolves.not.toThrow();
+    });
+  });
+
+  describe("cancelAllGuardianNotifications", () => {
+    it("cancels all guardian notifications across all guardians", async () => {
+      mockLocalNotifications.checkPermissions.mockResolvedValue({
+        display: "granted",
+      });
+      mockLocalNotifications.getPending.mockResolvedValue({
+        notifications: [
+          { id: 10001 },
+          { id: 10500 },
+          { id: 20001 },
+          { id: 50000 }, // Out of range
+        ],
+      });
+      mockLocalNotifications.cancel.mockResolvedValue();
+
+      await cancelAllGuardianNotifications();
+
+      expect(mockLocalNotifications.cancel).toHaveBeenCalledWith({
+        localNotifications: expect.arrayContaining([10001, 10500, 20001]),
+      });
+    });
+  });
+
+  describe("getPendingNotificationCount", () => {
+    it("returns count of pending notifications for guardian", async () => {
+      mockLocalNotifications.checkPermissions.mockResolvedValue({
+        display: "granted",
+      });
+      mockLocalNotifications.getPending.mockResolvedValue({
+        notifications: [
+          { id: 10001 },
+          { id: 10002 },
+          { id: 20000 }, // Different guardian
+        ],
+      });
+
+      const count = await getPendingNotificationCount("test-guardian-1");
+
+      expect(count).toBe(2);
+    });
+
+    it("returns 0 when plugin is not available", async () => {
+      mockLocalNotifications.checkPermissions.mockRejectedValue(
+        new Error("Plugin error"),
+      );
+
+      const count = await getPendingNotificationCount("test-guardian-1");
+
+      expect(count).toBe(0);
+    });
+  });
+
+  describe("setupNotificationListeners", () => {
+    it("sets up notification received listener", async () => {
+      mockLocalNotifications.addListener.mockResolvedValue();
+
+      await setupNotificationListeners();
+
+      expect(mockLocalNotifications.addListener).toHaveBeenCalledWith(
+        "localNotificationReceived",
+        expect.any(Function),
+      );
+    });
+
+    it("sets up notification action performed listener", async () => {
+      mockLocalNotifications.addListener.mockResolvedValue();
+
+      await setupNotificationListeners();
+
+      expect(mockLocalNotifications.addListener).toHaveBeenCalledWith(
+        "localNotificationActionPerformed",
+        expect.any(Function),
+      );
+    });
+
+    it("dispatches custom event on deadline notification", async () => {
+      const dispatchEventSpy = vi.spyOn(window, "dispatchEvent");
+      mockLocalNotifications.addListener.mockImplementation((event: string, callback: any) => {
+        if (event === "localNotificationReceived") {
+          callback({
+            id: 1,
+            title: "⚠️ GUARDIAN CHECK-IN MISSED",
+            extra: { type: "guardian-deadline", guardianId: "test-1" },
+          });
+        }
+        return Promise.resolve();
+      });
+
+      await setupNotificationListeners();
+
+      expect(dispatchEventSpy).toHaveBeenCalledWith(
+        expect.any(CustomEvent),
+      );
+    });
+  });
+});

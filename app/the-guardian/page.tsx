@@ -155,6 +155,16 @@ export default function TheGuardianPage() {
       }
     } catch { /* ignore */ }
     setLoaded(true);
+
+    // Setup Capacitor notification listeners
+    try {
+      // Dynamic import to avoid SSR issues
+      import("@/lib/capacitor-guardian").then(({ setupNotificationListeners }) => {
+        setupNotificationListeners();
+      });
+    } catch (e) {
+      console.debug("Failed to setup notification listeners:", e);
+    }
   }, []);
 
   // AUTO-RELEASE: evaluate once per tick; when the switch fires, sign
@@ -350,6 +360,16 @@ export default function TheGuardianPage() {
       setPassphrase("");
       setConfirmPass("");
       sound.success();
+
+      // Schedule background notifications for mobile
+      if (r) {
+        try {
+          const { scheduleGuardianNotifications } = await import("@/lib/capacitor-guardian");
+          await scheduleGuardianNotifications(r.id, r);
+        } catch (e) {
+          console.debug("Failed to schedule guardian notifications:", e);
+        }
+      }
     } catch (e) {
       setError(`// ${e instanceof Error ? e.message : "Unknown error"}`);
       sound.error();
@@ -369,6 +389,14 @@ export default function TheGuardianPage() {
         updated.duressFlag ? "CHECK-IN ACCEPTED." : "CHECK-IN ACCEPTED. Timer reset.",
       );
       sound.success();
+
+      // Reschedule background notifications for mobile
+      try {
+        const { scheduleGuardianNotifications } = await import("@/lib/capacitor-guardian");
+        await scheduleGuardianNotifications(updated.id, updated);
+      } catch (e) {
+        console.debug("Failed to reschedule guardian notifications:", e);
+      }
     } catch (e) {
       setError(`// ${e instanceof Error ? e.message : "Check-in failed"}`);
       sound.error();
@@ -465,12 +493,20 @@ export default function TheGuardianPage() {
     } catch { /* ignore */ }
   }, []);
 
-  const handleDisarm = useCallback(() => {
+  const handleDisarm = useCallback(async () => {
     if (!record) return;
     const disarmed = disarmGuardian(record);
     setRecord(disarmed);
     setStatus(evaluateStatus(disarmed));
     sound.success();
+
+    // Cancel background notifications for mobile
+    try {
+      const { cancelGuardianNotifications } = await import("@/lib/capacitor-guardian");
+      await cancelGuardianNotifications(record.id);
+    } catch (e) {
+      console.debug("Failed to cancel guardian notifications:", e);
+    }
   }, [record]);
 
   const handleDestroy = useCallback(() => {
