@@ -20,6 +20,7 @@ export type OpsEventType =
   | "persona_selected"
   | "identity_created"
   | "identity_loaded"
+  | "identity_rotated"
   | "mission_started"
   | "mission_step_completed"
   | "mission_completed"
@@ -54,6 +55,10 @@ export interface OpsEvent {
   missionId?: MissionId;
   /** Related page/route (if applicable) */
   route?: string;
+  /** Identity handle when event was logged (optional, for binding) */
+  identityHandle?: string;
+  /** Identity fingerprint when event was logged (optional, for verification) */
+  identityFingerprint?: string;
 }
 
 export interface OpsJournal {
@@ -163,8 +168,9 @@ function generateId(): string {
 
 /**
  * Log an event to the ops journal.
+ * Automatically attaches identity handle/fingerprint if available.
  */
-export function logEvent(event: Omit<OpsEvent, "id" | "timestamp">): void {
+export async function logEvent(event: Omit<OpsEvent, "id" | "timestamp" | "identityHandle" | "identityFingerprint">): Promise<void> {
   const journal = getOpsJournal();
 
   const newEvent: OpsEvent = {
@@ -172,6 +178,21 @@ export function logEvent(event: Omit<OpsEvent, "id" | "timestamp">): void {
     timestamp: Date.now(),
     ...event,
   };
+
+  // Attach identity information if available
+  try {
+    if (typeof window !== "undefined" && window.crypto) {
+      const { loadIdentity } = await import("./identity");
+      const identity = await loadIdentity();
+      if (identity) {
+        newEvent.identityHandle = identity.handle;
+        newEvent.identityFingerprint = identity.fingerprint;
+      }
+    }
+  } catch {
+    // Silently fail if identity system is not available
+    // This maintains backward compatibility
+  }
 
   journal.events.push(newEvent);
 
@@ -186,8 +207,8 @@ export function logEvent(event: Omit<OpsEvent, "id" | "timestamp">): void {
 /**
  * Log a persona selection event.
  */
-export function logPersonaSelected(personaId: PersonaId, personaName?: string): void {
-  logEvent({
+export async function logPersonaSelected(personaId: PersonaId, personaName?: string): Promise<void> {
+  await logEvent({
     type: "persona_selected",
     title: `Selected persona: ${personaName || personaId}`,
     details: { personaId, personaName },
@@ -198,8 +219,8 @@ export function logPersonaSelected(personaId: PersonaId, personaName?: string): 
 /**
  * Log an identity creation event.
  */
-export function logIdentityCreated(handle: string): void {
-  logEvent({
+export async function logIdentityCreated(handle: string): Promise<void> {
+  await logEvent({
     type: "identity_created",
     title: `Created identity: ${handle}`,
     details: { handle },
@@ -209,8 +230,8 @@ export function logIdentityCreated(handle: string): void {
 /**
  * Log an identity loaded event.
  */
-export function logIdentityLoaded(handle: string): void {
-  logEvent({
+export async function logIdentityLoaded(handle: string): Promise<void> {
+  await logEvent({
     type: "identity_loaded",
     title: `Loaded identity: ${handle}`,
     details: { handle },
@@ -218,10 +239,21 @@ export function logIdentityLoaded(handle: string): void {
 }
 
 /**
+ * Log an identity rotation event.
+ */
+export async function logIdentityRotated(oldHandle: string, newHandle: string): Promise<void> {
+  await logEvent({
+    type: "identity_rotated",
+    title: `Rotated identity: ${oldHandle} → ${newHandle}`,
+    details: { oldHandle, newHandle },
+  });
+}
+
+/**
  * Log a mission started event.
  */
-export function logMissionStarted(missionId: MissionId, missionName: string): void {
-  logEvent({
+export async function logMissionStarted(missionId: MissionId, missionName: string): Promise<void> {
+  await logEvent({
     type: "mission_started",
     title: `Started mission: ${missionName}`,
     details: { missionId, missionName },
@@ -232,12 +264,12 @@ export function logMissionStarted(missionId: MissionId, missionName: string): vo
 /**
  * Log a mission step completed event.
  */
-export function logMissionStepCompleted(
+export async function logMissionStepCompleted(
   missionId: MissionId,
   stepId: string,
   stepTitle: string
-): void {
-  logEvent({
+): Promise<void> {
+  await logEvent({
     type: "mission_step_completed",
     title: `Completed step: ${stepTitle}`,
     details: { missionId, stepId, stepTitle },
@@ -248,8 +280,8 @@ export function logMissionStepCompleted(
 /**
  * Log a mission completed event.
  */
-export function logMissionCompleted(missionId: MissionId, missionName: string): void {
-  logEvent({
+export async function logMissionCompleted(missionId: MissionId, missionName: string): Promise<void> {
+  await logEvent({
     type: "mission_completed",
     title: `Completed mission: ${missionName}`,
     details: { missionId, missionName },
@@ -260,8 +292,8 @@ export function logMissionCompleted(missionId: MissionId, missionName: string): 
 /**
  * Log a page visit event.
  */
-export function logPageVisited(route: string, title?: string): void {
-  logEvent({
+export async function logPageVisited(route: string, title?: string): Promise<void> {
+  await logEvent({
     type: "page_visited",
     title: `Visited: ${title || route}`,
     details: { route, title },
@@ -272,8 +304,8 @@ export function logPageVisited(route: string, title?: string): void {
 /**
  * Log a custom event.
  */
-export function logCustomEvent(title: string, details?: Record<string, unknown>): void {
-  logEvent({
+export async function logCustomEvent(title: string, details?: Record<string, unknown>): Promise<void> {
+  await logEvent({
     type: "custom",
     title,
     details,
@@ -348,6 +380,7 @@ export function getOpsStats(): OpsStats {
     persona_selected: 0,
     identity_created: 0,
     identity_loaded: 0,
+    identity_rotated: 0,
     mission_started: 0,
     mission_step_completed: 0,
     mission_completed: 0,

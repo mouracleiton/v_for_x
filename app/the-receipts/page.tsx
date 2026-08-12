@@ -855,7 +855,7 @@ export default function TheReceiptsPage() {
 
       {/* OpenTimestamps calendar timestamp */}
       <div className="mt-4">
-        <TerminalCard title="08 · OPENTIMESTAMPS CALENDAR" accent="cyan">
+        <TerminalCard title="08 · OPENTIMESTAMPS CALENDAR" accent="green">
           <p className="text-xs text-content-dim mb-3">
             Create timestamp commitments for Witness and Evidence roots. Submit to
             calendar.opentimestamps.org for blockchain anchoring.

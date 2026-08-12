@@ -387,7 +387,7 @@ export async function verifyBuild(
  */
 export function getBuildStatusBadge(result: BuildVerifyResult): {
   text: string;
-  color: "green" | "amber" | "red";
+  color: "green" | "amber" | "blood";
 } {
   const { status, manifestMatch, signatureValid, keyTrusted } = result;
 
@@ -401,12 +401,12 @@ export function getBuildStatusBadge(result: BuildVerifyResult): {
 
   if (status.ok === "invalid") {
     if (!manifestMatch) {
-      return { text: "TAMPERED", color: "red" };
+      return { text: "TAMPERED", color: "blood" };
     }
     if (!signatureValid) {
-      return { text: "INVALID SIG", color: "red" };
+      return { text: "INVALID SIG", color: "blood" };
     }
-    return { text: "INVALID", color: "red" };
+    return { text: "INVALID", color: "blood" };
   }
 
   return { text: "UNKNOWN", color: "amber" };

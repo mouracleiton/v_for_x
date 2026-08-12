@@ -419,6 +419,10 @@ export interface MissionProgress {
   completedAt: number | null;
   /** Last step completed */
   lastCompletedAt: number | null;
+  /** Identity handle when progress was last updated (optional, for binding) */
+  identityHandle?: string;
+  /** Identity fingerprint when progress was last updated (optional, for verification) */
+  identityFingerprint?: string;
 }
 
 export interface MissionsState {
@@ -503,8 +507,9 @@ export function getMissionProgress(missionId: MissionId): MissionProgress | null
 
 /**
  * Mark a mission step as completed.
+ * Automatically attaches identity handle/fingerprint if available.
  */
-export function completeMissionStep(missionId: MissionId, stepId: string): void {
+export async function completeMissionStep(missionId: MissionId, stepId: string): Promise<void> {
   const state = getMissionsState();
   const progress = state.missions[missionId];
 
@@ -525,6 +530,21 @@ export function completeMissionStep(missionId: MissionId, stepId: string): void 
   if (missionProgress && !missionProgress.completedSteps.includes(stepId)) {
     missionProgress.completedSteps.push(stepId);
     missionProgress.lastCompletedAt = Date.now();
+  }
+
+  // Attach identity information if available
+  try {
+    if (typeof window !== "undefined" && window.crypto) {
+      const { loadIdentity } = await import("./identity");
+      const identity = await loadIdentity();
+      if (identity && missionProgress) {
+        missionProgress.identityHandle = identity.handle;
+        missionProgress.identityFingerprint = identity.fingerprint;
+      }
+    }
+  } catch {
+    // Silently fail if identity system is not available
+    // This maintains backward compatibility
   }
 
   // Check if mission is complete
