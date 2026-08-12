@@ -60,7 +60,6 @@ export interface PresenceToken {
 
 const MESH_PRESENCE_KEY = "vfx-mesh-presence";
 const PRESENCE_TTL_MS = 5 * 60 * 1000; // 5 minutes
-const QUALITY_WINDOW_MS = 30 * 1000; // 30 seconds for quality calculation
 
 /* ═══════════════════════════════════════════════════════════
    Helpers
@@ -436,4 +435,107 @@ export function clearAllPresenceData(): void {
   } catch {
     /* ignore */
   }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Self-healing mesh on peer loss
+   (Phase 26 C — Quantum P2P Squad adaptation)
+   ═══════════════════════════════════════════════════════════ */
+
+/**
+ * Weighting function injected into the self-heal routines so item A's
+ * amplitude allocation (or any future strategy) can be applied to PEERS
+ * instead of helpers, without a hard cross-module dependency.
+ *
+ * Default peer weight = quality (0..1, fallback 0.5) scaled by inverse hop
+ * count so closer peers weigh more. Return 0 to drop a peer from the
+ * re-distribution.
+ */
+export type PeerWeightFn = (peer: MeshPresence, graph: MeshGraph) => number;
+
+/** Default peer weighting: quality × (1 / (1 + hopCount)). */
+export function defaultPeerWeight(peer: MeshPresence): number {
+  const q = typeof peer.quality === "number" ? peer.quality : 0.5;
+  return q * (1 / (1 + (peer.hopCount ?? 0)));
+}
+
+export interface ReSuperposeResult {
+  /** The surviving graph after loss + re-distribution. */
+  graph: MeshGraph;
+  /** Peer hashes still carrying presence weight after re-superposition. */
+  survivors: string[];
+  /** Re-distributed weight per surviving peer (sum = 1 when any survivor). */
+  distribution: Record<string, number>;
+  /** The hash that was lost and marked offline. */
+  lostPeer: string;
+}
+
+/**
+ * Re-superpose on loss: on markPeerOffline, recompute the presence/amplitude
+ * distribution over the surviving subgraph (reuse pruneGraph + getOnlinePeers).
+ * No quantum math; the "amplitude" here is the injectable weighting function
+ * (default = quality × inverse hop count). Falls back to current behavior
+ * (no weighting) when no weighting fn or no survivors.
+ */
+export function reSuperposeOnLoss(
+  graph: MeshGraph,
+  lostPeerHash: string,
+  weightFn: PeerWeightFn = defaultPeerWeight,
+): ReSuperposeResult {
+  markPeerOffline(graph, lostPeerHash);
+  pruneGraph(graph);
+
+  const survivors = getOnlinePeers(graph)
+    .map((p) => p.peerHash);
+
+  const distribution: Record<string, number> = {};
+  const totalWeight = survivors.reduce((sum, hash) => {
+    const peer = graph.peers.get(hash);
+    if (!peer) return sum;
+    return sum + Math.max(0, weightFn(peer, graph));
+  }, 0);
+
+  if (totalWeight > 0) {
+    for (const hash of survivors) {
+      const peer = graph.peers.get(hash);
+      if (!peer) continue;
+      const w = Math.max(0, weightFn(peer, graph));
+      if (w > 0) distribution[hash] = w / totalWeight;
+    }
+  }
+
+  return { graph, survivors, distribution, lostPeer: lostPeerHash };
+}
+
+/** Pick a transient relay-coordinator peer for one tick via a seeded RNG. */
+export function collapseCoordinator(
+  graph: MeshGraph,
+  seed: number,
+  weightFn: PeerWeightFn = defaultPeerWeight,
+): string | null {
+  const online = getOnlinePeers(graph);
+  if (online.length === 0) return null;
+  // Seedable RNG (inline mulberry32 — keeps this lib dependency-free).
+  let a = seed >>> 0;
+  const rng = () => {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const weights = online.map((p) => Math.max(0, weightFn(p, graph)) ** 2);
+  const total = weights.reduce((s, w) => s + w, 0);
+  if (total <= 0) {
+    // No-amplitude fallback = current behavior: pick closest by hop count.
+    const closest = [...online].sort((x, y) => x.hopCount - y.hopCount)[0];
+    return closest.peerHash;
+  }
+  let acc = 0;
+  const roll = rng() * total;
+  for (let i = 0; i < online.length; i++) {
+    acc += weights[i];
+    if (roll <= acc) return online[i].peerHash;
+  }
+  return online[online.length - 1].peerHash;
 }
