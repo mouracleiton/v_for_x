@@ -133,7 +133,7 @@ export const LOCAL_STORAGE_KEYS: ReadonlyArray<StorageKeyInfo> = [
   {
     key: "vfx_duress_cfg",
     category: "duress",
-    description: "Duress/decoy mode configuration (decoy code, enabled state)",
+    description: "Duress/decoy mode configuration (decoy code, enabled state, decoy identity handle)",
     sensitive: true,
     wipeOnPanic: false, // Keep duress config to allow recovery
     preserveInDecoy: true,
@@ -146,6 +146,24 @@ export const LOCAL_STORAGE_KEYS: ReadonlyArray<StorageKeyInfo> = [
     sensitive: true,
     wipeOnPanic: false, // Keep duress mode state
     preserveInDecoy: true,
+    registeredAt: 1700000000000,
+  },
+  {
+    key: "vfx_duress_decoy_identity",
+    category: "duress",
+    description: "Decoy identity keypair (separate from real identity, used when in decoy mode)",
+    sensitive: true,
+    wipeOnPanic: true, // Wipe decoy identity on panic (not needed for recovery)
+    preserveInDecoy: false, // Not used in decoy mode (it IS the decoy mode identity
+    registeredAt: 1700000000000,
+  },
+  {
+    key: "vfx_duress_stash_record",
+    category: "duress",
+    description: "Record of real data stash operation (backup ID, timestamps, restoration status)",
+    sensitive: true,
+    wipeOnPanic: true, // Contains reference to real identity stash
+    preserveInDecoy: false, // Not needed in decoy mode
     registeredAt: 1700000000000,
   },
 

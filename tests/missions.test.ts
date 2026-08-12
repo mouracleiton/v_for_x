@@ -124,26 +124,26 @@ describe("missions.ts — Progress Tracking", () => {
     expect(progress?.completedAt).toBeNull();
   });
 
-  it("should complete a mission step", () => {
-    completeMissionStep("establish_identity", "choose_persona");
+  it("should complete a mission step", async () => {
+    await completeMissionStep("establish_identity", "choose_persona");
 
     const progress = getMissionProgress("establish_identity");
     expect(progress?.completedSteps).toContain("choose_persona");
     expect(progress?.lastCompletedAt).toBeGreaterThan(0);
   });
 
-  it("should not duplicate completed steps", () => {
-    completeMissionStep("establish_identity", "choose_persona");
-    completeMissionStep("establish_identity", "choose_persona");
+  it("should not duplicate completed steps", async () => {
+    await completeMissionStep("establish_identity", "choose_persona");
+    await completeMissionStep("establish_identity", "choose_persona");
 
     const progress = getMissionProgress("establish_identity");
     expect(progress?.completedSteps.filter((s) => s === "choose_persona")).toHaveLength(1);
   });
 
-  it("should mark mission as complete when all steps done", () => {
+  it("should mark mission as complete when all steps done", async () => {
     const mission = MISSIONS["establish_identity"];
     for (const step of mission.steps) {
-      completeMissionStep("establish_identity", step.id);
+      await completeMissionStep("establish_identity", step.id);
     }
 
     const progress = getMissionProgress("establish_identity");
@@ -151,24 +151,24 @@ describe("missions.ts — Progress Tracking", () => {
     expect(isMissionCompleted("establish_identity")).toBe(true);
   });
 
-  it("should check if step is completed", () => {
+  it("should check if step is completed", async () => {
     expect(isStepCompleted("establish_identity", "choose_persona")).toBe(false);
 
-    completeMissionStep("establish_identity", "choose_persona");
+    await completeMissionStep("establish_identity", "choose_persona");
     expect(isStepCompleted("establish_identity", "choose_persona")).toBe(true);
   });
 
-  it("should reset mission progress", () => {
-    completeMissionStep("establish_identity", "choose_persona");
+  it("should reset mission progress", async () => {
+    await completeMissionStep("establish_identity", "choose_persona");
     expect(isStepCompleted("establish_identity", "choose_persona")).toBe(true);
 
     resetMissionProgress("establish_identity");
     expect(isStepCompleted("establish_identity", "choose_persona")).toBe(false);
   });
 
-  it("should reset all missions progress", () => {
-    completeMissionStep("establish_identity", "choose_persona");
-    completeMissionStep("verify_claims", "understand_verification");
+  it("should reset all missions progress", async () => {
+    await completeMissionStep("establish_identity", "choose_persona");
+    await completeMissionStep("verify_claims", "understand_verification");
 
     resetAllMissionsProgress();
 
@@ -176,33 +176,33 @@ describe("missions.ts — Progress Tracking", () => {
     expect(isStepCompleted("verify_claims", "understand_verification")).toBe(false);
   });
 
-  it("should get next incomplete step", () => {
+  it("should get next incomplete step", async () => {
     const next = getNextStep("establish_identity");
     expect(next).toBeTruthy();
     expect(next?.id).toBe("choose_persona");
 
-    completeMissionStep("establish_identity", "choose_persona");
+    await completeMissionStep("establish_identity", "choose_persona");
     const next2 = getNextStep("establish_identity");
     expect(next2?.id).not.toBe("choose_persona");
   });
 
-  it("should return null for next step when mission complete", () => {
+  it("should return null for next step when mission complete", async () => {
     const mission = MISSIONS["establish_identity"];
     for (const step of mission.steps) {
-      completeMissionStep("establish_identity", step.id);
+      await completeMissionStep("establish_identity", step.id);
     }
 
     const next = getNextStep("establish_identity");
     expect(next).toBeNull();
   });
 
-  it("should get mission completion percentage", () => {
+  it("should get mission completion percentage", async () => {
     expect(getMissionCompletion("establish_identity")).toBe(0);
 
     const mission = MISSIONS["establish_identity"];
     const stepsToComplete = Math.ceil(mission.steps.length / 2);
     for (let i = 0; i < stepsToComplete; i++) {
-      completeMissionStep("establish_identity", mission.steps[i].id);
+      await completeMissionStep("establish_identity", mission.steps[i].id);
     }
 
     const completion = getMissionCompletion("establish_identity");
@@ -221,16 +221,16 @@ describe("missions.ts — VFXMSN1 Token Format", () => {
     localStorage.clear();
   });
 
-  it("should encode mission progress as VFXMSN1 token", () => {
-    completeMissionStep("establish_identity", "choose_persona");
+  it("should encode mission progress as VFXMSN1 token", async () => {
+    await completeMissionStep("establish_identity", "choose_persona");
     const token = encodeMissionProgress("establish_identity");
 
     expect(token).toBeTruthy();
     expect(token?.startsWith("VFXMSN1:")).toBe(true);
   });
 
-  it("should decode valid VFXMSN1 token", () => {
-    completeMissionStep("establish_identity", "choose_persona");
+  it("should decode valid VFXMSN1 token", async () => {
+    await completeMissionStep("establish_identity", "choose_persona");
     const token = encodeMissionProgress("establish_identity");
 
     expect(token).toBeTruthy();
@@ -248,8 +248,8 @@ describe("missions.ts — VFXMSN1 Token Format", () => {
     expect(decodeMissionProgress("VFXWIT1:abc")).toBeNull();
   });
 
-  it("should import mission progress from token", () => {
-    completeMissionStep("establish_identity", "choose_persona");
+  it("should import mission progress from token", async () => {
+    await completeMissionStep("establish_identity", "choose_persona");
     const token = encodeMissionProgress("establish_identity");
 
     expect(token).toBeTruthy();
@@ -264,9 +264,9 @@ describe("missions.ts — VFXMSN1 Token Format", () => {
     expect(isStepCompleted("establish_identity", "choose_persona")).toBe(true);
   });
 
-  it("should export all mission progress", () => {
-    completeMissionStep("establish_identity", "choose_persona");
-    completeMissionStep("verify_claims", "understand_verification");
+  it("should export all mission progress", async () => {
+    await completeMissionStep("establish_identity", "choose_persona");
+    await completeMissionStep("verify_claims", "understand_verification");
 
     const tokens = exportAllMissionProgress();
 
@@ -336,43 +336,43 @@ describe("missions.ts — Mission Queries", () => {
     expect(journalistMissions.length).toBeLessThanOrEqual(6);
   });
 
-  it("should get completed missions", () => {
+  it("should get completed missions", async () => {
     expect(getCompletedMissions()).toHaveLength(0);
 
     const mission = MISSIONS["establish_identity"];
     for (const step of mission.steps) {
-      completeMissionStep("establish_identity", step.id);
+      await completeMissionStep("establish_identity", step.id);
     }
 
     expect(getCompletedMissions()).toHaveLength(1);
   });
 
-  it("should get in-progress missions", () => {
+  it("should get in-progress missions", async () => {
     expect(getInProgressMissions()).toHaveLength(0);
 
-    completeMissionStep("establish_identity", "choose_persona");
+    await completeMissionStep("establish_identity", "choose_persona");
 
     const inProgress = getInProgressMissions();
     expect(inProgress).toHaveLength(1);
     expect(inProgress[0].id).toBe("establish_identity");
   });
 
-  it("should get not-started missions", () => {
+  it("should get not-started missions", async () => {
     const notStarted = getNotStartedMissions();
     expect(notStarted).toHaveLength(6);
 
-    completeMissionStep("establish_identity", "choose_persona");
+    await completeMissionStep("establish_identity", "choose_persona");
 
     const notStarted2 = getNotStartedMissions();
     expect(notStarted2).toHaveLength(5);
   });
 
-  it("should get total completion percentage", () => {
+  it("should get total completion percentage", async () => {
     expect(getTotalCompletion()).toBe(0);
 
     const mission = MISSIONS["establish_identity"];
     for (const step of mission.steps) {
-      completeMissionStep("establish_identity", step.id);
+      await completeMissionStep("establish_identity", step.id);
     }
 
     const total = getTotalCompletion();
@@ -399,10 +399,10 @@ describe("missions.ts — Mission Statistics", () => {
     expect(stats.overallCompletion).toBe(0);
   });
 
-  it("should update stats after completing missions", () => {
+  it("should update stats after completing missions", async () => {
     const mission = MISSIONS["establish_identity"];
     for (const step of mission.steps) {
-      completeMissionStep("establish_identity", step.id);
+      await completeMissionStep("establish_identity", step.id);
     }
 
     const stats = getMissionStats();
@@ -413,9 +413,9 @@ describe("missions.ts — Mission Statistics", () => {
     expect(stats.overallCompletion).toBeGreaterThan(0);
   });
 
-  it("should track in-progress missions correctly", () => {
-    completeMissionStep("establish_identity", "choose_persona");
-    completeMissionStep("verify_claims", "understand_verification");
+  it("should track in-progress missions correctly", async () => {
+    await completeMissionStep("establish_identity", "choose_persona");
+    await completeMissionStep("verify_claims", "understand_verification");
 
     const stats = getMissionStats();
 
@@ -467,8 +467,8 @@ describe("missions.ts — Token Persistence", () => {
     localStorage.clear();
   });
 
-  it("should persist state to localStorage", () => {
-    completeMissionStep("establish_identity", "choose_persona");
+  it("should persist state to localStorage", async () => {
+    await completeMissionStep("establish_identity", "choose_persona");
 
     const stored = localStorage.getItem("vfx_missions_progress");
     expect(stored).toBeTruthy();
@@ -512,17 +512,17 @@ describe("missions.ts — Edge Cases", () => {
     localStorage.clear();
   });
 
-  it("should handle completing same step twice", () => {
-    completeMissionStep("establish_identity", "choose_persona");
-    completeMissionStep("establish_identity", "choose_persona");
+  it("should handle completing same step twice", async () => {
+    await completeMissionStep("establish_identity", "choose_persona");
+    await completeMissionStep("establish_identity", "choose_persona");
 
     const progress = getMissionProgress("establish_identity");
     expect(progress?.completedSteps.filter(s => s === "choose_persona")).toHaveLength(1);
   });
 
-  it("should handle completing steps out of order", () => {
-    completeMissionStep("establish_identity", "export_identity");
-    completeMissionStep("establish_identity", "choose_persona");
+  it("should handle completing steps out of order", async () => {
+    await completeMissionStep("establish_identity", "export_identity");
+    await completeMissionStep("establish_identity", "choose_persona");
 
     const progress = getMissionProgress("establish_identity");
     expect(progress?.completedSteps).toContain("choose_persona");

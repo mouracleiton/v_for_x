@@ -9,7 +9,10 @@ import {
   exitDecoyMode,
   isInDecoyMode,
   getActiveMode,
+  setActiveMode,
 } from "../lib/duress-decoy";
+import { generateIdentity, saveIdentity } from "../lib/identity";
+import { clearAllBackups } from "../lib/storage-map";
 
 const store: Record<string, string> = {};
 const localStorageMock = {
@@ -22,6 +25,7 @@ vi.stubGlobal("localStorage", localStorageMock);
 
 beforeEach(() => {
   localStorageMock.clear();
+  clearAllBackups();
 });
 
 describe("enableDecoyMode", () => {
@@ -82,27 +86,58 @@ describe("generateDecoyState", () => {
 });
 
 describe("decoy mode activation", () => {
-  it("enters and exits decoy mode", () => {
+  it("sets active mode when entering decoy mode", async () => {
+    // Create and save a real identity first (required for new async interface)
+    const realIdentity = await generateIdentity();
+    await saveIdentity(realIdentity);
+
     expect(isInDecoyMode()).toBe(false);
-    enterDecoyMode();
+    await enterDecoyMode();
     expect(isInDecoyMode()).toBe(true);
     expect(getActiveMode()).toBe("decoy");
-    exitDecoyMode();
-    expect(isInDecoyMode()).toBe(false);
-    expect(getActiveMode()).toBe("normal");
+
+    // Clean up - exit decoy mode
+    await exitDecoyMode();
   });
 
-  it("writes decoy data to gamification store on activation", () => {
-    enterDecoyMode();
+  it("writes decoy data to gamification store on activation", async () => {
+    // Create and save a real identity first
+    const realIdentity = await generateIdentity();
+    await saveIdentity(realIdentity);
+
+    await enterDecoyMode();
     const raw = localStorageMock.getItem("vfx-gamification");
     expect(raw).toBeTruthy();
     const data = JSON.parse(raw!);
     expect(data.countriesVisited.length).toBeGreaterThan(0);
+
+    // Clean up
+    await exitDecoyMode();
   });
 
-  it("clears watchlist on activation", () => {
+  it("clears watchlist on activation", async () => {
+    // Create and save a real identity first
+    const realIdentity = await generateIdentity();
+    await saveIdentity(realIdentity);
+
     localStorageMock.setItem("vfx-watch", JSON.stringify([{ id: "sensitive-rule" }]));
-    enterDecoyMode();
+    await enterDecoyMode();
     expect(localStorageMock.getItem("vfx-watch")).toBeNull();
+
+    // Clean up
+    await exitDecoyMode();
+  });
+
+  it("exits decoy mode and returns to normal", async () => {
+    // Create and save a real identity
+    const realIdentity = await generateIdentity();
+    await saveIdentity(realIdentity);
+
+    await enterDecoyMode();
+    expect(isInDecoyMode()).toBe(true);
+
+    await exitDecoyMode();
+    expect(isInDecoyMode()).toBe(false);
+    expect(getActiveMode()).toBe("normal");
   });
 });

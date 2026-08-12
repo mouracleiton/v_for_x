@@ -214,7 +214,7 @@ Prioritize work that completes **See → Understand → Act → Hold → Coordin
 - [x] Key rotation + 30d grace: `rotateIdentity` / `loadPreviousIdentities` / `verifySignatureWithGrace`; Missions ROTATE KEY UI
 - [x] Bind mission progress + ops journal events to identity handle/fingerprint on save/log
 - [x] Panic wipe audit registry: `lib/storage-map.ts` (+ rotation/duress backup keys)
-- [ ] Duress identity: second key + stash/restore real identity, missions, ops (`enterDecoyMode` async)
+- [x] Duress identity: second key + stash/restore real identity, missions, ops (`enterDecoyMode` async)
 
 ## Phase 12 — Operable mesh (The Web v2)
 

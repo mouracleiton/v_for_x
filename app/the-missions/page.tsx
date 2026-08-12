@@ -463,9 +463,9 @@ export default function TheMissionsPage() {
 
       {/* Persona Picker Modal */}
       {showPersonaPicker && (
-        <TerminalCard title="SELECT YOUR PERSONA" accent="blood" glow className="mb-6">
+        <TerminalCard title={tc(lang, "missions.select_persona")} accent="blood" glow className="mb-6">
           <p className="text-xs text-content-secondary mb-4">
-            Choose the persona that best matches your use case and threat model. This will customize your experience and recommend relevant missions.
+            {tc(lang, "missions.select_persona_desc")}
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {Object.values(PERSONAS).map((persona) => (
@@ -490,7 +490,7 @@ export default function TheMissionsPage() {
 
       {/* Current Persona Display */}
       {selectedPersona && !showPersonaPicker && (
-        <TerminalCard title="CURRENT PERSONA" accent="green" className="mb-6">
+        <TerminalCard title={tc(lang, "missions.current_persona")} accent="green" className="mb-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <span className="text-3xl">{selectedPersona.icon}</span>
@@ -503,23 +503,23 @@ export default function TheMissionsPage() {
               onClick={() => setShowPersonaPicker(true)}
               className="text-xs px-3 py-1 border border-border-dim text-content-secondary hover:border-blood hover:text-blood"
             >
-              CHANGE
+              {tc(lang, "missions.change")}
             </button>
           </div>
         </TerminalCard>
       )}
 
       {/* Identity Display */}
-      <TerminalCard title="YOUR IDENTITY" accent="amber" className="mb-6">
+      <TerminalCard title={tc(lang, "missions.your_identity")} accent="amber" className="mb-6">
         {identity ? (
           <div className="space-y-3">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
-                <div className="text-xs text-content-dim">Handle</div>
+                <div className="text-xs text-content-dim">{tc(lang, "missions.handle")}</div>
                 <div className="text-sm font-bold text-terminal-green">{identity.handle}</div>
               </div>
               <div>
-                <div className="text-xs text-content-dim">Fingerprint</div>
+                <div className="text-xs text-content-dim">{tc(lang, "missions.fingerprint")}</div>
                 <div className="text-sm font-mono text-content-primary">{identity.fingerprint}</div>
               </div>
             </div>
@@ -551,25 +551,25 @@ export default function TheMissionsPage() {
                 onClick={handleExportIdentity}
                 className="text-xs px-3 py-1 border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void"
               >
-                EXPORT IDENTITY
+                {tc(lang, "missions.export_identity")}
               </button>
               <button
                 onClick={handleExportPublicCard}
                 className="text-xs px-3 py-1 border border-border-dim text-content-secondary hover:border-terminal-green hover:text-terminal-green"
               >
-                EXPORT PUBLIC CARD
+                {tc(lang, "missions.export_public_card")}
               </button>
               <button
                 onClick={() => setShowIdentity(!showIdentity)}
                 className="text-xs px-3 py-1 border border-border-dim text-content-secondary hover:border-terminal-green hover:text-terminal-green"
               >
-                {showIdentity ? "HIDE DETAILS" : "SHOW DETAILS"}
+                {showIdentity ? tc(lang, "missions.hide_details") : tc(lang, "missions.show_details")}
               </button>
               <button
                 onClick={() => setShowRotateKeyConfirm(true)}
                 className="text-xs px-3 py-1 border border-blood text-blood hover:bg-blood hover:text-void"
               >
-                ROTATE KEY
+                {tc(lang, "missions.rotate_key")}
               </button>
             </div>
 
@@ -614,13 +614,13 @@ export default function TheMissionsPage() {
         ) : (
           <div className="space-y-3">
             <p className="text-xs text-content-dim">
-              No identity found. Create your cryptographic identity to sign missions and verify your work.
+              {tc(lang, "missions.no_identity")}
             </p>
             <button
               onClick={handleCreateIdentity}
               className="px-4 py-2 border border-blood text-blood-bright hover:bg-blood hover:text-void text-xs font-bold"
             >
-              CREATE IDENTITY
+              {tc(lang, "missions.create_identity")}
             </button>
           </div>
         )}
@@ -630,27 +630,27 @@ export default function TheMissionsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
         {/* Mission Stats */}
         <div className="lg:col-span-1">
-          <TerminalCard title="MISSION STATS" accent="green">
+          <TerminalCard title={tc(lang, "missions.mission_stats")} accent="green">
             <div className="space-y-3">
               <div className="flex justify-between">
-                <span className="text-xs text-content-dim">Total Missions</span>
+                <span className="text-xs text-content-dim">{tc(lang, "missions.total_missions")}</span>
                 <span className="text-sm font-bold text-content-primary">{missionStats.totalMissions}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-xs text-content-dim">Completed</span>
+                <span className="text-xs text-content-dim">{tc(lang, "missions.completed")}</span>
                 <span className="text-sm font-bold text-terminal-green">{missionStats.completedMissions}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-xs text-content-dim">In Progress</span>
+                <span className="text-xs text-content-dim">{tc(lang, "missions.in_progress")}</span>
                 <span className="text-sm font-bold text-warning-amber">{missionStats.inProgressMissions}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-xs text-content-dim">Not Started</span>
+                <span className="text-xs text-content-dim">{tc(lang, "missions.not_started")}</span>
                 <span className="text-sm font-bold text-content-dim">{missionStats.notStartedMissions}</span>
               </div>
               <div className="pt-2 border-t border-border-dim">
                 <div className="flex justify-between">
-                  <span className="text-xs text-content-dim">Overall Progress</span>
+                  <span className="text-xs text-content-dim">{tc(lang, "missions.overall_progress")}</span>
                   <span className="text-sm font-bold text-blood-bright">{missionStats.overallCompletion.toFixed(1)}%</span>
                 </div>
                 <div className="w-full bg-panel border border-border-dim mt-1">
@@ -666,11 +666,11 @@ export default function TheMissionsPage() {
 
         {/* Available Missions */}
         <div className="lg:col-span-2">
-          <TerminalCard title="AVAILABLE MISSIONS" accent="amber">
+          <TerminalCard title={tc(lang, "missions.available_missions")} accent="amber">
             <div className="space-y-2">
               {availableMissions.length === 0 ? (
                 <div className="text-xs text-content-dim">
-                  No missions available for current persona. Select a different persona to see relevant missions.
+                  {tc(lang, "missions.no_missions")}
                 </div>
               ) : (
                 availableMissions.map((mission) => {
@@ -716,7 +716,7 @@ export default function TheMissionsPage() {
                             }}
                             className="text-xs px-2 py-0.5 border border-border-dim text-content-secondary hover:border-terminal-green hover:text-terminal-green"
                           >
-                            EXPORT
+                            {tc(lang, "missions.export")}
                           </button>
                         )}
                       </div>
@@ -736,7 +736,7 @@ export default function TheMissionsPage() {
             {/* Mission Progress */}
             <div className="flex items-center gap-4">
               <div className="flex-1">
-                <div className="text-xs text-content-dim mb-1">Mission Progress</div>
+                <div className="text-xs text-content-dim mb-1">{tc(lang, "missions.mission_progress")}</div>
                 <div className="w-full bg-panel border border-border-dim">
                   <div
                     className="bg-blood-bright h-3"
@@ -774,7 +774,7 @@ export default function TheMissionsPage() {
               {/* Safety Tips */}
               {currentStep.safetyTips && currentStep.safetyTips.length > 0 && (
                 <div className="mt-3 p-2 bg-warning-amber/10 border border-warning-amber/30">
-                  <div className="text-xs text-warning-amber mb-1">⚠️ SAFETY TIPS</div>
+                  <div className="text-xs text-warning-amber mb-1">{tc(lang, "missions.safety_tips")}</div>
                   <ul className="text-xs text-content-secondary space-y-1">
                     {currentStep.safetyTips.map((tip, i) => (
                       <li key={i}>• {tip}</li>
@@ -785,7 +785,7 @@ export default function TheMissionsPage() {
 
               {/* Estimated Time */}
               <div className="mt-3 flex items-center gap-2">
-                <span className="text-xs text-content-dim">⏱️ Estimated time:</span>
+                <span className="text-xs text-content-dim">{tc(lang, "missions.estimated_time")}</span>
                 <span className="text-xs text-content-primary">{formatTime(currentStep.estimatedTime)}</span>
               </div>
 
@@ -795,14 +795,14 @@ export default function TheMissionsPage() {
                   onClick={() => handleCompleteStep(activeMission, currentStep)}
                   className="mt-3 w-full py-2 border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void text-xs font-bold"
                 >
-                  MARK STEP COMPLETE
+                  {tc(lang, "missions.mark_complete")}
                 </button>
               )}
             </div>
 
             {/* All Steps Overview */}
             <div className="border-t border-border-dim pt-3">
-              <div className="text-xs text-content-dim mb-2">ALL STEPS</div>
+              <div className="text-xs text-content-dim mb-2">{tc(lang, "missions.all_steps")}</div>
               <div className="space-y-1">
                 {activeMission.steps.map((step, index) => {
                   const isCurrentStep = currentStep.id === step.id;
@@ -821,7 +821,7 @@ export default function TheMissionsPage() {
                       <span className={isCurrentStep ? "text-blood-bright font-bold" : "text-content-primary"}>
                         {step.title}
                       </span>
-                      {isCurrentStep && <span className="ml-auto text-blood-bright">← CURRENT</span>}
+                      {isCurrentStep && <span className="ml-auto text-blood-bright">{tc(lang, "missions.current")}</span>}
                     </div>
                   );
                 })}
@@ -836,7 +836,7 @@ export default function TheMissionsPage() {
               }}
               className="w-full py-2 border border-border-dim text-content-secondary hover:border-blood hover:text-blood text-xs"
             >
-              CLOSE MISSION
+              {tc(lang, "missions.close_mission")}
             </button>
           </div>
         </TerminalCard>
@@ -844,15 +844,15 @@ export default function TheMissionsPage() {
 
       {/* Safety Engine */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-        <TerminalCard title="SAFETY ENGINE" accent="amber">
+        <TerminalCard title={tc(lang, "missions.safety_engine")} accent="amber">
           <p className="text-xs text-content-dim mb-3">
-            Run safety checks before publishing sensitive content. The 6 gates prevent witch hunts and protect subjects.
+            {tc(lang, "missions.safety_engine_desc")}
           </p>
           <button
             onClick={handleRunSafetyCheck}
             className="w-full py-2 border border-warning-amber text-warning-amber hover:bg-warning-amber hover:text-void text-xs font-bold"
           >
-            RUN SAFETY CHECKS
+            {tc(lang, "missions.run_safety_checks")}
           </button>
 
           {safetyReport && (
@@ -860,15 +860,15 @@ export default function TheMissionsPage() {
               <div className={`p-2 border ${safetyReport.safe ? "border-terminal-green/50 bg-terminal-green/5" : "border-blood/50 bg-blood/5"}`}>
                 <div className="flex items-center gap-2 mb-1">
                   <StatusPill color={safetyReport.safe ? "green" : "blood"}>
-                    {safetyReport.safe ? "SAFE" : "UNSAFE"}
+                    {safetyReport.safe ? tc(lang, "missions.safe") : tc(lang, "missions.unsafe")}
                   </StatusPill>
                   <span className="text-xs text-content-secondary">
-                    Risk Score: {safetyReport.riskScore}/100
+                    {tc(lang, "missions.risk_score")}: {safetyReport.riskScore}/100
                   </span>
                 </div>
                 {safetyReport.shouldBlock && (
                   <div className="text-xs text-blood-bright mt-1">
-                    ⚠️ Publication blocked due to safety concerns
+                    {tc(lang, "missions.publication_blocked")}
                   </div>
                 )}
               </div>
@@ -878,7 +878,7 @@ export default function TheMissionsPage() {
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-xs font-bold text-content-primary">{result.gate}</span>
                     <StatusPill color={result.passed ? "green" : result.severity === "critical" ? "blood" : "amber"}>
-                      {result.passed ? "PASS" : "FAIL"}
+                      {result.passed ? tc(lang, "missions.pass") : tc(lang, "missions.fail")}
                     </StatusPill>
                   </div>
                   {!result.passed && result.issues.length > 0 && (
@@ -895,14 +895,14 @@ export default function TheMissionsPage() {
         </TerminalCard>
 
         {/* Import/Export Progress */}
-        <TerminalCard title="IMPORT / EXPORT PROGRESS" accent="green">
+        <TerminalCard title={tc(lang, "missions.import_export")} accent="green">
           <p className="text-xs text-content-dim mb-3">
-            Export your mission progress as VFXMSN1 tokens for backup or share with trusted allies.
+            {tc(lang, "missions.import_export_desc")}
           </p>
 
           {exportToken && (
             <div className="mb-3">
-              <label className="text-xs text-content-dim">Last Export</label>
+              <label className="text-xs text-content-dim">{tc(lang, "missions.last_export")}</label>
               <textarea
                 readOnly
                 value={exportToken}
@@ -916,7 +916,7 @@ export default function TheMissionsPage() {
               type="text"
               value={importToken}
               onChange={(e) => setImportToken(e.target.value)}
-              placeholder="Paste VFXMSN1 token to import..."
+              placeholder={tc(lang, "missions.paste_token")}
               className="w-full p-2 bg-abyss border border-border-dim text-xs focus:border-terminal-green focus:outline-none"
             />
             <button
@@ -924,7 +924,7 @@ export default function TheMissionsPage() {
               disabled={!importToken.trim()}
               className="w-full py-2 border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void text-xs font-bold disabled:opacity-30 disabled:cursor-not-allowed"
             >
-              IMPORT PROGRESS
+              {tc(lang, "missions.import_progress")}
             </button>
             {importStatus && (
               <div className="text-xs font-mono">{importStatus}</div>
@@ -934,45 +934,45 @@ export default function TheMissionsPage() {
       </div>
 
       {/* Operations Journal */}
-      <TerminalCard title="OPERATIONS JOURNAL" className="mb-6">
+      <TerminalCard title={tc(lang, "missions.ops_journal")} className="mb-6">
         <div className="flex items-center justify-between mb-3">
           <p className="text-xs text-content-dim">
-            Local activity log - self-monitoring with no phone-home. All data stays on your device.
+            {tc(lang, "missions.ops_journal_desc")}
           </p>
           <button
             onClick={handleRefreshOpsJournal}
             className="text-xs px-2 py-1 border border-border-dim text-content-secondary hover:border-terminal-green hover:text-terminal-green"
           >
-            REFRESH
+            {tc(lang, "missions.refresh")}
           </button>
         </div>
 
         {opsStats && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
             <div className="p-2 border border-border-dim">
-              <div className="text-[10px] text-content-dim">Total Events</div>
+              <div className="text-[10px] text-content-dim">{tc(lang, "missions.total_events")}</div>
               <div className="text-sm font-bold text-content-primary">{opsStats.totalEvents}</div>
             </div>
             <div className="p-2 border border-border-dim">
-              <div className="text-[10px] text-content-dim">Missions Completed</div>
+              <div className="text-[10px] text-content-dim">{tc(lang, "missions.missions_completed")}</div>
               <div className="text-sm font-bold text-terminal-green">{opsStats.missionsCompleted}</div>
             </div>
             <div className="p-2 border border-border-dim">
-              <div className="text-[10px] text-content-dim">Current Persona</div>
+              <div className="text-[10px] text-content-dim">{tc(lang, "missions.current_persona")}</div>
               <div className="text-sm font-bold text-blood-bright">
                 {opsStats.currentPersona ? PERSONAS[opsStats.currentPersona]?.name || "None" : "None"}
               </div>
             </div>
             <div className="p-2 border border-border-dim">
-              <div className="text-[10px] text-content-dim">Journal Age</div>
-              <div className="text-sm font-bold text-content-primary">{opsStats.journalAgeDays} days</div>
+              <div className="text-[10px] text-content-dim">{tc(lang, "missions.journal_age")}</div>
+              <div className="text-sm font-bold text-content-primary">{opsStats.journalAgeDays}{tc(lang, "missions.days")}</div>
             </div>
           </div>
         )}
 
         <div className="space-y-1">
           {recentEvents.length === 0 ? (
-            <div className="text-xs text-content-dim">No recent events logged</div>
+            <div className="text-xs text-content-dim">{tc(lang, "missions.no_events")}</div>
           ) : (
             recentEvents.map((event) => (
               <div key={event.id} className="flex items-start gap-2 p-2 border border-border-dim text-xs">
@@ -990,25 +990,25 @@ export default function TheMissionsPage() {
       {/* Key Rotation Confirmation Modal */}
       {showRotateKeyConfirm && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-          <TerminalCard title="⚠️ ROTATE IDENTITY KEY" accent="blood" glow className="max-w-lg">
+          <TerminalCard title={tc(lang, "missions.rotate_key_title")} accent="blood" glow className="max-w-lg">
             <div className="space-y-4">
               <div className="text-xs text-content-secondary">
                 <p className="mb-2">
-                  You are about to rotate your cryptographic identity key. This is a significant operation:
+                  {tc(lang, "missions.rotate_warning")}
                 </p>
                 <ul className="space-y-1 ml-4 list-disc">
-                  <li>A new keypair will be generated</li>
-                  <li>Your current key will be moved to history</li>
-                  <li>Signatures made with your old key will remain valid for 30 days</li>
-                  <li>After 30 days, the old key will be permanently deleted</li>
+                  <li>{tc(lang, "missions.rotate_step1")}</li>
+                  <li>{tc(lang, "missions.rotate_step2")}</li>
+                  <li>{tc(lang, "missions.rotate_step3")}</li>
+                  <li>{tc(lang, "missions.rotate_step4")}</li>
                 </ul>
                 <p className="mt-2 text-blood-bright font-bold">
-                  Make sure you have exported your current identity before proceeding!
+                  {tc(lang, "missions.rotate_warning2")}
                 </p>
               </div>
 
               <div className="p-2 border border-warning-amber/30 bg-warning-amber/5">
-                <div className="text-xs text-warning-amber mb-1">CURRENT IDENTITY</div>
+                <div className="text-xs text-warning-amber mb-1">{tc(lang, "missions.current_identity")}</div>
                 <div className="text-xs text-content-primary font-bold">{identity?.handle}</div>
                 <div className="text-xs text-content-dim font-mono">{identity?.fingerprint}</div>
               </div>
@@ -1018,13 +1018,13 @@ export default function TheMissionsPage() {
                   onClick={handleRotateKey}
                   className="flex-1 py-2 border border-blood text-blood-bright hover:bg-blood hover:text-void text-xs font-bold"
                 >
-                  CONFIRM ROTATION
+                  {tc(lang, "missions.confirm_rotation")}
                 </button>
                 <button
                   onClick={() => setShowRotateKeyConfirm(false)}
                   className="flex-1 py-2 border border-border-dim text-content-secondary hover:border-terminal-green hover:text-terminal-green text-xs"
                 >
-                  CANCEL
+                  {tc(lang, "missions.cancel")}
                 </button>
               </div>
             </div>

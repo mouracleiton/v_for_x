@@ -240,45 +240,45 @@ export default function ThePlaybooksPage() {
     <div className="p-3 sm:p-6 md:p-10 max-w-6xl mx-auto">
       {/* Header */}
       <div className="mb-8 pt-4">
-        <div className="text-xs text-content-dim mb-1">SITUATION RESPONSE</div>
+        <div className="text-xs text-content-dim mb-1">{tc(lang, "playbooks.section_label")}</div>
         <h1 className="text-2xl md:text-3xl text-blood-bright font-bold glow-blood">
-          THE PLAYBOOKS
+          {tc(lang, "playbooks.title")}
         </h1>
         <p className="text-content-secondary text-sm mt-2">
-          7 crisis response playbooks with checklist UI for arrest, internet shutdown, displacement, medical crisis, surveillance, violent crackdown, and document emergencies
+          {tc(lang, "playbooks.subtitle")}
         </p>
       </div>
 
       {/* Stats Overview */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
-        <TerminalCard title="TOTAL" accent="green">
+        <TerminalCard title={tc(lang, "playbooks.total")} accent="green">
           <div className="text-2xl font-bold text-content-primary">{stats.totalPlaybooks}</div>
-          <div className="text-xs text-content-dim">Playbooks</div>
+          <div className="text-xs text-content-dim">{tc(lang, "playbooks.playbooks")}</div>
         </TerminalCard>
-        <TerminalCard title="COMPLETED" accent="green">
+        <TerminalCard title={tc(lang, "playbooks.completed_filter")} accent="green">
           <div className="text-2xl font-bold text-terminal-green">{stats.completedPlaybooks}</div>
-          <div className="text-xs text-content-dim">Done</div>
+          <div className="text-xs text-content-dim">{tc(lang, "playbooks.done")}</div>
         </TerminalCard>
-        <TerminalCard title="IN PROGRESS" accent="amber">
+        <TerminalCard title={tc(lang, "playbooks.in_progress_filter")} accent="amber">
           <div className="text-2xl font-bold text-warning-amber">{stats.inProgressPlaybooks}</div>
-          <div className="text-xs text-content-dim">Active</div>
+          <div className="text-xs text-content-dim">{tc(lang, "playbooks.active")}</div>
         </TerminalCard>
-        <TerminalCard title="NOT STARTED" accent="blood">
+        <TerminalCard title={tc(lang, "playbooks.not_started_filter")} accent="blood">
           <div className="text-2xl font-bold text-content-dim">{stats.notStartedPlaybooks}</div>
-          <div className="text-xs text-content-dim">Remaining</div>
+          <div className="text-xs text-content-dim">{tc(lang, "playbooks.remaining")}</div>
         </TerminalCard>
-        <TerminalCard title="PROGRESS" accent="blood">
+        <TerminalCard title={tc(lang, "playbooks.overall")} accent="blood">
           <div className="text-2xl font-bold text-blood-bright">{stats.overallCompletion.toFixed(0)}%</div>
-          <div className="text-xs text-content-dim">Overall</div>
+          <div className="text-xs text-content-dim">{tc(lang, "playbooks.overall")}</div>
         </TerminalCard>
       </div>
 
       {/* Filters */}
-      <TerminalCard title="FILTERS" accent="amber" className="mb-6">
+      <TerminalCard title={tc(lang, "playbooks.filters")} accent="amber" className="mb-6">
         <div className="space-y-4">
           {/* Status Filter */}
           <div>
-            <label className="text-xs text-content-dim mb-2 block">Status</label>
+            <label className="text-xs text-content-dim mb-2 block">{tc(lang, "playbooks.status")}</label>
             <div className="flex flex-wrap gap-2">
               {(["all", "completed", "in_progress", "not_started"] as FilterType[]).map((filter) => (
                 <button
@@ -290,7 +290,7 @@ export default function ThePlaybooksPage() {
                       : "border-border-dim text-content-secondary hover:border-blood hover:text-blood"
                   }`}
                 >
-                  {filter === "all" ? "All" : filter === "completed" ? "Completed" : filter === "in_progress" ? "In Progress" : "Not Started"}
+                  {filter === "all" ? tc(lang, "playbooks.all") : filter === "completed" ? tc(lang, "playbooks.completed_filter") : filter === "in_progress" ? tc(lang, "playbooks.in_progress_filter") : tc(lang, "playbooks.not_started_filter")}
                 </button>
               ))}
             </div>
@@ -298,7 +298,7 @@ export default function ThePlaybooksPage() {
 
           {/* Category Filter */}
           <div>
-            <label className="text-xs text-content-dim mb-2 block">Category</label>
+            <label className="text-xs text-content-dim mb-2 block">{tc(lang, "playbooks.category")}</label>
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setCategoryFilter("all")}
@@ -308,7 +308,7 @@ export default function ThePlaybooksPage() {
                     : "border-border-dim text-content-secondary hover:border-blood hover:text-blood"
                 }`}
               >
-                All
+                {tc(lang, "playbooks.all")}
               </button>
               {(["legal", "infrastructure", "humanitarian", "health", "security", "evidence"] as PlaybookCategory[]).map((category) => (
                 <button
@@ -328,7 +328,7 @@ export default function ThePlaybooksPage() {
 
           {/* Severity Filter */}
           <div>
-            <label className="text-xs text-content-dim mb-2 block">Severity</label>
+            <label className="text-xs text-content-dim mb-2 block">{tc(lang, "playbooks.severity")}</label>
             <div className="flex flex-wrap gap-2">
               {(["all", "critical", "high", "medium", "low"] as SeverityFilter[]).map((severity) => (
                 <button
@@ -341,7 +341,7 @@ export default function ThePlaybooksPage() {
                       : "border-border-dim text-content-secondary hover:border-blood hover:text-blood"
                   }`}
                 >
-                  {severity === "all" ? "All" : severity === "critical" ? "🚨 Critical" : severity === "high" ? "⚠️ High" : severity}
+                  {severity === "all" ? tc(lang, "playbooks.all") : severity === "critical" ? tc(lang, "playbooks.critical") : severity === "high" ? tc(lang, "playbooks.high") : severity === "medium" ? tc(lang, "playbooks.medium") : tc(lang, "playbooks.low")}
                 </button>
               ))}
             </div>
@@ -351,7 +351,7 @@ export default function ThePlaybooksPage() {
 
       {/* Current Persona Display */}
       {currentPersona && (
-        <TerminalCard title="CURRENT PERSONA" accent="green" className="mb-6">
+        <TerminalCard title={tc(lang, "missions.current_persona")} accent="green" className="mb-6">
           <div className="flex items-center gap-4">
             <span className="text-3xl">{currentPersona.icon}</span>
             <div>
