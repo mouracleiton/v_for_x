@@ -355,6 +355,15 @@ export const TOKEN_SPECS: TokenSpec[] = [
 		signed: false,
 		encrypted: false,
 	},
+	{
+		prefix: "VFXRPR1:",
+		id: "VFXRPR1",
+		name: "Reparations Claim",
+		description: "Signed public claim about seized assets / reparations due",
+		module: "reparations",
+		signed: true,
+		encrypted: false,
+	},
 ];
 
 /* ═══════════════════════════════════════════════════════════════

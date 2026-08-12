@@ -1,0 +1,43 @@
+{
+  "meta": {
+    "title": "FOIA / Records-Request Templates",
+    "description": "Static jurisdiction templates for records-request generators. Off-the-shelf boilerplate an operator fills from the backbone; not legal advice. Local-only, no phone-home.",
+    "sources": ["curated from public records-request guides"],
+    "note": "Each entry is a jurisdiction-scoped template with placeholders {{...}} filled from data/world_backbone.json at render time.",
+    "last_updated": "2026-08-12"
+  },
+  "templates": [
+    {
+      "id": "us-federal-foia",
+      "jurisdiction": "USA",
+      "label": "US Federal FOIA request",
+      "body": "Under the Freedom of Information Act (5 U.S.C. § 552), I request copies of records pertaining to {{topic}} ({{iso3}}). I am a member of the news media/NGO and request a fee waiver. Preferred format: electronic.",
+      "placeholders": ["topic", "iso3"],
+      "disclaimer": "Template only — verify against the agency's current FOIA regulations before sending."
+    },
+    {
+      "id": "br-lai",
+      "jurisdiction": "BRA",
+      "label": "Brazil LAI request (Lei de Acesso à Informação)",
+      "body": "Com fundamento na Lei de Acesso à Informação (Lei nº 12.527/2011), solicito acesso aos registros sobre {{topic}} ({{iso3}}). Formato preferido: eletrônico.",
+      "placeholders": ["topic", "iso3"],
+      "disclaimer": "Modelo apenas — confira o endereçamento do órgão antes do envio."
+    },
+    {
+      "id": "eu-gdpr-access",
+      "jurisdiction": "EU",
+      "label": "EU GDPR data-access request",
+      "body": "Under Article 15 of the GDPR (Regulation 2016/679), I request access to personal data and records held concerning {{topic}} ({{iso3}}).",
+      "placeholders": ["topic", "iso3"],
+      "disclaimer": "Template only — national implementations may add requirements."
+    },
+    {
+      "id": "generic",
+      "jurisdiction": "*",
+      "label": "Generic records request (fallback)",
+      "body": "I respectfully request access to public records pertaining to {{topic}} ({{iso3}}). If fees apply, please notify me before processing. Preferred format: electronic.",
+      "placeholders": ["topic", "iso3"],
+      "disclaimer": "Generic fallback — adapt to local public-records law."
+    }
+  ]
+}

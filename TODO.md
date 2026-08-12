@@ -528,11 +528,11 @@ Ideas from the “what more” pass that are **not** already covered in Phases 1
 
 ### D. Institutional &amp; money-without-accounts
 
-- [ ] **Court bundle exporter**: HTML/PDF of evidence chain + signatures for counsel
-- [ ] **Reparations / seized-asset tracker** (public claims ledger, local verify)
+- [x] **Court bundle exporter**: HTML/PDF of evidence chain + signatures for counsel
+- [x] **Reparations / seized-asset tracker** (public claims ledger, local verify)
 - [ ] **Mirror patronage without tokens**: optional BTC/XMR address on signed mirror claim only
 - [ ] **Grant / M&amp;E pack**: anonymized Trail/Allocator aggregates (diff-privacy lite)
-- [ ] **FOIA / records-request generator** from backbone + static jurisdiction templates
+- [x] **FOIA / records-request generator** from backbone + static jurisdiction templates
 
 ### E. Domain packs (data + playbooks — avoid new chrome unless needed)
 

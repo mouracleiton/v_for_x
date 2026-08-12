@@ -433,6 +433,16 @@ export const LOCAL_STORAGE_KEYS: ReadonlyArray<StorageKeyInfo> = [
 		registeredAt: 1700000000000,
 	},
 	{
+		key: "vfx-reparations-ledger",
+		category: "user-data",
+		description:
+			"Reparations / seized-asset public claims ledger (signed, locally verifiable)",
+		sensitive: false,
+		wipeOnPanic: true,
+		preserveInDecoy: false,
+		registeredAt: 1700000000000,
+	},
+	{
 		key: "vfx-onboard-done",
 		category: "user-data",
 		description: "One-story onboarding dismissed/completed flag",
