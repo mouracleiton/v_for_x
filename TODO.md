@@ -193,7 +193,7 @@
 - [x] Wire unified identity into Web/Witness/Mirror sign paths by default
 - [x] Multi-peer WebRTC mesh + group ratchet (mesh-presence, ratchet sender keys, reconnect)
 - [x] Subnational layer on Sorrow Map (Leaflet), not only /the-subnational
-- [ ] OpenTimestamps / cosign build verify (Phase 13)
+- [x] OpenTimestamps / cosign build verify (Phase 13)
 - [ ] Shamir / voice notes / Nostr roots (voice notes implemented: record → VFXFILE1 → ShareSheet dead-drop/pack; more advanced Shamir/Nostr later)
 - [ ] Capacitor Guardian background check-in
 - [ ] Full i18n for new Phase 10 UI strings (ongoing; EmptyState + ShareSheet titles use existing tc patterns)

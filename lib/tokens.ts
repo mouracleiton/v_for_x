@@ -171,6 +171,15 @@ export const TOKEN_SPECS: TokenSpec[] = [
     signed: false,
     encrypted: false,
   },
+  {
+    prefix: "VFXOTS1:",
+    id: "VFXOTS1",
+    name: "OpenTimestamps Token",
+    description: "OpenTimestamps commitment for Witness and Evidence roots",
+    module: "opentimestamps",
+    signed: true,
+    encrypted: false,
+  },
 ];
 
 /* ═══════════════════════════════════════════════════════════════
