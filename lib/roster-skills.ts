@@ -291,3 +291,230 @@ export function tierLabel(tier: VouchTrust["tier"]): string {
     default: return "self-attested only";
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   Amplitude allocation
+   (Phase 26 A — Quantum P2P Squad adaptation)
+   ═══════════════════════════════════════════════════════════════ */
+
+import {
+  sovereigntyFriction,
+  FRICTION_MULTIPLIER,
+  type FrictionLevel,
+  type RelationshipsData,
+} from "./relationships";
+
+/** Deterministic seedable RNG so the same inputs yield the same pick. */
+export function mulberry32(seed: number): () => number {
+  let a = seed >>> 0;
+  return () => {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/** Hash a string into a 32-bit seed (FNV-1a). */
+export function seedFromString(input: string): number {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < input.length; i++) {
+    h ^= input.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return h >>> 0;
+}
+
+export interface AmplitudeTask {
+  /** Free-text skill need, e.g. "asylum lawyer Farsi". */
+  query?: string;
+  /** Required skill buckets. */
+  buckets?: SkillBucket[];
+  /** Required languages. */
+  languages?: Lang[];
+  /** Destination ISO3 — used for sovereignty friction lookup. */
+  destinationIso3?: string;
+}
+
+export interface AmplitudeWeights {
+  /** Per-helper skill match (0..1), e.g. from searchBySkills(). */
+  skillMatch?: Record<string, number>;
+  /** Vouch tier per helper id (drives exposure-risk damping). */
+  vouchTier?: Record<string, VouchTrust["tier"]>;
+  /** Ops-journal recent-activity count per helper id (higher = more exposed). */
+  recentActivity?: Record<string, number>;
+  /** Relationships data for sovereignty-friction lookup. */
+  relationships?: RelationshipsData;
+}
+
+export interface AmplitudeCandidate {
+  helper: Helper;
+  /** Raw amplitude weight before |w|² collapse. */
+  weight: number;
+  /** Sovereignty friction applied on the helper→destination corridor. */
+  friction: FrictionLevel;
+  /** Derived exposure-risk factor (0..1, higher = more exposed). */
+  exposureRisk: number;
+}
+
+export interface AmplitudeAllocation {
+  /** Ranked candidates (highest amplitude first). */
+  candidates: AmplitudeCandidate[];
+  /** Picked helper id (|w|² collapse over candidates). */
+  picked: string;
+  /** Seed used for the deterministic RNG. */
+  seed: number;
+  /** VFXAMP1 serialized token. */
+  token: string;
+}
+
+const TIER_FACTOR: Record<VouchTrust["tier"], number> = {
+  "well-vouched": 1,
+  trusted: 0.8,
+  vouched: 0.6,
+  self: 0.4,
+};
+
+/** Map a vouch tier + recent-activity count into an exposure-risk factor 0..1. */
+export function exposureRisk(
+  tier: VouchTrust["tier"] | undefined,
+  recentActivity: number | undefined,
+): number {
+  // Higher tier trust → slightly LOWER baseline exposure risk (better opsec).
+  // More recent activity → HIGHER exposure (more visible on the network).
+  const tierBase = tier ? 1 - (TIER_FACTOR[tier] ?? 0.5) : 0.5;
+  const activity = Math.min(1, (recentActivity ?? 0) / 10);
+  return Math.min(1, Math.max(0, tierBase * 0.4 + activity * 0.6));
+}
+
+/**
+ * Allocate a helper by amplitude: weight_i = skill_match_i · sovereignty_compat_i ·
+ * (1 − exposure_risk_i); collapse samples ∝ |weight_i|² via a seedable RNG so
+ * the same inputs always pick the same helper (no real randomness in static
+ * export). Returns VFXAMP1 token for verifiability.
+ */
+export function allocateByAmplitude(
+  helpers: Helper[],
+  task: AmplitudeTask,
+  weights: AmplitudeWeights = {},
+  seed?: number,
+): AmplitudeAllocation | null {
+  const matches = searchBySkills(helpers, {
+    query: task.query,
+    buckets: task.buckets,
+    languages: task.languages,
+    availableOnly: true,
+  });
+
+  const candidates: AmplitudeCandidate[] = matches
+    .map((m) => {
+      const skillMatch = m.score;
+      const tier = weights.vouchTier?.[m.helper.id];
+      const activity = weights.recentActivity?.[m.helper.id] ?? 0;
+      const expRisk = exposureRisk(tier, activity);
+      let frictionMult = FRICTION_MULTIPLIER.clean;
+      let friction: FrictionLevel = "clean";
+      if (task.destinationIso3 && weights.relationships) {
+        const f = sovereigntyFriction(
+          weights.relationships,
+          m.helper.country,
+          task.destinationIso3,
+        );
+        friction = f.level;
+        frictionMult = f.multiplier;
+      }
+      const weight = skillMatch * frictionMult * (1 - expRisk);
+      return { helper: m.helper, weight, friction, exposureRisk: expRisk };
+    })
+    .filter((c) => c.weight > 0);
+
+  if (candidates.length === 0) return null;
+
+  candidates.sort((a, b) => b.weight - a.weight);
+
+  const seedValue =
+    seed ??
+    seedFromString(
+      `${task.query ?? ""}|${(task.buckets ?? []).join(",")}|${(task.languages ?? []).join(",")}|${candidates.map((c) => c.helper.id).join("|")}`,
+    );
+
+  // Collapse: |w|² sampling with the seedable RNG.
+  const totalAmp = candidates.reduce((sum, c) => sum + c.weight * c.weight, 0);
+  const rng = mulberry32(seedValue);
+  const roll = rng() * totalAmp;
+  let acc = 0;
+  let picked = candidates[0].helper.id;
+  for (const c of candidates) {
+    acc += c.weight * c.weight;
+    if (roll <= acc) {
+      picked = c.helper.id;
+      break;
+    }
+  }
+
+  const token = encodeAmplitudeToken({
+    candidates,
+    picked,
+    seed: seedValue,
+    task,
+  });
+
+  return { candidates, picked, seed: seedValue, token };
+}
+
+/** VFXAMP1 token serialization. */
+export function encodeAmplitudeToken(a: {
+  candidates: AmplitudeCandidate[];
+  picked: string;
+  seed: number;
+  task: AmplitudeTask;
+}): string {
+  const payload = {
+    v: 1,
+    picked: a.picked,
+    seed: a.seed,
+    task: {
+      query: a.task.query ?? "",
+      buckets: a.task.buckets ?? [],
+      languages: a.task.languages ?? [],
+      destination: a.task.destinationIso3 ?? "",
+    },
+    n: a.candidates.length,
+    top: a.candidates.slice(0, 3).map((c) => ({
+      id: c.helper.id,
+      w: Number(c.weight.toFixed(4)),
+      f: c.friction,
+    })),
+  };
+  return `VFXAMP1:${JSON.stringify(payload)}`;
+}
+
+/** Parse a VFXAMP1 token back to its payload, or null if malformed. */
+export function parseAmplitudeToken(token: string): {
+  picked: string;
+  seed: number;
+  task: { query: string; buckets: string[]; languages: string[]; destination: string };
+  n: number;
+  top: Array<{ id: string; w: number; f: string }>;
+} | null {
+  if (!token || !token.startsWith("VFXAMP1:")) return null;
+  try {
+    const payload = JSON.parse(token.slice("VFXAMP1:".length));
+    if (!payload || typeof payload !== "object") return null;
+    return payload as {
+      picked: string;
+      seed: number;
+      task: { query: string; buckets: string[]; languages: string[]; destination: string };
+      n: number;
+      top: Array<{ id: string; w: number; f: string }>;
+    };
+  } catch {
+    return null;
+  }
+}
+
+/** True when a string is a VFXAMP1 token. */
+export function isAmplitudeToken(token: string): boolean {
+  return typeof token === "string" && token.startsWith("VFXAMP1:");
+}
