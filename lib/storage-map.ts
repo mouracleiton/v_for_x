@@ -443,6 +443,16 @@ export const LOCAL_STORAGE_KEYS: ReadonlyArray<StorageKeyInfo> = [
 		registeredAt: 1700000000000,
 	},
 	{
+		key: "vfx-perf-marks",
+		category: "user-data",
+		description:
+			"Local-only performance marks ring buffer (never leaves device; opt-in export only)",
+		sensitive: false,
+		wipeOnPanic: true,
+		preserveInDecoy: false,
+		registeredAt: 1700000000000,
+	},
+	{
 		key: "vfx-onboard-done",
 		category: "user-data",
 		description: "One-story onboarding dismissed/completed flag",

@@ -465,10 +465,10 @@ Only after Phases 11–15 spine is honest-green.
 - [ ] **Offline second-pass E2E**: Playwright with service worker; assert critical paths work offline
 - [x] **Token linter**: PR fails if new `VFX*` string not in `TOKEN_SPECS` — `tests/token-linter.test.ts` scans lib/app/components for `VFX*:` literals; caught + fixed 3 unregistered tokens (VFXCRDT1S, VFXMESH1, VFXERR1) now in TOKEN_SPECS
 - [x] **Storage map completeness CI**: grep localStorage/IDB keys vs `lib/storage-map.ts` — `tests/storage-map-completeness.test.ts` scans lib/app/components for literal localStorage keys; caught + registered 17 orphaned keys (Bridge staging slots, duress/watch/session, oracle-model, dead-drops, safety-gates) so panic-wipe + duress restore now cover them
-- [ ] Storybook-like gallery of pure UI states — EmptyState component + examples across thin pages (the-lives, relay, field-manual, archive, act, resistance, quorum)
+- [x] Storybook-like gallery of pure UI states — EmptyState component + examples across thin pages (the-lives, relay, field-manual, archive, act, resistance, quorum)
 - [x] **Contributor ladder**: good-first-issues tagged by persona kit + static-export rule reminder — `docs/CONTRIBUTOR_LADDER.md` (4-rung ladder first-time→contributor→trusted→maintainer, decision filter, static-export rule with storage-map/token-linter gates, review expectations)
 - [x] **Release train**: tagged static builds + minisign + changelog + mirror seed list update — `docs/RELEASE_TRAIN.md` (patch/minor/major cadence, pre-flight checklist, build attestation via write_build_attest.py, tag+changelog, mirror seed list update, reproducibility contract cross-ref)
-- [ ] **Telemetry that isn’t surveillance**: optional local-only perf marks; never leave device
+- [x] **Telemetry that isn’t surveillance**: optional local-only perf marks; never leave device
 - [ ] **Accessibility certification path**: WCAG 2.2 AA checklist automated where possible
 - [ ] **Threat-model revision cadence**: quarterly ADR update after real incident drills
 
