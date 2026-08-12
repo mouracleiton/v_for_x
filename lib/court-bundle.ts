@@ -10,48 +10,48 @@
  */
 
 export interface CourtBundleInput {
-  /** Case label / caption (e.g. "Re: events in SDN, 2025-Q3"). */
-  caption: string;
-  /** Witness statements (hash-chained). */
-  witness?: Array<{
-    hash: string;
-    handle?: string;
-    text: string;
-    ts: number;
-    prevHash?: string;
-    signature?: string;
-  }>;
-  /** Fulfillment receipts (signed Trail handoffs). */
-  fulfillments?: Array<{
-    id: string;
-    matchId?: string;
-    status?: string;
-    note?: string;
-    ts: number;
-    signature?: string;
-  }>;
-  /** Optional errata/corrections (VFXERR1 chain entries). */
-  errata?: Array<{ kind: string; ref: string; summary: string; ts: number }>;
-  /** Operator preparing the bundle (handle, not key material). */
-  preparedBy?: string;
-  /** Bundle generation timestamp. */
-  generatedAt?: number;
+	/** Case label / caption (e.g. "Re: events in SDN, 2025-Q3"). */
+	caption: string;
+	/** Witness statements (hash-chained). */
+	witness?: Array<{
+		hash: string;
+		handle?: string;
+		text: string;
+		ts: number;
+		prevHash?: string;
+		signature?: string;
+	}>;
+	/** Fulfillment receipts (signed Trail handoffs). */
+	fulfillments?: Array<{
+		id: string;
+		matchId?: string;
+		status?: string;
+		note?: string;
+		ts: number;
+		signature?: string;
+	}>;
+	/** Optional errata/corrections (VFXERR1 chain entries). */
+	errata?: Array<{ kind: string; ref: string; summary: string; ts: number }>;
+	/** Operator preparing the bundle (handle, not key material). */
+	preparedBy?: string;
+	/** Bundle generation timestamp. */
+	generatedAt?: number;
 }
 
 function esc(s: string | undefined): string {
-  return (s ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+	return (s ?? "")
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;");
 }
 
 function fmtTs(ts: number): string {
-  try {
-    return new Date(ts).toISOString();
-  } catch {
-    return String(ts);
-  }
+	try {
+		return new Date(ts).toISOString();
+	} catch {
+		return String(ts);
+	}
 }
 
 /**
@@ -59,14 +59,14 @@ function fmtTs(ts: number): string {
  * scripts — ready for browser "Print → Save as PDF".
  */
 export function renderCourtBundle(input: CourtBundleInput): string {
-  const generated = input.generatedAt ?? Date.now();
-  const witnessList = input.witness ?? [];
-  const fulfillList = input.fulfillments ?? [];
-  const errataList = input.errata ?? [];
+	const generated = input.generatedAt ?? Date.now();
+	const witnessList = input.witness ?? [];
+	const fulfillList = input.fulfillments ?? [];
+	const errataList = input.errata ?? [];
 
-  const witnessRows = witnessList
-    .map(
-      (w) => `<tr>
+	const witnessRows = witnessList
+		.map(
+			(w) => `<tr>
         <td>${esc(w.hash.slice(0, 12))}…</td>
         <td>${esc(w.handle ?? "anonymous")}</td>
         <td>${esc(fmtTs(w.ts))}</td>
@@ -74,12 +74,12 @@ export function renderCourtBundle(input: CourtBundleInput): string {
         <td><code>${esc(w.signature ?? "—")}</code></td>
         <td>${esc(w.text)}</td>
       </tr>`,
-    )
-    .join("\n");
+		)
+		.join("\n");
 
-  const fulfillRows = fulfillList
-    .map(
-      (f) => `<tr>
+	const fulfillRows = fulfillList
+		.map(
+			(f) => `<tr>
         <td>${esc(f.id)}</td>
         <td>${esc(f.matchId ?? "—")}</td>
         <td>${esc(f.status ?? "—")}</td>
@@ -87,21 +87,21 @@ export function renderCourtBundle(input: CourtBundleInput): string {
         <td><code>${esc(f.signature ?? "—")}</code></td>
         <td>${esc(f.note ?? "")}</td>
       </tr>`,
-    )
-    .join("\n");
+		)
+		.join("\n");
 
-  const errataRows = errataList
-    .map(
-      (e) => `<tr>
+	const errataRows = errataList
+		.map(
+			(e) => `<tr>
         <td>${esc(e.kind)}</td>
         <td>${esc(e.ref)}</td>
         <td>${esc(fmtTs(e.ts))}</td>
         <td>${esc(e.summary)}</td>
       </tr>`,
-    )
-    .join("\n");
+		)
+		.join("\n");
 
-  return `<!doctype html>
+	return `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
@@ -124,22 +124,34 @@ export function renderCourtBundle(input: CourtBundleInput): string {
 <p class="disclaimer">Cryptographically verifiable evidence chain. Hashes anchor to the V FOR X witness ledger; signatures verify against the stated identity keys. This bundle is a rendered summary — the canonical artifacts are the VFXWIT1 / VFXFUL1 / VFXERR1 tokens.</p>
 
 <h2>Witness Statements (${witnessList.length})</h2>
-${witnessList.length === 0 ? '<p><em>None.</em></p>' : `<table>
+${
+	witnessList.length === 0
+		? "<p><em>None.</em></p>"
+		: `<table>
 <thead><tr><th>Hash</th><th>By</th><th>Time</th><th>Prev</th><th>Signature</th><th>Text</th></tr></thead>
 <tbody>${witnessRows}</tbody>
-</table>`}
+</table>`
+}
 
 <h2>Fulfillment Receipts (${fulfillList.length})</h2>
-${fulfillList.length === 0 ? '<p><em>None.</em></p>' : `<table>
+${
+	fulfillList.length === 0
+		? "<p><em>None.</em></p>"
+		: `<table>
 <thead><tr><th>ID</th><th>Match</th><th>Status</th><th>Time</th><th>Signature</th><th>Note</th></tr></thead>
 <tbody>${fulfillRows}</tbody>
-</table>`}
+</table>`
+}
 
-${errataList.length === 0 ? "" : `<h2>Errata / Corrections (${errataList.length})</h2>
+${
+	errataList.length === 0
+		? ""
+		: `<h2>Errata / Corrections (${errataList.length})</h2>
 <table>
 <thead><tr><th>Kind</th><th>Ref</th><th>Time</th><th>Summary</th></tr></thead>
 <tbody>${errataRows}</tbody>
-</table>`}
+</table>`
+}
 
 <div class="meta">
   <p>Prepared by: ${esc(input.preparedBy ?? "anonymous operator")} · Generated: ${esc(fmtTs(generated))}</p>
@@ -150,5 +162,9 @@ ${errataList.length === 0 ? "" : `<h2>Errata / Corrections (${errataList.length}
 
 /** Count the total evidence items in a bundle input. */
 export function countBundleEvidence(input: CourtBundleInput): number {
-  return (input.witness?.length ?? 0) + (input.fulfillments?.length ?? 0) + (input.errata?.length ?? 0);
+	return (
+		(input.witness?.length ?? 0) +
+		(input.fulfillments?.length ?? 0) +
+		(input.errata?.length ?? 0)
+	);
 }

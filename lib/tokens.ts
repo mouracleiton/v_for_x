@@ -350,7 +350,8 @@ export const TOKEN_SPECS: TokenSpec[] = [
 		prefix: "VFXAMP1:",
 		id: "VFXAMP1",
 		name: "Amplitude Allocation",
-		description: "Seedable weighted helper pick (skill × sovereignty × exposure)",
+		description:
+			"Seedable weighted helper pick (skill × sovereignty × exposure)",
 		module: "roster-skills",
 		signed: false,
 		encrypted: false,
