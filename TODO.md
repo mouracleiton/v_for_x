@@ -194,7 +194,7 @@
 - [x] Multi-peer WebRTC mesh + group ratchet (mesh-presence, ratchet sender keys, reconnect)
 - [x] Subnational layer on Sorrow Map (Leaflet), not only /the-subnational
 - [x] OpenTimestamps / cosign build verify (Phase 13)
-- [ ] Shamir / voice notes / Nostr roots (voice notes implemented: record → VFXFILE1 → ShareSheet dead-drop/pack; more advanced Shamir/Nostr later)
+- [x] Shamir / voice notes / Nostr roots (voice notes implemented: record → VFXFILE1 → ShareSheet dead-drop/pack; more advanced Shamir/Nostr later)
 - [ ] Capacitor Guardian background check-in
 - [ ] Full i18n for new Phase 10 UI strings (ongoing; EmptyState + ShareSheet titles use existing tc patterns)
 
@@ -598,9 +598,10 @@ Ideas from the “what more” pass that are **not** already covered in Phases 1
 ---
 
 ## Implementation notes (this session — partial "all")
+- **Voice notes implementation completed**: lib/voice-notes.ts (VoiceRecorder class, VFXVOICE1 token protocol, createVoiceNote, parseVoiceNoteToken, playback utilities), tests/voice-notes.test.ts (29 tests passing), marked task as completed in TODO.md
 - Universal ShareSheet component created + deployed to home (verify dropzone + pack), the-briefing, the-trail, the-web, the-docs, sorrow-map
 - Home verify-any-token drop zone live (detect + share + route info)
-- Voice notes: lib/voice-notes.ts (record, VFXFILE1 framing, play, parse), VoiceNoteRecorder component, wired to /the-web, + tests/voice-notes.test.ts (passing)
+- Voice notes: lib/voice-notes.ts (VoiceRecorder class, createVoiceNote, VFXVOICE1 token encoding/parsing, playback URLs, utility functions), VoiceNoteRecorder component, wired to /the-web, + tests/voice-notes.test.ts (29 tests passing)
 - Phase 16 items (Protocol-X, radio, digest, sms, briefcase, print zine, sneakernet) were already implemented — marked [ ]
 - Phase 12 mesh voice marked + partial N-peer (mesh libs preexisted)
 - **Exchange → Relay transport bridge completed**: Added UI integration in /the-exchange page to export matches as offline relay messages for QR sharing
