@@ -423,6 +423,16 @@ export const LOCAL_STORAGE_KEYS: ReadonlyArray<StorageKeyInfo> = [
 		registeredAt: 1700000000000,
 	},
 	{
+		key: "vfx-wellbeing",
+		category: "user-data",
+		description:
+			"Operator wellbeing: shift/break timers + burnout + after-action notes (local-only nudges)",
+		sensitive: false,
+		wipeOnPanic: true,
+		preserveInDecoy: false,
+		registeredAt: 1700000000000,
+	},
+	{
 		key: "vfx-onboard-done",
 		category: "user-data",
 		description: "One-story onboarding dismissed/completed flag",

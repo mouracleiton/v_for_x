@@ -520,11 +520,11 @@ Ideas from the “what more” pass that are **not** already covered in Phases 1
 
 ### C. Human cost of running the tool
 
-- [ ] **Secondary-trauma / shift timers** for operators (local nudges, no phone-home)
+- [x] **Secondary-trauma / shift timers** for operators (local nudges, no phone-home)
 - [ ] **Peer-support dead-drops** (signed availability only; no content analysis)
 - [ ] **Family-safe defaults**: blur faces on Faces/Roster until explicit reveal + audit log
-- [ ] **Burnout-aware missions**: shorter paths when duress or quiet-hours active
-- [ ] **After-action notes** private to device, exportable into ops-journal compartments
+- [x] **Burnout-aware missions**: shorter paths when duress or quiet-hours active
+- [x] **After-action notes** private to device, exportable into ops-journal compartments
 
 ### D. Institutional &amp; money-without-accounts
 
