@@ -12,6 +12,7 @@ import ShareableStat from "@/components/shared/ShareableStat";
 import TokenVerifyDropzone from "@/components/shared/TokenVerifyDropzone";
 import OnboardingWizard from "@/components/shared/OnboardingWizard";
 import WorsenedStrip from "@/components/shared/WorsenedStrip";
+import MissionBriefing from "@/components/shared/MissionBriefing";
 import DataBar from "@/components/ui/DataBar";
 import StatusPill from "@/components/ui/StatusPill";
 import {
@@ -259,6 +260,8 @@ export default function HomePage() {
 
 	return (
 		<div className="p-3 sm:p-6 md:p-10 max-w-5xl mx-auto">
+			{/* Personalized Mission Briefing — self-hides for first-time visitors. */}
+			<MissionBriefing />
 			{/* Hero */}
 			<div className="text-center mb-12 pt-8">
 				<div className="text-5xl md:text-7xl mb-2 animate-pulse">🦀</div>
