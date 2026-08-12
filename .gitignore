@@ -59,3 +59,6 @@ __pycache__/
 
 # Local binary data caches (vector index, not source)
 *.db
+
+# local fusion rollback backups (originals in git history)
+page.tsx.orig
