@@ -585,47 +585,47 @@ IDB/tokens/data ✓, no new orphan `/the-*` pages. Each item names its target li
 
 ### A. Constraint-weighted allocation → `lib/roster-skills.ts`
 
-- [ ] **Amplitude allocation**: `allocateByAmplitude(helpers, task, weights)` returning a weighted
+- [x] **Amplitude allocation**: `allocateByAmplitude(helpers, task, weights)` returning a weighted
   pick instead of a deterministic rank — `weight_i = skill_match_i · sovereignty_compat_i · (1 − exposure_risk_i)`,
   collapse samples ∝ `|weight_i|²`. Reuses `searchBySkills` SkillMatch output; adds a deterministic
   seedable RNG so the same inputs yield the same pick (testable, no real randomness in static export).
-- [ ] **Sovereignty compatibility factor** sourced from the new friction matrix (item B) so
+- [x] **Sovereignty compatibility factor** sourced from the new friction matrix (item B) so
   cross-border rosters route around nationality blockers instead of silently skipping.
-- [ ] **Exposure-risk factor** derived from existing vouch tier + ops-journal recent-activity count
+- [x] **Exposure-risk factor** derived from existing vouch tier + ops-journal recent-activity count
   (high recent activity → higher exposure → lower weight).
-- [ ] Token: `VFXAMP1` — serialized amplitude allocation result (inputs + picked helper + seed),
+- [x] Token: `VFXAMP1` — serialized amplitude allocation result (inputs + picked helper + seed),
   registered in `lib/tokens.ts` + `/the-tokens`; tests `tests/roster-amplitude.test.ts`.
 
 ### B. Sovereignty friction matrix → `lib/relationships.ts`
 
-- [ ] **Friction lookup**: `sovereigntyFriction(data, iso3A, iso3B)` → `{ clean | risk | blocked }`
+- [x] **Friction lookup**: `sovereigntyFriction(data, iso3A, iso3B)` → `{ clean | risk | blocked }`
   derived from existing sanctions (`hasSanction`) + arms-corridor asymmetry + a static nationality
   override table (`data/sovereignty-friction.json`). Friction *damps* a weight, never hard-fails —
   matches the squads model (clean/risk/blocked → multiplier, not filter).
-- [ ] **Friction-aware routing** surface consumed by roster-skills (item A) and mesh-presence (item C);
+- [x] **Friction-aware routing** surface consumed by roster-skills (item A) and mesh-presence (item C);
   UI only on existing `/the-flows` (no new page) — a friction chip per corridor.
-- [ ] Tests: `tests/sovereignty-friction.test.ts` (sanction-derived blocked, arms-asymmetry risk,
+- [x] Tests: `tests/sovereignty-friction.test.ts` (sanction-derived blocked, arms-asymmetry risk,
   override precedence, damping multipliers).
 
 ### C. Self-healing mesh on peer loss → `lib/mesh-presence.ts`
 
-- [ ] **Re-superpose on loss**: `reSuperposeOnLoss(graph, lostPeerHash)` — on `markPeerOffline`,
+- [x] **Re-superpose on loss**: `reSuperposeOnLoss(graph, lostPeerHash)` — on `markPeerOffline`,
   recompute presence/amplitude distribution over the surviving subgraph (reuse `pruneGraph` +
   `getOnlinePeers`). No quantum math; the "amplitude" here is the future hook from item A applied
   to peers instead of helpers, so the seam is an injectable weighting function.
-- [ ] **Collapse trigger** when an observation arrives (new message, room join) — picks a transient
+- [x] **Collapse trigger** when an observation arrives (new message, room join) — picks a transient
   relay-coordinator peer for one tick via item A's RNG, decoheres on next presence tick. Keeps
   `VFXMESH1` token shape; adds an optional `coordinator` field.
-- [ ] Tests: `tests/mesh-self-heal.test.ts` (loss → re-distribution, coordinator election determinism,
+- [x] Tests: `tests/mesh-self-heal.test.ts` (loss → re-distribution, coordinator election determinism,
   no-amplitude fallback = current behavior).
 
 ### D. QKD-inspired tamper evidence → crypto spine (`lib/identity.ts` / `lib/ecdh.ts`)
 
-- [ ] **QBER-style integrity check** on ratchet/mesh sessions: a rolling error-rate sample over
+- [x] **QBER-style integrity check** on ratchet/mesh sessions: a rolling error-rate sample over
   message authentication failures; if it crosses a threshold, surface a **comms possibly intercepted**
   banner (reuse jurisdiction-risk banner pattern). Not real QKD (no photon channel) — the *detection*
   idea adapted to the existing signed-message layer.
-- [ ] Tests: `tests/qber-integrity.test.ts` (threshold crossing, banner trigger, reset on rekey).
+- [x] Tests: `tests/qber-integrity.test.ts` (threshold crossing, banner trigger, reset on rekey).
 
 ### Parked (no target lib yet — decision filter before starting)
 
