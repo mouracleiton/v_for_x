@@ -1,0 +1,38 @@
+{
+  "meta": {
+    "title": "Sovereignty Friction Overrides",
+    "description": "Manual clean/risk/blocked verdicts for cross-border corridors where the automatic sanctions + arms-asymmetry heuristic in lib/relationships.ts would mis-route. Used by sovereigntyFriction() to damp roster/mesh weights, never to hard-fail a route.",
+    "sources": [
+      "UN/EU/US sanctions regimes (curated)",
+      "SIPRI arms-corridor asymmetry (curated)"
+    ],
+    "note": "Keys are 'ISO3A>ISO3B' directed pairs (uppercase). Overrides take precedence over the derived heuristic. Verdict 'blocked' damps a weight to 0 (still surfaced, never silently dropped).",
+    "last_updated": "2026-08-12"
+  },
+  "overrides": {
+    "USA>IRN": { "level": "blocked", "reason": "comprehensive US sanctions on Iran" },
+    "IRN>USA": { "level": "blocked", "reason": "comprehensive Iran sanctions regime" },
+    "USA>CUB": { "level": "blocked", "reason": "US embargo on Cuba" },
+    "CUB>USA": { "level": "blocked", "reason": "US embargo on Cuba (reciprocal)" },
+    "USA>PRK": { "level": "blocked", "reason": "comprehensive US sanctions on DPRK" },
+    "PRK>USA": { "level": "blocked", "reason": "comprehensive DPRK sanctions regime" },
+    "USA>RUS": { "level": "blocked", "reason": "post-2022 sanctions regime" },
+    "RUS>USA": { "level": "blocked", "reason": "reciprocal sanctions regime" },
+    "EU>IRN": { "level": "blocked", "reason": "EU sanctions on Iran" },
+    "IRN>EU": { "level": "blocked", "reason": "EU sanctions on Iran (reciprocal)" },
+    "ISR>PSE": { "level": "risk", "reason": "active conflict corridor — aid-only routing" },
+    "PSE>ISR": { "level": "risk", "reason": "active conflict corridor — aid-only routing" },
+    "IND>PAK": { "level": "risk", "reason": "arms-corridor asymmetry, border tension" },
+    "PAK>IND": { "level": "risk", "reason": "arms-corridor asymmetry, border tension" },
+    "SAU>YEM": { "level": "risk", "reason": "active conflict corridor" },
+    "YEM>SAU": { "level": "risk", "reason": "active conflict corridor" },
+    "RUS>UKR": { "level": "blocked", "reason": "active invasion corridor" },
+    "UKR>RUS": { "level": "blocked", "reason": "active invasion corridor" },
+    "USA>CAN": { "level": "clean", "reason": "ally corridor, low friction" },
+    "CAN>USA": { "level": "clean", "reason": "ally corridor, low friction" },
+    "GBR>IRL": { "level": "clean", "reason": "ally corridor, low friction" },
+    "IRL>GBR": { "level": "clean", "reason": "ally corridor, low friction" },
+    "BRA>ARG": { "level": "clean", "reason": "Mercosur corridor, low friction" },
+    "ARG>BRA": { "level": "clean", "reason": "Mercosur corridor, low friction" }
+  }
+}

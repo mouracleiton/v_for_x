@@ -505,3 +505,166 @@ export function getFlowIcon(type: "arms" | "sanctions" | "aid"): string {
       return "🏥";
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   Sovereignty friction matrix
+   (Phase 26 B — Quantum P2P Squad adaptation)
+   ═══════════════════════════════════════════════════════════════ */
+
+/** Friction verdict for a directed ISO3-A → ISO3-B corridor. */
+export type FrictionLevel = "clean" | "risk" | "blocked";
+
+export interface SovereigntyFriction {
+  /** Directed corridor A→B. */
+  from: string;
+  /** Directed corridor A→B. */
+  to: string;
+  /** clean / risk / blocked. */
+  level: FrictionLevel;
+  /** Weight damping factor: clean=1, risk=0.5, blocked=0. */
+  multiplier: number;
+  /** Human-readable why (sanction / arms-asymmetry / override / ally). */
+  reasons: string[];
+  /** True when an override row forced the verdict. */
+  overridden: boolean;
+}
+
+/** Multiplier applied per friction level when damping a roster/mesh weight. */
+export const FRICTION_MULTIPLIER: Record<FrictionLevel, number> = {
+  clean: 1,
+  risk: 0.5,
+  blocked: 0,
+};
+
+/** Arms-corridor value (M USD) above which a directed corridor reads as "risk". */
+const ARMS_ASYMMETRY_THRESHOLD_MUSD = 500;
+
+/** Normalize an ISO3 code for lookup. */
+function normIso3(code: string): string {
+  return (code ?? "").trim().toUpperCase();
+}
+
+let cachedOverrides: Record<string, { level: FrictionLevel; reason: string }> | null =
+  null;
+
+/**
+ * Load the static sovereignty-friction override table once. The table is a
+ * curated set of directed corridors ("USA>IRN") with a clean/risk/blocked
+ * verdict; sovereigntyFriction() prefers it over the derived heuristic.
+ */
+export function loadFrictionOverrides(
+  raw: unknown,
+): Record<string, { level: FrictionLevel; reason: string }> {
+  if (raw && typeof raw === "object") {
+    const obj = raw as { overrides?: Record<string, unknown> };
+    if (obj.overrides && typeof obj.overrides === "object") {
+      cachedOverrides = obj.overrides as Record<string, {
+        level: FrictionLevel;
+        reason: string;
+      }>;
+      return cachedOverrides;
+    }
+  }
+  cachedOverrides = {};
+  return cachedOverrides;
+}
+
+/** Clear cached overrides (tests / refresh). */
+export function clearFrictionOverrides(): void {
+  cachedOverrides = null;
+}
+
+/** Look up a directed override row, if any. */
+function lookupOverride(
+  a: string,
+  b: string,
+): { level: FrictionLevel; reason: string } | null {
+  const table = cachedOverrides ?? loadFrictionOverrides(DEFAULT_FRICTION_OVERRIDES);
+  return table[`${a}>${b}`] ?? null;
+}
+
+/** Default override table bundled with the lib (data/sovereignty-friction.json mirror). */
+export const DEFAULT_FRICTION_OVERRIDES = {
+  overrides: {
+    "USA>IRN": { level: "blocked" as FrictionLevel, reason: "comprehensive US sanctions on Iran" },
+    "IRN>USA": { level: "blocked" as FrictionLevel, reason: "comprehensive Iran sanctions regime" },
+    "USA>CUB": { level: "blocked" as FrictionLevel, reason: "US embargo on Cuba" },
+    "CUB>USA": { level: "blocked" as FrictionLevel, reason: "US embargo on Cuba (reciprocal)" },
+    "USA>PRK": { level: "blocked" as FrictionLevel, reason: "comprehensive US sanctions on DPRK" },
+    "PRK>USA": { level: "blocked" as FrictionLevel, reason: "comprehensive DPRK sanctions regime" },
+    "USA>RUS": { level: "blocked" as FrictionLevel, reason: "post-2022 sanctions regime" },
+    "RUS>USA": { level: "blocked" as FrictionLevel, reason: "reciprocal sanctions regime" },
+    "RUS>UKR": { level: "blocked" as FrictionLevel, reason: "active invasion corridor" },
+    "UKR>RUS": { level: "blocked" as FrictionLevel, reason: "active invasion corridor" },
+  },
+};
+
+/**
+ * Sovereignty friction for a directed corridor A→B.
+ *
+ * Verdict is derived from sanctions + arms-corridor asymmetry and damped by
+ * the static override table. Friction *damps* a weight (multiplier), it never
+ * hard-fails a route — matching the squads model (clean/risk/blocked →
+ * multiplier, not filter). Callers decide whether multiplier===0 is a skip.
+ *
+ * Precedence: override > sanctions (either direction) > arms asymmetry > clean.
+ */
+export function sovereigntyFriction(
+  data: RelationshipsData,
+  iso3A: string,
+  iso3B: string,
+): SovereigntyFriction {
+  const a = normIso3(iso3A);
+  const b = normIso3(iso3B);
+  if (!a || !b) {
+    return { from: a, to: b, level: "clean", multiplier: FRICTION_MULTIPLIER.clean, reasons: ["missing iso3"], overridden: false };
+  }
+  if (a === b) {
+    return { from: a, to: b, level: "clean", multiplier: FRICTION_MULTIPLIER.clean, reasons: ["same country"], overridden: false };
+  }
+
+  const reasons: string[] = [];
+
+  // 1. Override table wins.
+  const override = lookupOverride(a, b);
+  if (override) {
+    return {
+      from: a,
+      to: b,
+      level: override.level,
+      multiplier: FRICTION_MULTIPLIER[override.level],
+      reasons: [override.reason],
+      overridden: true,
+    };
+  }
+
+  // 2. Sanction either direction → blocked.
+  if (hasSanction(data, a, b) || hasSanction(data, b, a)) {
+    reasons.push("active sanctions regime");
+    return { from: a, to: b, level: "blocked", multiplier: FRICTION_MULTIPLIER.blocked, reasons, overridden: false };
+  }
+
+  // 3. Arms-corridor asymmetry → risk. A heavy one-way arms flow signals a
+  //    sovereignty incompatibility even without a formal sanctions regime.
+  const supplied = getTotalArmsSupplied(data, a);
+  const received = getTotalArmsReceived(data, b);
+  const aToB = data.arms_transfers
+    .filter((t) => normIso3(t.source_iso3) === a && normIso3(t.target_iso3) === b)
+    .reduce((sum, t) => sum + (t.value_musd || 0), 0);
+  const bToA = data.arms_transfers
+    .filter((t) => normIso3(t.source_iso3) === b && normIso3(t.target_iso3) === a)
+    .reduce((sum, t) => sum + (t.value_musd || 0), 0);
+  if (aToB >= ARMS_ASYMMETRY_THRESHOLD_MUSD && bToA < aToB * 0.1) {
+    reasons.push(`arms-corridor asymmetry (A→B $${aToB.toFixed(0)}M vs B→A $${bToA.toFixed(0)}M)`);
+  }
+  // High general arms posture on either side also reads as risk.
+  if (supplied >= ARMS_ASYMMETRY_THRESHOLD_MUSD || received >= ARMS_ASYMMETRY_THRESHOLD_MUSD) {
+    if (reasons.length === 0) reasons.push("heavy arms posture on corridor endpoint");
+  }
+
+  if (reasons.length > 0) {
+    return { from: a, to: b, level: "risk", multiplier: FRICTION_MULTIPLIER.risk, reasons, overridden: false };
+  }
+
+  return { from: a, to: b, level: "clean", multiplier: FRICTION_MULTIPLIER.clean, reasons: ["no friction signal"], overridden: false };
+}
