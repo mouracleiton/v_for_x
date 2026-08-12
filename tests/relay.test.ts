@@ -90,12 +90,10 @@ describe("relay.ts", () => {
       const original = "This is a test message that needs to be split and reassembled correctly.".repeat(10);
       const segments = segmentForQR(original);
       const reassembled = reassembleSegments(segments);
-      // Each segment content includes the header prefix, so reassembly
-      // concatenates the full content strings
+      // segmentForQR prepends a header per segment for QR rendering;
+      // reassembleSegments strips them and returns the original text.
       expect(reassembled).not.toBeNull();
-      // Verify the original text is contained in the reassembled content
-      const fullContent = segments.map((s) => s.content).join("");
-      expect(reassembled).toBe(fullContent);
+      expect(reassembled).toBe(original);
     });
 
     it("should reassemble segments out of order", () => {

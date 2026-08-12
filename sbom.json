@@ -1,0 +1,321 @@
+{
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "creationInfo": {
+    "created": "2026-08-12T11:33:49Z",
+    "creators": [
+      "Tool: v-for-x/scripts/sbom-audit.sh",
+      "Organization: V FOR X"
+    ]
+  },
+  "dataLicense": "CC0-1.0",
+  "documentNamespace": "https://vforx.local/sbom/v-for-x/1786534429",
+  "drift": [
+    {
+      "declared": "^8.5.0",
+      "name": "@capacitor/core",
+      "reason": "not pinned exact"
+    },
+    {
+      "declared": "^8.2.1",
+      "name": "@capacitor/local-notifications",
+      "reason": "not pinned exact"
+    },
+    {
+      "declared": "^4",
+      "name": "@tailwindcss/postcss",
+      "reason": "not pinned exact"
+    },
+    {
+      "declared": "^10.4.1",
+      "name": "@testing-library/dom",
+      "reason": "not pinned exact"
+    },
+    {
+      "declared": "^7.0.1",
+      "name": "@testing-library/jest-dom",
+      "reason": "not pinned exact"
+    },
+    {
+      "declared": "^16.3.2",
+      "name": "@testing-library/react",
+      "reason": "not pinned exact"
+    },
+    {
+      "declared": "^1.9.22",
+      "name": "@types/leaflet",
+      "reason": "not pinned exact"
+    },
+    {
+      "declared": "^20",
+      "name": "@types/node",
+      "reason": "not pinned exact"
+    },
+    {
+      "declared": "^19",
+      "name": "@types/react",
+      "reason": "not pinned exact"
+    },
+    {
+      "declared": "^19",
+      "name": "@types/react-dom",
+      "reason": "not pinned exact"
+    },
+    {
+      "declared": "^6.0.5",
+      "name": "@vitejs/plugin-react",
+      "reason": "not pinned exact"
+    },
+    {
+      "declared": "^4.13.0",
+      "name": "axe-core",
+      "reason": "not pinned exact"
+    },
+    {
+      "declared": "^8.0.3",
+      "name": "idb",
+      "reason": "not pinned exact"
+    },
+    {
+      "declared": "^30.0.1",
+      "name": "jsdom",
+      "reason": "not pinned exact"
+    },
+    {
+      "declared": "^1.9.4",
+      "name": "leaflet",
+      "reason": "not pinned exact"
+    },
+    {
+      "declared": "^5.0.0",
+      "name": "react-leaflet",
+      "reason": "not pinned exact"
+    },
+    {
+      "declared": "^3.10.1",
+      "name": "recharts",
+      "reason": "not pinned exact"
+    },
+    {
+      "declared": "^4",
+      "name": "tailwindcss",
+      "reason": "not pinned exact"
+    },
+    {
+      "declared": "^5",
+      "name": "typescript",
+      "reason": "not pinned exact"
+    },
+    {
+      "declared": "^4.1.10",
+      "name": "vitest",
+      "reason": "not pinned exact"
+    },
+    {
+      "declared": "^5.0.14",
+      "name": "zustand",
+      "reason": "not pinned exact"
+    }
+  ],
+  "driftCount": 21,
+  "name": "v-for-x",
+  "packageCount": 24,
+  "packages": [
+    {
+      "declaredSpec": "^8.5.0",
+      "integrity": "sha512-Ca4krtqH1hothjtBIwf2J2TW7IhYq1ujp8QeItTiJohNsqij8ja2DYYH3DU0l8RmxCWaBAFTGA2TgOgOMCSNsQ==",
+      "name": "@capacitor/core",
+      "pinned": false,
+      "resolved": "https://registry.npmjs.org/@capacitor/core/-/core-8.5.0.tgz",
+      "version": "8.5.0"
+    },
+    {
+      "declaredSpec": "^8.2.1",
+      "integrity": "sha512-Bkim+MGl7UrDTjDferV4ECq0aWciTsa0k15+MX2jnx2PeWgEPvlBy5yrqzBlwEZPrtHFUvPVxPi5V66MPGHkAw==",
+      "name": "@capacitor/local-notifications",
+      "pinned": false,
+      "resolved": "https://registry.npmjs.org/@capacitor/local-notifications/-/local-notifications-8.2.1.tgz",
+      "version": "8.2.1"
+    },
+    {
+      "declaredSpec": "^4",
+      "integrity": "sha512-JTSZZGQi1AyKirbLN3azmjVzef92tcX7h+iSqPdaeStyFpGpDlKvvpxeOE8njhbUanbRwr3z8DyzhICWnMtQeg==",
+      "name": "@tailwindcss/postcss",
+      "pinned": false,
+      "resolved": "https://registry.npmjs.org/@tailwindcss/postcss/-/postcss-4.3.3.tgz",
+      "version": "4.3.3"
+    },
+    {
+      "declaredSpec": "^10.4.1",
+      "integrity": "sha512-o4PXJQidqJl82ckFaXUeoAW+XysPLauYI43Abki5hABd853iMhitooc6znOnczgbTYmEP6U6/y1ZyKAIsvMKGg==",
+      "name": "@testing-library/dom",
+      "pinned": false,
+      "resolved": "https://registry.npmjs.org/@testing-library/dom/-/dom-10.4.1.tgz",
+      "version": "10.4.1"
+    },
+    {
+      "declaredSpec": "^7.0.1",
+      "integrity": "sha512-oMDTC3oA+6CXSO2JZnvOI7CA6oVub6kij5ggk9ohwye5slmkwxYDXcPOVxgMw/RQlticjtO0C1RZkR97HgrWMw==",
+      "name": "@testing-library/jest-dom",
+      "pinned": false,
+      "resolved": "https://registry.npmjs.org/@testing-library/jest-dom/-/jest-dom-7.0.1.tgz",
+      "version": "7.0.1"
+    },
+    {
+      "declaredSpec": "^16.3.2",
+      "integrity": "sha512-XU5/SytQM+ykqMnAnvB2umaJNIOsLF3PVv//1Ew4CTcpz0/BRyy/af40qqrt7SjKpDdT1saBMc42CUok5gaw+g==",
+      "name": "@testing-library/react",
+      "pinned": false,
+      "resolved": "https://registry.npmjs.org/@testing-library/react/-/react-16.3.2.tgz",
+      "version": "16.3.2"
+    },
+    {
+      "declaredSpec": "^1.9.22",
+      "integrity": "sha512-h3lhECYEKDasG7LFHu+GiHqAvsgLuQvlJvVZzJDGONo3sEL+wUOqSFLnwkZlK0qVxnxbuGFW8iBlJNYs5wgndA==",
+      "name": "@types/leaflet",
+      "pinned": false,
+      "resolved": "https://registry.npmjs.org/@types/leaflet/-/leaflet-1.9.22.tgz",
+      "version": "1.9.22"
+    },
+    {
+      "declaredSpec": "^20",
+      "integrity": "sha512-6oYBAi5ikg4Pl+kGsoYtawUMBT2zZMCvPNF7pVLnHZfd1zf38DRiWn/gT01RYCdUqkv7Fhr+C9ot4/tb+2sVvA==",
+      "name": "@types/node",
+      "pinned": false,
+      "resolved": "https://registry.npmjs.org/@types/node/-/node-20.19.43.tgz",
+      "version": "20.19.43"
+    },
+    {
+      "declaredSpec": "^19",
+      "integrity": "sha512-AnzbBERsrLKtk2XSfTbYRLjQPdy116Sty4q+T+Bp3IC4l6jNBvreVPAHmpq9qhXQM7CXZPjLVmGMw9sy+hxQ3w==",
+      "name": "@types/react",
+      "pinned": false,
+      "resolved": "https://registry.npmjs.org/@types/react/-/react-19.2.18.tgz",
+      "version": "19.2.18"
+    },
+    {
+      "declaredSpec": "^19",
+      "integrity": "sha512-Bsc+QHgp+P/F02XDzNCY9jnZNCUuLki36KT7VKrTXXLdHf+vHMNZnW1rVu5DNW/rCK+fya3DATySbLM4yhtKUw==",
+      "name": "@types/react-dom",
+      "pinned": false,
+      "resolved": "https://registry.npmjs.org/@types/react-dom/-/react-dom-19.2.4.tgz",
+      "version": "19.2.4"
+    },
+    {
+      "declaredSpec": "^6.0.5",
+      "integrity": "sha512-BOVzne/NL162sMdResB25mUv+vWMF5NoAjNf09TeGlE7ZpszZWSD3winycicLJw72yeVsoCn/2kOhEuCvEShMA==",
+      "name": "@vitejs/plugin-react",
+      "pinned": false,
+      "resolved": "https://registry.npmjs.org/@vitejs/plugin-react/-/plugin-react-6.0.5.tgz",
+      "version": "6.0.5"
+    },
+    {
+      "declaredSpec": "^4.13.0",
+      "integrity": "sha512-UzGt8zg7Ny8djbYMhxl2zuEevVa7r2gJjYY5Lwr1xM7+XU2nd6CkIWFTVcCIbAP63vSz71NaVyyuSk9lHKcy0A==",
+      "name": "axe-core",
+      "pinned": false,
+      "resolved": "https://registry.npmjs.org/axe-core/-/axe-core-4.13.0.tgz",
+      "version": "4.13.0"
+    },
+    {
+      "declaredSpec": "^8.0.3",
+      "integrity": "sha512-LtwtVyVYO5BqRvcsKuB2iUMnHwPVByPCXFXOpuU96IZPPoPN6xjOGxZQ74pgSVVLQWtUOYgyeL4GE98BY5D3wg==",
+      "name": "idb",
+      "pinned": false,
+      "resolved": "https://registry.npmjs.org/idb/-/idb-8.0.3.tgz",
+      "version": "8.0.3"
+    },
+    {
+      "declaredSpec": "^30.0.1",
+      "integrity": "sha512-52v7mUVUfNQVYYqE1lcdaymWL0njO7lTLUog6ZvW2U5KsbiLk/GnZlVJ+qx0xfNJZ6Gn+KSpPNE52vurbxZwrA==",
+      "name": "jsdom",
+      "pinned": false,
+      "resolved": "https://registry.npmjs.org/jsdom/-/jsdom-30.0.1.tgz",
+      "version": "30.0.1"
+    },
+    {
+      "declaredSpec": "^1.9.4",
+      "integrity": "sha512-nxS1ynzJOmOlHp+iL3FyWqK89GtNL8U8rvlMOsQdTTssxZwCXh8N2NB3GDQOL+YR3XnWyZAxwQixURb+FA74PA==",
+      "name": "leaflet",
+      "pinned": false,
+      "resolved": "https://registry.npmjs.org/leaflet/-/leaflet-1.9.4.tgz",
+      "version": "1.9.4"
+    },
+    {
+      "declaredSpec": "16.3.0",
+      "integrity": "sha512-NEdGOzH+08eTXMUp9UYkA99Nhi5N6Thrhc1jgFOQgfgnGK/dA2hRwBpXep+exdFQrnwlRf/3Wixyp8lLBUpE2A==",
+      "name": "next",
+      "pinned": true,
+      "resolved": "https://registry.npmjs.org/next/-/next-16.3.0.tgz",
+      "version": "16.3.0"
+    },
+    {
+      "declaredSpec": "19.2.8",
+      "integrity": "sha512-PWaYA1L/q9u2u7xYQi+Y3L3Yfnie7XyLeaJICV1MGD6LprsBxcAqGjYyr0eY3p+QdsA+x/Irkt4Qif8D63+Sbw==",
+      "name": "react",
+      "pinned": true,
+      "resolved": "https://registry.npmjs.org/react/-/react-19.2.8.tgz",
+      "version": "19.2.8"
+    },
+    {
+      "declaredSpec": "19.2.8",
+      "integrity": "sha512-rVprimfGBG3DR+Tq0IQG2DT5PxKth1WIGDmj5yPmlzr4YBe7uyE+Du4oVqTDXZSHGGGXRtTJEGSSePyQCMBglQ==",
+      "name": "react-dom",
+      "pinned": true,
+      "resolved": "https://registry.npmjs.org/react-dom/-/react-dom-19.2.8.tgz",
+      "version": "19.2.8"
+    },
+    {
+      "declaredSpec": "^5.0.0",
+      "integrity": "sha512-CWbTpr5vcHw5bt9i4zSlPEVQdTVcML390TjeDG0cK59z1ylexpqC6M1PJFjV8jD7CF+ACBFsLIDs6DRMoLEofw==",
+      "name": "react-leaflet",
+      "pinned": false,
+      "resolved": "https://registry.npmjs.org/react-leaflet/-/react-leaflet-5.0.0.tgz",
+      "version": "5.0.0"
+    },
+    {
+      "declaredSpec": "^3.10.1",
+      "integrity": "sha512-QXFrvt6IVcw7eeZCoyXTwkIJAX3Dv1nyVhMicXJ47GsGDDpcN8z6o644DibE9XjpBTThtsomLKnTV6lc+cVFUA==",
+      "name": "recharts",
+      "pinned": false,
+      "resolved": "https://registry.npmjs.org/recharts/-/recharts-3.10.1.tgz",
+      "version": "3.10.1"
+    },
+    {
+      "declaredSpec": "^4",
+      "integrity": "sha512-gOhV3P7ufE62QDGg1zVaTgCR+EtPv92k2nIhVcVKcLmxT1sUBsQGhnZj175j+MqRt4zLF7ic+sCYjfhxMxj7YQ==",
+      "name": "tailwindcss",
+      "pinned": false,
+      "resolved": "https://registry.npmjs.org/tailwindcss/-/tailwindcss-4.3.3.tgz",
+      "version": "4.3.3"
+    },
+    {
+      "declaredSpec": "^5",
+      "integrity": "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==",
+      "name": "typescript",
+      "pinned": false,
+      "resolved": "https://registry.npmjs.org/typescript/-/typescript-5.9.3.tgz",
+      "version": "5.9.3"
+    },
+    {
+      "declaredSpec": "^4.1.10",
+      "integrity": "sha512-R9jUTe5S4Qb0HCd4TNqpC7oGcrMssMRGXLW80ubjWsW9VH5GF8y1Y0SFLY9AbqSk6nt0PnOx4H4WNJYZ13GUPw==",
+      "name": "vitest",
+      "pinned": false,
+      "resolved": "https://registry.npmjs.org/vitest/-/vitest-4.1.10.tgz",
+      "version": "4.1.10"
+    },
+    {
+      "declaredSpec": "^5.0.14",
+      "integrity": "sha512-/8tAspM5LMPr28b3fwLYrtdj77ECpfZviaP75CMTnwO8ISyaE4GDIG/9rDDYq/cH9D2Xw2A2RXglLInmVBQB/g==",
+      "name": "zustand",
+      "pinned": false,
+      "resolved": "https://registry.npmjs.org/zustand/-/zustand-5.0.14.tgz",
+      "version": "5.0.14"
+    }
+  ],
+  "sourceHashes": {
+    "package-lock.json": "1ee128408a1f2ef61816fbc7328de76524ab4a8c0cd48da78d9639afae4d0499",
+    "package.json": "debe42c864dbc4c0138124f206767193fb265afe391fb6a26223fc1612ebcf95"
+  },
+  "spdxVersion": "SPDX-2.3"
+}

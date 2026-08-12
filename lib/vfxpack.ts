@@ -335,6 +335,99 @@ export async function createPackWithIdentity(
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   Crisis Manifest packs (Phase 14)
+   ═══════════════════════════════════════════════════════════════ */
+
+/**
+ * A crisis manifest describes the *data* a pack carries for a specific
+ * crisis — which ISO3, which data files, what dimensions — so a
+ * recipient knows what an offline briefcase contains before importing
+ * any tokens. The manifest rides as the pack's description in a
+ * parseable JSON form; the pack's tokens carry the verifiable records.
+ */
+export interface CrisisManifest {
+  /** Manifest schema version. */
+  manifestVersion: 1;
+  /** ISO3 the manifest targets (or "GLOBAL"). */
+  iso3: string;
+  /** Crisis label. */
+  crisis: string;
+  /** Data files included (paths relative to build root). */
+  dataFiles: string[];
+  /** Dimensions covered (e.g. displacement, hunger, sanctions). */
+  dimensions: string[];
+  /** Human-readable description. */
+  note?: string;
+  /** Build/source hash the manifest was generated from. */
+  sourceHash?: string;
+  /** Epoch ms the manifest was generated. */
+  generatedAt: number;
+}
+
+/**
+ * Create a crisis pack: a VFXPACK1 with kind="manifest" whose
+ * description embeds a parseable CrisisManifest JSON, plus the supplied
+ * verifiable tokens. Unsigned by default; pass an identity to sign it.
+ */
+export async function createCrisisManifestPack(
+  manifest: CrisisManifest,
+  tokens: string[],
+  options?: {
+    identity?: { privateKey: CryptoKey; publicKey: CryptoKey };
+    label?: string;
+    ts?: number;
+  },
+): Promise<VfxPack> {
+  if (!manifest || manifest.manifestVersion !== 1) {
+    throw new Error("CrisisManifest must have manifestVersion 1");
+  }
+  const iso3 = manifest.iso3 === "GLOBAL" ? undefined : manifest.iso3;
+  const baseOptions = {
+    label: options?.label ?? `Crisis pack: ${manifest.crisis} [${manifest.iso3}]`,
+    description: JSON.stringify(manifest),
+    iso3,
+    kind: "manifest" as const,
+    ts: options?.ts,
+  };
+  if (options?.identity) {
+    return createSignedPack(tokens, options.identity as CryptoKeyPair, baseOptions);
+  }
+  return createPack(tokens, baseOptions);
+}
+
+/**
+ * Read the embedded CrisisManifest from a pack's description.
+ * Returns null if the pack isn't a manifest or the description isn't
+ * parseable as a manifest.
+ */
+export function readCrisisManifest(pack: VfxPack): CrisisManifest | null {
+  if (pack.kind !== "manifest") return null;
+  if (!pack.description) return null;
+  try {
+    const manifest = JSON.parse(pack.description) as CrisisManifest;
+    if (!manifest || manifest.manifestVersion !== 1 || !manifest.iso3) return null;
+    return manifest;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Convenience: decode a VFXPACK1 token and read its crisis manifest.
+ */
+export function readCrisisManifestFromToken(token: string): {
+  pack: VfxPack;
+  manifest: CrisisManifest | null;
+} | null {
+  try {
+    const pack = decodePack(token);
+    return { pack, manifest: readCrisisManifest(pack) };
+  } catch {
+    return null;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
    Pack verification
    ═══════════════════════════════════════════════════════════════ */
 

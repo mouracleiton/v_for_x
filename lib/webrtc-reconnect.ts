@@ -1,474 +1,292 @@
 /**
- * V FOR X — WebRTC Reconnection & ICE Restart (The Web v2)
+ * V FOR X — WebRTC Reconnect / ICE Restart (Phase 12 — todo-003)
  *
- * Handles WebRTC connection recovery when the peer connection fails
- * or the network changes. Implements ICE restart without losing the
- * room code, automatic reconnection with exponential backoff, and
- * connection state tracking.
+ * P2P rooms die for boring reasons: a NAT mapping lapses, a mobile peer
+ * switches cell→wifi, an ICE path flaps. Losing the *room code* on every
+ * hiccup forces users to re-share a join token — unusable under stress.
  *
- * Works with the existing signal-relay.ts signaling layer and extends
- * RTCPeerConnection management to handle network disruptions gracefully.
+ * This lib owns the reconnect *state machine* and the backoff scheduler
+ * so the room layer can (a) keep the room code stable across drops and
+ * (b) fire an ICE restart at the right moment without burning the peer.
+ *
+ *   • NEW → CONNECTED on first ICE success
+ *   • CONNECTED → DISCONNECTED (transient) → scheduleReconnect() w/ backoff
+ *   • DISCONNECTED → FAILED (iceConnectionState "failed") → restartICE()
+ *   • too many attempts → stop trying; user must re-engage
+ *   • a clean hangup (cleanupReconnectState) → CLOSED, timers cleared
+ *
+ * Transport-agnostic: the caller wires restartICE()/scheduleReconnect()
+ * to its own RTCPeerConnection. The room code is persisted separately
+ * so a reconnect reuses it — the join token never has to be re-shared.
+ *
+ * Type naming: `ReconnectState` is the mutable state OBJECT (returned by
+ * initReconnectState); `ConnectionState` is the string union label that
+ * lives on `ReconnectState.state`. This matches the existing test contract.
+ *
+ * Fully offline. No servers, no signaling — that stays in lib/signal-relay.
  */
+
+/* ═══════════════════════════════════════════════════════════════
+   Types
+   ═══════════════════════════════════════════════════════════════ */
 
 export type ConnectionState =
-  | "new"
-  | "checking"
-  | "connected"
-  | "disconnected"
-  | "failed"
-  | "closed"
-  | "reconnecting";
+	| "new"
+	| "connected"
+	| "disconnected"
+	| "reconnecting"
+	| "failed"
+	| "closed";
 
 export interface ReconnectConfig {
-  /** Maximum number of reconnection attempts */
-  maxAttempts: number;
-  /** Initial backoff delay in milliseconds */
-  initialBackoffMs: number;
-  /** Maximum backoff delay in milliseconds */
-  maxBackoffMs: number;
-  /** Backoff multiplier (exponential) */
-  backoffMultiplier: number;
-  /** How often to send keepalive pings (ms) */
-  keepaliveIntervalMs: number;
-  /** Connection timeout in milliseconds */
-  connectionTimeoutMs: number;
+	/** Max reconnect attempts before giving up. */
+	maxAttempts: number;
+	/** First backoff delay in ms. */
+	initialBackoffMs: number;
+	/** Hard cap on a single backoff delay. */
+	maxBackoffMs: number;
+	/** Exponential growth factor (e.g. 2.0). */
+	backoffMultiplier: number;
+	/** Keepalive ping interval in ms. */
+	keepaliveIntervalMs: number;
+	/** Consider the connection dead after this many ms without ICE. */
+	connectionTimeoutMs: number;
 }
 
-export interface ReconnectState {
-  /** Current connection state */
-  state: ConnectionState;
-  /** Number of reconnection attempts made */
-  attempt: number;
-  /** Timestamp of last connection attempt */
-  lastAttemptAt: number;
-  /** Timestamp of successful connection */
-  connectedAt: number;
-  /** Current backoff delay */
-  currentBackoffMs: number;
-  /** Whether ICE restart is in progress */
-  iceRestartInProgress: boolean;
-  /** Keepalive timer ID */
-  keepaliveTimerId: number | null;
-  /** Reconnect timer ID */
-  reconnectTimerId: number | null;
-}
-
-const DEFAULT_CONFIG: ReconnectConfig = {
-  maxAttempts: 10,
-  initialBackoffMs: 1000, // 1 second
-  maxBackoffMs: 60000, // 1 minute
-  backoffMultiplier: 1.5,
-  keepaliveIntervalMs: 15000, // 15 seconds
-  connectionTimeoutMs: 30000, // 30 seconds
+export const DEFAULT_RECONNECT_CONFIG: ReconnectConfig = {
+	maxAttempts: 5,
+	initialBackoffMs: 1_000,
+	maxBackoffMs: 10_000,
+	backoffMultiplier: 2.0,
+	keepaliveIntervalMs: 5_000,
+	connectionTimeoutMs: 30_000,
 };
 
-/* ═══════════════════════════════════════════════════════════
-   Reconnection State Management
-═══════════════════════════════════════════════════════════ */
+export interface ReconnectState {
+	state: ConnectionState;
+	attempt: number;
+	currentBackoffMs: number;
+	iceRestartInProgress: boolean;
+	connectedAt: number | null;
+	lastAttemptAt: number | null;
+	keepaliveTimerId: TimerHandle | null;
+	reconnectTimerId: TimerHandle | null;
+}
 
-/**
- * Initialize a new reconnection state.
- */
-export function initReconnectState(): ReconnectState {
-  return {
-    state: "new",
-    attempt: 0,
-    lastAttemptAt: 0,
-    connectedAt: 0,
-    currentBackoffMs: DEFAULT_CONFIG.initialBackoffMs,
-    iceRestartInProgress: false,
-    keepaliveTimerId: null,
-    reconnectTimerId: null,
-  };
+/** Opaque timer handle — number in browsers, Timeout under Node; both accepted. */
+export type TimerHandle = ReturnType<typeof setTimeout> | number;
+
+export const ROOM_CODE_STORAGE_KEY = "vfx-webrtc-room-code";
+
+/* ═══════════════════════════════════════════════════════════════
+   State lifecycle
+   ═══════════════════════════════════════════════════════════════ */
+
+/** Create a fresh reconnect state at "new" with the default backoff. */
+export function initReconnectState(config: ReconnectConfig | null = DEFAULT_RECONNECT_CONFIG): ReconnectState {
+	const cfg = config ?? DEFAULT_RECONNECT_CONFIG;
+	return {
+		state: "new",
+		attempt: 0,
+		currentBackoffMs: cfg.initialBackoffMs,
+		iceRestartInProgress: false,
+		connectedAt: null,
+		lastAttemptAt: null,
+		keepaliveTimerId: null,
+		reconnectTimerId: null,
+	};
 }
 
 /**
- * Update the connection state and trigger appropriate actions.
+ * Apply a transport event. Returns a NEW state object. On "connected"
+ * the attempt counter + backoff reset; on "disconnected" the lastAttemptAt
+ * is stamped so the scheduler knows when to fire. Never throws.
  */
 export function updateConnectionState(
-  state: ReconnectState,
-  newState: ConnectionState,
-  pc: RTCPeerConnection | null
+	state: ReconnectState,
+	event: ConnectionState,
+	config: ReconnectConfig | null = DEFAULT_RECONNECT_CONFIG,
 ): ReconnectState {
-  const oldState = state.state;
-  state.state = newState;
-
-  // Clear timers when state changes significantly
-  if (newState === "connected" && oldState !== "connected") {
-    state.attempt = 0;
-    state.currentBackoffMs = DEFAULT_CONFIG.initialBackoffMs;
-    state.connectedAt = Date.now();
-    state.iceRestartInProgress = false;
-  } else if (newState === "failed" || newState === "closed") {
-    clearTimers(state);
-  } else if (newState === "disconnected") {
-    // Start reconnection process whenever we become disconnected
-    state.lastAttemptAt = Date.now();
-  }
-
-  return state;
+	const cfg = config ?? DEFAULT_RECONNECT_CONFIG;
+	const now = Date.now();
+	switch (event) {
+		case "connected":
+			return {
+				...state,
+				state: "connected",
+				attempt: 0,
+				currentBackoffMs: cfg.initialBackoffMs,
+				iceRestartInProgress: false,
+				connectedAt: now,
+			};
+		case "disconnected":
+			return { ...state, state: "disconnected", lastAttemptAt: now };
+		case "failed":
+			return { ...state, state: "failed", iceRestartInProgress: false };
+		case "reconnecting":
+			return { ...state, state: "reconnecting" };
+		case "closed":
+			return { ...state, state: "closed" };
+		default:
+			return state;
+	}
 }
 
-/**
- * Calculate the next backoff delay with exponential increase.
- */
+/* ═══════════════════════════════════════════════════════════════
+   Backoff math
+   ═══════════════════════════════════════════════════════════════ */
+
+/** Exponential backoff for the next attempt, capped at maxBackoffMs. */
 export function calculateNextBackoff(state: ReconnectState, config: ReconnectConfig): number {
-  const nextDelay = Math.min(
-    state.currentBackoffMs * config.backoffMultiplier,
-    config.maxBackoffMs
-  );
-  return Math.floor(nextDelay);
+	const raw = state.currentBackoffMs * config.backoffMultiplier;
+	return Math.min(raw, config.maxBackoffMs);
 }
 
-/**
- * Increment reconnection attempt and update backoff.
- */
+/** Increment the attempt counter and advance the backoff window. */
 export function incrementAttempt(state: ReconnectState, config: ReconnectConfig): ReconnectState {
-  state.attempt += 1;
-  state.lastAttemptAt = Date.now();
-  state.currentBackoffMs = calculateNextBackoff(state, config);
-  return state;
+	const now = Date.now();
+	return {
+		...state,
+		attempt: state.attempt + 1,
+		lastAttemptAt: now,
+		currentBackoffMs: calculateNextBackoff(state, config),
+	};
 }
 
-/**
- * Check if reconnection should be attempted.
- */
+/** True if a reconnect should still be tried (disconnected + under cap). */
 export function shouldAttemptReconnect(state: ReconnectState, config: ReconnectConfig): boolean {
-  return state.attempt < config.maxAttempts &&
-    (state.state === "disconnected" || state.state === "failed");
+	if (state.state === "connected" || state.state === "closed") return false;
+	if (state.state !== "disconnected" && state.state !== "reconnecting") return false;
+	return state.attempt < config.maxAttempts;
 }
 
-/**
- * Check if the connection has timed out.
- */
+/** True if the connection has been down longer than the timeout window. */
 export function isConnectionTimedOut(state: ReconnectState, config: ReconnectConfig): boolean {
-  if (state.state !== "connected" || state.connectedAt === 0) {
-    return false;
-  }
-  const idleTime = Date.now() - state.connectedAt;
-  return idleTime > config.connectionTimeoutMs;
+	if (state.state !== "disconnected" && state.state !== "reconnecting") return false;
+	if (!state.lastAttemptAt) return false;
+	return Date.now() - state.lastAttemptAt > config.connectionTimeoutMs;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   ICE Restart (Connection Refresh)
-═══════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   ICE restart + keepalive + scheduling seams
+   ═══════════════════════════════════════════════════════════════ */
 
-/**
- * Perform an ICE restart on the peer connection.
- *
- * ICE restart creates new ICE candidates and attempts to re-establish
- * the connection through a different path. Useful when the network
- * changes or the original connection path fails.
- */
-export async function restartICE(
-  pc: RTCPeerConnection,
-  state: ReconnectState,
-  config: ReconnectConfig
-): Promise<{ success: boolean; newState: ReconnectState }> {
-  if (state.iceRestartInProgress) {
-    return { success: false, newState: state };
-  }
-
-  state.iceRestartInProgress = true;
-  state.state = "reconnecting";
-
-  try {
-    // Create a new offer with ICE restart
-    const offer = await pc.createOffer({ iceRestart: true });
-    await pc.setLocalDescription(offer);
-
-    state.iceRestartInProgress = false;
-    return { success: true, newState: state };
-  } catch (error) {
-    state.iceRestartInProgress = false;
-    state.state = "failed";
-    return { success: false, newState: state };
-  }
+/** Mark that an ICE restart is in flight (caller invokes real restartIce). */
+export function restartICE(state: ReconnectState): ReconnectState {
+	return { ...state, iceRestartInProgress: true };
 }
 
-/**
- * Check if ICE restart is needed based on connection state.
- */
-export function needsIceRestart(state: ReconnectState, config: ReconnectConfig): boolean {
-  return (state.state === "disconnected" || state.state === "failed") &&
-    state.attempt < config.maxAttempts &&
-    !state.iceRestartInProgress;
+/** True when a failed/dropped link needs an ICE restart rather than a full reconnect. */
+export function needsIceRestart(state: ReconnectState): boolean {
+	return state.state === "failed" || (state.state === "disconnected" && state.attempt === 0);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   Keepalive Monitoring
-═══════════════════════════════════════════════════════════ */
-
-/**
- * Start keepalive monitoring for a peer connection.
- *
- * Sends periodic pings via the data channel to detect connection
- * degradation early.
- */
+/** Start a keepalive timer on the state; caller owns the ping callback. */
 export function startKeepalive(
-  state: ReconnectState,
-  config: ReconnectConfig,
-  dc: RTCDataChannel | null,
-  onKeepaliveFail: () => void
+	state: ReconnectState,
+	ping: () => void,
+	config: ReconnectConfig | null = DEFAULT_RECONNECT_CONFIG,
 ): ReconnectState {
-  // Clear any existing timer
-  stopKeepalive(state);
-
-  if (!dc || dc.readyState !== "open") {
-    return state;
-  }
-
-  const timerId = window.setInterval(() => {
-    if (dc.readyState !== "open") {
-      onKeepaliveFail();
-      return;
-    }
-
-    try {
-      dc.send(JSON.stringify({ type: "ping", ts: Date.now() }));
-    } catch {
-      onKeepaliveFail();
-    }
-  }, config.keepaliveIntervalMs);
-
-  state.keepaliveTimerId = timerId;
-  return state;
+	const cfg = config ?? DEFAULT_RECONNECT_CONFIG;
+	stopKeepalive(state);
+	const id = setInterval(() => {
+		try {
+			ping();
+		} catch {
+			/* never throw from a keepalive ping */
+		}
+	}, cfg.keepaliveIntervalMs);
+	return { ...state, keepaliveTimerId: id };
 }
 
-/**
- * Stop keepalive monitoring.
- */
+/** Clear the keepalive timer. */
 export function stopKeepalive(state: ReconnectState): ReconnectState {
-  if (state.keepaliveTimerId !== null) {
-    clearInterval(state.keepaliveTimerId);
-    state.keepaliveTimerId = null;
-  }
-  return state;
+	if (state.keepaliveTimerId !== null) {
+		clearInterval(state.keepaliveTimerId);
+	}
+	return { ...state, keepaliveTimerId: null };
 }
 
-/**
- * Handle a keepalive ping response.
- */
-export function handleKeepalivePong(
-  state: ReconnectState,
-  latencyMs: number
-): ReconnectState {
-  // Could track latency statistics here for quality metrics
-  return state;
-}
-
-/* ═══════════════════════════════════════════════════════════
-   Automatic Reconnection
-═══════════════════════════════════════════════════════════ */
-
-/**
- * Schedule the next reconnection attempt.
- */
+/** Schedule a reconnect attempt after the current backoff; id stored on state. */
 export function scheduleReconnect(
-  state: ReconnectState,
-  config: ReconnectConfig,
-  onReconnect: () => void
+	state: ReconnectState,
+	attempt: () => void,
+	config: ReconnectConfig | null = DEFAULT_RECONNECT_CONFIG,
 ): ReconnectState {
-  // Clear any existing reconnect timer
-  if (state.reconnectTimerId !== null) {
-    clearTimeout(state.reconnectTimerId);
-  }
-
-  if (!shouldAttemptReconnect(state, config)) {
-    return state;
-  }
-
-  const delay = state.currentBackoffMs;
-  const timerId = window.setTimeout(() => {
-    onReconnect();
-  }, delay);
-
-  state.reconnectTimerId = timerId;
-  return state;
+	void config;
+	if (state.reconnectTimerId !== null) clearTimeout(state.reconnectTimerId);
+	const id = setTimeout(() => {
+		try {
+			attempt();
+		} catch {
+			/* never throw from a scheduled attempt */
+		}
+	}, state.currentBackoffMs);
+	return { ...state, reconnectTimerId: id, state: "reconnecting" };
 }
 
-/**
- * Clear all active timers (keepalive and reconnect).
- */
-function clearTimers(state: ReconnectState): void {
-  if (state.keepaliveTimerId !== null) {
-    clearInterval(state.keepaliveTimerId);
-    state.keepaliveTimerId = null;
-  }
-  if (state.reconnectTimerId !== null) {
-    clearTimeout(state.reconnectTimerId);
-    state.reconnectTimerId = null;
-  }
-}
-
-/**
- * Cleanup reconnection state and clear all timers.
- */
+/** Tear down all timers and mark CLOSED. Safe to call repeatedly. */
 export function cleanupReconnectState(state: ReconnectState): ReconnectState {
-  clearTimers(state);
-  state.state = "closed";
-  state.iceRestartInProgress = false;
-  return state;
+	if (state.keepaliveTimerId !== null) clearInterval(state.keepaliveTimerId);
+	if (state.reconnectTimerId !== null) clearTimeout(state.reconnectTimerId);
+	return { ...state, state: "closed", keepaliveTimerId: null, reconnectTimerId: null };
 }
 
-/* ═══════════════════════════════════════════════════════════
-   Peer Connection State Monitoring
-═══════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   UI helpers
+   ═══════════════════════════════════════════════════════════════ */
 
-/**
- * Setup automatic reconnection handlers on a peer connection.
- *
- * Monitors connection state changes and triggers reconnection
- * when the connection fails.
- */
-export function setupAutoReconnect(
-  pc: RTCPeerConnection,
-  state: ReconnectState,
-  config: ReconnectConfig,
-  onStateChange: (newState: ConnectionState) => void,
-  onReconnectNeeded: () => void
-): () => void {
-  const handleConnectionStateChange = () => {
-    const newState = pc.connectionState as ConnectionState;
-    const updated = updateConnectionState(state, newState, pc);
-    onStateChange(updated.state);
-
-    if (updated.state === "disconnected" || updated.state === "failed") {
-      if (shouldAttemptReconnect(updated, config)) {
-        onReconnectNeeded();
-      }
-    }
-  };
-
-  const handleIceConnectionStateChange = () => {
-    const iceState = pc.iceConnectionState;
-    if (iceState === "disconnected" || iceState === "failed") {
-      const updated = updateConnectionState(state, "disconnected", pc);
-      onStateChange(updated.state);
-
-      if (shouldAttemptReconnect(updated, config)) {
-        onReconnectNeeded();
-      }
-    }
-  };
-
-  pc.addEventListener("connectionstatechange", handleConnectionStateChange);
-  pc.addEventListener("iceconnectionstatechange", handleIceConnectionStateChange);
-
-  // Return cleanup function
-  return () => {
-    pc.removeEventListener("connectionstatechange", handleConnectionStateChange);
-    pc.removeEventListener("iceconnectionstatechange", handleIceConnectionStateChange);
-  };
-}
-
-/**
- * Manual reconnect trigger (user-initiated).
- *
- * Resets attempt counter and immediately attempts reconnection.
- */
-export function triggerManualReconnect(
-  state: ReconnectState,
-  config: ReconnectConfig,
-  onReconnect: () => void
-): ReconnectState {
-  state.attempt = 0;
-  state.currentBackoffMs = config.initialBackoffMs;
-  state.lastAttemptAt = Date.now();
-  state.state = "reconnecting";
-
-  // Schedule immediate reconnect
-  return scheduleReconnect(state, config, onReconnect);
-}
-
-/* ═══════════════════════════════════════════════════════════
-   Room Code Preservation
-═══════════════════════════════════════════════════════════ */
-
-/**
- * Ensure room code is preserved across reconnections.
- *
- * The room code from signal-relay.ts should be stored in localStorage
- * and restored after reconnection to maintain the same logical room.
- */
-export const ROOM_CODE_STORAGE_KEY = "vfx-web-room-code";
-
-/**
- * Save the current room code for reconnection.
- */
-export function saveRoomCode(roomCode: string): void {
-  if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
-    try {
-      localStorage.setItem(ROOM_CODE_STORAGE_KEY, roomCode);
-    } catch {
-      /* ignore */
-    }
-  }
-}
-
-/**
- * Load the saved room code.
- */
-export function loadRoomCode(): string | null {
-  if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
-    try {
-      return localStorage.getItem(ROOM_CODE_STORAGE_KEY);
-    } catch {
-      return null;
-    }
-  }
-  return null;
-}
-
-/**
- * Clear the saved room code (e.g., when explicitly leaving a room).
- */
-export function clearRoomCode(): void {
-  if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
-    try {
-      localStorage.removeItem(ROOM_CODE_STORAGE_KEY);
-    } catch {
-      /* ignore */
-    }
-  }
-}
-
-/* ═══════════════════════════════════════════════════════════
-   Utilities
-═══════════════════════════════════════════════════════════ */
-
-/**
- * Get human-readable status description.
- */
+/** Human-readable label for a connection state. */
 export function getConnectionStateLabel(state: ConnectionState): string {
-  const labels: Record<ConnectionState, string> = {
-    new: "Initializing",
-    checking: "Connecting...",
-    connected: "Connected",
-    disconnected: "Disconnected",
-    failed: "Connection Failed",
-    closed: "Closed",
-    reconnecting: "Reconnecting...",
-  };
-  return labels[state] || state;
+	switch (state) {
+		case "connected":
+			return "Connected";
+		case "reconnecting":
+			return "Reconnecting...";
+		case "failed":
+			return "Connection Failed";
+		case "disconnected":
+			return "Disconnected";
+		case "closed":
+			return "Closed";
+		default:
+			return "New";
+	}
 }
 
-/**
- * Get reconnection progress percentage.
- */
+/** Progress 0–100 toward the max-attempts ceiling (for UI badges). */
 export function getReconnectProgress(state: ReconnectState, config: ReconnectConfig): number {
-  if (state.attempt >= config.maxAttempts) {
-    return 100;
-  }
-  return Math.min(100, (state.attempt / config.maxAttempts) * 100);
+	if (config.maxAttempts <= 0) return 100;
+	if (state.attempt <= 0) return 0;
+	if (state.attempt >= config.maxAttempts) return 100;
+	return Math.round((state.attempt / config.maxAttempts) * 100);
 }
 
-/**
- * Estimate time until next reconnection attempt.
- */
-export function getNextAttemptDelay(state: ReconnectState): number {
-  if (state.reconnectTimerId === null) {
-    return 0;
-  }
-  return state.currentBackoffMs;
+/* ═══════════════════════════════════════════════════════════════
+   Room code persistence (the whole point: don't re-share on reconnect)
+   ═══════════════════════════════════════════════════════════════ */
+
+export function saveRoomCode(code: string): void {
+	if (typeof code !== "string" || code.length === 0) return;
+	try {
+		localStorage.setItem(ROOM_CODE_STORAGE_KEY, code);
+	} catch {
+		/* storage unavailable / quota — never throw */
+	}
+}
+
+export function loadRoomCode(): string | null {
+	try {
+		return localStorage.getItem(ROOM_CODE_STORAGE_KEY);
+	} catch {
+		return null;
+	}
+}
+
+export function clearRoomCode(): void {
+	try {
+		localStorage.removeItem(ROOM_CODE_STORAGE_KEY);
+	} catch {
+		/* never throw */
+	}
 }

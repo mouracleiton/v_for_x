@@ -435,3 +435,132 @@ export async function signRevealWithIdentity(
   const identity = await ensureIdentity();
   return await signReviewRevealWithIdentity(identity, revealed);
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   Reputation decay (Phase 13)
+   ═══════════════════════════════════════════════════════════════ */
+
+const DAY_MS = 86_400_000;
+
+/**
+ * Half-life for review reputation decay, in days. A review's weight
+ * halves every this many days, so recent corroboration matters more
+ * than stale votes while never discarding old evidence outright.
+ */
+export const REVIEW_DECAY_HALF_LIFE_DAYS = 180;
+
+/**
+ * Exponential decay weight for a review, based on its age.
+ * Returns 0 < weight ≤ 1: a review from today weighs 1.0, one from
+ * `halfLifeDays` ago weighs 0.5, and so on. Reviews older than
+ * ~10 half-lives are effectively zero but never exactly zero.
+ *
+ * @param ts        the review's timestamp (epoch ms)
+ * @param now       reference time (default Date.now())
+ * @param halfLifeDays  half-life in days (default REVIEW_DECAY_HALF_LIFE_DAYS)
+ */
+export function reviewDecayWeight(
+  ts: number,
+  now = Date.now(),
+  halfLifeDays = REVIEW_DECAY_HALF_LIFE_DAYS,
+): number {
+  if (!Number.isFinite(ts) || !Number.isFinite(now)) return 0;
+  const ageDays = Math.max(0, (now - ts) / DAY_MS);
+  if (halfLifeDays <= 0) return 1;
+  return Math.pow(0.5, ageDays / halfLifeDays);
+}
+
+export interface WeightedAggregateReview {
+  /** Verifiable reviews (same as AggregateReview.count). */
+  count: number;
+  rejected: number;
+  /** Time-weighted mean rating (recent reviews count more). */
+  weightedMeanRating: number;
+  /** Unweighted mean rating (for comparison). */
+  meanRating: number;
+  /** Time-weighted corroboration flag tallies. */
+  flagTallies: Record<ReviewCorroboration, number>;
+  /** Sum of weights (effective sample size). */
+  effectiveN: number;
+  /** The single highest-weight review (most influential). */
+  mostInfluential: { rating: number; weight: number; ts: number } | null;
+}
+
+/**
+ * Aggregate revealed reviews with exponential time-decay weighting.
+ *
+ * Recent corroboration matters more than stale votes: each verified
+ * review contributes `weight = 0.5^(age / halfLife)` to the weighted
+ * mean, so a dossier propped up by old reviews drifts downward as new
+ * evidence fails to arrive. Falls back to the unweighted mean when no
+ * decay is requested (halfLifeDays = Infinity).
+ *
+ * @param commitments reviewer→commitment map (as in aggregateReviews)
+ * @param revealed    the revealed reviews to aggregate
+ * @param now         reference time (default Date.now())
+ * @param halfLifeDays half-life for decay (default 180 days)
+ */
+export async function weightedAggregateReviews(
+  commitments: Record<string, string>,
+  revealed: RevealedReview[],
+  now = Date.now(),
+  halfLifeDays = REVIEW_DECAY_HALF_LIFE_DAYS,
+): Promise<WeightedAggregateReview> {
+  const flagTallies: Record<ReviewCorroboration, number> = {
+    verified_evidence: 0,
+    has_sources: 0,
+    independent_account: 0,
+    contradicts_claim: 0,
+    insufficient: 0,
+  };
+
+  let count = 0;
+  let rejected = 0;
+  let weightedSum = 0;
+  let unweightedSum = 0;
+  let weightSum = 0;
+  const usedReviewers = new Set<string>();
+  let mostInfluential: { rating: number; weight: number; ts: number } | null = null;
+
+  for (const r of revealed) {
+    let matchedKey: string | null = null;
+    for (const [key, commitment] of Object.entries(commitments)) {
+      const res = await verifyReveal(commitment, r);
+      if (res.verified) {
+        matchedKey = key;
+        break;
+      }
+    }
+    if (matchedKey === null) {
+      rejected++;
+      continue;
+    }
+    if (usedReviewers.has(matchedKey)) continue;
+    usedReviewers.add(matchedKey);
+
+    const weight = reviewDecayWeight(r.review.ts, now, halfLifeDays);
+    count++;
+    weightedSum += r.review.rating * weight;
+    unweightedSum += r.review.rating;
+    weightSum += weight;
+
+    for (const f of r.review.flags) {
+      if (f === "contradicts_claim" || f === "insufficient") continue;
+      flagTallies[f] += weight;
+    }
+
+    if (!mostInfluential || weight > mostInfluential.weight) {
+      mostInfluential = { rating: r.review.rating, weight, ts: r.review.ts };
+    }
+  }
+
+  return {
+    count,
+    rejected,
+    weightedMeanRating: weightSum > 0 ? Math.round((weightedSum / weightSum) * 100) / 100 : 0,
+    meanRating: count > 0 ? Math.round((unweightedSum / count) * 100) / 100 : 0,
+    flagTallies,
+    effectiveN: Math.round(weightSum * 100) / 100,
+    mostInfluential,
+  };
+}

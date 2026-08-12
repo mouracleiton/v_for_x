@@ -6,1609 +6,1953 @@ import TerminalCard from "@/components/ui/TerminalCard";
 import StatusPill from "@/components/ui/StatusPill";
 import { useStore } from "@/stores/useStore";
 import { sound } from "@/lib/sound";
-import { ensureIdentity, signWithIdentity, type Identity, computeSafetyNumber, type PublicIdentity } from "@/lib/identity";
 import {
-  decodeSignalToken,
-  encodeSignalToken,
-  buildSignalUrl,
-  parseHashSignal,
-  stripHashSignal,
-  generateRoomCode,
-  normalizeRoom,
-  startClipboardWatch,
-  openSignalBus,
-  broadcastSignal,
-  type SignalPayload,
+	ensureIdentity,
+	signWithIdentity,
+	type Identity,
+	computeSafetyNumber,
+	type PublicIdentity,
+} from "@/lib/identity";
+import SafetyNumberGate from "@/components/shared/SafetyNumberGate";
+import {
+	decodeSignalToken,
+	encodeSignalToken,
+	buildSignalUrl,
+	parseHashSignal,
+	stripHashSignal,
+	generateRoomCode,
+	normalizeRoom,
+	startClipboardWatch,
+	openSignalBus,
+	broadcastSignal,
+	type SignalPayload,
 } from "@/lib/signal-relay";
+import { setDocsRoom } from "@/lib/docs-room";
 import {
-  FileReceiver,
-  buildDoneFrame,
-  buildInitFrame,
-  decryptDeadDropFile,
-  encryptChunk,
-  isFileControl,
-  prepareFileTransfer,
-  type FileMeta,
+	FileReceiver,
+	buildDoneFrame,
+	buildInitFrame,
+	decryptDeadDropFile,
+	encryptChunk,
+	isFileControl,
+	prepareFileTransfer,
+	type FileMeta,
 } from "@/lib/file-transfer";
 import {
-  dequeueFor,
-  enqueue,
-  expireAll,
-  formatMeshMail,
-  forward,
-  markSeen,
-  newMeshId,
-  peerHash,
-  pendingFor,
-  seen,
-  type MeshMessage,
+	dequeueFor,
+	enqueue,
+	expireAll,
+	formatMeshMail,
+	forward,
+	markSeen,
+	newMeshId,
+	peerHash,
+	pendingFor,
+	seen,
+	type MeshMessage,
 } from "@/lib/mesh-store";
 
 interface P2PMessage {
-  id: string;
-  author: string;
-  text: string;
-  ts: number;
-  self: boolean;
-  /** ECDSA signature hex (signs over author+text+ts) */
-  sig?: string;
-  /** Truncated public key hex of signer */
-  pubKey?: string;
-  /** Whether the signature was verified on receipt */
-  verified?: boolean;
+	id: string;
+	author: string;
+	text: string;
+	ts: number;
+	self: boolean;
+	/** ECDSA signature hex (signs over author+text+ts) */
+	sig?: string;
+	/** Truncated public key hex of signer */
+	pubKey?: string;
+	/** Whether the signature was verified on receipt */
+	verified?: boolean;
 }
 
 interface MeshHelloMessage {
-  kind: "mesh-hello";
-  handle: string;
-  from?: string;
-  publicKeyHex?: string;
-  fingerprint?: string;
+	kind: "mesh-hello";
+	handle: string;
+	from?: string;
+	publicKeyHex?: string;
+	fingerprint?: string;
 }
 
 interface DeadDrop {
-  id: string;
-  lat: string;
-  lng: string;
-  msg: string;
-  ts: number;
-  author: string;
-  /** Encrypted message (AES-GCM hex). Present when stored encrypted. */
-  enc?: string;
-  /** AES-GCM IV hex (12 bytes). */
-  iv?: string;
-  /** File drops store encrypted chunks instead of a message. */
-  kind?: "file";
-  fileMeta?: { name: string; mime: string; size: number; sha256: string };
-  payloadChunksB64?: string[];
-  keyB64?: string;
+	id: string;
+	lat: string;
+	lng: string;
+	msg: string;
+	ts: number;
+	author: string;
+	/** Encrypted message (AES-GCM hex). Present when stored encrypted. */
+	enc?: string;
+	/** AES-GCM IV hex (12 bytes). */
+	iv?: string;
+	/** File drops store encrypted chunks instead of a message. */
+	kind?: "file";
+	fileMeta?: { name: string; mime: string; size: number; sha256: string };
+	payloadChunksB64?: string[];
+	keyB64?: string;
 }
 
 interface ReceivedFile {
-  id: string;
-  name: string;
-  mime: string;
-  size: number;
-  sha256: string;
-  verified: boolean;
-  bytes: Uint8Array<ArrayBuffer>;
+	id: string;
+	name: string;
+	mime: string;
+	size: number;
+	sha256: string;
+	verified: boolean;
+	bytes: Uint8Array<ArrayBuffer>;
 }
 
 export default function TeiaPage() {
-  const { identity, setIdentity, session, startSession, lang } = useStore();
-  const [channel, setChannel] = useState("#general");
-  const [input, setInput] = useState("");
-  const [localMessages, setLocalMessages] = useState<P2PMessage[]>([]);
-  const [deadDropLat, setDeadDropLat] = useState("");
-  const [deadDropLng, setDeadDropLng] = useState("");
-  const [deadDropMsg, setDeadDropMsg] = useState("");
-  const [deadDrops, setDeadDrops] = useState<DeadDrop[]>([]);
+	const { identity, setIdentity, session, startSession, lang } = useStore();
+	const [channel, setChannel] = useState("#general");
+	const [input, setInput] = useState("");
+	const [localMessages, setLocalMessages] = useState<P2PMessage[]>([]);
+	const [deadDropLat, setDeadDropLat] = useState("");
+	const [deadDropLng, setDeadDropLng] = useState("");
+	const [deadDropMsg, setDeadDropMsg] = useState("");
+	const [deadDrops, setDeadDrops] = useState<DeadDrop[]>([]);
 
-  // WebRTC state
-  const [peerStatus, setPeerStatus] = useState<"idle" | "creating" | "waiting" | "connecting" | "connected" | "error">("idle");
-  const [localSDP, setLocalSDP] = useState("");
-  const [remoteSDP, setRemoteSDP] = useState("");
-  const [connectionLog, setConnectionLog] = useState<string[]>([]);
-  const [copiedOffer, setCopiedOffer] = useState(false);
+	// WebRTC state
+	const [peerStatus, setPeerStatus] = useState<
+		"idle" | "creating" | "waiting" | "connecting" | "connected" | "error"
+	>("idle");
+	const [localSDP, setLocalSDP] = useState("");
+	const [remoteSDP, setRemoteSDP] = useState("");
+	const [connectionLog, setConnectionLog] = useState<string[]>([]);
+	const [copiedOffer, setCopiedOffer] = useState(false);
 
-  // Auto-signaling state
-  const [room, setRoom] = useState("");
-  const [shareUrl, setShareUrl] = useState("");
-  const [clipWatching, setClipWatching] = useState(false);
-  const [roomActivity, setRoomActivity] = useState<string[]>([]);
+	// Auto-signaling state
+	const [room, setRoomState] = useState("");
+	const setRoom = useCallback((next: string) => {
+		setRoomState(next);
+		setDocsRoom(next);
+	}, []);
+	const [shareUrl, setShareUrl] = useState("");
+	const [clipWatching, setClipWatching] = useState(false);
+	const [roomActivity, setRoomActivity] = useState<string[]>([]);
 
-  const pcRef = useRef<RTCPeerConnection | null>(null);
-  const dcRef = useRef<RTCDataChannel | null>(null);
-  const identityRef = useRef<Identity | null>(null);
-  const sdpRef = useRef("");
-  const clipStopRef = useRef<(() => void) | null>(null);
-  const signalBusStopRef = useRef<(() => void) | null>(null);
+	const pcRef = useRef<RTCPeerConnection | null>(null);
+	const dcRef = useRef<RTCDataChannel | null>(null);
+	const identityRef = useRef<Identity | null>(null);
+	const sdpRef = useRef("");
+	const clipStopRef = useRef<(() => void) | null>(null);
+	const signalBusStopRef = useRef<(() => void) | null>(null);
 
-  // File transfer state
-  const [sendFile, setSendFile] = useState<File | null>(null);
-  const [sendMeta, setSendMeta] = useState<FileMeta | null>(null);
-  const [sendProgress, setSendProgress] = useState({ sent: 0, total: 0 });
-  const [sending, setSending] = useState(false);
-  const [receivedFiles, setReceivedFiles] = useState<ReceivedFile[]>([]);
-  const receiverRef = useRef<FileReceiver | null>(null);
-  const fileBusyRef = useRef(false);
+	// File transfer state
+	const [sendFile, setSendFile] = useState<File | null>(null);
+	const [sendMeta, setSendMeta] = useState<FileMeta | null>(null);
+	const [sendProgress, setSendProgress] = useState({ sent: 0, total: 0 });
+	const [sending, setSending] = useState(false);
+	const [receivedFiles, setReceivedFiles] = useState<ReceivedFile[]>([]);
+	const receiverRef = useRef<FileReceiver | null>(null);
+	const fileBusyRef = useRef(false);
 
-  // Mesh store-and-forward state
-  const [meshTo, setMeshTo] = useState("");
-  const [meshBody, setMeshBody] = useState("");
-  const [meshPending, setMeshPending] = useState<MeshMessage[]>([]);
-  const [meshLog, setMeshLog] = useState<string[]>([]);
-  const [myPeerHash, setMyPeerHash] = useState("");
-  const peerHashRef = useRef("");
-  const meshLogRef = useRef<string[]>([]);
+	// Mesh store-and-forward state
+	const [meshTo, setMeshTo] = useState("");
+	const [meshBody, setMeshBody] = useState("");
+	const [meshPending, setMeshPending] = useState<MeshMessage[]>([]);
+	const [meshLog, setMeshLog] = useState<string[]>([]);
+	const [myPeerHash, setMyPeerHash] = useState("");
+	const peerHashRef = useRef("");
+	const meshLogRef = useRef<string[]>([]);
 
-  // Safety number state
-  const [peerIdentity, setPeerIdentity] = useState<PublicIdentity | null>(null);
-  const [safetyNumber, setSafetyNumber] = useState<string>("");
+	// Safety number state
+	const [peerIdentity, setPeerIdentity] = useState<PublicIdentity | null>(null);
+	const [safetyNumber, setSafetyNumber] = useState<string>("");
 
-  const pushMeshLog = useCallback((line: string) => {
-    meshLogRef.current = [line, ...meshLogRef.current].slice(0, 10);
-    setMeshLog(meshLogRef.current);
-  }, []);
+	const pushMeshLog = useCallback((line: string) => {
+		meshLogRef.current = [line, ...meshLogRef.current].slice(0, 10);
+		setMeshLog(meshLogRef.current);
+	}, []);
 
-  // Derive my own mesh handle hash once an identity exists.
-  useEffect(() => {
-    const loadAndSetIdentity = async () => {
-      try {
-        const id = await ensureIdentity();
-        identityRef.current = id;
-        if (id) {
-          const h = await peerHash(id.handle);
-          peerHashRef.current = h;
-          setMyPeerHash(h);
-        }
-      } catch { /* ignore */ }
-    };
-    void loadAndSetIdentity();
-  }, []);
+	// Derive my own mesh handle hash once an identity exists.
+	useEffect(() => {
+		const loadAndSetIdentity = async () => {
+			try {
+				const id = await ensureIdentity();
+				identityRef.current = id;
+				if (id) {
+					const h = await peerHash(id.handle);
+					peerHashRef.current = h;
+					setMyPeerHash(h);
+				}
+			} catch {
+				/* ignore */
+			}
+		};
+		void loadAndSetIdentity();
+	}, []);
 
-  // Refresh the mesh outbox view.
-  const refreshMeshPending = useCallback(async () => {
-    const h = peerHashRef.current;
-    if (!h) {
-      setMeshPending([]);
-      return;
-    }
-    const list = await pendingFor(h, Date.now());
-    setMeshPending(list);
-  }, []);
+	// Refresh the mesh outbox view.
+	const refreshMeshPending = useCallback(async () => {
+		const h = peerHashRef.current;
+		if (!h) {
+			setMeshPending([]);
+			return;
+		}
+		const list = await pendingFor(h, Date.now());
+		setMeshPending(list);
+	}, []);
 
-  useEffect(() => {
-    if (!myPeerHash) return;
-    void refreshMeshPending();
-    const t = setInterval(() => void refreshMeshPending(), 5000);
-    return () => clearInterval(t);
-  }, [myPeerHash, refreshMeshPending]);
+	useEffect(() => {
+		if (!myPeerHash) return;
+		void refreshMeshPending();
+		const t = setInterval(() => void refreshMeshPending(), 5000);
+		return () => clearInterval(t);
+	}, [myPeerHash, refreshMeshPending]);
 
-  useEffect(() => {
-    if (!session) startSession();
-  }, [session, startSession]);
+	useEffect(() => {
+		if (!session) startSession();
+	}, [session, startSession]);
 
-  // Load persisted dead drops on mount
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem("vfx-dead-drops");
-      if (stored) setDeadDrops(JSON.parse(stored));
-    } catch { /* ignore */ }
-  }, []);
+	// Load persisted dead drops on mount
+	useEffect(() => {
+		try {
+			const stored = localStorage.getItem("vfx-dead-drops");
+			if (stored) setDeadDrops(JSON.parse(stored));
+		} catch {
+			/* ignore */
+		}
+	}, []);
 
-  const log = useCallback((msg: string) => {
-    const ts = new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
-    setConnectionLog((prev) => [...prev, `[${ts}] ${msg}`]);
-  }, []);
+	const log = useCallback((msg: string) => {
+		const ts = new Date().toLocaleTimeString("en-US", {
+			hour: "2-digit",
+			minute: "2-digit",
+			hour12: false,
+		});
+		setConnectionLog((prev) => [...prev, `[${ts}] ${msg}`]);
+	}, []);
 
-  const generateIdentity = async () => {
-    try {
-      const id = await ensureIdentity();
-      identityRef.current = id;
-      setIdentity({
-        handle: id.handle,
-        publicKey: id.publicKeyHex.slice(0, 32),
-        createdAt: id.createdAt,
-      });
-      sound.success();
-    } catch {
-      sound.error();
-    }
-  };
+	const generateIdentity = async () => {
+		try {
+			const id = await ensureIdentity();
+			identityRef.current = id;
+			setIdentity({
+				handle: id.handle,
+				publicKey: id.publicKeyHex.slice(0, 32),
+				createdAt: id.createdAt,
+			});
+			sound.success();
+		} catch {
+			sound.error();
+		}
+	};
 
-  /* ═══════════════════════════════════════════════════════════════
+	/* ═══════════════════════════════════════════════════════════════
      WebRTC — Manual signaling (copy-paste SDP)
      No server needed. Works on static export.
      ═══════════════════════════════════════════════════════════════ */
 
-  const setupDataChannel = (dc: RTCDataChannel) => {
-    dcRef.current = dc;
-    dc.onopen = () => {
-      log("DATA CHANNEL OPEN — P2P link established");
-      setPeerStatus("connected");
-      sound.success();
-      void meshOnPeerOpen();
-    };
-    dc.onclose = () => {
-      log("DATA CHANNEL CLOSED — P2P link severed");
-      setPeerStatus("idle");
-    };
-    dc.onmessage = async (e) => {
-      // FILE TRANSFER frames (VFXFILE1) — string controls + binary chunks.
-      if (typeof e.data === "string" && isFileControl(e.data)) {
-        handleFileControl(e.data);
-        return;
-      }
-      if (e.data instanceof ArrayBuffer || ArrayBuffer.isView(e.data)) {
-        const buf = e.data instanceof ArrayBuffer ? e.data : (e.data as ArrayBufferView).buffer;
-        handleFileBinary(buf as ArrayBuffer);
-        return;
-      }
-      try {
-        const raw = JSON.parse(e.data) as P2PMessage | MeshHelloMessage | { kind?: string; msg?: MeshMessage; handle?: string; from?: string };
-        // MESH store-and-forward frames.
-        if ("kind" in raw && raw.kind === "mesh-hello" && "handle" in raw) {
-          const hello = raw as MeshHelloMessage;
-          const h = await peerHash(hello.handle);
-          log(`MESH: peer "${hello.handle}" joined — ${h}`);
-          if (!peerHashRef.current && identity) peerHashRef.current = await peerHash(identity.handle);
-          const queued = await dequeueFor(h, Date.now());
-          for (const m of queued) {
-            if (dcRef.current?.readyState === "open") dcRef.current.send(JSON.stringify({ kind: "mesh", msg: m }));
-          }
-          if (queued.length > 0) log(`MESH: flushed ${queued.length} queued message(s) to peer`);
+	const setupDataChannel = (dc: RTCDataChannel) => {
+		dcRef.current = dc;
+		dc.onopen = () => {
+			log("DATA CHANNEL OPEN — P2P link established");
+			setPeerStatus("connected");
+			sound.success();
+			void meshOnPeerOpen();
+		};
+		dc.onclose = () => {
+			log("DATA CHANNEL CLOSED — P2P link severed");
+			setPeerStatus("idle");
+		};
+		dc.onmessage = async (e) => {
+			// FILE TRANSFER frames (VFXFILE1) — string controls + binary chunks.
+			if (typeof e.data === "string" && isFileControl(e.data)) {
+				handleFileControl(e.data);
+				return;
+			}
+			if (e.data instanceof ArrayBuffer || ArrayBuffer.isView(e.data)) {
+				const buf =
+					e.data instanceof ArrayBuffer
+						? e.data
+						: (e.data as ArrayBufferView).buffer;
+				handleFileBinary(buf as ArrayBuffer);
+				return;
+			}
+			try {
+				const raw = JSON.parse(e.data) as
+					| P2PMessage
+					| MeshHelloMessage
+					| {
+							kind?: string;
+							msg?: MeshMessage;
+							handle?: string;
+							from?: string;
+					  };
+				// MESH store-and-forward frames.
+				if ("kind" in raw && raw.kind === "mesh-hello" && "handle" in raw) {
+					const hello = raw as MeshHelloMessage;
+					const h = await peerHash(hello.handle);
+					log(`MESH: peer "${hello.handle}" joined — ${h}`);
+					if (!peerHashRef.current && identity)
+						peerHashRef.current = await peerHash(identity.handle);
+					const queued = await dequeueFor(h, Date.now());
+					for (const m of queued) {
+						if (dcRef.current?.readyState === "open")
+							dcRef.current.send(JSON.stringify({ kind: "mesh", msg: m }));
+					}
+					if (queued.length > 0)
+						log(`MESH: flushed ${queued.length} queued message(s) to peer`);
 
-          // Handle safety number if peer sent full identity
-          if (hello.publicKeyHex && hello.fingerprint) {
-            const peerId: PublicIdentity = {
-              handle: hello.handle,
-              publicKeyHex: hello.publicKeyHex,
-              fingerprint: hello.fingerprint,
-              createdAt: Date.now(),
-            };
-            setPeerIdentity(peerId);
+					// Handle safety number if peer sent full identity
+					if (hello.publicKeyHex && hello.fingerprint) {
+						const peerId: PublicIdentity = {
+							handle: hello.handle,
+							publicKeyHex: hello.publicKeyHex,
+							fingerprint: hello.fingerprint,
+							createdAt: Date.now(),
+						};
+						setPeerIdentity(peerId);
 
-            // Compute safety number if we have our identity
-            if (identityRef.current) {
-              const sn = await computeSafetyNumber(identityRef.current, peerId);
-              setSafetyNumber(sn);
-              log(`SAFETY NUMBER: ${sn.slice(0, 12)}... (verify with your peer in person)`);
-            }
-          }
+						// Compute safety number if we have our identity
+						if (identityRef.current) {
+							const sn = await computeSafetyNumber(identityRef.current, peerId);
+							setSafetyNumber(sn);
+							log(
+								`SAFETY NUMBER: ${sn.slice(0, 12)}... (verify with your peer in person)`,
+							);
+						}
+					}
 
-          void refreshMeshPending();
-          return;
-        }
-        if ("kind" in raw && raw.kind === "mesh" && "msg" in raw) {
-          void handleMeshMessage(raw.msg as MeshMessage);
-          return;
-        }
-        const msg = raw as P2PMessage;
-        // Verify ECDSA signature if present
-        let verified = false;
-        if (msg.sig && msg.pubKey) {
-          try {
-            const pubKeyData = Uint8Array.from(
-              msg.pubKey.match(/.{1,2}/g)!.map((b) => parseInt(b, 16))
-            );
-            const cryptoKey = await crypto.subtle.importKey(
-              "raw",
-              pubKeyData,
-              { name: "ECDSA", namedCurve: "P-256" },
-              false,
-              ["verify"]
-            );
-            const sigData = Uint8Array.from(
-              msg.sig.match(/.{1,2}/g)!.map((b) => parseInt(b, 16))
-            );
-            const content = new TextEncoder().encode(
-              JSON.stringify({ author: msg.author, text: msg.text, ts: msg.ts })
-            );
-            verified = await crypto.subtle.verify(
-              { name: "ECDSA", hash: "SHA-256" },
-              cryptoKey,
-              sigData,
-              content
-            );
-          } catch {
-            verified = false;
-          }
-        }
-        setLocalMessages((prev) => [...prev, { ...msg, self: false, verified }]);
-        sound.select();
-      } catch {
-        log("Received malformed message");
-      }
-    };
-    dc.onerror = () => {
-      log("DATA CHANNEL ERROR");
-      setPeerStatus("error");
-    };
-  };
+					void refreshMeshPending();
+					return;
+				}
+				if ("kind" in raw && raw.kind === "mesh" && "msg" in raw) {
+					void handleMeshMessage(raw.msg as MeshMessage);
+					return;
+				}
+				const msg = raw as P2PMessage;
+				// Verify ECDSA signature if present
+				let verified = false;
+				if (msg.sig && msg.pubKey) {
+					try {
+						const pubKeyData = Uint8Array.from(
+							msg.pubKey.match(/.{1,2}/g)!.map((b) => parseInt(b, 16)),
+						);
+						const cryptoKey = await crypto.subtle.importKey(
+							"raw",
+							pubKeyData,
+							{ name: "ECDSA", namedCurve: "P-256" },
+							false,
+							["verify"],
+						);
+						const sigData = Uint8Array.from(
+							msg.sig.match(/.{1,2}/g)!.map((b) => parseInt(b, 16)),
+						);
+						const content = new TextEncoder().encode(
+							JSON.stringify({
+								author: msg.author,
+								text: msg.text,
+								ts: msg.ts,
+							}),
+						);
+						verified = await crypto.subtle.verify(
+							{ name: "ECDSA", hash: "SHA-256" },
+							cryptoKey,
+							sigData,
+							content,
+						);
+					} catch {
+						verified = false;
+					}
+				}
+				setLocalMessages((prev) => [
+					...prev,
+					{ ...msg, self: false, verified },
+				]);
+				sound.select();
+			} catch {
+				log("Received malformed message");
+			}
+		};
+		dc.onerror = () => {
+			log("DATA CHANNEL ERROR");
+			setPeerStatus("error");
+		};
+	};
 
-  const createOffer = async () => {
-    if (!identity) return;
-    try {
-      setPeerStatus("creating");
-      log("Creating offer (you are the initiator)...");
+	const createOffer = async () => {
+		if (!identity) return;
+		try {
+			setPeerStatus("creating");
+			log("Creating offer (you are the initiator)...");
 
-      const pc = new RTCPeerConnection({
-        iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
-      });
-      pcRef.current = pc;
+			const pc = new RTCPeerConnection({
+				iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+			});
+			pcRef.current = pc;
 
-      const dc = pc.createDataChannel("vfx-chat", { ordered: true });
-      setupDataChannel(dc);
+			const dc = pc.createDataChannel("vfx-chat", { ordered: true });
+			setupDataChannel(dc);
 
-      pc.oniceconnectionstatechange = () => {
-        log(`ICE state: ${pc.iceConnectionState}`);
-      };
+			pc.oniceconnectionstatechange = () => {
+				log(`ICE state: ${pc.iceConnectionState}`);
+			};
 
-      const offer = await pc.createOffer();
-      await pc.setLocalDescription(offer);
+			const offer = await pc.createOffer();
+			await pc.setLocalDescription(offer);
 
-      // Wait for ICE gathering to complete
-      await new Promise<void>((resolve) => {
-        if (pc.iceGatheringState === "complete") return resolve();
-        const check = setInterval(() => {
-          if (pc.iceGatheringState === "complete") {
-            clearInterval(check);
-            resolve();
-          }
-        }, 200);
-        setTimeout(() => { clearInterval(check); resolve(); }, 3000);
-      });
+			// Wait for ICE gathering to complete
+			await new Promise<void>((resolve) => {
+				if (pc.iceGatheringState === "complete") return resolve();
+				const check = setInterval(() => {
+					if (pc.iceGatheringState === "complete") {
+						clearInterval(check);
+						resolve();
+					}
+				}, 200);
+				setTimeout(() => {
+					clearInterval(check);
+					resolve();
+				}, 3000);
+			});
 
-      const sdp = JSON.stringify(pc.localDescription);
-      sdpRef.current = sdp;
-      setLocalSDP(sdp);
-      log("Offer ready — copy and send to your peer");
-      setPeerStatus("waiting");
-      return autoShareSignal("offer", sdp);
-    } catch (err) {
-      log(`ERROR: ${err}`);
-      setPeerStatus("error");
-      return null;
-    }
-  };
+			const sdp = JSON.stringify(pc.localDescription);
+			sdpRef.current = sdp;
+			setLocalSDP(sdp);
+			log("Offer ready — copy and send to your peer");
+			setPeerStatus("waiting");
+			return autoShareSignal("offer", sdp);
+		} catch (err) {
+			log(`ERROR: ${err}`);
+			setPeerStatus("error");
+			return null;
+		}
+	};
 
-  /** Auto-share a signal token via room broadcast + clipboard + share link. */
-  const autoShareSignal = async (kind: "offer" | "answer", sdp: string) => {
-    const r = normalizeRoom(room);
-    const token = encodeSignalToken({
-      kind,
-      sdp,
-      room: r || undefined,
-      from: identity?.handle,
-    });
-    if (r) {
-      broadcastSignal(token, r);
-      log(`AUTO BROADCAST: ${kind} sent to room ${r} tabs on this device`);
-      roomActivityPush(`⇄ broadcast ${kind} → room ${r}`);
-    }
-    try {
-      await navigator.clipboard?.writeText(token);
-      log("AUTO: signal token copied to clipboard");
-    } catch { /* clipboard may be unavailable — share link still works */ }
-    const url = buildSignalUrl(token);
-    setShareUrl(url);
-    roomActivityPush(`🔗 share link ready (${String(token.length)} chars)`);
-    return token;
-  };
+	/** Auto-share a signal token via room broadcast + clipboard + share link. */
+	const autoShareSignal = async (kind: "offer" | "answer", sdp: string) => {
+		const r = normalizeRoom(room);
+		const token = encodeSignalToken({
+			kind,
+			sdp,
+			room: r || undefined,
+			from: identity?.handle,
+		});
+		if (r) {
+			broadcastSignal(token, r);
+			log(`AUTO BROADCAST: ${kind} sent to room ${r} tabs on this device`);
+			roomActivityPush(`⇄ broadcast ${kind} → room ${r}`);
+		}
+		try {
+			await navigator.clipboard?.writeText(token);
+			log("AUTO: signal token copied to clipboard");
+		} catch {
+			/* clipboard may be unavailable — share link still works */
+		}
+		const url = buildSignalUrl(token);
+		setShareUrl(url);
+		roomActivityPush(`🔗 share link ready (${String(token.length)} chars)`);
+		return token;
+	};
 
-  const roomActivityPush = (line: string) => {
-    setRoomActivity((prev) => [...prev.slice(-6), `[${new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false })}] ${line}`]);
-  };
+	const roomActivityPush = (line: string) => {
+		setRoomActivity((prev) => [
+			...prev.slice(-6),
+			`[${new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false })}] ${line}`,
+		]);
+	};
 
-  const createAnswer = async (sdpOverride = "") => {
-    const offerSdp = sdpOverride || sdpRef.current || remoteSDP;
-    if (!identity || !offerSdp.trim()) return null;
-    try {
-      setPeerStatus("creating");
-      log(sdpOverride ? "AUTO: processing incoming offer, creating answer..." : "Processing incoming offer, creating answer...");
+	const createAnswer = async (sdpOverride = "") => {
+		const offerSdp = sdpOverride || sdpRef.current || remoteSDP;
+		if (!identity || !offerSdp.trim()) return null;
+		try {
+			setPeerStatus("creating");
+			log(
+				sdpOverride
+					? "AUTO: processing incoming offer, creating answer..."
+					: "Processing incoming offer, creating answer...",
+			);
 
-      const pc = new RTCPeerConnection({
-        iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
-      });
-      pcRef.current = pc;
+			const pc = new RTCPeerConnection({
+				iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+			});
+			pcRef.current = pc;
 
-      pc.ondatachannel = (e) => {
-        log("Data channel received");
-        setupDataChannel(e.channel);
-      };
+			pc.ondatachannel = (e) => {
+				log("Data channel received");
+				setupDataChannel(e.channel);
+			};
 
-      pc.oniceconnectionstatechange = () => {
-        log(`ICE state: ${pc.iceConnectionState}`);
-      };
+			pc.oniceconnectionstatechange = () => {
+				log(`ICE state: ${pc.iceConnectionState}`);
+			};
 
-      const offer = JSON.parse(offerSdp);
-      await pc.setRemoteDescription(offer);
+			const offer = JSON.parse(offerSdp);
+			await pc.setRemoteDescription(offer);
 
-      const answer = await pc.createAnswer();
-      await pc.setLocalDescription(answer);
+			const answer = await pc.createAnswer();
+			await pc.setLocalDescription(answer);
 
-      // Wait for ICE gathering
-      await new Promise<void>((resolve) => {
-        if (pc.iceGatheringState === "complete") return resolve();
-        const check = setInterval(() => {
-          if (pc.iceGatheringState === "complete") {
-            clearInterval(check);
-            resolve();
-          }
-        }, 200);
-        setTimeout(() => { clearInterval(check); resolve(); }, 3000);
-      });
+			// Wait for ICE gathering
+			await new Promise<void>((resolve) => {
+				if (pc.iceGatheringState === "complete") return resolve();
+				const check = setInterval(() => {
+					if (pc.iceGatheringState === "complete") {
+						clearInterval(check);
+						resolve();
+					}
+				}, 200);
+				setTimeout(() => {
+					clearInterval(check);
+					resolve();
+				}, 3000);
+			});
 
-      const sdp = JSON.stringify(pc.localDescription);
-      sdpRef.current = sdp;
-      setLocalSDP(sdp);
-      log(sdpOverride ? "AUTO: answer ready — returning to initiator" : "Answer ready — copy and send back to the initiator");
-      setPeerStatus("waiting");
-      return autoShareSignal("answer", sdp);
-    } catch (err) {
-      log(`ERROR: ${sdpOverride ? "auto-offer" : "Invalid offer SDP"}. ${err}`);
-      setPeerStatus("error");
-      return null;
-    }
-  };
+			const sdp = JSON.stringify(pc.localDescription);
+			sdpRef.current = sdp;
+			setLocalSDP(sdp);
+			log(
+				sdpOverride
+					? "AUTO: answer ready — returning to initiator"
+					: "Answer ready — copy and send back to the initiator",
+			);
+			setPeerStatus("waiting");
+			return autoShareSignal("answer", sdp);
+		} catch (err) {
+			log(`ERROR: ${sdpOverride ? "auto-offer" : "Invalid offer SDP"}. ${err}`);
+			setPeerStatus("error");
+			return null;
+		}
+	};
 
-  const acceptAnswer = async (sdpOverride = "") => {
-    const answerSdp = sdpOverride || remoteSDP;
-    if (!answerSdp.trim() || !pcRef.current) return;
-    try {
-      setPeerStatus("connecting");
-      log(sdpOverride ? "AUTO: accepting answer SDP..." : "Accepting answer SDP...");
-      const answer = JSON.parse(answerSdp);
-      await pcRef.current.setRemoteDescription(answer);
-      log("Remote description set — waiting for connection");
-    } catch (err) {
-      log(`ERROR: Invalid answer SDP. ${err}`);
-      setPeerStatus("error");
-    }
-  };
+	const acceptAnswer = async (sdpOverride = "") => {
+		const answerSdp = sdpOverride || remoteSDP;
+		if (!answerSdp.trim() || !pcRef.current) return;
+		try {
+			setPeerStatus("connecting");
+			log(
+				sdpOverride
+					? "AUTO: accepting answer SDP..."
+					: "Accepting answer SDP...",
+			);
+			const answer = JSON.parse(answerSdp);
+			await pcRef.current.setRemoteDescription(answer);
+			log("Remote description set — waiting for connection");
+		} catch (err) {
+			log(`ERROR: Invalid answer SDP. ${err}`);
+			setPeerStatus("error");
+		}
+	};
 
-  /** Apply an incoming signal token (from clipboard, share link, or room bus). */
-  const consumeSignal = useCallback(async (token: string) => {
-    let payload: SignalPayload;
-    try {
-      payload = decodeSignalToken(token);
-    } catch {
-      log("AUTO: ignored malformed signal token");
-      return;
-    }
-    if (payload.room && normalizeRoom(payload.room) !== normalizeRoom(room)) return;
-    setRemoteSDP(payload.sdp);
-    sdpRef.current = payload.sdp;
-    if (payload.kind === "offer") {
-      if (peerStatus === "connected" || peerStatus === "connecting") return;
-      log(`AUTO: offer received${payload.from ? ` from ${payload.from}` : ""} — creating answer`);
-      roomActivityPush(`⇄ offer received${payload.from ? ` from ${payload.from}` : ""}`);
-      await createAnswer(payload.sdp);
-    } else {
-      if (peerStatus === "connected") return;
-      log("AUTO: answer received — accepting");
-      roomActivityPush("⇄ answer received");
-      await acceptAnswer(payload.sdp);
-    }
-  }, [room, peerStatus, identity]);
+	/** Apply an incoming signal token (from clipboard, share link, or room bus). */
+	const consumeSignal = useCallback(
+		async (token: string) => {
+			let payload: SignalPayload;
+			try {
+				payload = decodeSignalToken(token);
+			} catch {
+				log("AUTO: ignored malformed signal token");
+				return;
+			}
+			if (payload.room && normalizeRoom(payload.room) !== normalizeRoom(room))
+				return;
+			setRemoteSDP(payload.sdp);
+			sdpRef.current = payload.sdp;
+			if (payload.kind === "offer") {
+				if (peerStatus === "connected" || peerStatus === "connecting") return;
+				log(
+					`AUTO: offer received${payload.from ? ` from ${payload.from}` : ""} — creating answer`,
+				);
+				roomActivityPush(
+					`⇄ offer received${payload.from ? ` from ${payload.from}` : ""}`,
+				);
+				await createAnswer(payload.sdp);
+			} else {
+				if (peerStatus === "connected") return;
+				log("AUTO: answer received — accepting");
+				roomActivityPush("⇄ answer received");
+				await acceptAnswer(payload.sdp);
+			}
+		},
+		[room, peerStatus, identity],
+	);
 
-  // Same-device room bus: tabs on this browser auto-exchange signals.
-  useEffect(() => {
-    if (!identity || !normalizeRoom(room)) return;
-    const r = normalizeRoom(room);
-    log(`AUTO: listening for signals in room ${r}`);
-    roomActivityPush(`⇄ listening in room ${r}`);
-    signalBusStopRef.current = openSignalBus(r, (token) => {
-      void consumeSignal(token);
-    });
-    return () => {
-      signalBusStopRef.current?.();
-      signalBusStopRef.current = null;
-    };
-  }, [room, identity, consumeSignal]);
+	// Same-device room bus: tabs on this browser auto-exchange signals.
+	useEffect(() => {
+		if (!identity || !normalizeRoom(room)) return;
+		const r = normalizeRoom(room);
+		log(`AUTO: listening for signals in room ${r}`);
+		roomActivityPush(`⇄ listening in room ${r}`);
+		signalBusStopRef.current = openSignalBus(r, (token) => {
+			void consumeSignal(token);
+		});
+		return () => {
+			signalBusStopRef.current?.();
+			signalBusStopRef.current = null;
+		};
+	}, [room, identity, consumeSignal]);
 
-  // Auto-consume a signal carried in the URL hash (#vfx-signal=...).
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const token = parseHashSignal(window.location.hash);
-    if (token) {
-      stripHashSignal(window.location.hash);
-      setRemoteSDP("");
-      log("AUTO: signal found in share link — applying");
-      void consumeSignal(token);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+	// Auto-consume a signal carried in the URL hash (#vfx-signal=...).
+	useEffect(() => {
+		if (typeof window === "undefined") return;
+		const token = parseHashSignal(window.location.hash);
+		if (token) {
+			stripHashSignal(window.location.hash);
+			setRemoteSDP("");
+			log("AUTO: signal found in share link — applying");
+			void consumeSignal(token);
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 
-  /** Toggle clipboard watching (must start from a user gesture). */
-  const toggleClipboardWatch = () => {
-    if (clipWatching) {
-      clipStopRef.current?.();
-      clipStopRef.current = null;
-      setClipWatching(false);
-      sound.select();
-      return;
-    }
-    clipStopRef.current = startClipboardWatch(
-      (token) => {
-        log("AUTO: token detected in clipboard — applying");
-        void consumeSignal(token);
-      },
-      () => {
-        setClipWatching(false);
-        log("AUTO: clipboard watch failed (permission denied)");
-      },
-    );
-    setClipWatching(true);
-    sound.success();
-  };
+	/** Toggle clipboard watching (must start from a user gesture). */
+	const toggleClipboardWatch = () => {
+		if (clipWatching) {
+			clipStopRef.current?.();
+			clipStopRef.current = null;
+			setClipWatching(false);
+			sound.select();
+			return;
+		}
+		clipStopRef.current = startClipboardWatch(
+			(token) => {
+				log("AUTO: token detected in clipboard — applying");
+				void consumeSignal(token);
+			},
+			() => {
+				setClipWatching(false);
+				log("AUTO: clipboard watch failed (permission denied)");
+			},
+		);
+		setClipWatching(true);
+		sound.success();
+	};
 
-  // Stop clipboard watch on unmount
-  useEffect(() => {
-    return () => {
-      clipStopRef.current?.();
-      signalBusStopRef.current?.();
-    };
-  }, []);
+	// Stop clipboard watch on unmount
+	useEffect(() => {
+		return () => {
+			clipStopRef.current?.();
+			signalBusStopRef.current?.();
+		};
+	}, []);
 
-  const closeConnection = () => {
-    if (dcRef.current) dcRef.current.close();
-    if (pcRef.current) pcRef.current.close();
-    pcRef.current = null;
-    dcRef.current = null;
-    setPeerStatus("idle");
-    setLocalSDP("");
-    setRemoteSDP("");
-    log("Connection closed manually");
-  };
+	const closeConnection = () => {
+		if (dcRef.current) dcRef.current.close();
+		if (pcRef.current) pcRef.current.close();
+		pcRef.current = null;
+		dcRef.current = null;
+		setPeerStatus("idle");
+		setLocalSDP("");
+		setRemoteSDP("");
+		log("Connection closed manually");
+	};
 
-  const sendP2PMessage = async () => {
-    if (!input.trim() || !identity) return;
-    if (!dcRef.current || dcRef.current.readyState !== "open") {
-      sound.error();
-      return;
-    }
-    const msg: P2PMessage = {
-      id: Date.now() + "-" + Math.random().toString(36).slice(2),
-      author: identity.handle,
-      text: input,
-      ts: Date.now(),
-      self: true,
-    };
-    // Sign message with ECDSA private key from unified identity
-    if (identityRef.current) {
-      try {
-        const content = new TextEncoder().encode(
-          JSON.stringify({ author: msg.author, text: msg.text, ts: msg.ts })
-        );
-        const sigBuf = await crypto.subtle.sign(
-          { name: "ECDSA", hash: "SHA-256" },
-          identityRef.current.privateKey,
-          content
-        );
-        msg.sig = Array.from(new Uint8Array(sigBuf))
-          .map((b) => b.toString(16).padStart(2, "0"))
-          .join("");
-        const pubRaw = await crypto.subtle.exportKey("raw", identityRef.current.publicKey);
-        msg.pubKey = Array.from(new Uint8Array(pubRaw))
-          .map((b) => b.toString(16).padStart(2, "0"))
-          .join("");
-        msg.verified = true;
-      } catch {
-        log("Failed to sign message — sending unsigned");
-      }
-    }
-    try {
-      dcRef.current.send(JSON.stringify(msg));
-      setLocalMessages((prev) => [...prev, msg]);
-      setInput("");
-      sound.select();
-    } catch {
-      log("Failed to send — channel not open");
-      sound.error();
-    }
-  };
+	const sendP2PMessage = async () => {
+		if (!input.trim() || !identity) return;
+		if (!dcRef.current || dcRef.current.readyState !== "open") {
+			sound.error();
+			return;
+		}
+		const msg: P2PMessage = {
+			id: Date.now() + "-" + Math.random().toString(36).slice(2),
+			author: identity.handle,
+			text: input,
+			ts: Date.now(),
+			self: true,
+		};
+		// Sign message with ECDSA private key from unified identity
+		if (identityRef.current) {
+			try {
+				const content = new TextEncoder().encode(
+					JSON.stringify({ author: msg.author, text: msg.text, ts: msg.ts }),
+				);
+				const sigBuf = await crypto.subtle.sign(
+					{ name: "ECDSA", hash: "SHA-256" },
+					identityRef.current.privateKey,
+					content,
+				);
+				msg.sig = Array.from(new Uint8Array(sigBuf))
+					.map((b) => b.toString(16).padStart(2, "0"))
+					.join("");
+				const pubRaw = await crypto.subtle.exportKey(
+					"raw",
+					identityRef.current.publicKey,
+				);
+				msg.pubKey = Array.from(new Uint8Array(pubRaw))
+					.map((b) => b.toString(16).padStart(2, "0"))
+					.join("");
+				msg.verified = true;
+			} catch {
+				log("Failed to sign message — sending unsigned");
+			}
+		}
+		try {
+			dcRef.current.send(JSON.stringify(msg));
+			setLocalMessages((prev) => [...prev, msg]);
+			setInput("");
+			sound.select();
+		} catch {
+			log("Failed to send — channel not open");
+			sound.error();
+		}
+	};
 
-  /* ═══════════════════════════════════════════════════════════════
+	/* ═══════════════════════════════════════════════════════════════
      FILE TRANSFER (VFXFILE1 — chunked, AES-GCM encrypted)
      ═══════════════════════════════════════════════════════════════ */
-  const handleFileControl = useCallback(
-    (line: string) => {
-      if (!isFileControl(line)) return;
-      if (fileBusyRef.current) return; // one transfer at a time
-      fileBusyRef.current = true;
-      const receiver = new FileReceiver();
-      receiverRef.current = receiver;
-      const ok = receiver.feedControl(line);
-      if (!ok) {
-        fileBusyRef.current = false;
-        return;
-      }
-      if (receiver.getState() === "init") {
-        log(`FILE: incoming transfer "${receiver.getMeta()?.name}" (${receiver.getMeta()?.size} bytes)`);
-      }
-    },
-    [log],
-  );
+	const handleFileControl = useCallback(
+		(line: string) => {
+			if (!isFileControl(line)) return;
+			if (fileBusyRef.current) return; // one transfer at a time
+			fileBusyRef.current = true;
+			const receiver = new FileReceiver();
+			receiverRef.current = receiver;
+			const ok = receiver.feedControl(line);
+			if (!ok) {
+				fileBusyRef.current = false;
+				return;
+			}
+			if (receiver.getState() === "init") {
+				log(
+					`FILE: incoming transfer "${receiver.getMeta()?.name}" (${receiver.getMeta()?.size} bytes)`,
+				);
+			}
+		},
+		[log],
+	);
 
-  const handleFileBinary = useCallback((buf: ArrayBuffer) => {
-    const receiver = receiverRef.current;
-    if (!receiver || (receiver.getState() !== "init" && receiver.getState() !== "receiving")) return;
-    receiver.feedBinary(buf);
-    void receiver.whenComplete().then(() => {
-      const done = receiver.done();
-      fileBusyRef.current = false;
-      if (done) {
-        const rec: ReceivedFile = {
-          id: receiver.getMeta()?.id ?? Date.now().toString(),
-          name: done.meta.name,
-          mime: done.meta.mime,
-          size: done.meta.size,
-          sha256: done.meta.sha256,
-          verified: done.sha256Verified,
-          bytes: done.assembled,
-        };
-        setReceivedFiles((prev) => [...prev, rec]);
-        receiverRef.current = null;
-        if (done.sha256Verified) {
-          sound.success();
-          log(`FILE: "${done.meta.name}" received + sha256 VERIFIED`);
-        } else {
-          sound.error();
-          log(`FILE: "${done.meta.name}" FAILED integrity check — discarding`);
-        }
-      } else if (receiver.getState() === "error") {
-        sound.error();
-        log("FILE: transfer error (corrupt or aborted)");
-      }
-    });
-  }, [log]);
+	const handleFileBinary = useCallback(
+		(buf: ArrayBuffer) => {
+			const receiver = receiverRef.current;
+			if (
+				!receiver ||
+				(receiver.getState() !== "init" && receiver.getState() !== "receiving")
+			)
+				return;
+			receiver.feedBinary(buf);
+			void receiver.whenComplete().then(() => {
+				const done = receiver.done();
+				fileBusyRef.current = false;
+				if (done) {
+					const rec: ReceivedFile = {
+						id: receiver.getMeta()?.id ?? Date.now().toString(),
+						name: done.meta.name,
+						mime: done.meta.mime,
+						size: done.meta.size,
+						sha256: done.meta.sha256,
+						verified: done.sha256Verified,
+						bytes: done.assembled,
+					};
+					setReceivedFiles((prev) => [...prev, rec]);
+					receiverRef.current = null;
+					if (done.sha256Verified) {
+						sound.success();
+						log(`FILE: "${done.meta.name}" received + sha256 VERIFIED`);
+					} else {
+						sound.error();
+						log(
+							`FILE: "${done.meta.name}" FAILED integrity check — discarding`,
+						);
+					}
+				} else if (receiver.getState() === "error") {
+					sound.error();
+					log("FILE: transfer error (corrupt or aborted)");
+				}
+			});
+		},
+		[log],
+	);
 
-  const sendFileTransfer = useCallback(async () => {
-    if (!sendFile) return;
-    if (!dcRef.current || dcRef.current.readyState !== "open") {
-      sound.error();
-      log("FILE: no live channel — pair first");
-      return;
-    }
-    setSending(true);
-    try {
-      const bytes = new Uint8Array(await sendFile.arrayBuffer());
-      const prep = await prepareFileTransfer(
-        { name: sendFile.name, mime: sendFile.type || "application/octet-stream", size: bytes.length },
-        bytes,
-      );
-      setSendMeta(prep.meta);
-      const dc = dcRef.current;
-      dc.send(buildInitFrame(prep.meta));
-      setSendProgress({ sent: 0, total: prep.chunks.length });
-      for (let i = 0; i < prep.chunks.length; i++) {
-        const enc = await encryptChunk(prep.chunks[i], prep.keyB64);
-        if (dc.readyState !== "open") break;
-        dc.send(enc.buffer as ArrayBuffer);
-        setSendProgress({ sent: i + 1, total: prep.chunks.length });
-      }
-      if (dc.readyState === "open") {
-        dc.send(buildDoneFrame(prep.meta));
-        sound.success();
-        log(`FILE: "${prep.meta.name}" sent (${prep.chunks.length} chunks, sha256 verified on arrival)`);
-      }
-    } catch (err) {
-      sound.error();
-      log(`FILE: send failed — ${(err as Error).message}`);
-    } finally {
-      setSending(false);
-    }
-  }, [sendFile, log]);
+	const sendFileTransfer = useCallback(async () => {
+		if (!sendFile) return;
+		if (!dcRef.current || dcRef.current.readyState !== "open") {
+			sound.error();
+			log("FILE: no live channel — pair first");
+			return;
+		}
+		setSending(true);
+		try {
+			const bytes = new Uint8Array(await sendFile.arrayBuffer());
+			const prep = await prepareFileTransfer(
+				{
+					name: sendFile.name,
+					mime: sendFile.type || "application/octet-stream",
+					size: bytes.length,
+				},
+				bytes,
+			);
+			setSendMeta(prep.meta);
+			const dc = dcRef.current;
+			dc.send(buildInitFrame(prep.meta));
+			setSendProgress({ sent: 0, total: prep.chunks.length });
+			for (let i = 0; i < prep.chunks.length; i++) {
+				const enc = await encryptChunk(prep.chunks[i], prep.keyB64);
+				if (dc.readyState !== "open") break;
+				dc.send(enc.buffer as ArrayBuffer);
+				setSendProgress({ sent: i + 1, total: prep.chunks.length });
+			}
+			if (dc.readyState === "open") {
+				dc.send(buildDoneFrame(prep.meta));
+				sound.success();
+				log(
+					`FILE: "${prep.meta.name}" sent (${prep.chunks.length} chunks, sha256 verified on arrival)`,
+				);
+			}
+		} catch (err) {
+			sound.error();
+			log(`FILE: send failed — ${(err as Error).message}`);
+		} finally {
+			setSending(false);
+		}
+	}, [sendFile, log]);
 
-  const plantFileDeadDrop = useCallback(
-    async (rec: ReceivedFile, lat: string, lng: string) => {
-      if (!identity) return;
-      try {
-        const prep = await prepareFileTransfer({ name: rec.name, mime: rec.mime, size: rec.size }, rec.bytes);
-        const encChunks: Uint8Array[] = [];
-        for (const c of prep.chunks) encChunks.push(await encryptChunk(c, prep.keyB64));
-        const drop: DeadDrop = {
-          id: prep.meta.id,
-          lat: lat || "0.0000",
-          lng: lng || "0.0000",
-          msg: `[FILE] ${rec.name}`,
-          ts: Date.now(),
-          author: identity.handle,
-          kind: "file",
-          fileMeta: { name: rec.name, mime: rec.mime, size: rec.size, sha256: rec.sha256 },
-          payloadChunksB64: encChunks.map(bytesToB64),
-          keyB64: prep.keyB64,
-        };
-        const updated = [...deadDrops, drop];
-        setDeadDrops(updated);
-        try { localStorage.setItem("vfx-dead-drops", JSON.stringify(updated)); } catch { /* ignore */ }
-        sound.success();
-        log(`FILE: "${rec.name}" planted as encrypted dead drop`);
-      } catch (err) {
-        sound.error();
-        log(`FILE: dead drop failed — ${(err as Error).message}`);
-      }
-    },
-    [identity, deadDrops, log],
-  );
+	const plantFileDeadDrop = useCallback(
+		async (rec: ReceivedFile, lat: string, lng: string) => {
+			if (!identity) return;
+			try {
+				const prep = await prepareFileTransfer(
+					{ name: rec.name, mime: rec.mime, size: rec.size },
+					rec.bytes,
+				);
+				const encChunks: Uint8Array[] = [];
+				for (const c of prep.chunks)
+					encChunks.push(await encryptChunk(c, prep.keyB64));
+				const drop: DeadDrop = {
+					id: prep.meta.id,
+					lat: lat || "0.0000",
+					lng: lng || "0.0000",
+					msg: `[FILE] ${rec.name}`,
+					ts: Date.now(),
+					author: identity.handle,
+					kind: "file",
+					fileMeta: {
+						name: rec.name,
+						mime: rec.mime,
+						size: rec.size,
+						sha256: rec.sha256,
+					},
+					payloadChunksB64: encChunks.map(bytesToB64),
+					keyB64: prep.keyB64,
+				};
+				const updated = [...deadDrops, drop];
+				setDeadDrops(updated);
+				try {
+					localStorage.setItem("vfx-dead-drops", JSON.stringify(updated));
+				} catch {
+					/* ignore */
+				}
+				sound.success();
+				log(`FILE: "${rec.name}" planted as encrypted dead drop`);
+			} catch (err) {
+				sound.error();
+				log(`FILE: dead drop failed — ${(err as Error).message}`);
+			}
+		},
+		[identity, deadDrops, log],
+	);
 
-  /* ═══════════════════════════════════════════════════════════════
+	/* ═══════════════════════════════════════════════════════════════
      MESH STORE & FORWARD
      ═══════════════════════════════════════════════════════════════ */
-  const sendMeshMail = useCallback(async () => {
-    const to = meshTo.trim();
-    const body = meshBody.trim();
-    if (!to || !body) return;
-    const msg: MeshMessage = {
-      id: newMeshId(),
-      from: peerHashRef.current || "anon",
-      to,
-      body,
-      kind: "chat",
-      createdAt: Date.now(),
-      ttlMs: 24 * 60 * 60 * 1000,
-      hops: 0,
-      via: [],
-    };
-    await enqueue(msg);
-    sound.select();
-    log(`MESH: mail for ${to.slice(0, 8)} queued — rides the mesh`);
-    setMeshBody("");
-    void refreshMeshPending();
-  }, [meshTo, meshBody, log, refreshMeshPending]);
+	const sendMeshMail = useCallback(async () => {
+		const to = meshTo.trim();
+		const body = meshBody.trim();
+		if (!to || !body) return;
+		const msg: MeshMessage = {
+			id: newMeshId(),
+			from: peerHashRef.current || "anon",
+			to,
+			body,
+			kind: "chat",
+			createdAt: Date.now(),
+			ttlMs: 24 * 60 * 60 * 1000,
+			hops: 0,
+			via: [],
+		};
+		await enqueue(msg);
+		sound.select();
+		log(`MESH: mail for ${to.slice(0, 8)} queued — rides the mesh`);
+		setMeshBody("");
+		void refreshMeshPending();
+	}, [meshTo, meshBody, log, refreshMeshPending]);
 
-  const handleMeshMessage = useCallback(
-    async (msg: MeshMessage) => {
-      markSeen(msg.id);
-      if (msg.to === peerHashRef.current) {
-        pushMeshLog(`✉ delivered → ${msg.body}`);
-        sound.copy();
-        return;
-      }
-      if (msg.hops >= 5) {
-        pushMeshLog(`✕ ${msg.id.slice(0, 8)} died in the mesh (hop cap)`);
-        return;
-      }
-      await enqueue(msg);
-      const next = forward(msg, peerHashRef.current || "relay");
-      if (next && dcRef.current?.readyState === "open") {
-        dcRef.current.send(JSON.stringify({ kind: "mesh", msg: next }));
-        pushMeshLog(`⇄ re-forwarded (hop ${next.hops})`);
-      }
-      void refreshMeshPending();
-    },
-    [pushMeshLog, refreshMeshPending],
-  );
+	const handleMeshMessage = useCallback(
+		async (msg: MeshMessage) => {
+			markSeen(msg.id);
+			if (msg.to === peerHashRef.current) {
+				pushMeshLog(`✉ delivered → ${msg.body}`);
+				sound.copy();
+				return;
+			}
+			if (msg.hops >= 5) {
+				pushMeshLog(`✕ ${msg.id.slice(0, 8)} died in the mesh (hop cap)`);
+				return;
+			}
+			await enqueue(msg);
+			const next = forward(msg, peerHashRef.current || "relay");
+			if (next && dcRef.current?.readyState === "open") {
+				dcRef.current.send(JSON.stringify({ kind: "mesh", msg: next }));
+				pushMeshLog(`⇄ re-forwarded (hop ${next.hops})`);
+			}
+			void refreshMeshPending();
+		},
+		[pushMeshLog, refreshMeshPending],
+	);
 
-  /** On channel open: handshake, then flush queued mail to the peer. */
-  const meshOnPeerOpen = useCallback(async () => {
-    if (!identity) return;
-    if (dcRef.current?.readyState !== "open") return;
-    try {
-      // Send full identity for safety number computation
-      const fullIdentity = identityRef.current;
-      dcRef.current.send(JSON.stringify({
-        kind: "mesh-hello",
-        handle: identity.handle,
-        from: peerHashRef.current,
-        publicKeyHex: fullIdentity?.publicKeyHex,
-        fingerprint: fullIdentity?.fingerprint,
-      }));
-      const h = await peerHash(identity.handle);
-      const queued = await dequeueFor(h, Date.now());
-      for (const m of queued) {
-        if (dcRef.current?.readyState === "open") {
-          dcRef.current.send(JSON.stringify({ kind: "mesh", msg: m }));
-        }
-      }
-      if (queued.length > 0) log(`MESH: flushed ${queued.length} queued message(s) to peer`);
-      void refreshMeshPending();
-    } catch { /* ignore */ }
-  }, [identity, log, refreshMeshPending]);
+	/** On channel open: handshake, then flush queued mail to the peer. */
+	const meshOnPeerOpen = useCallback(async () => {
+		if (!identity) return;
+		if (dcRef.current?.readyState !== "open") return;
+		try {
+			// Send full identity for safety number computation
+			const fullIdentity = identityRef.current;
+			dcRef.current.send(
+				JSON.stringify({
+					kind: "mesh-hello",
+					handle: identity.handle,
+					from: peerHashRef.current,
+					publicKeyHex: fullIdentity?.publicKeyHex,
+					fingerprint: fullIdentity?.fingerprint,
+				}),
+			);
+			const h = await peerHash(identity.handle);
+			const queued = await dequeueFor(h, Date.now());
+			for (const m of queued) {
+				if (dcRef.current?.readyState === "open") {
+					dcRef.current.send(JSON.stringify({ kind: "mesh", msg: m }));
+				}
+			}
+			if (queued.length > 0)
+				log(`MESH: flushed ${queued.length} queued message(s) to peer`);
+			void refreshMeshPending();
+		} catch {
+			/* ignore */
+		}
+	}, [identity, log, refreshMeshPending]);
 
-  const purgeMesh = useCallback(async () => {
-    const removed = await expireAll(Date.now());
-    sound.select();
-    log(`MESH: purged ${removed} expired message(s)`);
-    void refreshMeshPending();
-  }, [log, refreshMeshPending]);
+	const purgeMesh = useCallback(async () => {
+		const removed = await expireAll(Date.now());
+		sound.select();
+		log(`MESH: purged ${removed} expired message(s)`);
+		void refreshMeshPending();
+	}, [log, refreshMeshPending]);
 
-  /* ═══════════════════════════════════════════════════════════════
+	/* ═══════════════════════════════════════════════════════════════
      AES-GCM Dead Drop encryption (at-rest)
      ═══════════════════════════════════════════════════════════════ */
-  const deriveDropKey = async (): Promise<CryptoKey | null> => {
-    if (!identity) return null;
-    try {
-      const keyMaterial = await crypto.subtle.importKey(
-        "raw",
-        new TextEncoder().encode(identity.handle),
-        "PBKDF2",
-        false,
-        ["deriveKey"]
-      );
-      return crypto.subtle.deriveKey(
-        { name: "PBKDF2", salt: new TextEncoder().encode("vfx-dead-drop-v1"), iterations: 10000, hash: "SHA-256" },
-        keyMaterial,
-        { name: "AES-GCM", length: 256 },
-        false,
-        ["encrypt", "decrypt"]
-      );
-    } catch { return null; }
-  };
+	const deriveDropKey = async (): Promise<CryptoKey | null> => {
+		if (!identity) return null;
+		try {
+			const keyMaterial = await crypto.subtle.importKey(
+				"raw",
+				new TextEncoder().encode(identity.handle),
+				"PBKDF2",
+				false,
+				["deriveKey"],
+			);
+			return crypto.subtle.deriveKey(
+				{
+					name: "PBKDF2",
+					salt: new TextEncoder().encode("vfx-dead-drop-v1"),
+					iterations: 10000,
+					hash: "SHA-256",
+				},
+				keyMaterial,
+				{ name: "AES-GCM", length: 256 },
+				false,
+				["encrypt", "decrypt"],
+			);
+		} catch {
+			return null;
+		}
+	};
 
-  const encryptMsg = async (plaintext: string): Promise<{ enc: string; iv: string } | null> => {
-    const key = await deriveDropKey();
-    if (!key) return null;
-    const iv = crypto.getRandomValues(new Uint8Array(12));
-    const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, new TextEncoder().encode(plaintext));
-    return {
-      enc: Array.from(new Uint8Array(ct)).map((b) => b.toString(16).padStart(2, "0")).join(""),
-      iv: Array.from(iv).map((b) => b.toString(16).padStart(2, "0")).join(""),
-    };
-  };
+	const encryptMsg = async (
+		plaintext: string,
+	): Promise<{ enc: string; iv: string } | null> => {
+		const key = await deriveDropKey();
+		if (!key) return null;
+		const iv = crypto.getRandomValues(new Uint8Array(12));
+		const ct = await crypto.subtle.encrypt(
+			{ name: "AES-GCM", iv },
+			key,
+			new TextEncoder().encode(plaintext),
+		);
+		return {
+			enc: Array.from(new Uint8Array(ct))
+				.map((b) => b.toString(16).padStart(2, "0"))
+				.join(""),
+			iv: Array.from(iv)
+				.map((b) => b.toString(16).padStart(2, "0"))
+				.join(""),
+		};
+	};
 
-  const decryptMsg = async (enc: string, ivHex: string): Promise<string | null> => {
-    const key = await deriveDropKey();
-    if (!key) return null;
-    try {
-      const iv = Uint8Array.from(ivHex.match(/.{1,2}/g)!.map((b) => parseInt(b, 16)));
-      const ct = Uint8Array.from(enc.match(/.{1,2}/g)!.map((b) => parseInt(b, 16)));
-      const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ct);
-      return new TextDecoder().decode(pt);
-    } catch { return null; }
-  };
+	const decryptMsg = async (
+		enc: string,
+		ivHex: string,
+	): Promise<string | null> => {
+		const key = await deriveDropKey();
+		if (!key) return null;
+		try {
+			const iv = Uint8Array.from(
+				ivHex.match(/.{1,2}/g)!.map((b) => parseInt(b, 16)),
+			);
+			const ct = Uint8Array.from(
+				enc.match(/.{1,2}/g)!.map((b) => parseInt(b, 16)),
+			);
+			const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ct);
+			return new TextDecoder().decode(pt);
+		} catch {
+			return null;
+		}
+	};
 
-  const plantDeadDrop = async () => {
-    if (!deadDropLat || !deadDropLng || !deadDropMsg || !identity) return;
-    const lat = parseFloat(deadDropLat).toFixed(4);
-    const lng = parseFloat(deadDropLng).toFixed(4);
-    const encrypted = await encryptMsg(deadDropMsg.slice(0, 200));
-    const drop: DeadDrop = {
-      id: Date.now() + "-" + Math.random().toString(36).slice(2),
-      lat,
-      lng,
-      msg: encrypted ? "[ENCRYPTED]" : deadDropMsg.slice(0, 200),
-      enc: encrypted?.enc,
-      iv: encrypted?.iv,
-      ts: Date.now(),
-      author: identity.handle,
-    };
-    const updated = [...deadDrops, drop];
-    setDeadDrops(updated);
-    try { localStorage.setItem("vfx-dead-drops", JSON.stringify(updated)); } catch { /* ignore */ }
-    setDeadDropLat("");
-    setDeadDropLng("");
-    setDeadDropMsg("");
-    sound.success();
-  };
+	const plantDeadDrop = async () => {
+		if (!deadDropLat || !deadDropLng || !deadDropMsg || !identity) return;
+		const lat = parseFloat(deadDropLat).toFixed(4);
+		const lng = parseFloat(deadDropLng).toFixed(4);
+		const encrypted = await encryptMsg(deadDropMsg.slice(0, 200));
+		const drop: DeadDrop = {
+			id: Date.now() + "-" + Math.random().toString(36).slice(2),
+			lat,
+			lng,
+			msg: encrypted ? "[ENCRYPTED]" : deadDropMsg.slice(0, 200),
+			enc: encrypted?.enc,
+			iv: encrypted?.iv,
+			ts: Date.now(),
+			author: identity.handle,
+		};
+		const updated = [...deadDrops, drop];
+		setDeadDrops(updated);
+		try {
+			localStorage.setItem("vfx-dead-drops", JSON.stringify(updated));
+		} catch {
+			/* ignore */
+		}
+		setDeadDropLat("");
+		setDeadDropLng("");
+		setDeadDropMsg("");
+		sound.success();
+	};
 
-  const removeDeadDrop = (id: string) => {
-    const updated = deadDrops.filter((d) => d.id !== id);
-    setDeadDrops(updated);
-    try { localStorage.setItem("vfx-dead-drops", JSON.stringify(updated)); } catch { /* ignore */ }
-  };
+	const removeDeadDrop = (id: string) => {
+		const updated = deadDrops.filter((d) => d.id !== id);
+		setDeadDrops(updated);
+		try {
+			localStorage.setItem("vfx-dead-drops", JSON.stringify(updated));
+		} catch {
+			/* ignore */
+		}
+	};
 
-  const copyOffer = () => {
-    if (localSDP) {
-      navigator.clipboard?.writeText(localSDP);
-      setCopiedOffer(true);
-      setTimeout(() => setCopiedOffer(false), 2000);
-    }
-  };
+	const copyOffer = () => {
+		if (localSDP) {
+			navigator.clipboard?.writeText(localSDP);
+			setCopiedOffer(true);
+			setTimeout(() => setCopiedOffer(false), 2000);
+		}
+	};
 
-  const peerStatusColor = peerStatus === "connected" ? "green" : peerStatus === "error" ? "blood" : peerStatus === "idle" ? "dim" : "amber";
+	const peerStatusColor =
+		peerStatus === "connected"
+			? "green"
+			: peerStatus === "error"
+				? "blood"
+				: peerStatus === "idle"
+					? "dim"
+					: "amber";
 
-  return (
-    <div className="p-3 sm:p-6 md:p-10 max-w-5xl mx-auto">
-      <div className="mb-8 pt-4">
-        <div className="text-xs text-content-dim mb-1">{tc(lang, "web.section_label")}</div>
-        <h1 className="text-2xl md:text-3xl text-blood-bright font-bold glow-blood">
-          {tc(lang, "web.title")}
-        </h1>
-        <p className="text-content-secondary text-sm mt-2">
-          {tc(lang, "subtitle.the_web")}
-        </p>
-      </div>
+	return (
+		<div className="p-3 sm:p-6 md:p-10 max-w-5xl mx-auto">
+			<div className="mb-8 pt-4">
+				<div className="text-xs text-content-dim mb-1">
+					{tc(lang, "web.section_label")}
+				</div>
+				<h1 className="text-2xl md:text-3xl text-blood-bright font-bold glow-blood">
+					{tc(lang, "web.title")}
+				</h1>
+				<p className="text-content-secondary text-sm mt-2">
+					{tc(lang, "subtitle.the_web")}
+				</p>
+			</div>
 
-      {/* Identity panel */}
-      <TerminalCard title={tc(lang, "web.anonymous_identity")} className="mb-6">
-        {identity ? (
-          <div className="flex flex-wrap items-center gap-4">
-            <div>
-              <div className="text-xs text-content-dim">{tc(lang, "web.your_handle")}</div>
-              <div className="text-lg text-terminal-green glow-green font-bold">{identity.handle}</div>
-            </div>
-            <div>
-              <div className="text-xs text-content-dim">{tc(lang, "web.public_key")}</div>
-              <div className="text-xs text-content-secondary font-mono break-all">
-                {identity.publicKey}...
-              </div>
-            </div>
-            <StatusPill color="green">ECDSA P-256</StatusPill>
-            <button
-              onClick={() => {
-                setIdentity(null);
-                // identity is managed by lib/identity.ts
-                closeConnection();
-                sound.error();
-              }}
-              className="text-xs px-3 py-1 border border-blood text-blood hover:bg-blood hover:text-void ml-auto"
-            >
-              {tc(lang, "web.burn_identity")}
-            </button>
-          </div>
-        ) : (
-          <div className="text-center py-6">
-            <p className="text-sm text-content-secondary mb-4">
-              {tc(lang, "web.no_identity")}
-            </p>
-            <button
-              onClick={generateIdentity}
-              className="px-4 py-2 text-sm border border-blood text-blood-bright hover:bg-blood hover:text-void"
-            >
-              {tc(lang, "web.generate_identity")}
-            </button>
-            <p className="text-xs text-content-dim mt-3">
-              Your identity is a cryptographic keypair. It never leaves this device.
-              No email, no phone, no registration.
-            </p>
-          </div>
-        )}
-      </TerminalCard>
+			{/* Identity panel */}
+			<TerminalCard title={tc(lang, "web.anonymous_identity")} className="mb-6">
+				{identity ? (
+					<div className="flex flex-wrap items-center gap-4">
+						<div>
+							<div className="text-xs text-content-dim">
+								{tc(lang, "web.your_handle")}
+							</div>
+							<div className="text-lg text-terminal-green glow-green font-bold">
+								{identity.handle}
+							</div>
+						</div>
+						<div>
+							<div className="text-xs text-content-dim">
+								{tc(lang, "web.public_key")}
+							</div>
+							<div className="text-xs text-content-secondary font-mono break-all">
+								{identity.publicKey}...
+							</div>
+						</div>
+						<StatusPill color="green">ECDSA P-256</StatusPill>
+						<button
+							onClick={() => {
+								setIdentity(null);
+								// identity is managed by lib/identity.ts
+								closeConnection();
+								sound.error();
+							}}
+							className="text-xs px-3 py-1 border border-blood text-blood hover:bg-blood hover:text-void ml-auto"
+						>
+							{tc(lang, "web.burn_identity")}
+						</button>
+					</div>
+				) : (
+					<div className="text-center py-6">
+						<p className="text-sm text-content-secondary mb-4">
+							{tc(lang, "web.no_identity")}
+						</p>
+						<button
+							onClick={generateIdentity}
+							className="px-4 py-2 text-sm border border-blood text-blood-bright hover:bg-blood hover:text-void"
+						>
+							{tc(lang, "web.generate_identity")}
+						</button>
+						<p className="text-xs text-content-dim mt-3">
+							Your identity is a cryptographic keypair. It never leaves this
+							device. No email, no phone, no registration.
+						</p>
+					</div>
+				)}
+			</TerminalCard>
 
-      {identity && (
-        <>
-          {/* AUTO-SIGNALING RELAY */}
-          <TerminalCard title={tc(lang, "web.auto_signaling")} accent="green" className="mb-6">
-            <p className="text-xs text-content-secondary mb-4">
-              {tc(lang, "web.auto_desc")}
-            </p>
+			{identity && (
+				<>
+					{/* AUTO-SIGNALING RELAY */}
+					<TerminalCard
+						title={tc(lang, "web.auto_signaling")}
+						accent="green"
+						className="mb-6"
+					>
+						<p className="text-xs text-content-secondary mb-4">
+							{tc(lang, "web.auto_desc")}
+						</p>
 
-            <div className="flex flex-wrap items-center gap-2 mb-4">
-              <div className="text-[10px] text-content-dim uppercase tracking-widest">
-                {tc(lang, "web.room")}
-              </div>
-              <input
-                type="text"
-                value={room}
-                onChange={(e) => setRoom(e.target.value.toUpperCase())}
-                placeholder={tc(lang, "web.room_ph")}
-                className="flex-1 min-w-40 bg-void border border-border-dim px-3 py-2 text-xs text-terminal-green font-mono focus:border-terminal-green focus:outline-none uppercase"
-              />
-              <button
-                onClick={() => {
-                  setRoom(generateRoomCode());
-                  sound.select();
-                }}
-                className="px-3 py-2 text-xs border border-border-dim text-content-secondary hover:border-terminal-green hover:text-terminal-green"
-              >
-                {tc(lang, "web.new_room")}
-              </button>
-            </div>
+						<div className="flex flex-wrap items-center gap-2 mb-4">
+							<div className="text-[10px] text-content-dim uppercase tracking-widest">
+								{tc(lang, "web.room")}
+							</div>
+							<input
+								type="text"
+								value={room}
+								onChange={(e) => setRoom(e.target.value.toUpperCase())}
+								placeholder={tc(lang, "web.room_ph")}
+								className="flex-1 min-w-40 bg-void border border-border-dim px-3 py-2 text-xs text-terminal-green font-mono focus:border-terminal-green focus:outline-none uppercase"
+							/>
+							<button
+								onClick={() => {
+									setRoom(generateRoomCode());
+									sound.select();
+								}}
+								className="px-3 py-2 text-xs border border-border-dim text-content-secondary hover:border-terminal-green hover:text-terminal-green"
+							>
+								{tc(lang, "web.new_room")}
+							</button>
+						</div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-              <button
-                onClick={createOffer}
-                disabled={peerStatus === "connected"}
-                className="p-3 border border-terminal-green hover:bg-terminal-green/5 text-left disabled:opacity-30"
-              >
-                <div className="text-xs text-terminal-green font-bold">
-                  {tc(lang, "web.pair_btn")}
-                </div>
-                <div className="text-[10px] text-content-secondary mt-1">
-                  Creates an offer, broadcasts it to same-room tabs, copies the token to the clipboard, and builds a share link.
-                </div>
-              </button>
-              <button
-                onClick={toggleClipboardWatch}
-                className={`p-3 border text-left ${clipWatching ? "border-terminal-green bg-terminal-green/5" : "border-border-dim hover:border-terminal-green"}`}
-              >
-                <div className={`text-xs font-bold ${clipWatching ? "text-terminal-green" : "text-content-secondary"}`}>
-                  {clipWatching ? `● ${tc(lang, "web.watching_clipboard")}` : tc(lang, "web.watch_clipboard")}
-                </div>
-                <div className="text-[10px] text-content-secondary mt-1">
-                  {tc(lang, "web.auto_clipboard_warn")}
-                </div>
-              </button>
-            </div>
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+							<button
+								onClick={createOffer}
+								disabled={peerStatus === "connected"}
+								className="p-3 border border-terminal-green hover:bg-terminal-green/5 text-left disabled:opacity-30"
+							>
+								<div className="text-xs text-terminal-green font-bold">
+									{tc(lang, "web.pair_btn")}
+								</div>
+								<div className="text-[10px] text-content-secondary mt-1">
+									Creates an offer, broadcasts it to same-room tabs, copies the
+									token to the clipboard, and builds a share link.
+								</div>
+							</button>
+							<button
+								onClick={toggleClipboardWatch}
+								className={`p-3 border text-left ${clipWatching ? "border-terminal-green bg-terminal-green/5" : "border-border-dim hover:border-terminal-green"}`}
+							>
+								<div
+									className={`text-xs font-bold ${clipWatching ? "text-terminal-green" : "text-content-secondary"}`}
+								>
+									{clipWatching
+										? `● ${tc(lang, "web.watching_clipboard")}`
+										: tc(lang, "web.watch_clipboard")}
+								</div>
+								<div className="text-[10px] text-content-secondary mt-1">
+									{tc(lang, "web.auto_clipboard_warn")}
+								</div>
+							</button>
+						</div>
 
-            {shareUrl && (
-              <div className="mb-4 border border-terminal-green/30 bg-terminal-green/5 p-3">
-                <div className="text-[10px] text-terminal-green uppercase tracking-widest mb-1">
-                  {tc(lang, "web.share_link")}
-                </div>
-                <div className="text-[11px] text-terminal-green font-mono break-all mb-2">{shareUrl}</div>
-                <div className="text-[10px] text-content-dim">
-                  {tc(lang, "web.share_link_desc")}
-                </div>
-                <button
-                  onClick={() => {
-                    navigator.clipboard?.writeText(shareUrl);
-                    sound.select();
-                  }}
-                  className="mt-2 px-3 py-1 text-[10px] border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void"
-                >
-                  [ COPY LINK ]
-                </button>
-              </div>
-            )}
+						{shareUrl && (
+							<div className="mb-4 border border-terminal-green/30 bg-terminal-green/5 p-3">
+								<div className="text-[10px] text-terminal-green uppercase tracking-widest mb-1">
+									{tc(lang, "web.share_link")}
+								</div>
+								<div className="text-[11px] text-terminal-green font-mono break-all mb-2">
+									{shareUrl}
+								</div>
+								<div className="text-[10px] text-content-dim">
+									{tc(lang, "web.share_link_desc")}
+								</div>
+								<button
+									onClick={() => {
+										navigator.clipboard?.writeText(shareUrl);
+										sound.select();
+									}}
+									className="mt-2 px-3 py-1 text-[10px] border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void"
+								>
+									[ COPY LINK ]
+								</button>
+							</div>
+						)}
 
-            {roomActivity.length > 0 && (
-              <div className="border border-border-dim bg-void p-2 max-h-32 overflow-y-auto">
-                <div className="text-[9px] text-content-dim uppercase mb-1">
-                  {tc(lang, "web.room_activity")}
-                </div>
-                {roomActivity.map((l, i) => (
-                  <div key={i} className="text-[10px] text-content-secondary">{l}</div>
-                ))}
-              </div>
-            )}
+						{roomActivity.length > 0 && (
+							<div className="border border-border-dim bg-void p-2 max-h-32 overflow-y-auto">
+								<div className="text-[9px] text-content-dim uppercase mb-1">
+									{tc(lang, "web.room_activity")}
+								</div>
+								{roomActivity.map((l, i) => (
+									<div key={i} className="text-[10px] text-content-secondary">
+										{l}
+									</div>
+								))}
+							</div>
+						)}
 
-            <div className="text-[10px] text-content-dim mt-3">
-              ▸ Same-device tabs in the same room pair automatically. Cross-device: share the link or the copied VFXSIG1 token — it applies itself on arrival. No server, on any static mirror.
-            </div>
-          </TerminalCard>
+						<div className="text-[10px] text-content-dim mt-3">
+							▸ Same-device tabs in the same room pair automatically.
+							Cross-device: share the link or the copied VFXSIG1 token — it
+							applies itself on arrival. No server, on any static mirror.
+						</div>
+					</TerminalCard>
 
-          {/* P2P Connection Manager */}
-          <TerminalCard title={tc(lang, "card.p2p_signaling")} accent="amber" className="mb-6">
-            <div className="flex items-center gap-2 mb-4">
-              <StatusPill color={peerStatusColor as "green" | "blood" | "dim" | "amber"}>
-                {peerStatus.toUpperCase()}
-              </StatusPill>
-              <span className="text-xs text-content-dim">
-                {peerStatus === "connected"
-                  ? "Encrypted data channel active"
-                  : peerStatus === "waiting"
-                    ? "Exchange SDP with your peer"
-                    : "No active connection"}
-              </span>
-            </div>
+					{/* P2P Connection Manager */}
+					<TerminalCard
+						title={tc(lang, "card.p2p_signaling")}
+						accent="amber"
+						className="mb-6"
+					>
+						<div className="flex items-center gap-2 mb-4">
+							<StatusPill
+								color={peerStatusColor as "green" | "blood" | "dim" | "amber"}
+							>
+								{peerStatus.toUpperCase()}
+							</StatusPill>
+							<span className="text-xs text-content-dim">
+								{peerStatus === "connected"
+									? "Encrypted data channel active"
+									: peerStatus === "waiting"
+										? "Exchange SDP with your peer"
+										: "No active connection"}
+							</span>
+						</div>
 
-            {/* Step 1: Role selection */}
-            {peerStatus === "idle" && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-                <button
-                  onClick={createOffer}
-                  className="p-3 border border-blood-dim hover:border-blood hover:bg-blood/5 text-left"
-                >
-                  <div className="text-xs text-blood-bright font-bold">{tc(lang, "web.create_offer")}</div>
-                  <div className="text-[10px] text-content-secondary mt-1">
-                    {tc(lang, "web.create_offer_desc")}
-                  </div>
-                </button>
-                <button
-                  onClick={() => {
-                    setPeerStatus("connecting");
-                    log("Paste an offer SDP below to create an answer");
-                  }}
-                  className="p-3 border border-terminal-green hover:bg-terminal-green/5 text-left"
-                >
-                  <div className="text-xs text-terminal-green font-bold">{tc(lang, "web.accept_offer")}</div>
-                  <div className="text-[10px] text-content-secondary mt-1">
-                    {tc(lang, "web.accept_offer_desc")}
-                  </div>
-                </button>
-              </div>
-            )}
+						{/* Step 1: Role selection */}
+						{peerStatus === "idle" && (
+							<div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+								<button
+									onClick={createOffer}
+									className="p-3 border border-blood-dim hover:border-blood hover:bg-blood/5 text-left"
+								>
+									<div className="text-xs text-blood-bright font-bold">
+										{tc(lang, "web.create_offer")}
+									</div>
+									<div className="text-[10px] text-content-secondary mt-1">
+										{tc(lang, "web.create_offer_desc")}
+									</div>
+								</button>
+								<button
+									onClick={() => {
+										setPeerStatus("connecting");
+										log("Paste an offer SDP below to create an answer");
+									}}
+									className="p-3 border border-terminal-green hover:bg-terminal-green/5 text-left"
+								>
+									<div className="text-xs text-terminal-green font-bold">
+										{tc(lang, "web.accept_offer")}
+									</div>
+									<div className="text-[10px] text-content-secondary mt-1">
+										{tc(lang, "web.accept_offer_desc")}
+									</div>
+								</button>
+							</div>
+						)}
 
-            {/* Step 2a: Display local SDP for copying */}
-            {localSDP && (
-              <div className="mb-4">
-                <div className="flex items-center justify-between mb-1">
-                  <div className="text-[10px] text-content-dim uppercase tracking-widest">
-                    YOUR SDP {peerStatus === "waiting" && pcRef.current?.localDescription?.type === "offer" ? "(OFFER)" : "(ANSWER)"}
-                  </div>
-                  <button
-                    onClick={copyOffer}
-                    className="text-[10px] px-2 py-0.5 border border-border-dim hover:border-terminal-green text-content-secondary hover:text-terminal-green"
-                  >
-                    {copiedOffer ? "✓ COPIED" : "COPY"}
-                  </button>
-                </div>
-                <textarea
-                  readOnly
-                  value={localSDP}
-                  rows={4}
-                  className="w-full bg-void border border-border-dim p-2 text-[10px] text-terminal-green font-mono resize-y"
-                />
-                <div className="text-[10px] text-content-dim mt-1">
-                  {pcRef.current?.localDescription?.type === "offer"
-                    ? "Send this to your peer. They should paste it into 'Remote SDP' and click CREATE ANSWER."
-                    : "Send this back to the initiator. They paste it into 'Remote SDP' and click ACCEPT ANSWER."}
-                </div>
-              </div>
-            )}
+						{/* Step 2a: Display local SDP for copying */}
+						{localSDP && (
+							<div className="mb-4">
+								<div className="flex items-center justify-between mb-1">
+									<div className="text-[10px] text-content-dim uppercase tracking-widest">
+										YOUR SDP{" "}
+										{peerStatus === "waiting" &&
+										pcRef.current?.localDescription?.type === "offer"
+											? "(OFFER)"
+											: "(ANSWER)"}
+									</div>
+									<button
+										onClick={copyOffer}
+										className="text-[10px] px-2 py-0.5 border border-border-dim hover:border-terminal-green text-content-secondary hover:text-terminal-green"
+									>
+										{copiedOffer ? "✓ COPIED" : "COPY"}
+									</button>
+								</div>
+								<textarea
+									readOnly
+									value={localSDP}
+									rows={4}
+									className="w-full bg-void border border-border-dim p-2 text-[10px] text-terminal-green font-mono resize-y"
+								/>
+								<div className="text-[10px] text-content-dim mt-1">
+									{pcRef.current?.localDescription?.type === "offer"
+										? "Send this to your peer. They should paste it into 'Remote SDP' and click CREATE ANSWER."
+										: "Send this back to the initiator. They paste it into 'Remote SDP' and click ACCEPT ANSWER."}
+								</div>
+							</div>
+						)}
 
-            {/* Step 2b: Remote SDP input */}
-            {(peerStatus === "connecting" || peerStatus === "waiting" || peerStatus === "connected") && (
-              <div className="mb-4">
-                <div className="text-[10px] text-content-dim uppercase tracking-widest mb-1">
-                  {tc(lang, "web.remote_sdp")}
-                </div>
-                <textarea
-                  value={remoteSDP}
-                  onChange={(e) => setRemoteSDP(e.target.value)}
-                  rows={4}
-                  placeholder={tc(lang, "web.remote_sdp_placeholder")}
-                  className="w-full bg-void border border-border-dim p-2 text-[10px] text-blood-bright font-mono resize-y focus:border-blood focus:outline-none"
-                />
-                <div className="flex gap-2 mt-2">
-                  {peerStatus === "connecting" && (
-                    <button
-                      onClick={() => { void createAnswer(); }}
-                      disabled={!remoteSDP.trim()}
-                      className="px-3 py-1.5 text-xs border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void disabled:opacity-30 disabled:cursor-not-allowed"
-                    >
-                      {tc(lang, "web.create_answer_btn")}
-                    </button>
-                  )}
-                  {peerStatus === "waiting" && pcRef.current?.localDescription?.type === "offer" && (
-                    <button
-                      onClick={() => { void acceptAnswer(); }}
-                      disabled={!remoteSDP.trim()}
-                      className="px-3 py-1.5 text-xs border border-blood text-blood-bright hover:bg-blood hover:text-void disabled:opacity-30 disabled:cursor-not-allowed"
-                    >
-                      {tc(lang, "web.accept_answer_btn")}
-                    </button>
-                  )}
-                  {(peerStatus === "connected" || peerStatus === "waiting" || peerStatus === "connecting") && (
-                    <button
-                      onClick={closeConnection}
-                      className="px-3 py-1.5 text-xs border border-border-dim text-content-secondary hover:border-blood hover:text-blood ml-auto"
-                    >
-                      {tc(lang, "web.close_btn")}
-                    </button>
-                  )}
-                </div>
-              </div>
-            )}
+						{/* Step 2b: Remote SDP input */}
+						{(peerStatus === "connecting" ||
+							peerStatus === "waiting" ||
+							peerStatus === "connected") && (
+							<div className="mb-4">
+								<div className="text-[10px] text-content-dim uppercase tracking-widest mb-1">
+									{tc(lang, "web.remote_sdp")}
+								</div>
+								<textarea
+									value={remoteSDP}
+									onChange={(e) => setRemoteSDP(e.target.value)}
+									rows={4}
+									placeholder={tc(lang, "web.remote_sdp_placeholder")}
+									className="w-full bg-void border border-border-dim p-2 text-[10px] text-blood-bright font-mono resize-y focus:border-blood focus:outline-none"
+								/>
+								<div className="flex gap-2 mt-2">
+									{peerStatus === "connecting" && (
+										<button
+											onClick={() => {
+												void createAnswer();
+											}}
+											disabled={!remoteSDP.trim()}
+											className="px-3 py-1.5 text-xs border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void disabled:opacity-30 disabled:cursor-not-allowed"
+										>
+											{tc(lang, "web.create_answer_btn")}
+										</button>
+									)}
+									{peerStatus === "waiting" &&
+										pcRef.current?.localDescription?.type === "offer" && (
+											<button
+												onClick={() => {
+													void acceptAnswer();
+												}}
+												disabled={!remoteSDP.trim()}
+												className="px-3 py-1.5 text-xs border border-blood text-blood-bright hover:bg-blood hover:text-void disabled:opacity-30 disabled:cursor-not-allowed"
+											>
+												{tc(lang, "web.accept_answer_btn")}
+											</button>
+										)}
+									{(peerStatus === "connected" ||
+										peerStatus === "waiting" ||
+										peerStatus === "connecting") && (
+										<button
+											onClick={closeConnection}
+											className="px-3 py-1.5 text-xs border border-border-dim text-content-secondary hover:border-blood hover:text-blood ml-auto"
+										>
+											{tc(lang, "web.close_btn")}
+										</button>
+									)}
+								</div>
+							</div>
+						)}
 
-            {/* Connection log */}
-            {connectionLog.length > 0 && (
-              <div className="border border-border-dim bg-void p-2 max-h-32 overflow-y-auto">
-                <div className="text-[9px] text-content-dim uppercase mb-1">{tc(lang, "web.connection_log")}</div>
-                {connectionLog.slice(-10).map((l, i) => (
-                  <div key={i} className="text-[10px] text-content-secondary">{l}</div>
-                ))}
-              </div>
-            )}
+						{/* Connection log */}
+						{connectionLog.length > 0 && (
+							<div className="border border-border-dim bg-void p-2 max-h-32 overflow-y-auto">
+								<div className="text-[9px] text-content-dim uppercase mb-1">
+									{tc(lang, "web.connection_log")}
+								</div>
+								{connectionLog.slice(-10).map((l, i) => (
+									<div key={i} className="text-[10px] text-content-secondary">
+										{l}
+									</div>
+								))}
+							</div>
+						)}
 
-            <div className="text-[10px] text-content-dim mt-3">
-              {tc(lang, "web.how_it_works")}
-            </div>
-          </TerminalCard>
+						<div className="text-[10px] text-content-dim mt-3">
+							{tc(lang, "web.how_it_works")}
+						</div>
+					</TerminalCard>
 
-          {/* SAFETY NUMBER PANEL */}
-          {peerStatus === "connected" && peerIdentity && (
-            <TerminalCard title="SAFETY NUMBER — PAIRWISE VERIFICATION" accent="green" className="mb-6">
-              <p className="text-xs text-content-secondary mb-3">
-                This safety number uniquely identifies your connection with this peer.
-                Verify it in person or through a trusted channel to confirm you're talking to the right person.
-              </p>
-              <div className="space-y-2 mb-3">
-                <div className="flex items-center justify-between border border-border-dim bg-void p-2">
-                  <div>
-                    <div className="text-[10px] text-content-dim uppercase tracking-widest">YOUR FINGERPRINT</div>
-                    <div className="text-sm text-terminal-green font-mono mt-1">
-                      {identityRef.current?.fingerprint || "..."}
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-[10px] text-content-dim uppercase tracking-widest">PEER FINGERPRINT</div>
-                    <div className="text-sm text-blood-bright font-mono mt-1">
-                      {peerIdentity.fingerprint}
-                    </div>
-                  </div>
-                </div>
-                <div className="border-2 border-terminal-green bg-terminal-green/5 p-3 text-center">
-                  <div className="text-[10px] text-terminal-green uppercase tracking-widest mb-2">
-                    SAFETY NUMBER
-                  </div>
-                  <div className="text-lg md:text-xl text-terminal-green font-mono font-bold tracking-wider">
-                    {safetyNumber ? safetyNumber.slice(0, 12) : "..."} {safetyNumber ? safetyNumber.slice(12, 24) : "..."} {safetyNumber ? safetyNumber.slice(24, 32) : "..."}
-                  </div>
-                  <div className="text-[9px] text-content-dim mt-2">
-                    Both sides should see the same number. Compare in person to verify authenticity.
-                  </div>
-                </div>
-                <div className="text-[10px] text-content-dim text-center">
-                  Peer: <span className="text-content-secondary">{peerIdentity.handle}</span> ·
-                  Public key: <span className="text-content-secondary font-mono">{peerIdentity.publicKeyHex.slice(0, 16)}...</span>
-                </div>
-              </div>
-            </TerminalCard>
-          )}
+					{/* SAFETY NUMBER GATE (first-run soft block) */}
+					{peerStatus === "connected" &&
+						peerIdentity &&
+						safetyNumber &&
+						identityRef.current && (
+							<SafetyNumberGate
+								localKey={identityRef.current.fingerprint}
+								peerKey={peerIdentity.fingerprint}
+								safetyNumber={safetyNumber}
+								peerLabel={peerIdentity.handle}
+							/>
+						)}
 
-          {/* P2P Chat — only when connected */}
-          <TerminalCard title={`P2P ENCRYPTED CHAT — ${channel}`} className="mb-6">
-            {peerStatus === "connected" ? (
-              <>
-                <div className="h-80 overflow-y-auto bg-void border border-border-dim p-3 mb-3 space-y-1">
-                  {localMessages.length === 0 ? (
-                    <div className="text-xs text-content-dim text-center mt-20">
-                      <span className="cursor-blink">&gt;</span> {tc(lang, "web.channel_open")}
-                    </div>
-                  ) : (
-                    localMessages.map((m) => (
-                      <div key={m.id} className={`text-xs flex items-start gap-2 ${m.self ? "justify-end" : ""}`}>
-                        {!m.self && <span className="text-content-dim shrink-0">[{new Date(m.ts).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false })}]</span>}
-                        <span className={`shrink-0 font-bold ${m.self ? "text-terminal-green" : "text-blood-bright"}`}>
-                          {m.author}:
-                        </span>
-                        <span className={`text-content-primary break-words ${m.self ? "text-right" : ""}`}>{m.text}</span>
-                        {m.sig && (
-                          <span className={`shrink-0 text-[9px] ${m.verified ? "text-terminal-green" : "text-blood-bright"}`} title={m.verified ? "ECDSA signature verified" : "Signature verification failed"}>
-                            {m.verified ? "✓" : "✗"}
-                          </span>
-                        )}
-                        {m.self && <span className="text-content-dim shrink-0">[{new Date(m.ts).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false })}]</span>}
-                      </div>
-                    ))
-                  )}
-                </div>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={input}
-                    onChange={(e) => { setInput(e.target.value); sound.keystroke(); }}
-                    onKeyDown={(e) => e.key === "Enter" && sendP2PMessage()}
-                    placeholder={tc(lang, "web.message_placeholder")}
-                    className="flex-1 bg-void border border-border-dim px-3 py-2 text-xs text-content-primary focus:border-blood focus:outline-none"
-                  />
-                  <button
-                    onClick={sendP2PMessage}
-                    className="px-4 py-2 text-xs border border-blood text-blood-bright hover:bg-blood hover:text-void"
-                  >
-                    {tc(lang, "web.send_btn")}
-                  </button>
-                </div>
-                <div className="text-[10px] text-terminal-green mt-2">
-                  {tc(lang, "web.messages_encrypted")}
-                </div>
-              </>
-            ) : (
-              <div className="py-12 text-center">
-                <div className="text-blood-bright text-sm mb-2">
-                  <span className="cursor-blink">&gt;</span> {tc(lang, "web.no_active_p2p")}
-                </div>
-                <p className="text-xs text-content-dim">
-                  Establish a peer link above to start sending encrypted messages.
-                  No server involved — pure browser-to-browser WebRTC.
-                </p>
-              </div>
-            )}
-          </TerminalCard>
+					{/* SAFETY NUMBER PANEL */}
+					{peerStatus === "connected" && peerIdentity && (
+						<TerminalCard
+							title="SAFETY NUMBER — PAIRWISE VERIFICATION"
+							accent="green"
+							className="mb-6"
+						>
+							<p className="text-xs text-content-secondary mb-3">
+								This safety number uniquely identifies your connection with this
+								peer. Verify it in person or through a trusted channel to
+								confirm you're talking to the right person.
+							</p>
+							<div className="space-y-2 mb-3">
+								<div className="flex items-center justify-between border border-border-dim bg-void p-2">
+									<div>
+										<div className="text-[10px] text-content-dim uppercase tracking-widest">
+											YOUR FINGERPRINT
+										</div>
+										<div className="text-sm text-terminal-green font-mono mt-1">
+											{identityRef.current?.fingerprint || "..."}
+										</div>
+									</div>
+									<div className="text-right">
+										<div className="text-[10px] text-content-dim uppercase tracking-widest">
+											PEER FINGERPRINT
+										</div>
+										<div className="text-sm text-blood-bright font-mono mt-1">
+											{peerIdentity.fingerprint}
+										</div>
+									</div>
+								</div>
+								<div className="border-2 border-terminal-green bg-terminal-green/5 p-3 text-center">
+									<div className="text-[10px] text-terminal-green uppercase tracking-widest mb-2">
+										SAFETY NUMBER
+									</div>
+									<div className="text-lg md:text-xl text-terminal-green font-mono font-bold tracking-wider">
+										{safetyNumber ? safetyNumber.slice(0, 12) : "..."}{" "}
+										{safetyNumber ? safetyNumber.slice(12, 24) : "..."}{" "}
+										{safetyNumber ? safetyNumber.slice(24, 32) : "..."}
+									</div>
+									<div className="text-[9px] text-content-dim mt-2">
+										Both sides should see the same number. Compare in person to
+										verify authenticity.
+									</div>
+								</div>
+								<div className="text-[10px] text-content-dim text-center">
+									Peer:{" "}
+									<span className="text-content-secondary">
+										{peerIdentity.handle}
+									</span>{" "}
+									· Public key:{" "}
+									<span className="text-content-secondary font-mono">
+										{peerIdentity.publicKeyHex.slice(0, 16)}...
+									</span>
+								</div>
+							</div>
+						</TerminalCard>
+					)}
 
-          {/* FILE TRANSFER */}
-          <TerminalCard title="FILE TRANSFER — VFXFILE1" accent="amber" className="mb-6">
-            <p className="text-xs text-content-secondary mb-3">
-              Send files through the live peer channel, chunked and AES-GCM encrypted. The
-              receiver verifies the SHA-256 fingerprint before offering a download.
-            </p>
-            <div className="flex flex-wrap items-center gap-2 mb-3">
-              <input
-                type="file"
-                onChange={(e) => {
-                  setSendFile(e.target.files?.[0] ?? null);
-                  sound.select();
-                }}
-                className="text-[10px] text-content-secondary file:mr-3 file:border file:border-border-dim file:bg-panel file:px-2 file:py-1 file:text-[10px] file:text-content-secondary file:uppercase file:tracking-wider"
-              />
-              <button
-                onClick={() => void sendFileTransfer()}
-                disabled={!sendFile || sending || peerStatus !== "connected"}
-                className="px-3 py-1.5 text-xs border border-blood text-blood-bright hover:bg-blood hover:text-void disabled:opacity-30 disabled:cursor-not-allowed"
-              >
-                {sending ? "SENDING…" : "SEND FILE"}
-              </button>
-              {sendMeta && (
-                <span className="text-[10px] text-content-dim">
-                  {sendMeta.name} · {sendMeta.size.toLocaleString()} B · {sendMeta.chunkCount} chunks
-                </span>
-              )}
-            </div>
-            {sending && (
-              <div className="mb-3">
-                <div className="h-1.5 bg-panel border border-border-dim">
-                  <div
-                    className="h-full bg-blood"
-                    style={{ width: `${sendProgress.total ? Math.round((sendProgress.sent / sendProgress.total) * 100) : 0}%` }}
-                  />
-                </div>
-                <div className="text-[10px] text-content-dim mt-1">
-                  chunk {sendProgress.sent} / {sendProgress.total}
-                </div>
-              </div>
-            )}
-            {peerStatus !== "connected" && (
-              <div className="text-[10px] text-warning-amber mb-3">
-                FILE TRANSFER REQUIRES A LIVE PEER CHANNEL — PAIR FIRST ABOVE.
-              </div>
-            )}
-            {receivedFiles.length > 0 && (
-              <div className="space-y-2">
-                <div className="text-[10px] text-content-dim uppercase tracking-widest">
-                  RECEIVED ({receivedFiles.length})
-                </div>
-                {receivedFiles.slice().reverse().map((rf) => (
-                  <div key={rf.id} className="border border-border-dim bg-void/50 p-2">
-                    <div className="flex items-center justify-between gap-2 flex-wrap">
-                      <span className="text-[10px] text-blood-bright font-bold break-all">{rf.name}</span>
-                      <StatusPill color={rf.verified ? "green" : "blood"}>
-                        {rf.verified ? "SHA-256 OK" : "MISMATCH"}
-                      </StatusPill>
-                    </div>
-                    <div className="text-[10px] text-content-dim mt-1">
-                      {rf.size.toLocaleString()} B · {rf.sha256.slice(0, 16)}
-                    </div>
-                    {rf.verified && (
-                      <div className="flex gap-2 mt-2 flex-wrap">
-                        <button
-                          onClick={() => {
-                            const blob = new Blob([rf.bytes as BlobPart], { type: rf.mime || "application/octet-stream" });
-                            const url = URL.createObjectURL(blob);
-                            const a = document.createElement("a");
-                            a.href = url;
-                            a.download = rf.name;
-                            a.click();
-                            URL.revokeObjectURL(url);
-                            sound.select();
-                          }}
-                          className="px-2 py-1 text-[10px] border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void"
-                        >
-                          DOWNLOAD
-                        </button>
-                        <button
-                          onClick={() => void plantFileDeadDrop(rf, deadDropLat, deadDropLng)}
-                          className="px-2 py-1 text-[10px] border border-warning-amber text-warning-amber hover:bg-warning-amber hover:text-void"
-                        >
-                          PLANT AS DEAD DROP
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-            <div className="text-[10px] text-content-dim mt-3">
-              ▸ DTLS secures the channel; the per-file AES-GCM layer keeps files unreadable at
-              rest inside dead drops. The key travels once, with the transfer.
-            </div>
-          </TerminalCard>
+					{/* P2P Chat — only when connected */}
+					<TerminalCard
+						title={`P2P ENCRYPTED CHAT — ${channel}`}
+						className="mb-6"
+					>
+						{peerStatus === "connected" ? (
+							<>
+								<div className="h-80 overflow-y-auto bg-void border border-border-dim p-3 mb-3 space-y-1">
+									{localMessages.length === 0 ? (
+										<div className="text-xs text-content-dim text-center mt-20">
+											<span className="cursor-blink">&gt;</span>{" "}
+											{tc(lang, "web.channel_open")}
+										</div>
+									) : (
+										localMessages.map((m) => (
+											<div
+												key={m.id}
+												className={`text-xs flex items-start gap-2 ${m.self ? "justify-end" : ""}`}
+											>
+												{!m.self && (
+													<span className="text-content-dim shrink-0">
+														[
+														{new Date(m.ts).toLocaleTimeString("en-US", {
+															hour: "2-digit",
+															minute: "2-digit",
+															hour12: false,
+														})}
+														]
+													</span>
+												)}
+												<span
+													className={`shrink-0 font-bold ${m.self ? "text-terminal-green" : "text-blood-bright"}`}
+												>
+													{m.author}:
+												</span>
+												<span
+													className={`text-content-primary break-words ${m.self ? "text-right" : ""}`}
+												>
+													{m.text}
+												</span>
+												{m.sig && (
+													<span
+														className={`shrink-0 text-[9px] ${m.verified ? "text-terminal-green" : "text-blood-bright"}`}
+														title={
+															m.verified
+																? "ECDSA signature verified"
+																: "Signature verification failed"
+														}
+													>
+														{m.verified ? "✓" : "✗"}
+													</span>
+												)}
+												{m.self && (
+													<span className="text-content-dim shrink-0">
+														[
+														{new Date(m.ts).toLocaleTimeString("en-US", {
+															hour: "2-digit",
+															minute: "2-digit",
+															hour12: false,
+														})}
+														]
+													</span>
+												)}
+											</div>
+										))
+									)}
+								</div>
+								<div className="flex gap-2">
+									<input
+										type="text"
+										value={input}
+										onChange={(e) => {
+											setInput(e.target.value);
+											sound.keystroke();
+										}}
+										onKeyDown={(e) => e.key === "Enter" && sendP2PMessage()}
+										placeholder={tc(lang, "web.message_placeholder")}
+										className="flex-1 bg-void border border-border-dim px-3 py-2 text-xs text-content-primary focus:border-blood focus:outline-none"
+									/>
+									<button
+										onClick={sendP2PMessage}
+										className="px-4 py-2 text-xs border border-blood text-blood-bright hover:bg-blood hover:text-void"
+									>
+										{tc(lang, "web.send_btn")}
+									</button>
+								</div>
+								<div className="text-[10px] text-terminal-green mt-2">
+									{tc(lang, "web.messages_encrypted")}
+								</div>
+							</>
+						) : (
+							<div className="py-12 text-center">
+								<div className="text-blood-bright text-sm mb-2">
+									<span className="cursor-blink">&gt;</span>{" "}
+									{tc(lang, "web.no_active_p2p")}
+								</div>
+								<p className="text-xs text-content-dim">
+									Establish a peer link above to start sending encrypted
+									messages. No server involved — pure browser-to-browser WebRTC.
+								</p>
+							</div>
+						)}
+					</TerminalCard>
 
-          {/* MESH OUTBOX */}
-          <TerminalCard title="MESH OUTBOX — STORE & FORWARD" accent="green" className="mb-6">
-            <p className="text-xs text-content-secondary mb-3">
-              Mail for an offline peer is parked here and rides the mesh: it moves only when peers
-              meet. Nothing is guaranteed — the mesh is best-effort by design.
-            </p>
-            <div className="flex flex-wrap gap-2 mb-2">
-              <input
-                value={meshTo}
-                onChange={(e) => setMeshTo(e.target.value)}
-                placeholder="to handle hash (8 hex)"
-                aria-label="Mesh recipient hash"
-                className="flex-1 min-w-36 bg-void border border-border-dim px-3 py-2 text-xs font-mono text-terminal-green focus:border-terminal-green focus:outline-none"
-              />
-              <input
-                value={meshBody}
-                onChange={(e) => setMeshBody(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && void sendMeshMail()}
-                placeholder="message body"
-                aria-label="Mesh message body"
-                className="flex-[2] min-w-48 bg-void border border-border-dim px-3 py-2 text-xs text-content-primary focus:border-terminal-green focus:outline-none"
-              />
-              <button
-                onClick={() => void sendMeshMail()}
-                disabled={!meshTo.trim() || !meshBody.trim()}
-                className="px-3 py-2 text-xs border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void disabled:opacity-30"
-              >
-                DEPOSIT
-              </button>
-              <button
-                onClick={() => void purgeMesh()}
-                className="px-3 py-2 text-xs border border-border-dim text-content-secondary hover:border-blood hover:text-blood"
-              >
-                PURGE EXPIRED
-              </button>
-            </div>
-            <div className="flex items-center gap-2 text-[10px] text-content-dim mb-2">
-              <StatusPill color={myPeerHash ? "green" : "dim"}>MY HASH {myPeerHash.slice(0, 8) || "…"}</StatusPill>
-              <span>UNDELIVERED: {meshPending.length}</span>
-            </div>
-            {meshPending.length > 0 && (
-              <div className="border border-border-dim bg-void p-2 max-h-32 overflow-y-auto mb-2">
-                {meshPending.slice().reverse().map((m) => (
-                  <div key={m.id} className="text-[10px] text-content-secondary">
-                    {formatMeshMail(m)} — {m.body.slice(0, 60)}
-                  </div>
-                ))}
-              </div>
-            )}
-            {meshLog.length > 0 && (
-              <div className="border border-border-dim bg-void p-2 max-h-24 overflow-y-auto">
-                <div className="text-[9px] text-content-dim uppercase mb-1">MESH LOG</div>
-                {meshLog.map((l, i) => (
-                  <div key={i} className="text-[10px] text-terminal-green">{l}</div>
-                ))}
-              </div>
-            )}
-          </TerminalCard>
+					{/* FILE TRANSFER */}
+					<TerminalCard
+						title="FILE TRANSFER — VFXFILE1"
+						accent="amber"
+						className="mb-6"
+					>
+						<p className="text-xs text-content-secondary mb-3">
+							Send files through the live peer channel, chunked and AES-GCM
+							encrypted. The receiver verifies the SHA-256 fingerprint before
+							offering a download.
+						</p>
+						<div className="flex flex-wrap items-center gap-2 mb-3">
+							<input
+								type="file"
+								onChange={(e) => {
+									setSendFile(e.target.files?.[0] ?? null);
+									sound.select();
+								}}
+								className="text-[10px] text-content-secondary file:mr-3 file:border file:border-border-dim file:bg-panel file:px-2 file:py-1 file:text-[10px] file:text-content-secondary file:uppercase file:tracking-wider"
+							/>
+							<button
+								onClick={() => void sendFileTransfer()}
+								disabled={!sendFile || sending || peerStatus !== "connected"}
+								className="px-3 py-1.5 text-xs border border-blood text-blood-bright hover:bg-blood hover:text-void disabled:opacity-30 disabled:cursor-not-allowed"
+							>
+								{sending ? "SENDING…" : "SEND FILE"}
+							</button>
+							{sendMeta && (
+								<span className="text-[10px] text-content-dim">
+									{sendMeta.name} · {sendMeta.size.toLocaleString()} B ·{" "}
+									{sendMeta.chunkCount} chunks
+								</span>
+							)}
+						</div>
+						{sending && (
+							<div className="mb-3">
+								<div className="h-1.5 bg-panel border border-border-dim">
+									<div
+										className="h-full bg-blood"
+										style={{
+											width: `${sendProgress.total ? Math.round((sendProgress.sent / sendProgress.total) * 100) : 0}%`,
+										}}
+									/>
+								</div>
+								<div className="text-[10px] text-content-dim mt-1">
+									chunk {sendProgress.sent} / {sendProgress.total}
+								</div>
+							</div>
+						)}
+						{peerStatus !== "connected" && (
+							<div className="text-[10px] text-warning-amber mb-3">
+								FILE TRANSFER REQUIRES A LIVE PEER CHANNEL — PAIR FIRST ABOVE.
+							</div>
+						)}
+						{receivedFiles.length > 0 && (
+							<div className="space-y-2">
+								<div className="text-[10px] text-content-dim uppercase tracking-widest">
+									RECEIVED ({receivedFiles.length})
+								</div>
+								{receivedFiles
+									.slice()
+									.reverse()
+									.map((rf) => (
+										<div
+											key={rf.id}
+											className="border border-border-dim bg-void/50 p-2"
+										>
+											<div className="flex items-center justify-between gap-2 flex-wrap">
+												<span className="text-[10px] text-blood-bright font-bold break-all">
+													{rf.name}
+												</span>
+												<StatusPill color={rf.verified ? "green" : "blood"}>
+													{rf.verified ? "SHA-256 OK" : "MISMATCH"}
+												</StatusPill>
+											</div>
+											<div className="text-[10px] text-content-dim mt-1">
+												{rf.size.toLocaleString()} B · {rf.sha256.slice(0, 16)}
+											</div>
+											{rf.verified && (
+												<div className="flex gap-2 mt-2 flex-wrap">
+													<button
+														onClick={() => {
+															const blob = new Blob([rf.bytes as BlobPart], {
+																type: rf.mime || "application/octet-stream",
+															});
+															const url = URL.createObjectURL(blob);
+															const a = document.createElement("a");
+															a.href = url;
+															a.download = rf.name;
+															a.click();
+															URL.revokeObjectURL(url);
+															sound.select();
+														}}
+														className="px-2 py-1 text-[10px] border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void"
+													>
+														DOWNLOAD
+													</button>
+													<button
+														onClick={() =>
+															void plantFileDeadDrop(
+																rf,
+																deadDropLat,
+																deadDropLng,
+															)
+														}
+														className="px-2 py-1 text-[10px] border border-warning-amber text-warning-amber hover:bg-warning-amber hover:text-void"
+													>
+														PLANT AS DEAD DROP
+													</button>
+												</div>
+											)}
+										</div>
+									))}
+							</div>
+						)}
+						<div className="text-[10px] text-content-dim mt-3">
+							▸ DTLS secures the channel; the per-file AES-GCM layer keeps files
+							unreadable at rest inside dead drops. The key travels once, with
+							the transfer.
+						</div>
+					</TerminalCard>
 
-          {/* Dead drops */}
-          <TerminalCard title={tc(lang, "web.dead_drops")} accent="amber" className="mb-6">
-            <p className="text-xs text-content-secondary mb-4">
-              {tc(lang, "web.dead_drops_desc")}
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-3">
-              <input
-                type="number"
-                step="0.0001"
-                value={deadDropLat}
-                onChange={(e) => setDeadDropLat(e.target.value)}
-                placeholder={tc(lang, "web.latitude_ph")}
-                className="bg-void border border-border-dim px-3 py-2 text-xs text-content-primary focus:border-blood focus:outline-none"
-              />
-              <input
-                type="number"
-                step="0.0001"
-                value={deadDropLng}
-                onChange={(e) => setDeadDropLng(e.target.value)}
-                placeholder={tc(lang, "web.longitude_ph")}
-                className="bg-void border border-border-dim px-3 py-2 text-xs text-content-primary focus:border-blood focus:outline-none"
-              />
-              <input
-                type="text"
-                value={deadDropMsg}
-                onChange={(e) => setDeadDropMsg(e.target.value)}
-                placeholder={tc(lang, "web.message_ph")}
-                className="bg-void border border-border-dim px-3 py-2 text-xs text-content-primary focus:border-blood focus:outline-none"
-              />
-            </div>
-            <button
-              onClick={plantDeadDrop}
-              disabled={!deadDropLat || !deadDropLng || !deadDropMsg}
-              className="px-4 py-2 text-xs border border-border-dim text-content-secondary hover:border-blood hover:text-blood disabled:opacity-30"
-            >
-              {tc(lang, "web.plant_dead_drop")}
-            </button>
+					{/* MESH OUTBOX */}
+					<TerminalCard
+						title="MESH OUTBOX — STORE & FORWARD"
+						accent="green"
+						className="mb-6"
+					>
+						<p className="text-xs text-content-secondary mb-3">
+							Mail for an offline peer is parked here and rides the mesh: it
+							moves only when peers meet. Nothing is guaranteed — the mesh is
+							best-effort by design.
+						</p>
+						<div className="flex flex-wrap gap-2 mb-2">
+							<input
+								value={meshTo}
+								onChange={(e) => setMeshTo(e.target.value)}
+								placeholder="to handle hash (8 hex)"
+								aria-label="Mesh recipient hash"
+								className="flex-1 min-w-36 bg-void border border-border-dim px-3 py-2 text-xs font-mono text-terminal-green focus:border-terminal-green focus:outline-none"
+							/>
+							<input
+								value={meshBody}
+								onChange={(e) => setMeshBody(e.target.value)}
+								onKeyDown={(e) => e.key === "Enter" && void sendMeshMail()}
+								placeholder="message body"
+								aria-label="Mesh message body"
+								className="flex-[2] min-w-48 bg-void border border-border-dim px-3 py-2 text-xs text-content-primary focus:border-terminal-green focus:outline-none"
+							/>
+							<button
+								onClick={() => void sendMeshMail()}
+								disabled={!meshTo.trim() || !meshBody.trim()}
+								className="px-3 py-2 text-xs border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void disabled:opacity-30"
+							>
+								DEPOSIT
+							</button>
+							<button
+								onClick={() => void purgeMesh()}
+								className="px-3 py-2 text-xs border border-border-dim text-content-secondary hover:border-blood hover:text-blood"
+							>
+								PURGE EXPIRED
+							</button>
+						</div>
+						<div className="flex items-center gap-2 text-[10px] text-content-dim mb-2">
+							<StatusPill color={myPeerHash ? "green" : "dim"}>
+								MY HASH {myPeerHash.slice(0, 8) || "…"}
+							</StatusPill>
+							<span>UNDELIVERED: {meshPending.length}</span>
+						</div>
+						{meshPending.length > 0 && (
+							<div className="border border-border-dim bg-void p-2 max-h-32 overflow-y-auto mb-2">
+								{meshPending
+									.slice()
+									.reverse()
+									.map((m) => (
+										<div
+											key={m.id}
+											className="text-[10px] text-content-secondary"
+										>
+											{formatMeshMail(m)} — {m.body.slice(0, 60)}
+										</div>
+									))}
+							</div>
+						)}
+						{meshLog.length > 0 && (
+							<div className="border border-border-dim bg-void p-2 max-h-24 overflow-y-auto">
+								<div className="text-[9px] text-content-dim uppercase mb-1">
+									MESH LOG
+								</div>
+								{meshLog.map((l, i) => (
+									<div key={i} className="text-[10px] text-terminal-green">
+										{l}
+									</div>
+								))}
+							</div>
+						)}
+					</TerminalCard>
 
-            {deadDrops.length > 0 && (
-              <div className="mt-4 space-y-2">
-                <div className="text-[10px] text-content-dim uppercase tracking-widest">
-                  LOCAL DEAD DROPS ({deadDrops.length})
-                </div>
-                {deadDrops.slice().reverse().map((d) => (
-                  <div key={d.id} className="border border-border-dim bg-void/50 p-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] text-blood-bright font-bold">{d.author}</span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] text-content-dim">{new Date(d.ts).toISOString().slice(0, 16).replace("T", " ")}</span>
-                        <button
-                          onClick={() => removeDeadDrop(d.id)}
-                          className="text-[10px] text-content-dim hover:text-blood"
-                        >
-                          [×]
-                        </button>
-                      </div>
-                    </div>
-                    <div className="text-[10px] text-terminal-green mt-1">
-                      {d.lat}, {d.lng}
-                    </div>
-                    {d.kind === "file" ? (
-                      <FileDropRow drop={d} />
-                    ) : (
-                      <DecryptedDrop drop={d} decrypt={decryptMsg} />
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </TerminalCard>
-        </>
-      )}
-    </div>
-  );
+					{/* Dead drops */}
+					<TerminalCard
+						title={tc(lang, "web.dead_drops")}
+						accent="amber"
+						className="mb-6"
+					>
+						<p className="text-xs text-content-secondary mb-4">
+							{tc(lang, "web.dead_drops_desc")}
+						</p>
+						<div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-3">
+							<input
+								type="number"
+								step="0.0001"
+								value={deadDropLat}
+								onChange={(e) => setDeadDropLat(e.target.value)}
+								placeholder={tc(lang, "web.latitude_ph")}
+								className="bg-void border border-border-dim px-3 py-2 text-xs text-content-primary focus:border-blood focus:outline-none"
+							/>
+							<input
+								type="number"
+								step="0.0001"
+								value={deadDropLng}
+								onChange={(e) => setDeadDropLng(e.target.value)}
+								placeholder={tc(lang, "web.longitude_ph")}
+								className="bg-void border border-border-dim px-3 py-2 text-xs text-content-primary focus:border-blood focus:outline-none"
+							/>
+							<input
+								type="text"
+								value={deadDropMsg}
+								onChange={(e) => setDeadDropMsg(e.target.value)}
+								placeholder={tc(lang, "web.message_ph")}
+								className="bg-void border border-border-dim px-3 py-2 text-xs text-content-primary focus:border-blood focus:outline-none"
+							/>
+						</div>
+						<button
+							onClick={plantDeadDrop}
+							disabled={!deadDropLat || !deadDropLng || !deadDropMsg}
+							className="px-4 py-2 text-xs border border-border-dim text-content-secondary hover:border-blood hover:text-blood disabled:opacity-30"
+						>
+							{tc(lang, "web.plant_dead_drop")}
+						</button>
+
+						{deadDrops.length > 0 && (
+							<div className="mt-4 space-y-2">
+								<div className="text-[10px] text-content-dim uppercase tracking-widest">
+									LOCAL DEAD DROPS ({deadDrops.length})
+								</div>
+								{deadDrops
+									.slice()
+									.reverse()
+									.map((d) => (
+										<div
+											key={d.id}
+											className="border border-border-dim bg-void/50 p-2"
+										>
+											<div className="flex items-center justify-between">
+												<span className="text-[10px] text-blood-bright font-bold">
+													{d.author}
+												</span>
+												<div className="flex items-center gap-2">
+													<span className="text-[10px] text-content-dim">
+														{new Date(d.ts)
+															.toISOString()
+															.slice(0, 16)
+															.replace("T", " ")}
+													</span>
+													<button
+														onClick={() => removeDeadDrop(d.id)}
+														className="text-[10px] text-content-dim hover:text-blood"
+													>
+														[×]
+													</button>
+												</div>
+											</div>
+											<div className="text-[10px] text-terminal-green mt-1">
+												{d.lat}, {d.lng}
+											</div>
+											{d.kind === "file" ? (
+												<FileDropRow drop={d} />
+											) : (
+												<DecryptedDrop drop={d} decrypt={decryptMsg} />
+											)}
+										</div>
+									))}
+							</div>
+						)}
+					</TerminalCard>
+				</>
+			)}
+		</div>
+	);
 }
 
 /* Decrypts a dead drop message on render. Shows placeholder while encrypted. */
 function DecryptedDrop({
-  drop,
-  decrypt,
+	drop,
+	decrypt,
 }: {
-  drop: DeadDrop;
-  decrypt: (enc: string, iv: string) => Promise<string | null>;
+	drop: DeadDrop;
+	decrypt: (enc: string, iv: string) => Promise<string | null>;
 }) {
-  const [text, setText] = useState(drop.msg);
-  useEffect(() => {
-    if (drop.enc && drop.iv) {
-      decrypt(drop.enc, drop.iv).then((pt) => {
-        if (pt) setText(pt);
-      });
-    }
-  }, [drop.enc, drop.iv, decrypt]);
-  return <div className="text-xs text-content-primary mt-1">{text}</div>;
+	const [text, setText] = useState(drop.msg);
+	useEffect(() => {
+		if (drop.enc && drop.iv) {
+			decrypt(drop.enc, drop.iv).then((pt) => {
+				if (pt) setText(pt);
+			});
+		}
+	}, [drop.enc, drop.iv, decrypt]);
+	return <div className="text-xs text-content-primary mt-1">{text}</div>;
 }
 
 /* Renders a file dead drop with key-gated unlock + download. */
 function FileDropRow({ drop }: { drop: DeadDrop }) {
-  const [key, setKey] = useState("");
-  const [bytes, setBytes] = useState<Uint8Array | null>(null);
-  const [unlocking, setUnlocking] = useState(false);
+	const [key, setKey] = useState("");
+	const [bytes, setBytes] = useState<Uint8Array | null>(null);
+	const [unlocking, setUnlocking] = useState(false);
 
-  const download = () => {
-    if (!bytes || !drop.fileMeta) return;
-    const blob = new Blob([bytes as BlobPart], { type: drop.fileMeta.mime || "application/octet-stream" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = drop.fileMeta.name;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
+	const download = () => {
+		if (!bytes || !drop.fileMeta) return;
+		const blob = new Blob([bytes as BlobPart], {
+			type: drop.fileMeta.mime || "application/octet-stream",
+		});
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement("a");
+		a.href = url;
+		a.download = drop.fileMeta.name;
+		a.click();
+		URL.revokeObjectURL(url);
+	};
 
-  const unlock = async () => {
-    if (!drop.payloadChunksB64 || !drop.keyB64) return;
-    setUnlocking(true);
-    try {
-      const rec = {
-        payloadChunksB64: drop.payloadChunksB64,
-        keyB64: drop.keyB64,
-      } as Parameters<typeof decryptDeadDropFile>[0];
-      const plain = await decryptDeadDropFile(rec);
-      setBytes(plain);
-      sound.success();
-    } catch {
-      sound.error();
-    } finally {
-      setUnlocking(false);
-    }
-  };
+	const unlock = async () => {
+		if (!drop.payloadChunksB64 || !drop.keyB64) return;
+		setUnlocking(true);
+		try {
+			const rec = {
+				payloadChunksB64: drop.payloadChunksB64,
+				keyB64: drop.keyB64,
+			} as Parameters<typeof decryptDeadDropFile>[0];
+			const plain = await decryptDeadDropFile(rec);
+			setBytes(plain);
+			sound.success();
+		} catch {
+			sound.error();
+		} finally {
+			setUnlocking(false);
+		}
+	};
 
-  return (
-    <div className="mt-1 space-y-1">
-      <div className="flex items-center gap-2">
-        <StatusPill color={bytes ? "green" : "amber"}>{bytes ? "UNLOCKED" : "LOCKED"}</StatusPill>
-        <span className="text-[10px] text-content-dim">
-          {drop.fileMeta?.size.toLocaleString()} bytes · sha256 {drop.fileMeta?.sha256.slice(0, 12)}
-        </span>
-      </div>
-      {!bytes && (
-        <div className="flex gap-2">
-          <input
-            value={key}
-            onChange={(e) => setKey(e.target.value)}
-            placeholder="dead-drop key (base64)"
-            className="flex-1 min-w-0 bg-void border border-border-dim px-2 py-1 text-[10px] font-mono text-content-primary focus:border-terminal-green focus:outline-none"
-          />
-          <button
-            onClick={unlock}
-            disabled={unlocking}
-            className="px-2 py-1 text-[10px] border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void disabled:opacity-30"
-          >
-            {unlocking ? "…" : "UNLOCK"}
-          </button>
-        </div>
-      )}
-      {bytes && (
-        <button
-          onClick={download}
-          className="px-2 py-1 text-[10px] border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void"
-        >
-          DOWNLOAD {drop.fileMeta?.name}
-        </button>
-      )}
-    </div>
-  );
+	return (
+		<div className="mt-1 space-y-1">
+			<div className="flex items-center gap-2">
+				<StatusPill color={bytes ? "green" : "amber"}>
+					{bytes ? "UNLOCKED" : "LOCKED"}
+				</StatusPill>
+				<span className="text-[10px] text-content-dim">
+					{drop.fileMeta?.size.toLocaleString()} bytes · sha256{" "}
+					{drop.fileMeta?.sha256.slice(0, 12)}
+				</span>
+			</div>
+			{!bytes && (
+				<div className="flex gap-2">
+					<input
+						value={key}
+						onChange={(e) => setKey(e.target.value)}
+						placeholder="dead-drop key (base64)"
+						className="flex-1 min-w-0 bg-void border border-border-dim px-2 py-1 text-[10px] font-mono text-content-primary focus:border-terminal-green focus:outline-none"
+					/>
+					<button
+						onClick={unlock}
+						disabled={unlocking}
+						className="px-2 py-1 text-[10px] border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void disabled:opacity-30"
+					>
+						{unlocking ? "…" : "UNLOCK"}
+					</button>
+				</div>
+			)}
+			{bytes && (
+				<button
+					onClick={download}
+					className="px-2 py-1 text-[10px] border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-void"
+				>
+					DOWNLOAD {drop.fileMeta?.name}
+				</button>
+			)}
+		</div>
+	);
 }
 
 function bytesToB64(bytes: Uint8Array): string {
-  let binary = "";
-  const chunk = 0x8000;
-  for (let i = 0; i < bytes.length; i += chunk) {
-    binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
-  }
-  return btoa(binary);
+	let binary = "";
+	const chunk = 0x8000;
+	for (let i = 0; i < bytes.length; i += chunk) {
+		binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+	}
+	return btoa(binary);
 }

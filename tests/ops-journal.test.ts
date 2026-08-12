@@ -71,8 +71,8 @@ describe("ops-journal.ts — Journal Management", () => {
     expect(journal.lastUpdated).toBeGreaterThan(0);
   });
 
-  it("should persist journal to localStorage", () => {
-    logEvent({
+  it("should persist journal to localStorage", async () => {
+    await logEvent({
       type: "custom",
       title: "Test event",
     });
@@ -84,8 +84,8 @@ describe("ops-journal.ts — Journal Management", () => {
     expect(parsed.events).toHaveLength(1);
   });
 
-  it("should clear journal events", () => {
-    logEvent({
+  it("should clear journal events", async () => {
+    await logEvent({
       type: "custom",
       title: "Test event",
     });
@@ -96,8 +96,8 @@ describe("ops-journal.ts — Journal Management", () => {
     expect(journal.events).toEqual([]);
   });
 
-  it("should delete journal entirely", () => {
-    logEvent({
+  it("should delete journal entirely", async () => {
+    await logEvent({
       type: "custom",
       title: "Test event",
     });
@@ -118,8 +118,8 @@ describe("ops-journal.ts — Event Logging", () => {
     localStorage.clear();
   });
 
-  it("should log a basic event", () => {
-    logEvent({
+  it("should log a basic event", async () => {
+    await logEvent({
       type: "custom",
       title: "Test event",
       details: { test: "data" },
@@ -136,18 +136,18 @@ describe("ops-journal.ts — Event Logging", () => {
     expect(event.timestamp).toBeGreaterThan(0);
   });
 
-  it("should generate unique IDs for events", () => {
-    logEvent({ type: "custom", title: "Event 1" });
-    logEvent({ type: "custom", title: "Event 2" });
+  it("should generate unique IDs for events", async () => {
+    await logEvent({ type: "custom", title: "Event 1" });
+    await logEvent({ type: "custom", title: "Event 2" });
 
     const journal = getOpsJournal();
     expect(journal.events[0].id).not.toBe(journal.events[1].id);
   });
 
-  it("should limit journal to 1000 events", () => {
+  it("should limit journal to 1000 events", async () => {
     // Add 1001 events
     for (let i = 0; i < 1001; i++) {
-      logEvent({
+      await logEvent({
         type: "custom",
         title: `Event ${i}`,
       });
@@ -157,8 +157,8 @@ describe("ops-journal.ts — Event Logging", () => {
     expect(journal.events.length).toBe(1000);
   });
 
-  it("should log persona selection", () => {
-    logPersonaSelected("journalist", "Journalist");
+  it("should log persona selection", async () => {
+    await logPersonaSelected("journalist", "Journalist");
 
     const journal = getOpsJournal();
     expect(journal.events).toHaveLength(1);
@@ -168,8 +168,8 @@ describe("ops-journal.ts — Event Logging", () => {
     expect(event.personaId).toBe("journalist");
   });
 
-  it("should log identity creation", () => {
-    logIdentityCreated("V-ABCD-1234");
+  it("should log identity creation", async () => {
+    await logIdentityCreated("V-ABCD-1234");
 
     const journal = getOpsJournal();
     expect(journal.events).toHaveLength(1);
@@ -179,8 +179,8 @@ describe("ops-journal.ts — Event Logging", () => {
     expect(event.title).toContain("V-ABCD-1234");
   });
 
-  it("should log mission start", () => {
-    logMissionStarted("establish_identity", "Establish Your Identity");
+  it("should log mission start", async () => {
+    await logMissionStarted("establish_identity", "Establish Your Identity");
 
     const journal = getOpsJournal();
     expect(journal.events).toHaveLength(1);
@@ -190,8 +190,8 @@ describe("ops-journal.ts — Event Logging", () => {
     expect(event.missionId).toBe("establish_identity");
   });
 
-  it("should log page visit", () => {
-    logPageVisited("/the-trail", "The Trail");
+  it("should log page visit", async () => {
+    await logPageVisited("/the-trail", "The Trail");
 
     const journal = getOpsJournal();
     expect(journal.events).toHaveLength(1);
@@ -203,13 +203,13 @@ describe("ops-journal.ts — Event Logging", () => {
 });
 
 describe("ops-journal.ts — Event Querying", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     localStorage.clear();
 
     // Add test events
-    logEvent({ type: "custom", title: "Event 1" });
-    logEvent({ type: "page_visited", title: "Visited page", route: "/test" });
-    logEvent({ type: "custom", title: "Event 2" });
+    await logEvent({ type: "custom", title: "Event 1" });
+    await logEvent({ type: "page_visited", title: "Visited page", route: "/test" });
+    await logEvent({ type: "custom", title: "Event 2" });
   });
 
   afterEach(() => {
@@ -224,8 +224,8 @@ describe("ops-journal.ts — Event Querying", () => {
     expect(pageEvents).toHaveLength(1);
   });
 
-  it("should get events by mission ID", () => {
-    logMissionStarted("establish_identity", "Test Mission");
+  it("should get events by mission ID", async () => {
+    await logMissionStarted("establish_identity", "Test Mission");
 
     const missionEvents = getEventsByMission("establish_identity");
     expect(missionEvents.length).toBeGreaterThan(0);
@@ -254,15 +254,15 @@ describe("ops-journal.ts — Event Querying", () => {
 });
 
 describe("ops-journal.ts — Statistics", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     localStorage.clear();
 
     // Add test events
-    logEvent({ type: "custom", title: "Event 1" });
-    logEvent({ type: "custom", title: "Event 2" });
-    logEvent({ type: "page_visited", title: "Visited page", route: "/test" });
-    logEvent({ type: "page_visited", title: "Visited page", route: "/test" });
-    logEvent({ type: "mission_completed", title: "Mission done" });
+    await logEvent({ type: "custom", title: "Event 1" });
+    await logEvent({ type: "custom", title: "Event 2" });
+    await logEvent({ type: "page_visited", title: "Visited page", route: "/test" });
+    await logEvent({ type: "page_visited", title: "Visited page", route: "/test" });
+    await logEvent({ type: "mission_completed", title: "Mission done" });
   });
 
   afterEach(() => {
@@ -304,8 +304,8 @@ describe("ops-journal.ts — Export/Import", () => {
     localStorage.clear();
   });
 
-  it("should export journal as JSON", () => {
-    logEvent({ type: "custom", title: "Test event" });
+  it("should export journal as JSON", async () => {
+    await logEvent({ type: "custom", title: "Test event" });
 
     const exported = exportOpsJournal();
     expect(exported).toBeTruthy();

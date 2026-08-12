@@ -178,9 +178,22 @@ def main():
         cmd_list()
     elif cmd == "diff":
         if len(sys.argv) < 4:
-            print("Usage: python3 scripts/snapshot.py diff <old_date> <new_date>")
-            return
-        cmd_diff(sys.argv[2], sys.argv[3])
+            # Default: diff the two most recent snapshots.
+            snaps = sorted(
+                [p.name for p in snapshots_dir().glob("world_backbone_*.json")]
+            )
+            # extract date portion
+            dates = [
+                p.replace("world_backbone_", "").replace(".json", "") for p in snaps
+            ]
+            if len(dates) < 2:
+                print("Need at least two snapshots to diff. Run 'snapshot save' twice.")
+                return
+            old_date, new_date = dates[-2], dates[-1]
+            print(f"Auto-diffing the two latest snapshots: {old_date} → {new_date}")
+            cmd_diff(old_date, new_date)
+        else:
+            cmd_diff(sys.argv[2], sys.argv[3])
     else:
         print(f"Unknown command: {cmd}")
         print(__doc__)

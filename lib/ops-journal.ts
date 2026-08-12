@@ -10,7 +10,6 @@
 
 import type { PersonaId } from "./personas";
 import type { MissionId } from "./missions";
-import type { Persona } from "./personas";
 
 /* ═══════════════════════════════════════════════════════════════
    Types
@@ -96,7 +95,7 @@ const OPS_JOURNAL_STORAGE_KEY = "vfx_ops_journal";
  * Creates a new journal if none exists.
  */
 export function getOpsJournal(): OpsJournal {
-  if (typeof window === "undefined") {
+  if (typeof localStorage === "undefined") {
     return {
       events: [],
       createdAt: Date.now(),
@@ -140,8 +139,8 @@ function createOpsJournal(): OpsJournal {
 /**
  * Save the ops journal to localStorage.
  */
-function saveOpsJournal(journal: OpsJournal): void {
-  if (typeof window === "undefined") return;
+export function saveOpsJournal(journal: OpsJournal): void {
+  if (typeof localStorage === "undefined") return;
 
   try {
     journal.lastUpdated = Date.now();
@@ -456,7 +455,7 @@ export function clearOpsJournal(): void {
  * This cannot be undone.
  */
 export function deleteOpsJournal(): void {
-  if (typeof window === "undefined") return;
+  if (typeof localStorage === "undefined") return;
   localStorage.removeItem(OPS_JOURNAL_STORAGE_KEY);
 }
 

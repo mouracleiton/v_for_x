@@ -239,7 +239,7 @@ export async function rotateIdentity(): Promise<Identity> {
 /**
  * Save an identity to the history for grace period verification.
  */
-async function saveIdentityToHistory(identity: Identity): Promise<void> {
+export async function saveIdentityToHistory(identity: Identity): Promise<void> {
   const history = await loadPreviousIdentities();
 
   const entry: IdentityHistoryEntry = {
@@ -279,7 +279,6 @@ export async function loadPreviousIdentities(): Promise<IdentityHistoryEntry[]> 
 
   try {
     const historyData = JSON.parse(stored);
-    const now = Date.now();
 
     const entries: IdentityHistoryEntry[] = [];
 
@@ -313,10 +312,9 @@ export async function loadPreviousIdentities(): Promise<IdentityHistoryEntry[]> 
           rotatedAt: data.rotatedAt,
           gracePeriodUntil: data.gracePeriodUntil,
         });
-      } catch {
-        // Skip corrupted entry
-        continue;
-      }
+          } catch {
+            // Skip a corrupted individual history entry; keep the rest.
+          }
     }
 
     // Sort by rotatedAt descending (most recent first)
@@ -801,7 +799,7 @@ export async function signMirrorClaimWithIdentity(
     buildVersion?: string;
   }
 ): Promise<import("./mirror").MirrorNode> {
-  const { createMirrorClaim, MIRROR_KIT_VERSION } = await import("./mirror");
+  const { MIRROR_KIT_VERSION } = await import("./mirror");
 
   // Create a mirror-compatible keypair from the identity
   const pubRaw = await crypto.subtle.exportKey("spki", identity.publicKey);
@@ -811,12 +809,6 @@ export async function signMirrorClaimWithIdentity(
   const pubHashBuf = await crypto.subtle.digest("SHA-256", pubRaw);
   const pubHashHex = bytesToHex(new Uint8Array(pubHashBuf));
   const handle = `V-${pubHashHex.slice(0, 4)}-${pubHashHex.slice(4, 8)}`;
-
-  const mirrorKey = {
-    publicKey: publicKeyBase64,
-    privateKey: "", // We'll sign directly using identity.privateKey
-    handle,
-  };
 
   // Create the claim content
   const ts = Date.now();

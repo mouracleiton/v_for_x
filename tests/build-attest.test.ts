@@ -170,7 +170,7 @@ describe("Build Attestation", () => {
       };
 
       const badge = getBuildStatusBadge(result);
-      expect(badge.color).toBe("red");
+      expect(badge.color).toBe("blood");
       expect(badge.text).toBe("TAMPERED");
     });
 
@@ -184,7 +184,7 @@ describe("Build Attestation", () => {
       };
 
       const badge = getBuildStatusBadge(result);
-      expect(badge.color).toBe("red");
+      expect(badge.color).toBe("blood");
       expect(badge.text).toBe("INVALID SIG");
     });
 

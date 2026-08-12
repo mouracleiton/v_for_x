@@ -41,3 +41,21 @@ yarn-error.log*
 next-env.d.ts
 *.pyc
 __pycache__/
+
+# Ruflo local secrets and runtime data
+.env
+.env.local
+.env.*.local
+.claude-flow/
+# Local Pi runtime state
+.atl/
+
+# AI agent runtime state (tooling, not project code)
+.agents/
+.claude/
+.pi-subagents/
+.swarm/
+.mcp.json
+
+# Local binary data caches (vector index, not source)
+*.db

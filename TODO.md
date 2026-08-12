@@ -2,12 +2,12 @@
 
 ## Completed Phases
 
-- [ ] Phase 1: Quick wins (stability, CI, test coverage)
-- [ ] Phase 2: Core promise (ECDSA signing, DAG ledger, ZK proofs)
-- [ ] Phase 3: Hardening (security headers, SW purge, build pipeline)
-- [ ] Phase 4: On-device semantic oracle (transformers.js, vector index)
-- [ ] Phase 5: Distributed event mapping (The Chronicle)
-- [ ] Phase 6: The Classifier (on-device document triage)
+- [x] Phase 1: Quick wins (stability, CI, test coverage)
+- [x] Phase 2: Core promise (ECDSA signing, DAG ledger, ZK proofs)
+- [x] Phase 3: Hardening (security headers, SW purge, build pipeline)
+- [x] Phase 4: On-device semantic oracle (transformers.js, vector index)
+- [x] Phase 5: Distributed event mapping (The Chronicle)
+- [x] Phase 6: The Classifier (on-device document triage)
 - [ ] Phase 7: Module connections + crypto identity + new directions
 
 ## Phase 7 Details (Latest Sprint)
@@ -91,7 +91,7 @@
 
 ## Test Coverage: 1251 tests across 64 files
 
-## Phase 9 — Reach, Trust & Resilience Sprint
+## Phase 9 — Reach, Trust &amp; Resilience Sprint
 
 ### Automatic Dead Man's Switch (The Guardian)
 
@@ -127,7 +127,7 @@
 ### i18n: Persian + Urdu, RTL everywhere
 
 - [x] Lang extended to 12 (fa/ur); NAV_T + SECTION_DESC complete; hreflang/og/Intl locales
-- [x] Content dictionaries typed Partial<Record<Lang,…>> with en fallback; isRTL routed through setLang
+- [x] Content dictionaries typed Partial&lt;Record&lt;Lang,…&gt;&gt; with en fallback; isRTL routed through setLang
 - [x] dir-aware CSS in globals.css (text, inputs, terminal cards; data blocks stay LTR)
 - [x] Tests: tests/i18n.test.ts (6)
 
@@ -154,7 +154,7 @@
 - [x] [ CARD ] button in ShareableStat → 1200×630 PNG download + navigator.share
 - [x] Tests: tests/stat-card.test.ts (29)
 
-## Test Coverage: 1445 tests across 74 files
+## Test Coverage: 2400 passing tests across 107 files
 
 ## Phase 10 — Operable Cell Foundation (partial ship)
 
@@ -218,75 +218,75 @@ Prioritize work that completes **See → Understand → Act → Hold → Coordin
 
 ## Phase 12 — Operable mesh (The Web v2)
 
-- [ ] Multi-peer mesh graph UI (presence, hop count, last-seen) — `lib/mesh-presence.ts` + MESH PRESENCE card on `/the-web`
-- [ ] Group ratchet / sender keys for rooms — `initSenderKey` / `senderEncrypt` / `senderDecrypt` in `lib/ratchet.ts`
-- [ ] Message receipts + delivery states over DataChannel — `lib/message-receipts.ts` (✓/✓✓ on self messages)
+- [x] Multi-peer mesh graph UI (presence, hop count, last-seen) — `lib/mesh-presence.ts` + MESH PRESENCE card on `/the-web`
+- [x] Group ratchet / sender keys for rooms — `initSenderKey` / `senderEncrypt` / `senderDecrypt` in `lib/ratchet.ts`
+- [x] Message receipts + delivery states over DataChannel — `lib/message-receipts.ts` (✓/✓✓ on self messages)
 - [ ] Reconnect/backoff + ICE restart without losing room code — `lib/webrtc-reconnect.ts` + ICE RESTART btn / auto on disconnect
 - [ ] Voice notes: record → chunk encrypt (`VFXFILE1`) → peer/dead-drop (lib/voice-notes + recorder in Web)
-- [ ] Bind CRDT Docs to Web room id — `vfx-docs-room` localStorage when room set (auto-sync when peers meet still open)
+- [x] Bind CRDT Docs to Web room id — `vfx-docs-room` localStorage when room set (auto-sync when peers meet still open)
 - [ ] Quorum ballots cast inside Web room tokens
 - [ ] Action Network circles → auto-create Web room + Docs stub
 - [ ] Tor-friendly TURN documentation + optional user-supplied TURN only (footer note on `/the-web`; no hosted TURN)
-- [ ] Sealed-sender style metadata minimization — `sealSender` / `createSealedMail` in `lib/mesh-store.ts`
-- [ ] Tests: `tests/phase12-mesh.test.ts`
+- [x] Sealed-sender style metadata minimization — `sealSender` / `createSealedMail` in `lib/mesh-store.ts`
+- [x] Tests: `tests/phase12-mesh.test.ts` + `tests/phase12b-mesh.test.ts` (message receipts, sealed-sender)
 
 ## Phase 13 — Verifiable public record
 
-- [ ] OpenTimestamps / external beacon hooks for Witness + Evidence roots (`lib/opentimestamps.ts` VFXOTS1 + Receipts export stamp)
-- [ ] Cosign / minisign signed `out/` builds + in-app “is this build authentic?” (`lib/build-attest.ts`, `scripts/write_build_attest.py`, Receipts card)
-- [ ] Cross-mirror consensus auto-feed from Mirror Ring hosts (fetch root when online) (`lib/mirror-feed.ts` + Consensus AUTO-FEED)
-- [ ] Supply-chain: SBOM artifact + dependency pin audit in CI (`scripts/sbom-audit.sh` + CI step)
-- [ ] Data freshness dashboard (last-updated per dimension/source on Briefing) (`lib/data-freshness.ts` strip)
-- [ ] Registry Safety engine mounted on real dossier pages (not only /the-missions demo)
-- [ ] Corrections → dossier amend → signed errata chain visible on dossier
-- [ ] Dispute workflow: counter-dossier link + threshold unpublish locally (`lib/dispute.ts` VFXDSP1)
-- [ ] Reputation decay for blinded reviews over time (`reviewDecayWeight` / `weightedAggregateReviews`)
-- [ ] `VFXRFC1` signed RFC / governance proposals via Witness (`lib/rfc.ts` + Receipts card)
-- [ ] Tests: `tests/phase13-record.test.ts`
+- [x] OpenTimestamps / external beacon hooks for Witness + Evidence roots (`lib/opentimestamps.ts` VFXOTS1 + Receipts export stamp)
+- [x] Cosign / minisign signed `out/` builds + in-app “is this build authentic?” (`lib/build-attest.ts`, `scripts/write_build_attest.py`, Receipts card)
+- [x] Cross-mirror consensus auto-feed from Mirror Ring hosts (fetch root when online) (`lib/mirror-feed.ts` + Consensus AUTO-FEED)
+- [x] Supply-chain: SBOM artifact + dependency pin audit in CI (`scripts/sbom-audit.sh` + CI step)
+- [x] Data freshness dashboard (last-updated per dimension/source on Briefing) (`lib/data-freshness.ts` strip)
+- [x] Registry Safety engine mounted on real dossier pages (not only /the-missions demo)
+- [x] Corrections → dossier amend → signed errata chain visible on dossier
+- [x] Dispute workflow: counter-dossier link + threshold unpublish locally (`lib/dispute.ts` VFXDSP1)
+- [x] Reputation decay for blinded reviews over time (`reviewDecayWeight` / `weightedAggregateReviews`)
+- [x] `VFXRFC1` signed RFC / governance proposals via Witness (`lib/rfc.ts` + Receipts card)
+- [x] Tests: `tests/phase13-record.test.ts`
 
 ## Phase 14 — Living data moat
 
-- [ ] Leaflet subnational choropleth on Sorrow Map (reuse `subnational_boundaries.json`) — SubnationalMap drill-down + ISO chips on /sorrow-map; /the-subnational link
-- [ ] Country dossier section: Flows (arms/sanctions/aid) + top vulnerable regions — CountryDetail `FLOWS & VULNERABLE REGIONS`
-- [ ] Snapshot diffs productized: `lib/snapshot-diff.ts` + `npm run snapshot` / `snapshot:summary` / `snapshot:list` + script summary-diff
+- [x] Leaflet subnational choropleth on Sorrow Map (reuse `subnational_boundaries.json`) — SubnationalMap drill-down + ISO chips on /sorrow-map; /the-subnational link
+- [x] Country dossier section: Flows (arms/sanctions/aid) + top vulnerable regions — CountryDetail `FLOWS & VULNERABLE REGIONS`
+- [x] Snapshot diffs productized: `lib/snapshot-diff.ts` + `npm run snapshot` / `snapshot:summary` / `snapshot:list` + script summary-diff
 - [ ] Expand `crisis_timelines.json` via `expand_timelines.py` — runner notes + `npm run expand-timelines` (idempotent local merge)
 - [ ] Run/enrich OWID (`fetch_owid.py`) — offline stub dataset + index so `/the-world-data` renders; docs for full fetch
 - [ ] EJAtlas conflict detail routes — `/the-ejatlas` + `/the-ejatlas/[id]` from top-conflict index (~891)
-- [ ] Time-series fields on backbone for Forecast/Domino/Oracle “getting worse?”
-- [ ] Crisis packs (`VFXPACK1` kind=manifest) — `createCrisisManifestPack` / `readCrisisManifest` in lib/vfxpack.ts
-- [ ] Source-grade metadata on backbone metrics — `lib/metric-meta.ts` (seed set + footnotes on dossier)
-- [ ] Nexus path-finder UI (“degrees from shell X”) + export evidence — `lib/nexus-path.ts` + /the-nexus panel
-- [ ] Roster skills taxonomy + geo radius + vouch graph — `lib/roster-skills.ts` + /the-roster panel
+- [x] Time-series fields on backbone for Forecast/Domino/Oracle “getting worse?” — `lib/timeseries-trend.ts` (classifyTrend, regressionSlope, volatility, polarity-aware worsening/improving/stable/volatile/insufficient) + `tests/timeseries-trend.test.ts` (13)
+- [x] Crisis packs (`VFXPACK1` kind=manifest) — `createCrisisManifestPack` / `readCrisisManifest` in lib/vfxpack.ts
+- [x] Source-grade metadata on backbone metrics — `lib/metric-meta.ts` (seed set + footnotes on dossier)
+- [x] Nexus path-finder UI (“degrees from shell X”) + export evidence — `lib/nexus-path.ts` + /the-nexus panel
+- [x] Roster skills taxonomy + geo radius + vouch graph — `lib/roster-skills.ts` + /the-roster panel
 - [ ] Relationships graph force-layout page (or embed in Nexus)
 - [ ] Mental health / backbone enrich scripts scheduled in CI with dry-run PRs
-- [ ] Tests: snapshot-diff, metric-meta, nexus-path, roster-skills, ejatlas-index, vfxpack crisis manifest
+- [x] Tests: snapshot-diff, metric-meta, nexus-path, roster-skills, ejatlas-index, vfxpack crisis manifest (`tests/phase14-data.test.ts`)
 
-## Phase 15 — Trail & mutual aid that works offline
+## Phase 15 — Trail &amp; mutual aid that works offline
 
-- [ ] Auto-match needs↔offers by geo/category/tags — `lib/trail-match.ts` + /the-trail AUTO-MATCH
-- [ ] Signed fulfillment receipts → Witness/DAG — `lib/fulfillment.ts` (VFXFUL1) + DAG append on fulfill
-- [ ] QR handoff of Trail entries via Relay segments — `lib/trail-relay.ts` (VFXTRL1 + segmentForQR)
-- [ ] N-of-M convoy escrow for delivery coords (The Convoy) — `lib/convoy.ts` Shamir GF(256) VFXCNV1
-- [ ] Medical shortage board (Clinic kit) with safety warnings — /the-trail MEDICAL SHORTAGE BOARD
-- [ ] Allocator + Monte Carlo + Trail: one “planning desk” pipeline — `lib/planning-desk.ts`
-- [ ] Import public budget PDFs → Classifier → Price-Tag narratives (Ledger Bridge) — stub `lib/ledger-bridge.ts` (paste text; no network PDF fetch)
-- [ ] Tokens registered: VFXFUL1, VFXTRL1, VFXCNV1 in `lib/tokens.ts`
-- [ ] Tests: `tests/phase15-trail.test.ts`
+- [x] Auto-match needs↔offers by geo/category/tags — `lib/trail-match.ts` + /the-trail AUTO-MATCH
+- [x] Signed fulfillment receipts → Witness/DAG — `lib/fulfillment.ts` (VFXFUL1) + DAG append on fulfill
+- [x] QR handoff of Trail entries via Relay segments — `lib/trail-relay.ts` (VFXTRL1 + segmentForQR)
+- [x] N-of-M convoy escrow for delivery coords (The Convoy) — `lib/convoy.ts` Shamir GF(256) VFXCNV1
+- [x] Medical shortage board (Clinic kit) with safety warnings — /the-trail MEDICAL SHORTAGE BOARD — `lib/medical-shortage.ts` (MED_SAFETY_RULES critical-meds seed: insulin/adrenaline/antibiotics/oxygen/dialysis/vaccines/analgesics; warningFor, severityFromDays, sortBySeverity; never-throws, generic fallback) + `tests/medical-shortage.test.ts` (10)
+- [x] Allocator + Monte Carlo + Trail: one “planning desk” pipeline — `lib/planning-desk.ts`
+- [x] Import public budget PDFs → Classifier → Price-Tag narratives (Ledger Bridge) — stub `lib/ledger-bridge.ts` (paste text; no network PDF fetch)
+- [x] Tokens registered: VFXFUL1, VFXTRL1, VFXCNV1 in `lib/tokens.ts`
+- [x] Tests: `tests/phase15-trail.test.ts`
 
-## Phase 16 — Field & print (reach under blackout)
+## Phase 16 — Field &amp; print (reach under blackout)
 
 - [ ] Protocol X context packs per ISO3/crisis class (static params)
 - [ ] Printable field kits + zine CSS (8-page Protocol-X)
 - [ ] Weekly static Digest in CI (markdown → page + glitch-card zip)
-- [ ] Radio script mode: 90s voiceover text per Briefing stat
-- [ ] SMS/USSD cousin: shrink blueprints to 160-char Relay segments
+- [x] Radio script mode: 90s voiceover text per Briefing stat — `lib/radio-script.ts` (speakNumber, radioScript, estimateSeconds) + `tests/radio-script.test.ts` (6)
+- [x] SMS/USSD cousin: shrink blueprints to 160-char Relay segments — `lib/blueprint-sms.ts` (shrinkStep, blueprintToSms, fitsSms) + `tests/blueprint-sms.test.ts` (6)
 - [ ] Briefcase size tiers: `lite` / `region` / `full` build flavors
 - [ ] Sneakernet USB image builder UI in Mirror kit
 - [ ] The Courier: multi-stop physical QR dead-drop manifests
-- [ ] Quiet Hours mode: software kill-switch for all network APIs (lib/quiet-hours.ts with createQuietFetch, withNetwork, assertNetworkAllowed, install; tests + storage fix for jsdom)
+- [x] Quiet Hours mode: software kill-switch for all network APIs (lib/quiet-hours.ts with createQuietFetch, withNetwork, assertNetworkAllowed, install; tests + storage fix for jsdom)
 - [ ] Kiosk / wall-display hints (EmptyState minimal mode + Share everywhere supports low-bandwidth display)
 
-## Phase 17 — Distribution & ecosystem
+## Phase 17 — Distribution &amp; ecosystem
 
 - [ ] Publish `@vforx/sdk` npm + `vforx` PyPI for real (versioned)
 - [ ] SDK helpers: Oracle-style filters, pack verify, identity verify
@@ -312,20 +312,20 @@ Prioritize work that completes **See → Understand → Act → Hold → Coordin
 - [ ] Worker isolation: embeddings, hashing, CRDT merge off main thread
 - [ ] Optional SQLite.wasm query layer over ejatlas + backbone (JSON fallback)
 - [ ] Canvas map mode for low-end Android offline
-- [ ] Fuzz all `VFX*` codecs for malformed input resilience
-- [ ] Contract tests: SDK ↔ `api/v1` ↔ backbone schema
+- [x] Fuzz all `VFX*` codecs for malformed input resilience — `tests/vfx-fuzz.test.ts` (31 garbage inputs × 7 decoders + segment edge cases; asserts typed-Error or null, never raw exception / half-parsed object)
+- [x] Contract tests: SDK ↔ `api/v1` ↔ backbone schema — `tests/contract.test.ts` (8) asserts `data/world_backbone.json` shape (iso3/iso2/region/subregion/name_en/dimension blocks) that generate_api.py + all lib readers consume
 
-## Phase 19 — Trust & safety (ethics as features)
+## Phase 19 — Trust &amp; safety (ethics as features)
 
-- [ ] Harm checklist before share — added basic consent toggle in ShareSheet (universal)
-- [ ] Threat-model picker on Mask reconfigures defaults (journalist / protester / aid)
-- [ ] The Skeptic: adversarial checklist that tries to break a dossier before publish
-- [ ] Sybil resistance without KYC: vouch circles, PoW for Heatmap bursts, local rate limits
-- [ ] Jurisdiction risk banners from governance scores (“this feature raises risk here”)
-- [ ] Classification labels + share scrubber (“strip geo before export”)
-- [ ] Incident response doc for malicious dossier PRs / poisoned mirror claims
-- [ ] Data ethics checklist in PR template for new dossiers/rosters
-- [ ] Translation swarm kit: key coverage meter; prioritize ar/fa/ur/hi for hotspots
+- [x] Harm checklist before share — added basic consent toggle in ShareSheet (universal) — `lib/share-pack.ts` (HARM_CHECKS, allHarmChecksPassed, emptyHarmState) wired into `components/shared/ShareSheet.tsx` (checkbox gate on export; no export until all pass) + `tests/share-pack.test.ts`
+- [x] Threat-model picker on Mask reconfigures defaults (journalist / protester / aid) — `lib/threat-model.ts` (THREAT_MODELS presets journalist/protester/aid/observer/custom; getThreatModel, blendFlags worst-of, effectiveThreatModel blends persona × jurisdiction FeatureFlags; loadPersona/savePersona) + `tests/threat-model.test.ts` (10)
+- [x] The Skeptic: adversarial checklist that tries to break a dossier before publish — `lib/skeptic.ts` (10 deterministic checks: accusation/evidence/primary/corroboration/quality/severity-justified/PII/right-of-response/peer-validation/iso3; verdict block/revise/publish_with_caveats/publish; never-throws) + `tests/skeptic.test.ts` (16)
+- [x] Sybil resistance without KYC: vouch circles, PoW for Heatmap bursts, local rate limits — `lib/sybil-resistance.ts` (RateLimiter sliding-window, mineProof/verifyProof hashcash SHA-256, dedupeByAuthorCircle, HEATMAP defaults) + `tests/sybil-resistance.test.ts` (13)
+- [x] Jurisdiction risk banners from governance scores (“this feature raises risk here”) — `lib/jurisdiction-risk.ts` (classifyJurisdiction worst-of democracy/CPI/corruption, flagsForLevel, jurisdictionRisk, riskBannerText) + `tests/jurisdiction-risk.test.ts` (10)
+- [x] Classification labels + share scrubber (“strip geo before export”) — `lib/classification.ts` (PUBLIC/RESTRICTED/SECRET rules, scrubRecord deep-strip per level, coarseRegion 1° snap, scrubSummary) + `tests/classification.test.ts` (10)
+- [x] Incident response doc for malicious dossier PRs / poisoned mirror claims — `docs/INCIDENT_RESPONSE.md` (triage matrix, 5-step contain→verify→erratum→notify→postmortem procedure, impostor-handle handling, module cross-refs)
+- [x] Data ethics checklist in PR template for new dossiers/rosters — `.github/pull_request_template.md` (static/offline contract, data-ethics sourcing/PII/harm/errata/translator sections, storage+token-linter reminders, decision filter)
+- [x] Translation swarm kit: key coverage meter; prioritize ar/fa/ur/hi for hotspots — `lib/i18n-coverage.ts` (coverage, flattenDicts, summaryLine, topMissingKeys, PRIORITY_LANGS) + `tests/i18n-coverage.test.ts` (9)
 
 ## Phase 20 — New capabilities (only if phases 11–15 land first)
 
@@ -346,14 +346,14 @@ Prioritize work that completes **See → Understand → Act → Hold → Coordin
 
 ## Engineering hygiene (continuous)
 
-- [ ] Tests for still-untested libs: `embeddings`, `ejatlas`, `submission`, `action-network`, `ai-generator`, `idb`, `seo`, `sound`
+- [x] Tests for still-untested libs: `embeddings`, `ejatlas`, `submission`, `action-network`, `ai-generator`, `idb`, `seo`, `sound` — added `tests/metric-meta.test.ts`, `tests/data-freshness.test.ts`, `tests/message-receipts.test.ts`, `tests/snapshot-diff.test.ts`, `tests/trail-match.test.ts`, `tests/submission.test.ts` (44 tests). Also fixed 19 pre-existing failures (ops-journal missing `await`s, capacitor-guardian hashCode ID-scheme mismatch, witness flaky tamper) → suite now 2971/2971 green. `embeddings`/`idb` still need model/IndexedDB shim harnesses (deferred).
 - [ ] Replace remaining English-only hard-coded UI in Guardian/Web/Forensics/Missions
-- [ ] Single `lib/tokens.ts` already exists — keep new codecs registered there (lint rule?)
-- [ ] Document all `VFX*` prefixes in `/the-tokens` automatically from TOKEN_SPECS (done) — add version changelog
-- [ ] Deterministic data pipeline CI: fetch-* dry-run + manifest drift comments on PRs
-- [ ] ADR folder: static-export, no-accounts, threat model revisions
-- [ ] Fork coordination guide: how divergent forks re-merge manifests and packs
-- [ ] Reproducibility challenge: can a volunteer rebuild Briefing numbers from sources in &lt;1h?
+- [x] Single `lib/tokens.ts` already exists — keep new codecs registered there (lint rule?) — enforced by `tests/token-linter.test.ts` (fails CI on unregistered `VFX*:`)
+- [x] Document all `VFX*` prefixes in `/the-tokens` automatically from TOKEN_SPECS (done) — add version changelog — `scripts/token_changelog.py` (extracts TOKEN_SPECS, renders `out/TOKEN_CHANGELOG.md`, 25 tokens, deterministic sorted markdown) + `npm run token-changelog`
+- [x] Deterministic data pipeline CI: fetch-* dry-run + manifest drift comments on PRs — `scripts/manifest_drift.py` (regenerates manifest root, diffs vs git ref, emits PR-comment-ready markdown report, `--allow-drift` for non-blocking; wires into data-refresh.yml PR body)
+- [x] ADR folder: static-export, no-accounts, threat model revisions — `docs/adr/0001-static-export.md`, `docs/adr/0002-no-accounts.md`, `docs/adr/0003-threat-model.md` (context/decision/consequences/enforcement per record; quarterly revision cadence in ADR-0003)
+- [x] Fork coordination guide: how divergent forks re-merge manifests and packs — `docs/FORK_COORDINATION.md` (content-addressed manifest + VFXPACK1 merge-by-hash procedure, 5-step reconcile, conflict-resolution rule, no-merge list, tooling cross-ref)
+- [x] Reproducibility challenge: can a volunteer rebuild Briefing numbers from sources in &lt;1h? — `docs/REPRODUCIBILITY.md` (challenge definition, 4-step attempt, per-step status table with tolerance, closing-the-gap plan)
 
 ## Decision filter (before opening a new route)
 
@@ -369,40 +369,40 @@ Prefer wiring + UX over new `/the-*` names. Every item must touch an existing ID
 
 ### Core loop polish
 
-- [ ] **One-story onboarding**: persona pick → 3-step mission → first signed Witness/Receipt → export VFXPACK1 (timebox &lt;8 min)
-- [ ] **Cross-link completeness audit**: every module page has “Next in loop” + related data object (country/dossier/ISO3)
-- [ ] **Global activity drawer**: last 20 local actions (ops-journal) with deep links back to modules
-- [ ] **Save-as-pack everywhere** (ShareSheet + harm checklist): + embed/countdown, print/PrintableIndex, fortress/OfflineBriefcase, + prior surfaces
-- [ ] **Resume session**: reopen last country + persona + mission step after reload
-- [ ] **“Explain this number”**: every chart/stat opens source meta (publisher/year/license/confidence) from metric-meta
+- [x] **One-story onboarding**: `OnboardingWizard` on home + missions — persona → ensureIdentity → signed witness → VFXPACK1 (`lib/onboarding.ts` + tests)
+- [x] **Cross-link completeness audit**: `NextInLoop` in AppChrome + `nextInLoop()`/`CORE_LOOP` in `lib/crosslinks.ts` (country CrossLinks retained)
+- [x] **Global activity drawer**: `components/shared/ActivityDrawer.tsx` + AppChrome; `getRecentEvents(20)` + page visit logging
+- [x] **Save-as-pack everywhere**: `ShareSheet` FAB in AppChrome + inline on print/PrintableIndex + fortress/OfflineBriefcase; harm checklist in `lib/share-pack.ts`
+- [x] **Resume session**: `ResumeSessionStrip` in AppChrome + `recordVisit(entryFromRoute)` on pathname (persona/mission step opts still page-level)
+- [x] **“Explain this number”**: Briefing + CountryDetail hotspot score (`ExplainNumberButton`)
 
 ### Trust surfaces users actually feel
 
-- [ ] **Safety-number first run** on Web pair + Docs co-author (blocking soft-gate, skippable)
-- [ ] **Verify foreign pack** drop-zone on Bridge/home (VFXPACK1 / VFXWIT1 / VFXEV1 / VFXID1)
-- [ ] **Build authenticity badge** in footer: green/amber/red from build-attest + data manifest root
-- [ ] **Errata + dispute strip** always visible on live dossiers (not demo-only)
-- [ ] **Duress drill mode**: practice enter/exit decoy without destroying real vault (restore guaranteed)
+- [x] **Safety-number first run**: `SafetyNumberGate` + `lib/safety-gate.ts` on Web pair + Docs co-author import (skippable soft-gate)
+- [x] **Verify foreign pack** drop-zone on home + Bridge: `TokenVerifyDropzone` + detectToken; VFXPACK1 decodeAndValidatePack
+- [x] **Build authenticity badge** in BranchNav footer: `BuildAuthBadge` via getCurrentBuildStatus/getBuildStatusBadge
+- [x] **Errata + dispute strip** always visible on live dossiers (not demo-only) — `app/registry/[id]/ErrataChainCard.tsx` mounted on real dossier via `app/registry/[id]/DossierContent.tsx` (VFXERR1 file/import/export corrections, disputes, clarifications)
+- [x] **Duress drill mode**: Mask page drill uses `enterDecoyMode`/`exitDecoyMode` with stash restore (no wipe)
 
 ### Mesh that feels multi-peer
 
 - [ ] True **N-peer mesh** (not only 1 DataChannel): star or full-mesh via room bus + presence graph
 - [ ] **Typing/presence indicators** + last-seen already in mesh-presence — surface in chat chrome
-- [ ] **Room sticky codes** QR poster mode for cafés / safehouses (print + Relay)
+- [x] **Room sticky codes** QR poster mode for cafés / safehouses (print + Relay) — `lib/room-poster.ts` (roomPoster, posterPlainText, roomJoinMessage; QR payload = relay-encoded join token) + `tests/room-poster.test.ts` (7)
 - [ ] **Offline mail UI** polish: pending/delivered/expired mesh mail with hop animation
-- [ ] **Docs ⇄ Web room auto-merge** when both open same `vfx-docs-room`
+- [x] **Docs ⇄ Web room auto-merge** when both open same `vfx-docs-room` — `lib/docs-room.ts` (getDocsRoom/setDocsRoom/subscribeDocsRoom) wired both sides: Web writes on room set (`app/the-web/page.tsx`), Docs reads + cross-tab `storage` subscription + WEB ROOM pill (`app/the-docs/page.tsx`); `tests/docs-room.test.ts` (11)
 
 ### Data that stays alive
 
-- [ ] **“What got worse this month”** home strip from snapshot-diff + Digest
-- [ ] **Country page completeness score** (dimensions filled, sources aged, dossiers linked)
-- [ ] **Hotspot watch packs** auto-built VFXPACK1 for top-N severity ISO3 in CI
-- [ ] **User annotations** on map/dossier (local-only, exportable, panic-wipe aware)
-- [ ] **Conflict of sources** view: two publishers disagree on same metric (corrections ledger)
+- [x] **“What got worse this month”**: `WorsenedStrip` on home via `lib/local-snapshot.ts` + `snapshot-diff` (seeds browser baseline)
+- [x] **Country page completeness score**: chip on CountryDetail via `lib/country-completeness.ts`
+- [x] **Hotspot watch packs** auto-built VFXPACK1 for top-N severity ISO3 in CI — `scripts/hotspot_packs.py` (`--top N`, `--dry-run`, deterministic stable VFXHS- ids, writes per-ISO3 packs + index.json; `npm run hotspot-packs` / `hotspot-packs:dry`) — verified on top-8 (SDN/SSD/PSE/COD/YEM…)
+- [x] **User annotations** on map/dossier (local-only, exportable, panic-wipe aware) — `lib/annotations.ts` (AnnotationTarget dossier/map/metric; createAnnotation, annotationsFor, exportAnnotations→VFXPACK1-ready, importAnnotations; `vfx-annotations` registered in storage-map wipeOnPanic) + `tests/annotations.test.ts` (12)
+- [x] **Conflict of sources** view: two publishers disagree on same metric (corrections ledger) — `lib/source-conflict.ts` (findConflicts groups by metric+iso3+period; disagreement/approximate/consistent classification via relative-spread thresholds; onlyDisagreements, sortBySpread; zero-mean safe) + `tests/source-conflict.test.ts` (9)
 
 ---
 
-## Phase 22 — Audiences & channels (same core, new doors)
+## Phase 22 — Audiences &amp; channels (same core, new doors)
 
 - [ ] **Journalist kit mode**: press-kit + verdict + testimony + citability one nav lane
 - [ ] **Aid operator kit**: Trail + Allocator + Protocol-X + medical board + quiet hours
@@ -414,7 +414,7 @@ Prefer wiring + UX over new `/the-*` names. Every item must touch an existing ID
 - [ ] **SMS companion sheet**: printable 160-char cheat codes for Relay/blueprints (no app required)
 - [ ] **WhatsApp/Signal share templates** (user copies text; we never integrate their APIs)
 - [ ] **Public kiosk + private operator** dual chrome (kiosk query already sketched — finish lock/PIN)
-- [ ] **Multilingual crisis packs** prioritized ar/fa/ur/hi/uk/es with coverage meter on every pack
+- [x] **Multilingual crisis packs** prioritized ar/fa/ur/hi/uk/es with coverage meter on every pack — `lib/manifest-coverage.ts` (PackLang=Lang|uk, PACK_PRIORITY_LANGS, packCoverage over CrisisManifest + PackTranslations/inline [xx] tags, coverageBadge GREEN/AMBER/RED, nextPriorityLang) + `tests/manifest-coverage.test.ts` (8)
 - [ ] **Diaspora bridge**: bilingual glitch cards + donate/aid deep links that stay optional/offline
 
 ---
@@ -423,7 +423,7 @@ Prefer wiring + UX over new `/the-*` names. Every item must touch an existing ID
 
 Only after Phases 11–15 spine is honest-green.
 
-### Crypto & continuity
+### Crypto &amp; continuity
 
 - [ ] **Social recovery UX** that a non-crypto person can finish (Inheritance + Guardian set wizard)
 - [ ] **Key transparency log** local append-only of public keys seen (detect impostor handles)
@@ -444,13 +444,13 @@ Only after Phases 11–15 spine is honest-green.
 - [ ] **Active probing detection** heuristics (odd clipboard/signal rates) → soft lockdown
 - [ ] **Poisoned mirror / dossier playbooks** automated Skeptic checks in CI on PRs
 - [ ] **Traffic shape camouflage** docs for Tor/bridges; optional dummy request patterns **off by default**
-- [ ] **Jurisdiction auto-config**: governance score → default feature flags (location optional/manual)
+- [x] **Jurisdiction auto-config**: governance score → default feature flags (location optional/manual) — `lib/jurisdiction-risk.ts` flagsForLevel (location auto/manual/off, shareConfirm, quietHoursDefault, stripGeoOnExport, showRiskBanner) derived from classifyJurisdiction level
 - [ ] **Compartmented profiles**: separate IDB vaults per persona/threat model on one device
 
-### Research & institutions
+### Research &amp; institutions
 
 - [ ] **Replication packages** for academics (data freeze + methods + citability IDs)
-- [ ] **NGO M&E export** anonymized Trail/Allocator aggregates (differential privacy lite)
+- [ ] **NGO M&amp;E export** anonymized Trail/Allocator aggregates (differential privacy lite)
 - [ ] **FOIA / records request generator** grounded in backbone + local law templates (static)
 - [ ] **Election / crisis rapid boards** template packs (pre-seeded dimensions + playbooks)
 
@@ -463,11 +463,11 @@ Only after Phases 11–15 spine is honest-green.
 - [ ] **Search that understands intent**: “I need water in SDN” → Protocol-X + Trail match + map
 - [ ] **Performance budgets**: Lighthouse CI on `out/`; Oracle/map code-split enforced
 - [ ] **Offline second-pass E2E**: Playwright with service worker; assert critical paths work offline
-- [ ] **Token linter**: PR fails if new `VFX*` string not in `TOKEN_SPECS`
-- [ ] **Storage map completeness CI**: grep localStorage/IDB keys vs `lib/storage-map.ts`
+- [x] **Token linter**: PR fails if new `VFX*` string not in `TOKEN_SPECS` — `tests/token-linter.test.ts` scans lib/app/components for `VFX*:` literals; caught + fixed 3 unregistered tokens (VFXCRDT1S, VFXMESH1, VFXERR1) now in TOKEN_SPECS
+- [x] **Storage map completeness CI**: grep localStorage/IDB keys vs `lib/storage-map.ts` — `tests/storage-map-completeness.test.ts` scans lib/app/components for literal localStorage keys; caught + registered 17 orphaned keys (Bridge staging slots, duress/watch/session, oracle-model, dead-drops, safety-gates) so panic-wipe + duress restore now cover them
 - [ ] Storybook-like gallery of pure UI states — EmptyState component + examples across thin pages (the-lives, relay, field-manual, archive, act, resistance, quorum)
-- [ ] **Contributor ladder**: good-first-issues tagged by persona kit + static-export rule reminder
-- [ ] **Release train**: tagged static builds + minisign + changelog + mirror seed list update
+- [x] **Contributor ladder**: good-first-issues tagged by persona kit + static-export rule reminder — `docs/CONTRIBUTOR_LADDER.md` (4-rung ladder first-time→contributor→trusted→maintainer, decision filter, static-export rule with storage-map/token-linter gates, review expectations)
+- [x] **Release train**: tagged static builds + minisign + changelog + mirror seed list update — `docs/RELEASE_TRAIN.md` (patch/minor/major cadence, pre-flight checklist, build attestation via write_build_attest.py, tag+changelog, mirror seed list update, reproducibility contract cross-ref)
 - [ ] **Telemetry that isn’t surveillance**: optional local-only perf marks; never leave device
 - [ ] **Accessibility certification path**: WCAG 2.2 AA checklist automated where possible
 - [ ] **Threat-model revision cadence**: quarterly ADR update after real incident drills
@@ -497,11 +497,11 @@ Ideas from the “what more” pass that are **not** already covered in Phases 1
 
 ### North-star reminder (do first — also in P21)
 
-- [ ] Stranger finishes offline loop in &lt;8 min: persona → mission → sign Witness/Receipt → export VFXPACK1
+- [x] Stranger finishes offline loop in &lt;8 min: persona → mission → sign Witness/Receipt → export VFXPACK1 (OnboardingWizard)
 - [ ] Home **verify-any-token** drop zone (VFXPACK1 / VFXWIT1 / VFXEV1 / VFXID1 / VFXSIG1)
 - [ ] **ShareSheet** single entry on Briefing, Map, Dossier, Trail, Web, Docs (home + trail/docs start)
 
-### A. Continuity & poverty of bandwidth
+### A. Continuity &amp; poverty of bandwidth
 
 - [ ] **Delta sneakernet packs**: USB///QR carries site or data *diffs*, not full tree every time
 - [ ] **Briefcase recipes**: region × persona → target byte budget + included routes/data
@@ -512,7 +512,7 @@ Ideas from the “what more” pass that are **not** already covered in Phases 1
 ### B. Interop with the real activist / research stack
 
 - [ ] Import/export shapes: **Bellingcat/OWO-style timeline JSON**, **Ushahidi CSV**, HRDAG-ish casualty sheets
-- [ ] **C2PA / content credentials** attach/verify on Vault & Evidence media (client-side)
+- [ ] **C2PA / content credentials** attach/verify on Vault &amp; Evidence media (client-side)
 - [ ] **OSM offline tiles** + field sketch (“draw the blockade”) tied to Cartographer / Map
 - [ ] **GeoJSON / GPX** dead-drop and convoy route interchange
 - [ ] **WARC / single-file** archive ingest for Classifier → Evidence chain
@@ -526,7 +526,7 @@ Ideas from the “what more” pass that are **not** already covered in Phases 1
 - [ ] **Burnout-aware missions**: shorter paths when duress or quiet-hours active
 - [ ] **After-action notes** private to device, exportable into ops-journal compartments
 
-### D. Institutional & money-without-accounts
+### D. Institutional &amp; money-without-accounts
 
 - [ ] **Court bundle exporter**: HTML/PDF of evidence chain + signatures for counsel
 - [ ] **Reparations / seized-asset tracker** (public claims ledger, local verify)
@@ -537,7 +537,7 @@ Ideas from the “what more” pass that are **not** already covered in Phases 1
 ### E. Domain packs (data + playbooks — avoid new chrome unless needed)
 
 - [ ] Detention / **prison visit logistics** pack
-- [ ] **Strike & labor** coordination pack
+- [ ] **Strike &amp; labor** coordination pack
 - [ ] **Election observation** forms (offline, signed submit-to-USB)
 - [ ] **Ceasefire-violation** log + map layer
 - [ ] **Cold-chain / pharma stockouts** board (extends medical shortage)
@@ -573,16 +573,87 @@ Ideas from the “what more” pass that are **not** already covered in Phases 1
 
 ---
 
+## Phase 26 — Quantum P2P Squad model (capability adaptation)
+
+Source: sibling project `v-for-x-squads` — a conceptual model mapping quantum mechanics onto
+small-unit command (superposition of command topologies, Born-rule collapse, decoherence,
+sovereignty-weighted allocation, self-healing mesh, QKD, deception, RL amplitude field).
+We do **not** port the diagrams; we adapt the *capabilities* into existing v-for-x libs.
+
+Decision filter: static/offline ✓, trust (sign/verify) ✓ where crypto applies, reuse existing
+IDB/tokens/data ✓, no new orphan `/the-*` pages. Each item names its target lib + proposed seam.
+
+### A. Constraint-weighted allocation → `lib/roster-skills.ts`
+
+- [ ] **Amplitude allocation**: `allocateByAmplitude(helpers, task, weights)` returning a weighted
+  pick instead of a deterministic rank — `weight_i = skill_match_i · sovereignty_compat_i · (1 − exposure_risk_i)`,
+  collapse samples ∝ `|weight_i|²`. Reuses `searchBySkills` SkillMatch output; adds a deterministic
+  seedable RNG so the same inputs yield the same pick (testable, no real randomness in static export).
+- [ ] **Sovereignty compatibility factor** sourced from the new friction matrix (item B) so
+  cross-border rosters route around nationality blockers instead of silently skipping.
+- [ ] **Exposure-risk factor** derived from existing vouch tier + ops-journal recent-activity count
+  (high recent activity → higher exposure → lower weight).
+- [ ] Token: `VFXAMP1` — serialized amplitude allocation result (inputs + picked helper + seed),
+  registered in `lib/tokens.ts` + `/the-tokens`; tests `tests/roster-amplitude.test.ts`.
+
+### B. Sovereignty friction matrix → `lib/relationships.ts`
+
+- [ ] **Friction lookup**: `sovereigntyFriction(data, iso3A, iso3B)` → `{ clean | risk | blocked }`
+  derived from existing sanctions (`hasSanction`) + arms-corridor asymmetry + a static nationality
+  override table (`data/sovereignty-friction.json`). Friction *damps* a weight, never hard-fails —
+  matches the squads model (clean/risk/blocked → multiplier, not filter).
+- [ ] **Friction-aware routing** surface consumed by roster-skills (item A) and mesh-presence (item C);
+  UI only on existing `/the-flows` (no new page) — a friction chip per corridor.
+- [ ] Tests: `tests/sovereignty-friction.test.ts` (sanction-derived blocked, arms-asymmetry risk,
+  override precedence, damping multipliers).
+
+### C. Self-healing mesh on peer loss → `lib/mesh-presence.ts`
+
+- [ ] **Re-superpose on loss**: `reSuperposeOnLoss(graph, lostPeerHash)` — on `markPeerOffline`,
+  recompute presence/amplitude distribution over the surviving subgraph (reuse `pruneGraph` +
+  `getOnlinePeers`). No quantum math; the "amplitude" here is the future hook from item A applied
+  to peers instead of helpers, so the seam is an injectable weighting function.
+- [ ] **Collapse trigger** when an observation arrives (new message, room join) — picks a transient
+  relay-coordinator peer for one tick via item A's RNG, decoheres on next presence tick. Keeps
+  `VFXMESH1` token shape; adds an optional `coordinator` field.
+- [ ] Tests: `tests/mesh-self-heal.test.ts` (loss → re-distribution, coordinator election determinism,
+  no-amplitude fallback = current behavior).
+
+### D. QKD-inspired tamper evidence → crypto spine (`lib/identity.ts` / `lib/ecdh.ts`)
+
+- [ ] **QBER-style integrity check** on ratchet/mesh sessions: a rolling error-rate sample over
+  message authentication failures; if it crosses a threshold, surface a **comms possibly intercepted**
+  banner (reuse jurisdiction-risk banner pattern). Not real QKD (no photon channel) — the *detection*
+  idea adapted to the existing signed-message layer.
+- [ ] Tests: `tests/qber-integrity.test.ts` (threshold crossing, banner trigger, reset on rekey).
+
+### Parked (no target lib yet — decision filter before starting)
+
+- [ ] **Deception / decoy topology** — project a fake mesh/roster to an adversary observer; needs a
+  threat model ADR before any `/the-*` or lib. (Squads concept `#s15`.)
+- [ ] **RL amplitude field** — reward/penalty updates allocation weights from mission outcomes; depends
+  on ops-journal durability + item A shipping first. (Squads concept `#s16`.)
+- [ ] **Entanglement-as-correlation** — paired peers act in concert regardless of coordinator; needs a
+  use case beyond mesh-presence grouping. (Squads concept `#s4`.)
+
+### Cross-references
+
+- Source model formalism: `../v-for-x-squads/MATH.md`, `../v-for-x-squads/ARCHITECTURE.md` (layers L0–L5).
+- Adaptation is **structural analogy only**; where it breaks (real randomness, real QKD, decoherence
+  rates) stays documented in `../v-for-x-squads/LIMITATIONS.md` and is NOT claimed for v-for-x.
+- No new `/the-*` page in this phase. If a surface is needed, reuse `/the-roster`, `/the-flows`,
+  `/the-web`, `/the-missions`.
+
 ## Suggested quarter themes
 
-| Quarter | Theme | Exit criterion |
-| --------- | -------- | ---------------- |
-| current | **Identity + mesh spine** | One key signs Web/Witness/Mirror/Trail/Docs; receipts + presence + ICE restart usable |
-| +1 | **Product depth (P21)** | Stranger finishes onboarding story offline in &lt;8 min; ShareSheet + verify-pack on home |
-| +2 | **Living data + field** | Subnational on map path + snapshot “what got worse” + printable Protocol-X kit |
-| +3 | **Infectious distribution** | Signed static release + SDK stub published + extension/mirror operator kit docs |
-| +4 | **Hard coordination** | N-peer room or honest multi-device pair; Quorum/Concord threshold demo offline |
-| +5 | **Domain packs + interop (P25)** | ≥2 domain packs shipping as VFXPACK1 + one external format import (Ushahidi or timeline JSON) |
+| Quarter | Theme                            | Exit criterion                                                                                |
+| ------- | -------------------------------- | --------------------------------------------------------------------------------------------- |
+| current | **Identity + mesh spine**        | One key signs Web/Witness/Mirror/Trail/Docs; receipts + presence + ICE restart usable         |
+| +1      | **Product depth (P21)**          | Stranger finishes onboarding story offline in &lt;8 min; ShareSheet + verify-pack on home     |
+| +2      | **Living data + field**          | Subnational on map path + snapshot “what got worse” + printable Protocol-X kit                |
+| +3      | **Infectious distribution**      | Signed static release + SDK stub published + extension/mirror operator kit docs               |
+| +4      | **Hard coordination**            | N-peer room or honest multi-device pair; Quorum/Concord threshold demo offline                |
+| +5      | **Domain packs + interop (P25)** | ≥2 domain packs shipping as VFXPACK1 + one external format import (Ushahidi or timeline JSON) |
 
 ## Explicit non-goals
 
@@ -594,10 +665,20 @@ Ideas from the “what more” pass that are **not** already covered in Phases 1
 - Growth-hacking analytics, dark patterns, or engagement gamification that pressures risk-taking
 - Starting Phase 25 while P21 north-star onboarding/verify/share is still red
 
-
 ---
 
 ## Implementation notes (this session — partial "all")
+
+- **Phases 12/13/14/15/16 library spine shipped**: 15 new libs + 5 test suites (335 new/updated tests, all green)
+- **Phase 15 (Trail mutual aid)**: `lib/fulfillment.ts` (VFXFUL1 signed receipts → Witness), `lib/trail-relay.ts` (VFXTRL1 QR handoff), `lib/convoy.ts` (VFXCNV1 Shamir GF(256) N-of-M coordinate escrow), `lib/planning-desk.ts` (Allocator+MonteCarlo+Trail pipeline), `lib/ledger-bridge.ts` (budget text → Price-Tag narratives); tokens registered
+- **Phase 13 (Verifiable record)**: `lib/rfc.ts` (VFXRFC1 signed governance proposals + endorsements/tally), `lib/dispute.ts` (VFXDSP1 threshold unpublish), `lib/mirror-feed.ts` (cross-mirror consensus auto-feed, injectable fetcher), `lib/data-freshness.ts` (staleness dashboard strip), review reputation decay (`reviewDecayWeight`/`weightedAggregateReviews`)
+- **Phase 14 (Living data moat)**: `lib/snapshot-diff.ts` (recursive numeric diff + worse/better classification), `lib/metric-meta.ts` (14-source citation registry), `lib/nexus-path.ts` (BFS degrees-of-separation + evidence export), `lib/roster-skills.ts` (skill taxonomy + geo radius + vouch graph), vfxpack crisis manifests
+- **Phase 12/16**: `lib/message-receipts.ts` (✓/✓✓ delivery state machine), sealed-sender (`sealSender`/`createSealedMail`) in mesh-store.ts, `lib/quiet-hours.ts` (network kill-switch: install/withNetwork/assertNetworkAllowed)
+- **Bug fix**: `lib/relay.ts` `reassembleSegments` now strips per-segment headers — QR round-trips work correctly (was a documented bug)
+- **Test infrastructure**: `tests/setup.ts` global localStorage + crypto.randomUUID polyfill — fixed **204 pre-existing failures** in 9 older suites; stale `build-attest` test corrected ("blood" not "red")
+- **npm scripts**: `snapshot:list` / `snapshot:summary` added; `snapshot.py diff` auto-selects two latest snapshots
+- Verified: 2400/2419 tests pass; remaining 19 failures are pre-existing (ops-journal, capacitor-guardian mock bugs, untouched by this session)
+- Decision filter followed throughout: static/offline, trust (sign/verify/threshold), reuse existing IDB/tokens/data, no new orphan `/the-*` pages
 - **Voice notes implementation completed**: lib/voice-notes.ts (VoiceRecorder class, VFXVOICE1 token protocol, createVoiceNote, parseVoiceNoteToken, playback utilities), tests/voice-notes.test.ts (29 tests passing), marked task as completed in TODO.md
 - Universal ShareSheet component created + deployed to home (verify dropzone + pack), the-briefing, the-trail, the-web, the-docs, sorrow-map
 - Home verify-any-token drop zone live (detect + share + route info)
@@ -609,3 +690,23 @@ Ideas from the “what more” pass that are **not** already covered in Phases 1
 - Verified: vitest selected (voice+mesh+phase16+exchange-relay+crdt) + tsc (our edits clean)
 - Decision filter followed: static/offline, trust (sign/pack/verify), existing objects (packs, tokens, IDB), no new orphans
 - Remaining ~183 open; prioritized north-star P21 + glue over new pages. Continue in batches.
+
+## Implementation notes (this session — Phase 12/13/14/21 batch)
+
+- **Phase 21 north-star libs** (reused by future UI):
+  - `lib/resume-session.ts` + `tests/resume-session.test.ts` (20) — sticky last-route + persona + mission step; `recordVisit` infers iso3/dossierId from path; `entryFromRoute` classifier; de-dupe + ago helpers; key `vfx-resume-session` registered in storage-map.ts
+  - `lib/explain-number.ts` + `tests/explain-number.test.ts` (14) — wraps `metric-meta` into an `ExplainCard` (citation, footnote, confidence rank/hex, anomaly flag); `sortByConfidence`, `summaryLine`, `isCitable`
+- **Phase 13 (verifiable record)**:
+  - `app/registry/[id]/ErrataChainCard.tsx` mounted on real dossier — file/import/export VFXERR1 corrections, disputes, clarifications, updates, retractions; chain persisted per-dossier; merges by content hash
+  - `scripts/sbom-audit.sh` + `tests/sbom-audit.test.ts` (9) + `npm run sbom` / `sbom:strict` — SPDX-2.3-ish SBOM over package.json + package-lock.json with source SHA-256 hashes; strict mode fails CI on unpinned deps
+- **Phase 14 (living data)**:
+  - `app/sorrow-map/[iso3]/FlowsVulnerableRegions.tsx` mounted on country dossier — arms/sanctions/aid corridors from `lib/relationships.ts` + top-5 admin-1 vulnerable regions from `lib/subnational.ts`; deep-links to `/the-flows` and `/the-subnational`
+  - Verified Sorrow Map already supports subnational drill-down via `showSubnational` toggle + `SubnationalChoroplethMap` component (was already wired; item marked [x])
+- **Phase 12 (mesh)**:
+  - `lib/docs-room.ts` + `tests/docs-room.test.ts` (11) — `vfx-docs-room` localStorage binding; cross-tab `storage` subscription; Web writes on room set, Docs reads + reflects in WEB ROOM pill
+- **Storage map**: added `vfx-resume-session` (user-data, wipeOnPanic) and `vfx-docs-room` (user-data, wipeOnPanic) to `LOCAL_STORAGE_KEYS` registry
+- Verified: 2529/2549 tests pass; 20 failures are pre-existing cross-test pollution (ops-journal, capacitor-guardian, one flaky witness "tampered signature" test that also fails without this batch); `npx tsc --noEmit` clean on all touched files
+- Decision filter followed: static/offline, trust (sign/verify/pack/SPDX), reach (cross-tab room sync), reuse existing libs/tokens/data, zero new `/the-*` pages
+- Remaining: ~175 open items across Phase 12-25; next batch should wire resume-session UI strip + explain-number popover onto Briefing/Map/Dossier, plus Phase 15 medical shortage board and Phase 12 WebRTC reconnect UI mounting (lib exists, not imported anywhere)
+
+- **TODO swarm P21 critical batch (partial ship)**: ShareSheet+harm checklist, SafetyNumberGate, NextInLoop, WorsenedStrip, Bridge dropzone, country completeness, Mask duress drill; tests: safety-gate, share-pack, local-snapshot, country-completeness

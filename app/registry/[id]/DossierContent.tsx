@@ -28,6 +28,7 @@ import {
 import { verifySetMembership, type ZKCommitment } from "@/lib/zk";
 import { GENESIS_HASH } from "@/lib/dag";
 import BlindedReview from "./BlindedReview";
+import ErrataChainCard from "./ErrataChainCard";
 
 interface Dossier {
   id: string;
@@ -579,6 +580,9 @@ export default function DossierContent({
 
       {/* Blinded peer review — commit/reveal corroboration */}
       <BlindedReview dossierId={d.id} lang={lang} />
+
+      {/* Errata & corrections chain (VFXERR1) — signed review layer */}
+      <ErrataChainCard dossierId={d.id} />
 
       {/* THE EVIDENCE ROOM — evidence-chain workbench */}
       <EvidenceRoom dossier={d} claimTitle={di.subject} />

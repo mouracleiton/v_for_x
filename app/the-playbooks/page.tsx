@@ -164,7 +164,7 @@ export default function ThePlaybooksPage() {
   }, []);
 
   const handleResetPlaybook = useCallback((playbookId: PlaybookId) => {
-    if (confirm("Reset all progress for this playbook? This cannot be undone.")) {
+    if (confirm(tc(lang, "confirm.reset_progress"))) {
       resetPlaybookProgress(playbookId);
       setStats(getPlaybookStats());
       sound.success();
@@ -185,7 +185,7 @@ export default function ThePlaybooksPage() {
   const handleImportProgress = useCallback(() => {
     const trimmed = importToken.trim();
     if (!trimmed) {
-      setImportStatus("✗ No token provided");
+      setImportStatus(tc(lang, "import.no_token"));
       sound.error();
       return;
     }
@@ -193,15 +193,15 @@ export default function ThePlaybooksPage() {
     try {
       const success = importPlaybookProgress(trimmed);
       if (success) {
-        setImportStatus("✓ Progress imported successfully");
+        setImportStatus(tc(lang, "import.success"));
         sound.success();
         setStats(getPlaybookStats());
       } else {
-        setImportStatus("✗ Invalid playbook progress token");
+        setImportStatus(tc(lang, "import.invalid_token"));
         sound.error();
       }
     } catch (error) {
-      setImportStatus("✗ Failed to import progress");
+      setImportStatus(tc(lang, "import.failed"));
       sound.error();
       console.error("Import error:", error);
     }
@@ -419,7 +419,7 @@ export default function ThePlaybooksPage() {
                     onClick={() => setExpandedPlaybook(isExpanded ? null : playbook.id)}
                     className="w-full py-2 border border-blood text-blood-bright hover:bg-blood hover:text-void text-xs font-bold"
                   >
-                    {isExpanded ? "▼ COLLAPSE DETAILS" : "▶ EXPAND CHECKLISTS"}
+                    {isExpanded ? tc(lang, "playbooks.collapse") : tc(lang, "playbooks.expand")}
                   </button>
                 </div>
 
@@ -468,7 +468,7 @@ export default function ThePlaybooksPage() {
                                     className="w-full p-2 flex items-start gap-3 text-left border border-border-dim hover:border-terminal-green transition-colors"
                                   >
                                     <span className={`mt-0.5 ${isCompleted ? "text-terminal-green" : "text-content-dim"}`}>
-                                      {isCompleted ? "✓" : "○"}
+                                      {isCompleted ? tc(lang, "ui.checked") : tc(lang, "ui.unchecked")}
                                     </span>
                                     <span className={`text-xs flex-1 ${isCompleted ? "line-through text-content-dim" : "text-content-primary"}`}>
                                       {item}
@@ -485,7 +485,7 @@ export default function ThePlaybooksPage() {
                     {/* Resources */}
                     {playbook.resources.length > 0 && (
                       <div className="p-3 bg-panel border border-border-dim">
-                        <div className="text-xs text-content-dim mb-2">RELATED TOOLS & RESOURCES</div>
+                        <div className="text-xs text-content-dim mb-2">{tc(lang, "playbooks.related_resources")}</div>
                         <div className="space-y-1">
                           {playbook.resources.map((resource, index) => (
                             <div key={index} className="flex items-center gap-2 text-xs">
@@ -584,22 +584,22 @@ export default function ThePlaybooksPage() {
       </TerminalCard>
 
       {/* Info Card */}
-      <TerminalCard title="ABOUT PLAYBOOKS" accent="amber">
+      <TerminalCard title={tc(lang, "playbooks.about_playbooks")} accent="amber">
         <div className="space-y-2 text-xs text-content-secondary">
           <p>
-            <strong className="text-content-primary">What are playbooks?</strong> Playbooks are pre-configured crisis response procedures with step-by-step checklists for emergency situations.
+            <strong className="text-content-primary">{tc(lang, "playbooks.what_are")}</strong> {tc(lang, "playbooks.what_are_desc")}
           </p>
           <p>
-            <strong className="text-content-primary">How do they work?</strong> Each playbook contains multiple checklists covering immediate response, coordination, documentation, and follow-up. Track your progress as you complete each item.
+            <strong className="text-content-primary">{tc(lang, "playbooks.how_work")}</strong> {tc(lang, "playbooks.how_work_desc")}
           </p>
           <p>
-            <strong className="text-content-primary">Are they tailored to my role?</strong> Yes. When you select a persona, you'll see the playbooks most relevant to your use case and threat model.
+            <strong className="text-content-primary">{tc(lang, "playbooks.tailored")}</strong> {tc(lang, "playbooks.tailored_desc")}
           </p>
           <p>
-            <strong className="text-content-primary">Is my progress saved?</strong> Yes. Progress is stored locally on your device. Export your progress regularly to backup or sync across devices.
+            <strong className="text-content-primary">{tc(lang, "playbooks.saved")}</strong> {tc(lang, "playbooks.saved_desc")}
           </p>
           <p className="text-blood-bright">
-            <strong>⚠️ IMPORTANT:</strong> These playbooks are guidance, not legal advice. Consult with qualified legal professionals for arrest and detention situations.
+            <strong>{tc(lang, "playbooks.important")}</strong> {tc(lang, "playbooks.legal_warning")}
           </p>
         </div>
       </TerminalCard>

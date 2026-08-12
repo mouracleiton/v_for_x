@@ -200,7 +200,11 @@ export function reassembleSegments(segments: QRSegment[]): string | null {
     }
     if (seen.size !== expectedTotal) continue;
 
-    return sorted.map((s) => s.content).join("");
+    // Strip the per-segment header (VFX<id><index>/<total>|) that
+    // segmentForQR prepends for QR rendering, then rejoin in order.
+    return sorted
+      .map((s) => s.content.replace(/^VFX[0-9a-z]+\d+\/\d+\|/, ""))
+      .join("");
   }
 
   return null;

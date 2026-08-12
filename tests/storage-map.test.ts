@@ -25,7 +25,6 @@ import {
   clearAllBackups,
   executePanicWipe,
   getStorageHealthReport,
-  type StorageBackup,
 } from "../lib/storage-map";
 
 // Mock localStorage
@@ -81,8 +80,7 @@ const indexedDBMock = {
     const mockRequest = {
       result: {
         close: () => {},
-        transaction: (storeNames: string | string[], mode: IDBTransactionMode) => {
-          const stores = Array.isArray(storeNames) ? storeNames : [storeNames];
+        transaction: (_storeNames: string | string[], _mode: IDBTransactionMode) => {
           return {
             objectStore: (storeName: string) => {
               return {
@@ -90,21 +88,16 @@ const indexedDBMock = {
                   let clearOnSuccess: ((event: Event) => void) | null = null;
                   let clearOnError: ((event: Event) => void) | null = null;
 
-                  // Execute the clear operation synchronously
+                  // Execute the clear operation synchronously, then surface the
+                  // result through the onsuccess/onerror setters (the caller
+                  // assigns them after clear() returns).
                   try {
                     const db = mockIndexedDBStores.get(dbName);
                     if (db) {
                       db.set(storeName, []);
                     }
-
-                    // Trigger success immediately
-                    if (clearOnSuccess) {
-                      clearOnSuccess({} as Event);
-                    }
-                  } catch (error) {
-                    if (clearOnError) {
-                      clearOnError({} as Event);
-                    }
+                  } catch {
+                    // surfaced via onerror below
                   }
 
                   return {
@@ -707,7 +700,7 @@ describe("storage-map", () => {
       mockLocalStorage.set("vfx_duress_cfg", '{"enabled": true, "decoyCode": "9999"}');
 
       // Backup real identity before entering decoy
-      const event = await executePanicWipe("duress", {
+      await executePanicWipe("duress", {
         backupKeys: ["vfx_identity", "vfx_persona", "vfx_missions_progress"],
         backupLabel: "real-identity-backup",
         reason: "Entering decoy mode",

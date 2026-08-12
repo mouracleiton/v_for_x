@@ -15,6 +15,12 @@
     "fetch-owid": "python3 scripts/fetch_owid.py",
     "fetch-owid:dry": "python3 scripts/fetch_owid.py --dry-run",
     "snapshot": "python3 scripts/snapshot.py save",
+    "snapshot:list": "python3 scripts/snapshot.py list",
+    "snapshot:summary": "python3 scripts/snapshot.py diff",
+    "hotspot-packs": "python3 scripts/hotspot_packs.py --top 10",
+    "hotspot-packs:dry": "python3 scripts/hotspot_packs.py --dry-run",
+    "sbom": "./scripts/sbom-audit.sh",
+    "sbom:strict": "VFX_SBOM_STRICT=1 ./scripts/sbom-audit.sh",
     "start": "next start",
     "test": "vitest run",
     "test:watch": "vitest"
