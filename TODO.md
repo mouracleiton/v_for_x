@@ -547,11 +547,11 @@ Ideas from the “what more” pass that are **not** already covered in Phases 1
 
 ### F. Adversarial realism
 
-- [ ] **Memory-hole detector** (optional online): this mirror’s hashes vs last-known seed list
-- [ ] **Impostor-handle watchlist** (key transparency lite — public keys seen over time)
-- [ ] **“Device search in 60s” drill**: timed wipe + decoy quality score
+- [x] **Memory-hole detector** (optional online): this mirror’s hashes vs last-known seed list
+- [x] **Impostor-handle watchlist** (key transparency lite — public keys seen over time)
+- [x] **“Device search in 60s” drill**: timed wipe + decoy quality score
 - [ ] **Traffic-shape / cover-traffic docs** (off by default; never required)
-- [ ] **Compartmented crash reports**: local-only panic reason codes for after-action
+- [x] **Compartmented crash reports**: local-only panic reason codes for after-action
 
 ### G. Thin surfaces that should become products (routes exist)
 

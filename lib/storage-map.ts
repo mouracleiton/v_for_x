@@ -403,6 +403,26 @@ export const LOCAL_STORAGE_KEYS: ReadonlyArray<StorageKeyInfo> = [
 		registeredAt: 1700000000000,
 	},
 	{
+		key: "vfx-impostor-watchlist",
+		category: "identity",
+		description:
+			"Impostor-handle watchlist: public keys seen per handle over time (key-transparency lite)",
+		sensitive: true,
+		wipeOnPanic: true,
+		preserveInDecoy: false,
+		registeredAt: 1700000000000,
+	},
+	{
+		key: "vfx-crash-reports",
+		category: "user-data",
+		description:
+			"Compartmented local-only crash reason codes for after-action (PII-scrubbed)",
+		sensitive: false,
+		wipeOnPanic: true,
+		preserveInDecoy: true,
+		registeredAt: 1700000000000,
+	},
+	{
 		key: "vfx-onboard-done",
 		category: "user-data",
 		description: "One-story onboarding dismissed/completed flag",
